@@ -69,3 +69,9 @@
   - [x] Criar repositório público `rayhenrique/monitorafacil`.
   - [x] Vincular remote `origin` via HTTPS e configurar rastreamento da branch `main`.
   - [x] Realizar push inicial de todo o código, documentação e suíte de testes.
+
+- [x] **Fase 11: Documentação de Deploy na VPS Hostinger com CloudPanel**
+  - [x] Criar guia prático `deploy.md` calibrado para o domínio `monitorafacil.kltecnologia.com`.
+  - [x] Mapear credenciais, paths do CloudPanel (`htdocs/.../public`), usuário SSH `kltecnologia-monitorafacil` e banco MySQL.
+  - [x] Documentar emissão de SSL Let's Encrypt e agendamento de Cron Job no CloudPanel.
+

@@ -24,6 +24,7 @@
 - [Variáveis de Ambiente (.env)](#-variáveis-de-ambiente-env)
 - [Rotinas de Sincronização e Agendamento](#-rotinas-de-sincronização-e-agendamento)
 - [Testes Automatizados](#-testes-automatizados)
+- [Guia de Deploy (Hostinger + CloudPanel)](deploy.md)
 - [Licença](#-licença)
 
 ---
