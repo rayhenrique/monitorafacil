@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\TeamType;
 use App\Models\ConsolidationTeam;
 use App\Models\FamilyHealthIndicatorSnapshot;
+use App\Models\FamilyHealthMonthlySnapshot;
 use App\Models\Setting;
 use Illuminate\Support\Collection;
 
@@ -295,6 +296,20 @@ class FamilyHealthService
     }
 
     /**
+     * Retorna a pontuação do conceito no Componente III - Qualidade (Quadro 2 / NT 08/2026).
+     * Ótimo = 1,00 | Bom = 0,75 | Suficiente = 0,50 | Regular = 0,25.
+     */
+    public static function calculateComponentIIIPoints(string $performanceLevel): float
+    {
+        return match (strtolower($performanceLevel)) {
+            'otimo' => 1.00,
+            'bom' => 0.75,
+            'suficiente' => 0.50,
+            default => 0.25,
+        };
+    }
+
+    /**
      * Retorna a visão geral municipal de todos os indicadores C1 a C7 para o quadrimestre.
      *
      * @return array<string, mixed>
@@ -360,6 +375,35 @@ class FamilyHealthService
     }
 
     /**
+     * Retorna os meses que compõem o quadrimestre (Mês 1 ao Mês 4).
+     *
+     * @return array<int, array{number: int, name: string, label: string}>
+     */
+    public static function getMonthsForQuarter(int $quarter): array
+    {
+        return match ($quarter) {
+            1 => [
+                1 => ['number' => 1, 'name' => 'Janeiro', 'label' => 'Mês 1 (Jan)'],
+                2 => ['number' => 2, 'name' => 'Fevereiro', 'label' => 'Mês 2 (Fev)'],
+                3 => ['number' => 3, 'name' => 'Março', 'label' => 'Mês 3 (Mar)'],
+                4 => ['number' => 4, 'name' => 'Abril', 'label' => 'Mês 4 (Abr)'],
+            ],
+            2 => [
+                5 => ['number' => 5, 'name' => 'Maio', 'label' => 'Mês 1 (Mai)'],
+                6 => ['number' => 6, 'name' => 'Junho', 'label' => 'Mês 2 (Jun)'],
+                7 => ['number' => 7, 'name' => 'Julho', 'label' => 'Mês 3 (Jul)'],
+                8 => ['number' => 8, 'name' => 'Agosto', 'label' => 'Mês 4 (Ago)'],
+            ],
+            default => [
+                9 => ['number' => 9, 'name' => 'Setembro', 'label' => 'Mês 1 (Set)'],
+                10 => ['number' => 10, 'name' => 'Outubro', 'label' => 'Mês 2 (Out)'],
+                11 => ['number' => 11, 'name' => 'Novembro', 'label' => 'Mês 3 (Nov)'],
+                12 => ['number' => 12, 'name' => 'Dezembro', 'label' => 'Mês 4 (Dez)'],
+            ],
+        };
+    }
+
+    /**
      * Retorna os detalhes de um indicador específico (C1 a C7) incluindo equipes e boas práticas.
      *
      * @return array<string, mixed>
@@ -399,7 +443,7 @@ class FamilyHealthService
 
         $activeSnap = $currentFocus ?? $municipalSnap;
 
-        return [
+        $detail = [
             'meta' => $meta,
             'municipal_score' => $municipalSnap ? (float) $municipalSnap->score_percent : 0.0,
             'municipal_level' => $municipalSnap ? $municipalSnap->performance_level : 'regular',
@@ -414,6 +458,128 @@ class FamilyHealthService
             'teams' => $teams,
             'active_search_list' => $this->generateActiveSearchSample($code, $activeSnap ? $activeSnap->active_search_count : 15, $selectedIne),
         ];
+
+        // Lógica específica para o Indicador C1 (Acompanhamento Mensal e Avaliação Quadrimestral - NT 08/2026)
+        if ($code === 'c1') {
+            $monthsConfig = self::getMonthsForQuarter($quarter);
+
+            // 1. Acompanhamento Mensal do Escopo Ativo (Equipe Selecionada ou Consolidado Municipal)
+            $monthlySnapshots = FamilyHealthMonthlySnapshot::query()
+                ->where('year', $year)
+                ->where('quarter', $quarter)
+                ->where('indicator_code', 'c1')
+                ->when($selectedIne, fn ($q) => $q->where('ine', $selectedIne), fn ($q) => $q->whereNull('ine'))
+                ->get()
+                ->keyBy('month');
+
+            $monthlyEvolution = [];
+            $sumScores = 0.0;
+            $countedMonths = 0;
+
+            foreach ($monthsConfig as $mNum => $cfg) {
+                $snap = $monthlySnapshots->get($mNum);
+                $mScore = $snap ? (float) $snap->score_percent : 0.0;
+                $mLevel = $snap ? $snap->performance_level : self::calculatePerformanceLevel('c1', $mScore);
+                $mPoints = self::calculateComponentIIIPoints($mLevel);
+
+                $monthlyEvolution[] = [
+                    'month_number' => $mNum,
+                    'month_name' => $cfg['name'],
+                    'label' => $cfg['label'],
+                    'month_in_quarter' => count($monthlyEvolution) + 1,
+                    'numerator' => $snap ? $snap->numerator : 0,
+                    'denominator' => $snap ? $snap->denominator : 0,
+                    'score_percent' => $mScore,
+                    'performance_level' => $mLevel,
+                    'component_iii_points' => $mPoints,
+                ];
+
+                $sumScores += $mScore;
+                $countedMonths++;
+            }
+
+            // Média aritmética simples dos 4 meses conforme NT 08/2026: (M1 + M2 + M3 + M4) / 4
+            $quarterAvgScore = $countedMonths > 0 ? round($sumScores / $countedMonths, 2) : ($activeSnap ? (float) $activeSnap->score_percent : 0.0);
+            $quarterLevel = self::calculatePerformanceLevel('c1', $quarterAvgScore);
+            $quarterPoints = self::calculateComponentIIIPoints($quarterLevel);
+
+            $detail['current']['score_percent'] = $quarterAvgScore;
+            $detail['current']['performance_level'] = $quarterLevel;
+            $detail['c1_monthly_evolution'] = $monthlyEvolution;
+            $detail['c1_quarter_summary'] = [
+                'average_score' => $quarterAvgScore,
+                'performance_level' => $quarterLevel,
+                'component_iii_points' => $quarterPoints,
+                'weight' => 1.0,
+                'weighted_score' => round($quarterPoints * 1.0, 2),
+                'formula' => 'Média Aritmética: (Mês 1 + Mês 2 + Mês 3 + Mês 4) / 4',
+                'balance_status' => match (true) {
+                    $quarterAvgScore > 70.0 => 'excess_programmatic',
+                    $quarterAvgScore < 30.0 => 'excess_spontaneous',
+                    $quarterAvgScore > 50.0 => 'optimal',
+                    default => 'good',
+                },
+            ];
+
+            // 2. Decorar as equipes com seus resultados mensais M1..M4 e pontos do Componente III
+            $allTeamsMonthly = FamilyHealthMonthlySnapshot::query()
+                ->where('year', $year)
+                ->where('quarter', $quarter)
+                ->where('indicator_code', 'c1')
+                ->whereNotNull('ine')
+                ->get()
+                ->groupBy('ine');
+
+            $agendaAlerts = [];
+
+            foreach ($teams as $team) {
+                $tSnaps = $allTeamsMonthly->get($team->ine) ?? collect();
+                $scoresByMonth = [];
+                $monthIdx = 1;
+                foreach ($monthsConfig as $mNum => $cfg) {
+                    $found = $tSnaps->firstWhere('month', $mNum);
+                    $scoresByMonth[$monthIdx] = $found ? (float) $found->score_percent : 0.0;
+                    $monthIdx++;
+                }
+
+                $tAvg = count($scoresByMonth) > 0 ? round(array_sum($scoresByMonth) / count($scoresByMonth), 2) : (float) $team->score_percent;
+                $tLevel = self::calculatePerformanceLevel('c1', $tAvg);
+                $tPoints = self::calculateComponentIIIPoints($tLevel);
+
+                $team->monthly_scores = $scoresByMonth;
+                $team->quarter_average = $tAvg;
+                $team->quarter_level = $tLevel;
+                $team->component_iii_points = $tPoints;
+
+                if ($tAvg > 70.0) {
+                    $team->agenda_status = 'excess_programmatic';
+                    $agendaAlerts[] = [
+                        'team_name' => $team->team_name,
+                        'ine' => $team->ine,
+                        'average' => $tAvg,
+                        'status' => 'excess_programmatic',
+                        'title' => 'Risco de Barreira à Demanda Espontânea (> 70%)',
+                        'recommendation' => 'Agenda com excesso de vagas programadas. Recomenda-se reservar cotas diárias de acolhimento imediato e escuta qualificada sem agendamento prévio.',
+                    ];
+                } elseif ($tAvg < 30.0) {
+                    $team->agenda_status = 'excess_spontaneous';
+                    $agendaAlerts[] = [
+                        'team_name' => $team->team_name,
+                        'ine' => $team->ine,
+                        'average' => $tAvg,
+                        'status' => 'excess_spontaneous',
+                        'title' => 'Déficit de Acompanhamento Longitudinal (< 30%)',
+                        'recommendation' => 'Predomínio excessivo de urgências/espontânea. Estruturar blocos de agenda para pré-natal, hipertensão, diabetes e puericultura.',
+                    ];
+                } else {
+                    $team->agenda_status = $tAvg > 50.0 ? 'optimal' : 'good';
+                }
+            }
+
+            $detail['agenda_alerts'] = $agendaAlerts;
+        }
+
+        return $detail;
     }
 
     /**
@@ -489,6 +655,27 @@ class FamilyHealthService
      */
     public function ensureBaselineSnapshots(int $year, int $quarter): void
     {
+        // Equipes padrão da Atenção Primária
+        $teams = [
+            ['ine' => '0001839210', 'name' => 'eSF 01 · Centro de Saúde Central', 'type' => '70'],
+            ['ine' => '0001839229', 'name' => 'eSF 02 · Vila Esperança', 'type' => '70'],
+            ['ine' => '0001839237', 'name' => 'eSF 03 · Bairro Novo Horizonte', 'type' => '70'],
+            ['ine' => '0001839245', 'name' => 'eSF 04 · Jardim das Palmeiras', 'type' => '70'],
+            ['ine' => '0001839253', 'name' => 'eAP 01 · Atenção Primária Noturna', 'type' => '76'],
+        ];
+
+        // 1. Garante que os snapshots mensais do Indicador C1 existam (Acompanhamento Mensal)
+        $monthlyCount = FamilyHealthMonthlySnapshot::query()
+            ->where('year', $year)
+            ->where('quarter', $quarter)
+            ->where('indicator_code', 'c1')
+            ->count();
+
+        if ($monthlyCount === 0) {
+            $this->ensureBaselineMonthlyC1($year, $quarter, $teams);
+        }
+
+        // 2. Garante os snapshots quadrimestrais consolidados de C1 a C7
         $existingCount = FamilyHealthIndicatorSnapshot::query()
             ->where('year', $year)
             ->where('quarter', $quarter)
@@ -499,15 +686,6 @@ class FamilyHealthService
         }
 
         $indicators = self::getIndicatorsMetadata();
-
-        // Equipes padrão da Atenção Primária
-        $teams = [
-            ['ine' => '0001839210', 'name' => 'eSF 01 · Centro de Saúde Central', 'type' => '70'],
-            ['ine' => '0001839229', 'name' => 'eSF 02 · Vila Esperança', 'type' => '70'],
-            ['ine' => '0001839237', 'name' => 'eSF 03 · Bairro Novo Horizonte', 'type' => '70'],
-            ['ine' => '0001839245', 'name' => 'eSF 04 · Jardim das Palmeiras', 'type' => '70'],
-            ['ine' => '0001839253', 'name' => 'eAP 01 · Atenção Primária Noturna', 'type' => '76'],
-        ];
 
         // Valores base de referência coerentes com as metas ministeriais
         $baselineData = [
@@ -524,7 +702,7 @@ class FamilyHealthService
             $base = $baselineData[$slug];
             $level = self::calculatePerformanceLevel($slug, $base['pct']);
 
-            // 1. Snapshot Municipal Consolidado
+            // Snapshot Municipal Consolidado
             FamilyHealthIndicatorSnapshot::query()->create([
                 'year' => $year,
                 'quarter' => $quarter,
@@ -540,7 +718,7 @@ class FamilyHealthService
                 'active_search_count' => max(0, $base['den'] - $base['num']),
             ]);
 
-            // 2. Snapshots por Equipe
+            // Snapshots por Equipe
             $variance = [4.5, -3.2, 8.1, -6.4, 2.0];
             foreach ($teams as $idx => $team) {
                 $teamVar = $variance[$idx % count($variance)];
@@ -564,6 +742,97 @@ class FamilyHealthService
                     'active_search_count' => max(0, $teamDen - $teamNum),
                 ]);
             }
+        }
+    }
+
+    /**
+     * Gera snapshots mensais de baseline para o indicador C1 nos 4 meses do quadrimestre.
+     *
+     * @param list<array{ine: string, name: string, type: string}> $teams
+     */
+    public function ensureBaselineMonthlyC1(int $year, int $quarter, array $teams): void
+    {
+        $monthsConfig = self::getMonthsForQuarter($quarter);
+
+        $monthBaseScores = [
+            1 => 54.20,
+            2 => 58.60,
+            3 => 62.40,
+            4 => 59.80,
+        ];
+
+        /** @var array<int, array{num: int, den: int, scores: list<float>}> $teamMonthlySum */
+        $teamMonthlySum = [];
+
+        foreach ($teams as $tIdx => $team) {
+            $ine = $team['ine'];
+            $teamVariance = [-3.5, 2.8, 5.2, -6.0, 1.4][$tIdx % 5];
+
+            $mIndex = 1;
+            foreach ($monthsConfig as $monthNum => $cfg) {
+                $basePct = $monthBaseScores[$mIndex] + $teamVariance;
+                $pct = min(92.0, max(18.0, round($basePct, 2)));
+                $den = 280 + ($mIndex * 15) + ($tIdx * 20);
+                $num = (int) round(($pct / 100) * $den);
+                $level = self::calculatePerformanceLevel('c1', $pct);
+
+                FamilyHealthMonthlySnapshot::query()->updateOrCreate(
+                    [
+                        'year' => $year,
+                        'month' => $monthNum,
+                        'ine' => $ine,
+                        'indicator_code' => 'c1',
+                    ],
+                    [
+                        'quarter' => $quarter,
+                        'month_in_quarter' => $mIndex,
+                        'team_name' => $team['name'],
+                        'team_type' => $team['type'],
+                        'numerator' => $num,
+                        'denominator' => $den,
+                        'score_percent' => $pct,
+                        'performance_level' => $level,
+                    ]
+                );
+
+                if (! isset($teamMonthlySum[$monthNum])) {
+                    $teamMonthlySum[$monthNum] = ['num' => 0, 'den' => 0, 'scores' => []];
+                }
+                $teamMonthlySum[$monthNum]['num'] += $num;
+                $teamMonthlySum[$monthNum]['den'] += $den;
+                $teamMonthlySum[$monthNum]['scores'][] = $pct;
+
+                $mIndex++;
+            }
+        }
+
+        // Snapshots municipais consolidados para cada mês
+        $mIndex = 1;
+        foreach ($monthsConfig as $monthNum => $cfg) {
+            $data = $teamMonthlySum[$monthNum];
+            $mAvgScore = count($data['scores']) > 0 ? round(array_sum($data['scores']) / count($data['scores']), 2) : 0.0;
+            $mLevel = self::calculatePerformanceLevel('c1', $mAvgScore);
+
+            FamilyHealthMonthlySnapshot::query()->updateOrCreate(
+                [
+                    'year' => $year,
+                    'month' => $monthNum,
+                    'ine' => null,
+                    'indicator_code' => 'c1',
+                ],
+                [
+                    'quarter' => $quarter,
+                    'month_in_quarter' => $mIndex,
+                    'team_name' => 'Consolidado Municipal',
+                    'team_type' => '70',
+                    'numerator' => $data['num'],
+                    'denominator' => $data['den'],
+                    'score_percent' => $mAvgScore,
+                    'performance_level' => $mLevel,
+                ]
+            );
+
+            $mIndex++;
         }
     }
 }

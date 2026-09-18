@@ -85,6 +85,47 @@ class SettingsTest extends TestCase
             $table->unsignedInteger('micdt_outdated_count');
             $table->timestamps();
         });
+
+        Schema::dropIfExists('family_health_indicator_snapshots');
+        Schema::dropIfExists('family_health_monthly_snapshots');
+
+        Schema::create('family_health_indicator_snapshots', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedSmallInteger('year');
+            $table->unsignedTinyInteger('quarter');
+            $table->string('ine', 20)->nullable()->index();
+            $table->string('team_name', 150)->nullable();
+            $table->string('team_type', 10)->default('70');
+            $table->string('indicator_code', 10)->index();
+            $table->unsignedInteger('numerator')->default(0);
+            $table->unsignedInteger('denominator')->default(0);
+            $table->decimal('score_percent', 5, 2)->default(0.00);
+            $table->string('performance_level', 20)->default('regular');
+            $table->json('good_practices_breakdown')->nullable();
+            $table->unsignedInteger('active_search_count')->default(0);
+            $table->timestamps();
+
+            $table->unique(['year', 'quarter', 'ine', 'indicator_code'], 'unique_team_indicator_period');
+        });
+
+        Schema::create('family_health_monthly_snapshots', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedSmallInteger('year');
+            $table->unsignedTinyInteger('month');
+            $table->unsignedTinyInteger('quarter');
+            $table->unsignedTinyInteger('month_in_quarter');
+            $table->string('ine', 20)->nullable()->index();
+            $table->string('team_name', 150)->nullable();
+            $table->string('team_type', 10)->default('70');
+            $table->string('indicator_code', 10)->index();
+            $table->unsignedInteger('numerator')->default(0);
+            $table->unsignedInteger('denominator')->default(0);
+            $table->decimal('score_percent', 5, 2)->default(0.00);
+            $table->string('performance_level', 20)->default('regular');
+            $table->timestamps();
+
+            $table->unique(['year', 'month', 'ine', 'indicator_code'], 'unique_monthly_team_indicator');
+        });
     }
 
     public function test_settings_routes_require_authentication(): void
@@ -298,5 +339,23 @@ XML;
                 unlink($tempPath);
             }
         }
+    }
+
+    public function test_data_processing_livewire_can_run_processing(): void
+    {
+        $admin = User::query()->create([
+            'name' => 'Administrador',
+            'email' => 'admin@monitorafacil.gov.br',
+            'password' => Hash::make('password123'),
+        ]);
+
+        $this->actingAs($admin);
+
+        Livewire::test(DataProcessing::class)
+            ->assertSet('progressPercent', 0)
+            ->call('processNow')
+            ->assertSet('progressPercent', 100)
+            ->assertSee('tb_fat_atendimento_individual')
+            ->assertSee('tb_dim_equipe');
     }
 }

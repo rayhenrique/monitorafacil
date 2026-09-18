@@ -2,12 +2,11 @@
 
 namespace App\Livewire\Settings;
 
-use App\Enums\SyncStatus;
 use App\Enums\TeamType;
 use App\Models\ConsolidationRegistration;
 use App\Models\ConsolidationTeam;
 use App\Models\SyncLog;
-use Illuminate\Support\Facades\Artisan;
+use App\Services\EsusDataProcessingService;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -22,26 +21,40 @@ class DataProcessing extends Component
 
     public ?string $processStatus = null; // 'success' | 'error'
 
-    public function processNow(): void
+    public int $progressPercent = 0;
+
+    public string $currentStep = '';
+
+    /** @var array<string, array{name: string, description: string, status: string, rows: int, message: string}> */
+    public array $tablesReport = [];
+
+    public ?float $executionTimeMs = null;
+
+    public function processNow(EsusDataProcessingService $service): void
     {
         $this->isProcessing = true;
         $this->processMessage = null;
         $this->processStatus = null;
+        $this->progressPercent = 10;
+        $this->currentStep = 'Iniciando verificação do banco de dados e-SUS PEC...';
 
         try {
-            $exitCode = Artisan::call('esus:sync-snapshot');
-            $output = trim(Artisan::output());
+            $result = $service->process(function (int $percent, string $step, array $tables): void {
+                $this->progressPercent = $percent;
+                $this->currentStep = $step;
+                $this->tablesReport = $tables;
+            });
 
-            if ($exitCode === 0) {
-                $this->processStatus = 'success';
-                $this->processMessage = $output ?: 'Processamento de dados concluído com sucesso!';
-            } else {
-                $this->processStatus = 'error';
-                $this->processMessage = $output ?: 'Ocorreu um erro durante a execução da rotina de consolidação.';
-            }
+            $this->progressPercent = 100;
+            $this->currentStep = 'Processamento concluído com sucesso!';
+            $this->processStatus = 'success';
+            $this->processMessage = $result['message'];
+            $this->tablesReport = $result['tables'];
+            $this->executionTimeMs = $result['execution_time_ms'];
         } catch (Throwable $e) {
             $this->processStatus = 'error';
             $this->processMessage = 'Exceção ao executar o processamento: '.$e->getMessage();
+            $this->currentStep = 'Falha durante o processamento.';
         } finally {
             $this->isProcessing = false;
         }

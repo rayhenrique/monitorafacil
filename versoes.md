@@ -4,6 +4,26 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.6.0] - 18/09/2026
+
+### 🚀 Destaques da Versão
+- **Processamento Real de Dados do e-SUS PEC:** Substituição definitiva de dados mockados por pipeline real com barra de progresso em tempo real e painel detalhado de status/contagem das 7 tabelas do Data Warehouse do e-SUS PEC (`tb_dim_equipe`, `tb_dim_tempo`, `tb_dim_cbo`, `tb_dim_tipo_atendimento`, `tb_fat_atendimento_individual`, `tb_fat_cad_individual`, `tb_fat_cad_domiciliar`).
+- **Acompanhamento Mensal do Indicador C1 (Mais Acesso à APS):** Monitoramento individual dos 4 meses do quadrimestre (Mês 1, Mês 2, Mês 3 e Mês 4) da relação entre oferta de demanda programada e espontânea.
+- **Avaliação Quadrimestral e Componente III (NT 08/2026-DEAPS/SAPS/MS):** Cálculo oficial da média aritmética simples dos 4 meses (`(M1 + M2 + M3 + M4) / 4`) com classificação oficial (Ótimo, Bom, Suficiente e Regular) e conversão em pontos do Componente III - Qualidade (Quadro 2: 1,00 pt, 0,75 pt, 0,50 pt ou 0,25 pt com Peso 1,0).
+
+### ✨ Novas Funcionalidades
+- **Barra de Progresso & Diagnóstico de Tabelas em Configurações > Processar Dados:**
+  - Barra de progresso interativa com percentual e descrição da etapa em execução.
+  - Tabela de auditoria com status (`Processado`, `Atenção`, `Pendente`), quantidade de registros e diagnóstico de cada tabela do PEC.
+- **Painel Dedicado para o Indicador C1 · Mais Acesso:**
+  - Card de Síntese Quadrimestral com fórmula oficial e pontuação no Componente III.
+  - Grid com 4 cards de acompanhamento mensal mostrando percentuais, atendimentos programados vs espontâneos e pontos parciais por mês.
+  - Tabela de equipes enriquecida com colunas para Mês 1, Mês 2, Mês 3, Mês 4, Média Quadrimestral, Conceito e Pontos do Componente III.
+  - Diagnóstico de equilíbrio da agenda na aba de Oportunidades (identificando equipes com sobrecarga $> 70\%$ ou desestruturação $< 30\%$).
+  - Caderno metodológico atualizado com referências explícitas à NT 08/2026-DEAPS/SAPS/MS e Quadro 2.
+
+---
+
 ## [v1.5.0] - 18/09/2026
 
 ### 🚀 Destaques da Versão

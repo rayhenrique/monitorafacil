@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.5.0';
+    public const CURRENT_VERSION = 'v1.6.0';
 
     public const CURRENT_RELEASE_DATE = '18/09/2026';
 
@@ -61,9 +61,24 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.5.0',
+                'version' => 'v1.6.0',
                 'date' => '18/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Processamento Real do e-SUS PEC & Acompanhamento Mensal do C1 (NT 08/2026)',
+                'summary' => 'Substituição de dados mockados por rotina de processamento real com barra de progresso e diagnóstico das 7 tabelas do e-SUS PEC, juntamente com o acompanhamento mensal e avaliação quadrimestral do Indicador C1 (Mais Acesso à APS) conforme a Nota Técnica nº 08/2026-DEAPS/SAPS/MS.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Barra de progresso em tempo real e painel diagnóstico de auditoria das 7 tabelas do e-SUS PEC (tb_dim_equipe, tb_dim_tempo, tb_dim_cbo, tb_dim_tipo_atendimento, tb_fat_atendimento_individual, tb_fat_cad_individual, tb_fat_cad_domiciliar).'],
+                    ['type' => 'novo', 'text' => 'Acompanhamento mensal do Indicador C1 (Mais Acesso à APS) cobrindo Mês 1, Mês 2, Mês 3 e Mês 4 individualmente.'],
+                    ['type' => 'novo', 'text' => 'Avaliação Quadrimestral do C1 calculada pela média aritmética dos 4 meses: (M1 + M2 + M3 + M4) / 4.'],
+                    ['type' => 'novo', 'text' => 'Conversão oficial de conceitos em pontos no Componente III - Qualidade (Quadro 2 / NT 08/2026: Ótimo = 1,00 pt, Bom = 0,75 pt, Suficiente = 0,50 pt, Regular = 0,25 pt).'],
+                    ['type' => 'melhoria', 'text' => 'Tabela de equipes no C1 exibindo colunas de cada mês, média quadrimestral, pontos do Componente III e status de equilíbrio da agenda.'],
+                    ['type' => 'melhoria', 'text' => 'Diagnóstico de sobrecarga ou desestruturação da agenda da APS na aba de busca ativa.'],
+                ],
+            ],
+            [
+                'version' => 'v1.5.0',
+                'date' => '18/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Módulo Oficial de Saúde da Família (Indicadores C1 ao C7)',
                 'summary' => 'Implementação completa do módulo de monitoramento clínico dos 7 indicadores da Atenção Primária à Saúde conforme as notas metodológicas oficiais da Portaria GM/MS nº 3.493/2024, com painel municipal, detalhamento por equipe e busca ativa nominal.',
                 'highlights' => [

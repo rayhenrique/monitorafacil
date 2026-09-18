@@ -94,6 +94,26 @@ class FamilyHealthTest extends TestCase
 
             $table->unique(['year', 'quarter', 'ine', 'indicator_code'], 'unique_team_indicator_period');
         });
+
+        Schema::dropIfExists('family_health_monthly_snapshots');
+        Schema::create('family_health_monthly_snapshots', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedSmallInteger('year');
+            $table->unsignedTinyInteger('month');
+            $table->unsignedTinyInteger('quarter');
+            $table->unsignedTinyInteger('month_in_quarter');
+            $table->string('ine', 20)->nullable()->index();
+            $table->string('team_name', 150)->nullable();
+            $table->string('team_type', 10)->default('70');
+            $table->string('indicator_code', 10)->index();
+            $table->unsignedInteger('numerator')->default(0);
+            $table->unsignedInteger('denominator')->default(0);
+            $table->decimal('score_percent', 5, 2)->default(0.00);
+            $table->string('performance_level', 20)->default('regular');
+            $table->timestamps();
+
+            $table->unique(['year', 'month', 'ine', 'indicator_code'], 'unique_monthly_team_indicator');
+        });
     }
 
     private function authenticateUser(): User
