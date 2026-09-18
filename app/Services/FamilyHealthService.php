@@ -433,6 +433,23 @@ class FamilyHealthService
             ->where('indicator_code', $code)
             ->whereNotNull('ine');
 
+        if ($code === 'c1') {
+            $teamsQuery->where(function ($q) {
+                $q->whereIn('team_type', ['70', '76'])
+                  ->orWhereNull('team_type');
+            })
+            ->where('team_name', 'not like', 'ESB%')
+            ->where('team_name', 'not like', 'esb%')
+            ->where('team_name', 'not like', '%E-MULTI%')
+            ->where('team_name', 'not like', '%e-multi%')
+            ->where('team_name', 'not like', '%EQUIPE AMPLIADA%')
+            ->where('team_name', 'not like', '%equipe ampliada%')
+            ->where('team_name', 'not like', '%EMAD%')
+            ->where('team_name', 'not like', '%EMAP%')
+            ->where('team_name', 'not like', '%SEM EQUIPE%')
+            ->where('team_name', 'not like', '%INE N%O ENCONTRADO%');
+        }
+
         $teams = $teamsQuery->orderByDesc('score_percent')->get();
 
         // Se uma equipe foi filtrada
@@ -834,5 +851,50 @@ class FamilyHealthService
 
             $mIndex++;
         }
+    }
+
+    /**
+     * Remove snapshots inválidos do indicador C1 (equipes que não são eSF ou eAP).
+     */
+    public static function purgeInvalidC1Snapshots(): int
+    {
+        $deleted = 0;
+
+        $query = FamilyHealthIndicatorSnapshot::query()
+            ->where('indicator_code', 'c1')
+            ->whereNotNull('ine')
+            ->where(function ($q) {
+                $q->whereNotIn('team_type', ['70', '76'])
+                  ->orWhere('team_name', 'like', 'ESB%')
+                  ->orWhere('team_name', 'like', 'esb%')
+                  ->orWhere('team_name', 'like', '%E-MULTI%')
+                  ->orWhere('team_name', 'like', '%e-multi%')
+                  ->orWhere('team_name', 'like', '%EQUIPE AMPLIADA%')
+                  ->orWhere('team_name', 'like', '%equipe ampliada%')
+                  ->orWhere('team_name', 'like', '%EMAD%')
+                  ->orWhere('team_name', 'like', '%EMAP%')
+                  ->orWhere('team_name', 'like', '%SEM EQUIPE%')
+                  ->orWhere('team_name', 'like', '%sem equipe%')
+                  ->orWhere('team_name', 'like', '%INE N%O ENCONTRADO%')
+                  ->orWhere('ine', 'SEM_INE')
+                  ->orWhere('ine', '0')
+                  ->orWhereRaw('LENGTH(ine) != 10');
+            });
+
+        $deleted += $query->delete();
+
+        $monthlyQuery = FamilyHealthMonthlySnapshot::query()
+            ->where('indicator_code', 'c1')
+            ->whereNotNull('ine')
+            ->where(function ($q) {
+                $q->where('ine', 'like', 'ESB%')
+                  ->orWhere('ine', 'SEM_INE')
+                  ->orWhere('ine', '0')
+                  ->orWhereRaw('LENGTH(ine) != 10');
+            });
+
+        $deleted += $monthlyQuery->delete();
+
+        return $deleted;
     }
 }

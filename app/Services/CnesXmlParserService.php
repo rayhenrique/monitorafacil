@@ -68,6 +68,7 @@ class CnesXmlParserService
 
                 $type = match ($reader->getAttribute('TP_EQUIPE')) {
                     '70' => TeamType::Esf->value,
+                    '76' => TeamType::Eap->value,
                     '71' => TeamType::SaudeBucal->value,
                     '72' => TeamType::Emulti->value,
                     default => null,
@@ -87,8 +88,13 @@ class CnesXmlParserService
                     throw new RuntimeException('O arquivo XML CNES atribui tipos diferentes ao mesmo INE.');
                 }
 
+                $name = trim((string) $reader->getAttribute('NM_REFERENCIA'));
+                if ($name === '') {
+                    $name = trim((string) $reader->getAttribute('DS_EQUIPE'));
+                }
+
                 $typesByIne[$ine] = $type;
-                $teams[$type.'|'.$ine.'|'.$cnes] = compact('ine', 'cnes', 'type');
+                $teams[$type.'|'.$ine.'|'.$cnes] = compact('ine', 'cnes', 'type', 'name');
             }
         } finally {
             $reader->close();
@@ -102,6 +108,7 @@ class CnesXmlParserService
 
         $counts = [
             'esf' => 0,
+            'eap' => 0,
             'saude_bucal' => 0,
             'emulti' => 0,
             'total' => count($teamsList),
@@ -110,6 +117,7 @@ class CnesXmlParserService
         foreach ($teamsList as $team) {
             match ($team['type']) {
                 TeamType::Esf->value => $counts['esf']++,
+                TeamType::Eap->value => $counts['eap']++,
                 TeamType::SaudeBucal->value => $counts['saude_bucal']++,
                 TeamType::Emulti->value => $counts['emulti']++,
                 default => null,
@@ -121,5 +129,99 @@ class CnesXmlParserService
             'teams' => $teamsList,
             'counts' => $counts,
         ];
+    }
+
+    /**
+     * Retorna a lista de equipes homologadas no CNES elegíveis exclusivamente ao Indicador C1 (eSF Tipo 70 e eAP Tipo 76).
+     *
+     * @return list<array{ine: string, name: string, type: string, cnes: string}>
+     */
+    public function getEligibleC1Teams(?string $xmlPath = null): array
+    {
+        $targetPath = $this->resolveAvailableXmlPath($xmlPath);
+        if ($targetPath === null || ! is_file($targetPath) || ! is_readable($targetPath)) {
+            return [];
+        }
+
+        try {
+            $parsed = $this->parse($targetPath);
+            $eligible = [];
+            $seenInes = [];
+
+            foreach ($parsed['teams'] as $team) {
+                if ($team['type'] === TeamType::Esf->value || $team['type'] === TeamType::Eap->value) {
+                    $ine = $team['ine'];
+                    if (isset($seenInes[$ine])) {
+                        continue;
+                    }
+                    $seenInes[$ine] = true;
+                    $teamCode = ($team['type'] === TeamType::Eap->value) ? '76' : '70';
+                    $eligible[] = [
+                        'ine' => $ine,
+                        'name' => ! empty($team['name']) ? $team['name'] : ($teamCode === '76' ? 'eAP '.$ine : 'eSF '.$ine),
+                        'type' => $teamCode,
+                        'cnes' => $team['cnes'] ?? '',
+                    ];
+                }
+            }
+
+            return $eligible;
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    /**
+     * Localiza o caminho de um arquivo XML CNES válido disponível no sistema.
+     */
+    public function resolveAvailableXmlPath(?string $explicitPath = null): ?string
+    {
+        if (filled($explicitPath)) {
+            $path = $this->normalizePath($explicitPath);
+            if (is_file($path) && is_readable($path)) {
+                return $path;
+            }
+        }
+
+        $configured = config('esus.homologated_xml_path');
+        if (filled($configured)) {
+            $path = $this->normalizePath((string) $configured);
+            if (is_file($path) && is_readable($path)) {
+                return $path;
+            }
+        }
+
+        // Procura por arquivos XML na pasta importacao/
+        $importDir = base_path('importacao');
+        if (is_dir($importDir)) {
+            $xmlFiles = glob($importDir . DIRECTORY_SEPARATOR . '*.xml');
+            if (! empty($xmlFiles)) {
+                // Prioriza arquivos contendo "XmlParaESUS"
+                foreach ($xmlFiles as $file) {
+                    if (stripos(basename($file), 'XmlParaESUS') !== false && is_readable($file)) {
+                        return $file;
+                    }
+                }
+                if (is_readable($xmlFiles[0])) {
+                    return $xmlFiles[0];
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private function normalizePath(string $path): string
+    {
+        $trimmed = trim($path);
+        if ($trimmed === '') {
+            return '';
+        }
+
+        if (str_starts_with($trimmed, '/') || str_starts_with($trimmed, '\\') || preg_match('/^[a-zA-Z]:[\\\\\/]/', $trimmed)) {
+            return $trimmed;
+        }
+
+        return base_path($trimmed);
     }
 }

@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.7.0';
+    public const CURRENT_VERSION = 'v1.8.0';
 
     public const CURRENT_RELEASE_DATE = '18/09/2026';
 
@@ -61,9 +61,23 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.7.0',
+                'version' => 'v1.8.0',
                 'date' => '18/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Filtragem Estrita de Equipes Elegíveis (eSF e eAP) e CBOs Habilitados no Indicador C1',
+                'summary' => 'Conformidade metodológica estrita com a Nota Metodológica C1 - Mais Acesso e NT 08/2026: apenas equipes de Saúde da Família (eSF - Tipo 70) e Atenção Primária (eAP - Tipo 76) participam do C1. Expurgo e isolamento de equipes de Saúde Bucal (eSB), eMulti, EMAD, EMAP, "SEM EQUIPE" e registros órfãos. Validação das 19 equipes eSF de Teotônio Vilela via XML CNES e restrição aos 7 CBOs oficiais de Médicos e Enfermeiros.',
+                'highlights' => [
+                    ['type' => 'correcao', 'text' => 'Exclusividade eSF/eAP no Indicador C1: Eliminação definitiva de equipes eSB (Saúde Bucal), eMulti (Equipe Ampliada/Complementar), EMAD I e EMAP I (Atenção Domiciliar) do C1.'],
+                    ['type' => 'novo', 'text' => 'Reconhecimento das 19 Equipes Homologadas de Teotônio Vilela: Integração com o XML CNES oficial (XmlParaESUS31_270915.xml) para identificar com precisão as 19 eSF.'],
+                    ['type' => 'correcao', 'text' => 'Filtro Rigoroso dos 7 CBOs Habilitados na Produção Clínica: JOIN e filtro estrito na tb_dim_cbo para Médicos (2251-42, 2251-70, 2251-30, 2251-25, 2252-50) e Enfermeiros (2235-65, 2235-05).'],
+                    ['type' => 'correcao', 'text' => 'Eliminação de Registros de Sistema: Remoção completa de "SEM EQUIPE", "INE NÃO ENCONTRADO", INEs vazios ou com formato inválido.'],
+                    ['type' => 'melhoria', 'text' => 'Expurgo Automático de Snapshots Corrompidos: Método purgeInvalidC1Snapshots() para sanitizar bases de dados locais e de produção.'],
+                ],
+            ],
+            [
+                'version' => 'v1.7.0',
+                'date' => '18/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Extração de Equipes do e-SUS PEC, Processamento Seletivo C1 e Nova Legenda Invertida',
                 'summary' => 'Resolução definitiva da importação de equipes no ambiente de produção do e-SUS PEC com inspeção dinâmica de schema, novo pipeline seletivo para processar apenas o que interessa ao C1 ou execução geral completa, e inversão oficial da legenda com nova paleta de cores (Regular/Vermelho, Suficiente/Amarelo, Bom/Verde e Ótimo/Azul).',
                 'highlights' => [

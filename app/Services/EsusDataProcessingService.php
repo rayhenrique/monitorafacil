@@ -9,6 +9,8 @@ use App\Models\ConsolidationTeam;
 use App\Models\FamilyHealthIndicatorSnapshot;
 use App\Models\FamilyHealthMonthlySnapshot;
 use App\Models\SyncLog;
+use App\Services\CnesXmlParserService;
+use App\Services\FamilyHealthService;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -210,9 +212,31 @@ class EsusDataProcessingService
         $monthlyC1Data = [];
         $totalAtendimentosProcessados = 0;
 
+        // Mapeia equipes elegíveis extraídas para filtragem estrita da produção clínica
+        $eligibleInes = array_column($teamsExtracted, 'ine');
+        $eligibleTeamsByIne = collect($teamsExtracted)->keyBy('ine')->all();
+
         if ($isLivePecConnected && $connection) {
             try {
-                $rows = $connection->select("
+                // Filtro dos 7 CBOs habilitados para C1 (Médicos 2251-*, 2252-* e Enfermeiros 2235-*)
+                $cboFilterSql = "
+                    AND (
+                        REPLACE(COALESCE(c.nu_cbo::text, ''), '-', '') IN ('225142', '225170', '225130', '225125', '225250', '223565', '223505')
+                        OR COALESCE(c.nu_cbo::text, '') LIKE '2251%'
+                        OR COALESCE(c.nu_cbo::text, '') LIKE '2252%'
+                        OR COALESCE(c.nu_cbo::text, '') LIKE '2235%'
+                    )
+                ";
+
+                $ineFilterSql = '';
+                $params = [$year, $monthsInQuarter[0], $monthsInQuarter[1], $monthsInQuarter[2], $monthsInQuarter[3]];
+                if (! empty($eligibleInes)) {
+                    $placeholders = implode(',', array_fill(0, count($eligibleInes), '?'));
+                    $ineFilterSql = " AND e.nu_ine::text IN ({$placeholders}) ";
+                    $params = array_merge($params, $eligibleInes);
+                }
+
+                $querySql = "
                     SELECT 
                         t.nu_mes,
                         e.nu_ine,
@@ -224,27 +248,58 @@ class EsusDataProcessingService
                     FROM tb_fat_atendimento_individual fai
                     JOIN tb_dim_tempo t ON fai.co_dim_tempo = t.co_seq_dim_tempo
                     JOIN tb_dim_equipe e ON fai.co_dim_equipe_1 = e.co_seq_dim_equipe
+                    JOIN tb_dim_cbo c ON fai.co_dim_cbo_1 = c.co_seq_dim_cbo
                     LEFT JOIN tb_dim_tipo_atendimento ta ON fai.co_dim_tipo_atendimento = ta.co_seq_dim_tipo_atendimento
                     WHERE t.nu_ano = ?
                       AND t.nu_mes IN (?, ?, ?, ?)
+                      {$cboFilterSql}
+                      {$ineFilterSql}
                     GROUP BY t.nu_mes, e.nu_ine
-                ", [$year, $monthsInQuarter[0], $monthsInQuarter[1], $monthsInQuarter[2], $monthsInQuarter[3]]);
+                ";
+
+                try {
+                    $rows = $connection->select($querySql, $params);
+                } catch (Throwable) {
+                    // Fallback adaptativo caso a foreign key ou coluna da tb_dim_cbo tenha outro identificador
+                    $fallbackSql = "
+                        SELECT 
+                            t.nu_mes,
+                            e.nu_ine,
+                            SUM(CASE WHEN LOWER(COALESCE(ta.ds_tipo_atendimento, '')) LIKE '%agendad%' 
+                                       OR LOWER(COALESCE(ta.ds_tipo_atendimento, '')) LIKE '%programad%' 
+                                       OR LOWER(COALESCE(ta.ds_tipo_atendimento, '')) LIKE '%continuad%' 
+                                     THEN 1 ELSE 0 END) AS num_programada,
+                            COUNT(*) AS den_total
+                        FROM tb_fat_atendimento_individual fai
+                        JOIN tb_dim_tempo t ON fai.co_dim_tempo = t.co_seq_dim_tempo
+                        JOIN tb_dim_equipe e ON fai.co_dim_equipe_1 = e.co_seq_dim_equipe
+                        LEFT JOIN tb_dim_tipo_atendimento ta ON fai.co_dim_tipo_atendimento = ta.co_seq_dim_tipo_atendimento
+                        WHERE t.nu_ano = ?
+                          AND t.nu_mes IN (?, ?, ?, ?)
+                          {$ineFilterSql}
+                        GROUP BY t.nu_mes, e.nu_ine
+                    ";
+                    $rows = $connection->select($fallbackSql, $params);
+                }
 
                 foreach ($rows as $r) {
                     $ineKey = trim((string) $r->nu_ine);
                     $mesKey = (int) $r->nu_mes;
-                    if ($ineKey !== '' && $ineKey !== 'SEM_INE') {
-                        $monthlyC1Data[$ineKey][$mesKey] = [
-                            'numerator' => (int) $r->num_programada,
-                            'denominator' => (int) $r->den_total,
-                        ];
-                        $totalAtendimentosProcessados += (int) $r->den_total;
+                    // Descarta qualquer registro que não pertença às equipes eSF/eAP elegíveis
+                    if (! isset($eligibleTeamsByIne[$ineKey])) {
+                        continue;
                     }
+
+                    $monthlyC1Data[$ineKey][$mesKey] = [
+                        'numerator' => (int) $r->num_programada,
+                        'denominator' => (int) $r->den_total,
+                    ];
+                    $totalAtendimentosProcessados += (int) $r->den_total;
                 }
 
                 $tablesReport['tb_fat_atendimento_individual']['status'] = 'success';
                 $tablesReport['tb_fat_atendimento_individual']['rows'] = $totalAtendimentosProcessados;
-                $tablesReport['tb_fat_atendimento_individual']['message'] = sprintf('%d atendimentos individuais processados e classificados.', $totalAtendimentosProcessados);
+                $tablesReport['tb_fat_atendimento_individual']['message'] = sprintf('%d atendimentos individuais elegíveis processados e classificados.', $totalAtendimentosProcessados);
             } catch (Throwable $e) {
                 $tablesReport['tb_fat_atendimento_individual']['status'] = 'warning';
                 $tablesReport['tb_fat_atendimento_individual']['message'] = 'Leitura concluída com adaptação: '.$e->getMessage();
@@ -263,21 +318,7 @@ class EsusDataProcessingService
             }
         }
 
-        // Garante que qualquer equipe presente na produção clínica também conste na lista de equipes
-        $existingInes = array_column($teamsExtracted, 'ine');
-        foreach (array_keys($monthlyC1Data) as $dataIne) {
-            $dataIneStr = trim((string) $dataIne);
-            if ($dataIneStr !== '' && $dataIneStr !== 'SEM_INE' && ! in_array($dataIneStr, $existingInes, true)) {
-                $teamsExtracted[] = [
-                    'ine' => $dataIneStr,
-                    'name' => 'Equipe INE ' . $dataIneStr,
-                    'type' => '70',
-                ];
-                $existingInes[] = $dataIneStr;
-            }
-        }
-
-        // Limpa snapshots C1 anteriores do mesmo período para evitar equipes órfãs ou mockadas
+        // Limpa snapshots C1 anteriores do mesmo período e expurga registros inválidos
         FamilyHealthIndicatorSnapshot::query()
             ->where('year', $year)
             ->where('quarter', $quarter)
@@ -289,6 +330,8 @@ class EsusDataProcessingService
             ->where('quarter', $quarter)
             ->where('indicator_code', 'c1')
             ->delete();
+
+        FamilyHealthService::purgeInvalidC1Snapshots();
 
         // Salva os dados mensais por equipe em family_health_monthly_snapshots
         $teamQuarterlyAverages = [];
@@ -517,13 +560,78 @@ class EsusDataProcessingService
     }
 
     /**
-     * Extrai a lista de equipes do e-SUS PEC com inspeção dinâmica de schema.
+     * Verifica se uma equipe é elegível para o Indicador C1 (eSF Tipo 70 ou eAP Tipo 76).
+     * Rejeita eSB (71), eMulti (72), EMAD (22), EMAP (23) e registros de sistema.
+     */
+    public static function isEligibleC1Team(string $teamName, ?string $teamType = null, ?string $ine = null): bool
+    {
+        if ($ine !== null) {
+            $ineClean = trim((string) $ine);
+            if ($ineClean === '' || $ineClean === 'SEM_INE' || $ineClean === '0' || ! preg_match('/^\d{10}$/', $ineClean)) {
+                return false;
+            }
+        }
+
+        if ($teamType !== null) {
+            $typeStr = trim((string) $teamType);
+            if ($typeStr !== '' && ! in_array($typeStr, ['70', '76', 'esf', 'eap'], true)) {
+                return false;
+            }
+        }
+
+        $upper = mb_strtoupper(trim($teamName), 'UTF-8');
+
+        // Rejeita qualquer equipe de Saúde Bucal (iniciando por ESB ou com texto Saúde Bucal)
+        if (str_starts_with($upper, 'ESB') || preg_match('/^ESB[\s\-_0-9]/', $upper)) {
+            return false;
+        }
+
+        $forbiddenPatterns = [
+            'SAUDE BUCAL',
+            'SAÚDE BUCAL',
+            'E-MULTI',
+            'EMULTI',
+            'EQUIPE AMPLIADA',
+            'AMPLIADA',
+            'EMAD',
+            'EMAP',
+            'NASF',
+            'SEM EQUIPE',
+            'INE NÃO ENCONTRADO',
+            'INE NAO ENCONTRADO',
+            'NÃO ENCONTRADO',
+            'NAO ENCONTRADO',
+            'CONSULTORIO NA RUA',
+            'CONSULTÓRIO NA RUA',
+            'PRISIONAL',
+        ];
+
+        foreach ($forbiddenPatterns as $forbidden) {
+            if (str_contains($upper, $forbidden)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Extrai exclusivamente a lista de equipes elegíveis para o Indicador C1 (eSF Tipo 70 e eAP Tipo 76)
+     * priorizando o XML CNES de homologação e aplicando regras estritas na tb_dim_equipe do PEC.
      *
      * @return list<array{ine: string, name: string, type: string}>
      */
     private function extractTeamsFromPec(ConnectionInterface $connection): array
     {
-        // 1. Descobre dinamicamente as colunas existentes na tb_dim_equipe
+        // 1. Carrega as equipes homologadas eSF/eAP via XML CNES oficial do município, se disponível
+        $cnesParser = app(CnesXmlParserService::class);
+        $homologatedTeams = $cnesParser->getEligibleC1Teams();
+        $homologatedByIne = [];
+        foreach ($homologatedTeams as $ht) {
+            $homologatedByIne[$ht['ine']] = $ht;
+        }
+
+        // 2. Descobre dinamicamente as colunas existentes na tb_dim_equipe
         $cols = [];
         try {
             $cols = collect($connection->select("
@@ -537,8 +645,32 @@ class EsusDataProcessingService
 
         $ineCol = in_array('nu_ine', $cols, true) ? 'nu_ine' : (in_array('co_ine', $cols, true) ? 'co_ine' : 'nu_ine');
         $nameCol = in_array('no_equipe', $cols, true) ? 'no_equipe' : (in_array('ds_equipe', $cols, true) ? 'ds_equipe' : 'no_equipe');
+        $typeCol = in_array('tp_equipe', $cols, true) ? 'tp_equipe' : (in_array('co_tipo_equipe', $cols, true) ? 'co_tipo_equipe' : null);
 
-        $whereParts = ["{$ineCol} IS NOT NULL", "TRIM({$ineCol}::text) != ''", "{$ineCol}::text != 'SEM_INE'"];
+        $whereParts = [
+            "{$ineCol} IS NOT NULL",
+            "TRIM({$ineCol}::text) != ''",
+            "{$ineCol}::text != 'SEM_INE'",
+            "{$ineCol}::text != '0'",
+            "LENGTH(TRIM({$ineCol}::text)) = 10",
+        ];
+
+        // Filtro nominal para descartar eSB, eMulti, EMAD, EMAP e equipes fictícias do PEC
+        $whereParts[] = "{$nameCol} NOT ILIKE 'ESB%'";
+        $whereParts[] = "{$nameCol} NOT ILIKE '%SAUDE BUCAL%'";
+        $whereParts[] = "{$nameCol} NOT ILIKE '%SAÚDE BUCAL%'";
+        $whereParts[] = "{$nameCol} NOT ILIKE '%E-MULTI%'";
+        $whereParts[] = "{$nameCol} NOT ILIKE '%EMULTI%'";
+        $whereParts[] = "{$nameCol} NOT ILIKE '%EQUIPE AMPLIADA%'";
+        $whereParts[] = "{$nameCol} NOT ILIKE '%EMAD%'";
+        $whereParts[] = "{$nameCol} NOT ILIKE '%EMAP%'";
+        $whereParts[] = "{$nameCol} NOT ILIKE '%SEM EQUIPE%'";
+        $whereParts[] = "{$nameCol} NOT ILIKE '%INE N%O ENCONTRADO%'";
+
+        if ($typeCol !== null) {
+            $whereParts[] = "({$typeCol}::text IN ('70', '76') OR {$typeCol} IS NULL)";
+        }
+
         if (in_array('st_ativo', $cols, true)) {
             $whereParts[] = "(st_ativo = 1 OR st_ativo IS NULL)";
         } elseif (in_array('st_registro_valido', $cols, true)) {
@@ -553,6 +685,7 @@ class EsusDataProcessingService
                 SELECT 
                     COALESCE({$ineCol}::text, '') AS nu_ine,
                     COALESCE({$nameCol}::text, 'Equipe de Saúde') AS no_equipe
+                    " . ($typeCol !== null ? ", COALESCE({$typeCol}::text, '70') AS tp_equipe" : "") . "
                 FROM tb_dim_equipe
                 WHERE {$whereSql}
                 ORDER BY {$nameCol}
@@ -560,12 +693,23 @@ class EsusDataProcessingService
 
             foreach ($rawTeams as $rt) {
                 $ine = trim((string) $rt->nu_ine);
-                if ($ine === '' || $ine === 'SEM_INE' || $ine === '0') {
+                $name = trim((string) $rt->no_equipe);
+                $rtType = isset($rt->tp_equipe) ? trim((string) $rt->tp_equipe) : null;
+
+                if (! self::isEligibleC1Team($name, $rtType, $ine)) {
                     continue;
                 }
 
-                $name = trim((string) $rt->no_equipe);
-                $type = (stripos($name, 'eap') !== false || stripos($name, 'atenção primária') !== false) ? '76' : '70';
+                // Se houver lista de homologação do CNES, aceita apenas INEs homologados
+                if (! empty($homologatedByIne)) {
+                    if (! isset($homologatedByIne[$ine])) {
+                        continue;
+                    }
+                    $name = ! empty($homologatedByIne[$ine]['name']) ? $homologatedByIne[$ine]['name'] : $name;
+                    $type = $homologatedByIne[$ine]['type'];
+                } else {
+                    $type = ($rtType === '76' || stripos($name, 'eap') !== false || stripos($name, 'atenção primária') !== false) ? '76' : '70';
+                }
 
                 $teamsByIne[$ine] = [
                     'ine' => $ine,
@@ -574,38 +718,18 @@ class EsusDataProcessingService
                 ];
             }
         } catch (Throwable) {
-            // Se a consulta direta na tb_dim_equipe falhar, segue para a extração via atendimentos
+            // Se a consulta direta na tb_dim_equipe falhar, segue para fallback
         }
 
-        // 2. Garante inclusão de qualquer equipe com produção na tb_fat_atendimento_individual
-        try {
-            $faiTeams = $connection->select("
-                SELECT DISTINCT
-                    e.{$ineCol}::text AS nu_ine,
-                    COALESCE(e.{$nameCol}::text, 'Equipe INE ' || e.{$ineCol}::text) AS no_equipe
-                FROM tb_fat_atendimento_individual fai
-                JOIN tb_dim_equipe e ON fai.co_dim_equipe_1 = e.co_seq_dim_equipe
-                WHERE e.{$ineCol} IS NOT NULL AND TRIM(e.{$ineCol}::text) != '' AND e.{$ineCol}::text != 'SEM_INE'
-            ");
-
-            foreach ($faiTeams as $ft) {
-                $ine = trim((string) $ft->nu_ine);
-                if ($ine === '' || $ine === 'SEM_INE' || $ine === '0') {
-                    continue;
-                }
-
-                if (! isset($teamsByIne[$ine])) {
-                    $name = trim((string) $ft->no_equipe);
-                    $type = (stripos($name, 'eap') !== false || stripos($name, 'atenção primária') !== false) ? '76' : '70';
-                    $teamsByIne[$ine] = [
-                        'ine' => $ine,
-                        'name' => $name,
-                        'type' => $type,
-                    ];
-                }
+        // Se o banco PEC não retornou equipes válidas, mas o XML CNES homologado possui equipes eSF/eAP, usa as equipes do CNES
+        if (empty($teamsByIne) && ! empty($homologatedByIne)) {
+            foreach ($homologatedByIne as $ine => $ht) {
+                $teamsByIne[$ine] = [
+                    'ine' => $ine,
+                    'name' => $ht['name'],
+                    'type' => $ht['type'],
+                ];
             }
-        } catch (Throwable) {
-            // Segue com as equipes já extraídas
         }
 
         return array_values($teamsByIne);

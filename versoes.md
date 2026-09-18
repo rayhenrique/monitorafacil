@@ -4,6 +4,17 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.8.0] - 18/09/2026
+
+### 🚀 Destaques da Versão
+- **Filtragem Estrita de Equipes Elegíveis no Indicador C1 (eSF Tipo 70 e eAP Tipo 76):** Conformidade rigorosa com a Nota Metodológica C1 - Mais Acesso e NT 08/2026-DEAPS/SAPS/MS. As únicas equipes que competem e integram o C1 são exclusivamente eSF (40h) e eAP (20h/30h).
+- **Isolamento de Equipes Não Elegíveis:** Equipes de Saúde Bucal (eSB - Tipo 71, que pertencem aos indicadores B1 a B6), equipes Multiprofissionais (eMulti - Tipo 72, indicadores M1 e M2) e Atenção Domiciliar (EMAD Tipo 22 e EMAP Tipo 23) foram completamente isoladas e descartadas do Indicador C1.
+- **Validação das 19 Equipes Homologadas de Teotônio Vilela/AL:** Integração com o arquivo oficial do CNES (`XmlParaESUS31_270915.xml`), mapeando exatamente as 19 equipes eSF do município e expurgando as 19 eSB, 2 eMulti, EMAD I e EMAP I.
+- **Filtro Rigoroso dos 7 CBOs Habilitados na Produção Clínica:** JOIN e filtro estrito na `tb_dim_cbo` da `tb_fat_atendimento_individual` para considerar apenas atendimentos médicos (`2251-42`, `2251-70`, `2251-30`, `2251-25`, `2252-50`) e de enfermagem (`2235-65`, `2235-05`), impedindo que atendimentos de dentistas ou multiprofissionais afetem o cálculo do C1.
+- **Expurgo e Sanitização de Snapshots:** Criação do método `purgeInvalidC1Snapshots()` e eliminação de registros de sistema como `"SEM EQUIPE"`, `"INE NÃO ENCONTRADO"` e INEs inválidos.
+
+---
+
 ## [v1.7.0] - 18/09/2026
 
 ### 🚀 Destaques da Versão

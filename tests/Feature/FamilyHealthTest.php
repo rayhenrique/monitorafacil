@@ -237,4 +237,112 @@ class FamilyHealthTest extends TestCase
             'Ótimo · 1,00 pt',
         ]);
     }
+
+    public function test_cnes_xml_parser_extracts_only_19_esf_teams_for_teotonio_vilela(): void
+    {
+        $xmlPath = base_path('importacao/XmlParaESUS31_270915.xml');
+        if (! file_exists($xmlPath)) {
+            $this->markTestSkipped('XML de Teotônio Vilela não encontrado.');
+        }
+
+        $parser = new \App\Services\CnesXmlParserService();
+        $eligibleTeams = $parser->getEligibleC1Teams($xmlPath);
+
+        // Teotônio Vilela possui exatamente 19 equipes eSF (Tipo 70)
+        $this->assertCount(19, $eligibleTeams);
+
+        foreach ($eligibleTeams as $team) {
+            $this->assertSame('70', $team['type']);
+            $this->assertMatchesRegularExpression('/^\d{10}$/', $team['ine']);
+            $this->assertStringStartsNotWith('ESB', strtoupper($team['name']));
+            $this->assertStringNotContainsString('E-MULTI', strtoupper($team['name']));
+            $this->assertStringNotContainsString('EQUIPE AMPLIADA', strtoupper($team['name']));
+            $this->assertStringNotContainsString('EMAD', strtoupper($team['name']));
+            $this->assertStringNotContainsString('EMAP', strtoupper($team['name']));
+        }
+    }
+
+    public function test_is_eligible_c1_team_filters_out_esb_emulti_emad_emap_and_unknown_teams(): void
+    {
+        // Equipes válidas
+        $this->assertTrue(\App\Services\EsusDataProcessingService::isEligibleC1Team('USF 08 GULANDIM', '70', '0000171220'));
+        $this->assertTrue(\App\Services\EsusDataProcessingService::isEligibleC1Team('eAP Noturna Central', '76', '0001839253'));
+
+        // Equipes que NÃO fazem parte de C1
+        $this->assertFalse(\App\Services\EsusDataProcessingService::isEligibleC1Team('SEM EQUIPE', '70', 'SEM_INE'));
+        $this->assertFalse(\App\Services\EsusDataProcessingService::isEligibleC1Team('INE NÃO ENCONTRADO', '70', '0000000000'));
+        $this->assertFalse(\App\Services\EsusDataProcessingService::isEligibleC1Team('E-MULTI COMPLEMENTAR', '72', '0001477269'));
+        $this->assertFalse(\App\Services\EsusDataProcessingService::isEligibleC1Team('EQUIPE AMPLIADA', '72', '0001508695'));
+        $this->assertFalse(\App\Services\EsusDataProcessingService::isEligibleC1Team('EMAD I', '22', '0001503596'));
+        $this->assertFalse(\App\Services\EsusDataProcessingService::isEligibleC1Team('EMAP I', '23', '0001503618'));
+        $this->assertFalse(\App\Services\EsusDataProcessingService::isEligibleC1Team('ESB 008', '71', '0001749145'));
+        $this->assertFalse(\App\Services\EsusDataProcessingService::isEligibleC1Team('ESB 009', '71', '0001749196'));
+        $this->assertFalse(\App\Services\EsusDataProcessingService::isEligibleC1Team('Saúde Bucal Centro', '71', '0001749129'));
+    }
+
+    public function test_purge_invalid_c1_snapshots_removes_non_esf_and_non_eap_teams(): void
+    {
+        $this->authenticateUser();
+
+        // Insere equipes válidas e inválidas no banco
+        \App\Models\FamilyHealthIndicatorSnapshot::query()->create([
+            'year' => 2026,
+            'quarter' => 1,
+            'ine' => '0000171220',
+            'team_name' => 'USF 08 GULANDIM',
+            'team_type' => '70',
+            'indicator_code' => 'c1',
+            'numerator' => 50,
+            'denominator' => 100,
+            'score_percent' => 50.00,
+        ]);
+
+        \App\Models\FamilyHealthIndicatorSnapshot::query()->create([
+            'year' => 2026,
+            'quarter' => 1,
+            'ine' => '0001749145',
+            'team_name' => 'ESB 008',
+            'team_type' => '71',
+            'indicator_code' => 'c1',
+            'numerator' => 30,
+            'denominator' => 100,
+            'score_percent' => 30.00,
+        ]);
+
+        \App\Models\FamilyHealthIndicatorSnapshot::query()->create([
+            'year' => 2026,
+            'quarter' => 1,
+            'ine' => '0001477269',
+            'team_name' => 'E-MULTI COMPLEMENTAR',
+            'team_type' => '72',
+            'indicator_code' => 'c1',
+            'numerator' => 20,
+            'denominator' => 100,
+            'score_percent' => 20.00,
+        ]);
+
+        \App\Models\FamilyHealthIndicatorSnapshot::query()->create([
+            'year' => 2026,
+            'quarter' => 1,
+            'ine' => 'SEM_INE',
+            'team_name' => 'SEM EQUIPE',
+            'team_type' => '70',
+            'indicator_code' => 'c1',
+            'numerator' => 10,
+            'denominator' => 50,
+            'score_percent' => 20.00,
+        ]);
+
+        $purgedCount = \App\Services\FamilyHealthService::purgeInvalidC1Snapshots();
+        $this->assertSame(3, $purgedCount);
+
+        // Apenas a equipe válida 0000171220 deve permanecer
+        $remaining = \App\Models\FamilyHealthIndicatorSnapshot::query()
+            ->where('indicator_code', 'c1')
+            ->whereNotNull('ine')
+            ->get();
+
+        $this->assertCount(1, $remaining);
+        $this->assertSame('0000171220', $remaining->first()->ine);
+    }
 }
