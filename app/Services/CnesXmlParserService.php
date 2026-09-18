@@ -106,23 +106,34 @@ class CnesXmlParserService
 
         $teamsList = array_values($teams);
 
-        $counts = [
-            'esf' => 0,
-            'eap' => 0,
-            'saude_bucal' => 0,
-            'emulti' => 0,
-            'total' => count($teamsList),
+        // Conta INEs únicos por tipo (evita duplicação quando o mesmo INE aparece em múltiplos CNES)
+        $uniqueInesByType = [
+            'esf' => [],
+            'eap' => [],
+            'saude_bucal' => [],
+            'emulti' => [],
         ];
 
         foreach ($teamsList as $team) {
-            match ($team['type']) {
-                TeamType::Esf->value => $counts['esf']++,
-                TeamType::Eap->value => $counts['eap']++,
-                TeamType::SaudeBucal->value => $counts['saude_bucal']++,
-                TeamType::Emulti->value => $counts['emulti']++,
+            $typeKey = match ($team['type']) {
+                TeamType::Esf->value => 'esf',
+                TeamType::Eap->value => 'eap',
+                TeamType::SaudeBucal->value => 'saude_bucal',
+                TeamType::Emulti->value => 'emulti',
                 default => null,
             };
+            if ($typeKey !== null) {
+                $uniqueInesByType[$typeKey][$team['ine']] = true;
+            }
         }
+
+        $counts = [
+            'esf' => count($uniqueInesByType['esf']),
+            'eap' => count($uniqueInesByType['eap']),
+            'saude_bucal' => count($uniqueInesByType['saude_bucal']),
+            'emulti' => count($uniqueInesByType['emulti']),
+            'total' => count($teamsList),
+        ];
 
         return [
             'ibge' => (string) $ibge,
