@@ -250,6 +250,7 @@ git pull origin main
 composer install --no-dev --optimize-autoloader
 npm run build
 php8.5 artisan migrate --force
+php8.5 artisan livewire:publish --assets
 php8.5 artisan optimize:clear
 php8.5 artisan config:cache
 php8.5 artisan route:cache
