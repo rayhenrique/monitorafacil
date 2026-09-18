@@ -1,14 +1,14 @@
-# Saúde Brasil 360 Monitor (MonitoraFácil)
+# Monitora Fácil (Saúde Brasil 360)
 
 > **Plataforma Municipal de Gestão, Monitoramento e Projeção Financeira da Atenção Primária à Saúde (APS)**
 
-[![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
-[![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://php.net)
+[![Laravel](https://img.shields.io/badge/Laravel-13.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.5%20%7C%208.2%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://php.net)
+[![Livewire](https://img.shields.io/badge/Livewire-v3.8-FB70A9?style=for-the-badge&logo=livewire&logoColor=white)](https://livewire.laravel.com)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
-[![Livewire](https://img.shields.io/badge/Livewire-v3-FB70A9?style=for-the-badge&logo=livewire&logoColor=white)](https://livewire.laravel.com)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://mysql.com)
 [![e--SUS PEC](https://img.shields.io/badge/e--SUS_PEC-PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://sisaps.saude.gov.br/esus/)
-[![Testes](https://img.shields.io/badge/Testes-15%20Aprovados-10B981?style=for-the-badge&logo=pest&logoColor=white)](#testes-automatizados)
+[![Testes](https://img.shields.io/badge/Testes-16%20Aprovados-10B981?style=for-the-badge&logo=pest&logoColor=white)](#testes-automatizados)
 
 ---
 
@@ -97,7 +97,15 @@ graph TD
   - **MICDT**: Cadastros Domiciliares e Territoriais / Domicílios (Atualizados vs Desatualizados).
 - Exibição de totais absolutos e percentual de cobertura territorial atualizada.
 
-### 4. 💲 Simulador de Repasses e Planejamento Financeiro
+### 4. 🩺 Componente de Qualidade (Nota Técnica 30/2025)
+- Acompanhamento detalhado dos indicadores clínicos por faixas de desempenho (*Ótimo*, *Bom*, *Suficiente*, *Regular*):
+  - **Saúde da Família (C1 a C7)**: Mais Acesso (C1), Crianças (C2), Gestante e Puérpera (C3), Diabéticos (C4), Hipertensos (C5), Idosos (C6) e Mulheres (C7).
+  - **Saúde Bucal (B1 a B6)**: Primeira Consulta Programada (B1), Tratamento Concluído (B2), Taxa de Exodontias (B3), Escovação Supervisionada (B4), Procedimentos Preventivos (B5) e Restauração Atraumática - ART (B6).
+  - **e-Multi (M1 e M2)**: Atendimentos por pessoa (M1) e Ações interprofissionais (M2).
+- Iconografia executiva contextual dedicada para cada indicador.
+- Tratamento compassivo para métricas em processamento com referência padrão `0`.
+
+### 5. 💲 Simulador de Repasses e Planejamento Financeiro
 - Ferramenta de estimativa do componente de **Vínculo e Acompanhamento Territorial** de eSF (40h).
 - Simulação interativa baseada nas 4 faixas de desempenho da Nota Técnica 30/2025:
   - **Ótimo**: R$ 18.000,00 / mês por equipe.
@@ -108,7 +116,7 @@ graph TD
 - Cálculo instantâneo do valor bruto mensal e da projeção para as 4 parcelas do quadrimestre.
 - Alertas visuais e validação em tempo real para garantir que o número de equipes distribuídas seja exatamente igual ao total homologado.
 
-### 5. 🔐 Acesso e Segurança
+### 6. 🔐 Acesso e Segurança
 - Autenticação restrita ao gestor/administrador municipal.
 - Proteção contra força bruta (*Rate Limiting* integrado ao `LoginRequest`).
 - Sessões protegidas no banco de dados e hash Bcrypt com fator de custo 12.
@@ -133,6 +141,7 @@ monitorafacil/
 │   │   └── Requests/Auth/LoginRequest.php# Validação e rate limiting de login
 │   ├── Livewire/Dashboard/
 │   │   ├── FinancialSimulator.php        # Lógica reativa do simulador financeiro
+│   │   ├── QualityOverview.php           # Painel de indicadores C1-C7, B1-B6 e M1-M2
 │   │   ├── QuarterSelector.php           # Seletor global de ano e quadrimestre
 │   │   ├── RegistrationsOverview.php     # Cards de cadastros MICI e MICDT
 │   │   └── TeamsOverview.php             # Indicadores de equipes homologadas
@@ -161,13 +170,23 @@ monitorafacil/
 
 ---
 
-## 💻 Requisitos do Sistema
+## 💻 Stack Tecnológica & Requisitos do Sistema
 
-- **PHP**: >= 8.2 (com extensões `pdo_mysql`, `pdo_pgsql`, `xml`, `xmlreader`, `mbstring`, `bcmath`, `curl`)
-- **MySQL**: >= 8.0 (banco de dados da aplicação)
-- **PostgreSQL**: >= 9.6 (banco do e-SUS PEC da prefeitura, acesso de leitura)
-- **Composer**: >= 2.x
-- **Node.js**: >= 18.x e **NPM**
+### Stack em Uso
+| Camada | Tecnologia | Versão em Uso |
+| :--- | :--- | :--- |
+| **Framework Backend** | [Laravel](https://laravel.com) | **v13.32.0** (Laravel 13.x) |
+| **Ambiente PHP** | [PHP](https://php.net) | **v8.5.0** (requisito mínimo `>= 8.2`) |
+| **Camada Reativa** | [Livewire](https://livewire.laravel.com) | **v3.8.9** |
+| **Engine Interativa** | [Alpine.js](https://alpinejs.dev) | **v3.x** |
+| **Design & CSS** | [Tailwind CSS](https://tailwindcss.com) | **v4.0.0** |
+| **Build & Tooling** | [Vite](https://vitejs.dev) | **v6.2.0** |
+| **Banco Local (App)** | [MySQL](https://mysql.com) | **>= 8.0** |
+| **Banco e-SUS PEC** | [PostgreSQL](https://www.postgresql.org) | **>= 9.6** (acesso somente leitura) |
+| **Gerenciador de Pacotes**| [Composer](https://getcomposer.org) / [NPM](https://npmjs.com) | **Composer >= 2.x** / **Node >= 18.x** |
+
+### Extensões PHP Requeridas
+- `pdo_mysql`, `pdo_pgsql`, `xml`, `xmlreader`, `mbstring`, `bcmath`, `curl`, `opcache`.
 
 ---
 
@@ -334,8 +353,8 @@ Saída esperada:
    PASS  Tests\Feature\EsusSyncSnapshotTest
    PASS  Tests\Feature\ExampleTest
 
-   Tests:    15 passed (49 assertions)
-   Duration: ~2.00s
+   Tests:    16 passed (57 assertions)
+   Duration: ~1.10s
 ```
 
 ---
