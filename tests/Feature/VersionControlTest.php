@@ -94,9 +94,9 @@ class VersionControlTest extends TestCase
         $this->assertFalse(VersionService::shouldShowModal($user->fresh()));
 
         $allReleases = VersionService::getAllReleases();
-        $this->assertCount(7, $allReleases);
+        $this->assertCount(8, $allReleases);
         $this->assertSame(VersionService::CURRENT_VERSION, $allReleases[0]['version']);
-        $this->assertSame('v1.0.0', $allReleases[6]['version']);
+        $this->assertSame('v1.0.0', end($allReleases)['version']);
     }
 
     public function test_whats_new_livewire_component_renders_and_filters(): void

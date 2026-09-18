@@ -17,7 +17,8 @@ use Throwable;
 class EsusDataProcessingService
 {
     /**
-     * Executa o processamento completo dos dados do e-SUS PEC com relatório de etapas e tabelas.
+     * Executa o processamento dos dados do e-SUS PEC com relatório de etapas e tabelas.
+     * Suporta escopo 'all' (geral completo) ou 'c1' (focado no Indicador C1).
      *
      * @param (callable(int $percent, string $step, array $tables): void)|null $progressCallback
      * @return array{
@@ -28,7 +29,7 @@ class EsusDataProcessingService
      *     execution_time_ms: float
      * }
      */
-    public function process(?callable $progressCallback = null, ?int $targetYear = null, ?int $targetQuarter = null): array
+    public function process(?callable $progressCallback = null, ?int $targetYear = null, ?int $targetQuarter = null, string $scope = 'all'): array
     {
         $startTime = microtime(true);
 
@@ -95,7 +96,8 @@ class EsusDataProcessingService
             ],
         ];
 
-        $this->notifyProgress($progressCallback, 10, 'Iniciando conexão e validação com o e-SUS PEC...', $tablesReport);
+        $scopeDesc = $scope === 'c1' ? 'Indicador C1 (Mais Acesso)' : 'Geral Completo';
+        $this->notifyProgress($progressCallback, 10, "Iniciando conexão e validação com o e-SUS PEC [{$scopeDesc}]...", $tablesReport);
 
         $syncLog = SyncLog::query()->create([
             'status' => SyncStatus::Running,
@@ -120,31 +122,11 @@ class EsusDataProcessingService
         $teamsExtracted = [];
         if ($isLivePecConnected && $connection) {
             try {
-                $rawTeams = $connection->select("
-                    SELECT 
-                        COALESCE(nu_ine, 'SEM_INE') AS nu_ine,
-                        COALESCE(no_equipe, 'Equipe de Saúde') AS no_equipe,
-                        CASE 
-                            WHEN tp_equipe::text IN ('70', '1', 'ESF') THEN '70'
-                            WHEN tp_equipe::text IN ('76', '2', 'EAP') THEN '76'
-                            ELSE '70'
-                        END AS tp_equipe
-                    FROM tb_dim_equipe
-                    WHERE st_ativo = 1 OR st_ativo IS NULL
-                    ORDER BY no_equipe
-                ");
-
-                foreach ($rawTeams as $rt) {
-                    $teamsExtracted[] = [
-                        'ine' => (string) $rt->nu_ine,
-                        'name' => (string) $rt->no_equipe,
-                        'type' => (string) $rt->tp_equipe,
-                    ];
-                }
+                $teamsExtracted = $this->extractTeamsFromPec($connection);
 
                 $tablesReport['tb_dim_equipe']['status'] = 'success';
                 $tablesReport['tb_dim_equipe']['rows'] = count($teamsExtracted);
-                $tablesReport['tb_dim_equipe']['message'] = sprintf('%d equipes eSF/eAP ativas identificadas.', count($teamsExtracted));
+                $tablesReport['tb_dim_equipe']['message'] = sprintf('%d equipes eSF/eAP ativas identificadas no e-SUS PEC.', count($teamsExtracted));
             } catch (Throwable $e) {
                 $tablesReport['tb_dim_equipe']['status'] = 'warning';
                 $tablesReport['tb_dim_equipe']['message'] = 'Tabela consultada com aviso: '.$e->getMessage();
@@ -222,11 +204,15 @@ class EsusDataProcessingService
                 ", [$year, $monthsInQuarter[0], $monthsInQuarter[1], $monthsInQuarter[2], $monthsInQuarter[3]]);
 
                 foreach ($rows as $r) {
-                    $monthlyC1Data[$r->nu_ine][$r->nu_mes] = [
-                        'numerator' => (int) $r->num_programada,
-                        'denominator' => (int) $r->den_total,
-                    ];
-                    $totalAtendimentosProcessados += (int) $r->den_total;
+                    $ineKey = trim((string) $r->nu_ine);
+                    $mesKey = (int) $r->nu_mes;
+                    if ($ineKey !== '' && $ineKey !== 'SEM_INE') {
+                        $monthlyC1Data[$ineKey][$mesKey] = [
+                            'numerator' => (int) $r->num_programada,
+                            'denominator' => (int) $r->den_total,
+                        ];
+                        $totalAtendimentosProcessados += (int) $r->den_total;
+                    }
                 }
 
                 $tablesReport['tb_fat_atendimento_individual']['status'] = 'success';
@@ -242,6 +228,33 @@ class EsusDataProcessingService
             $tablesReport['tb_fat_atendimento_individual']['message'] = '14.280 atendimentos consolidados para o quadrimestre (4 meses).';
         }
 
+        // Garante que qualquer equipe presente na produção clínica também conste na lista de equipes
+        $existingInes = array_column($teamsExtracted, 'ine');
+        foreach (array_keys($monthlyC1Data) as $dataIne) {
+            $dataIneStr = trim((string) $dataIne);
+            if ($dataIneStr !== '' && $dataIneStr !== 'SEM_INE' && ! in_array($dataIneStr, $existingInes, true)) {
+                $teamsExtracted[] = [
+                    'ine' => $dataIneStr,
+                    'name' => 'Equipe INE ' . $dataIneStr,
+                    'type' => '70',
+                ];
+                $existingInes[] = $dataIneStr;
+            }
+        }
+
+        // Limpa snapshots C1 anteriores do mesmo período para evitar equipes órfãs ou mockadas
+        FamilyHealthIndicatorSnapshot::query()
+            ->where('year', $year)
+            ->where('quarter', $quarter)
+            ->where('indicator_code', 'c1')
+            ->delete();
+
+        FamilyHealthMonthlySnapshot::query()
+            ->where('year', $year)
+            ->where('quarter', $quarter)
+            ->where('indicator_code', 'c1')
+            ->delete();
+
         // Salva os dados mensais por equipe em family_health_monthly_snapshots
         $teamQuarterlyAverages = [];
 
@@ -256,14 +269,19 @@ class EsusDataProcessingService
                     $num = $monthlyC1Data[$ine][$m]['numerator'];
                     $den = max(1, $monthlyC1Data[$ine][$m]['denominator']);
                 } else {
-                    // Distribuição realista e estável em torno da meta ótima (50% a 70%)
-                    $baseTotal = 280 + (($m * 17) % 50) + (hexdec(substr(md5($ine.$m), 0, 2)) % 40);
-                    $targetPct = 52.0 + (($m * 3.5) % 15) - (($idx % 2) * 4);
-                    $num = (int) round(($baseTotal * $targetPct) / 100);
-                    $den = $baseTotal;
+                    if ($isLivePecConnected) {
+                        $num = 0;
+                        $den = 0;
+                    } else {
+                        // Distribuição estável em torno da meta ótima (50% a 70%) para ambiente sem PEC conectado
+                        $baseTotal = 280 + (($m * 17) % 50) + (hexdec(substr(md5($ine.$m), 0, 2)) % 40);
+                        $targetPct = 52.0 + (($m * 3.5) % 15) - (($idx % 2) * 4);
+                        $num = (int) round(($baseTotal * $targetPct) / 100);
+                        $den = $baseTotal;
+                    }
                 }
 
-                $score = round(($num / max(1, $den)) * 100, 2);
+                $score = $den > 0 ? round(($num / $den) * 100, 2) : 0.00;
                 $level = FamilyHealthService::calculatePerformanceLevel('c1', $score);
                 $teamMonthlyScores[] = $score;
 
@@ -385,52 +403,63 @@ class EsusDataProcessingService
             ]
         );
 
-        // ETAPA 4: tb_fat_cad_individual e tb_fat_cad_domiciliar (90%)
-        $this->notifyProgress($progressCallback, 85, 'Consolidando tb_fat_cad_individual e tb_fat_cad_domiciliar...', $tablesReport);
+        // ETAPA 4: tb_fat_cad_individual e tb_fat_cad_domiciliar
+        if ($scope === 'c1') {
+            $tablesReport['tb_fat_cad_individual']['status'] = 'info';
+            $tablesReport['tb_fat_cad_individual']['rows'] = 0;
+            $tablesReport['tb_fat_cad_individual']['message'] = 'Não processado (Foco selecionado: Indicador C1 Mais Acesso).';
 
-        $miciUpdated = 24580;
-        $miciOutdated = 2140;
-        $micdtUpdated = 8420;
-        $micdtOutdated = 610;
+            $tablesReport['tb_fat_cad_domiciliar']['status'] = 'info';
+            $tablesReport['tb_fat_cad_domiciliar']['rows'] = 0;
+            $tablesReport['tb_fat_cad_domiciliar']['message'] = 'Não processado (Foco selecionado: Indicador C1 Mais Acesso).';
+        } else {
+            $this->notifyProgress($progressCallback, 85, 'Consolidando tb_fat_cad_individual e tb_fat_cad_domiciliar...', $tablesReport);
 
-        if ($isLivePecConnected && $connection) {
-            try {
-                $indCount = (int) ($connection->selectOne("SELECT COUNT(*) AS total FROM tb_fat_cad_individual")->total ?? 0);
-                if ($indCount > 0) {
-                    $miciUpdated = (int) round($indCount * 0.88);
-                    $miciOutdated = $indCount - $miciUpdated;
-                }
-            } catch (Throwable) {}
+            $miciUpdated = 24580;
+            $miciOutdated = 2140;
+            $micdtUpdated = 8420;
+            $micdtOutdated = 610;
 
-            try {
-                $domCount = (int) ($connection->selectOne("SELECT COUNT(*) AS total FROM tb_fat_cad_domiciliar")->total ?? 0);
-                if ($domCount > 0) {
-                    $micdtUpdated = (int) round($domCount * 0.92);
-                    $micdtOutdated = $domCount - $micdtUpdated;
-                }
-            } catch (Throwable) {}
+            if ($isLivePecConnected && $connection) {
+                try {
+                    $indCount = (int) ($connection->selectOne("SELECT COUNT(*) AS total FROM tb_fat_cad_individual")->total ?? 0);
+                    if ($indCount > 0) {
+                        $miciUpdated = (int) round($indCount * 0.88);
+                        $miciOutdated = $indCount - $miciUpdated;
+                    }
+                } catch (Throwable) {}
+
+                try {
+                    $domCount = (int) ($connection->selectOne("SELECT COUNT(*) AS total FROM tb_fat_cad_domiciliar")->total ?? 0);
+                    if ($domCount > 0) {
+                        $micdtUpdated = (int) round($domCount * 0.92);
+                        $micdtOutdated = $domCount - $micdtUpdated;
+                    }
+                } catch (Throwable) {}
+            }
+
+            ConsolidationRegistration::query()->updateOrCreate(
+                ['year' => $year, 'quarter' => $quarter],
+                [
+                    'mici_updated_count' => $miciUpdated,
+                    'mici_outdated_count' => $miciOutdated,
+                    'micdt_updated_count' => $micdtUpdated,
+                    'micdt_outdated_count' => $micdtOutdated,
+                ]
+            );
+
+            $tablesReport['tb_fat_cad_individual']['status'] = 'success';
+            $tablesReport['tb_fat_cad_individual']['rows'] = $miciUpdated + $miciOutdated;
+            $tablesReport['tb_fat_cad_individual']['message'] = sprintf('%d cadastros individuais consolidados (MICI).', $miciUpdated + $miciOutdated);
+
+            $tablesReport['tb_fat_cad_domiciliar']['status'] = 'success';
+            $tablesReport['tb_fat_cad_domiciliar']['rows'] = $micdtUpdated + $micdtOutdated;
+            $tablesReport['tb_fat_cad_domiciliar']['message'] = sprintf('%d cadastros domiciliares consolidados (MICDT).', $micdtUpdated + $micdtOutdated);
         }
-
-        ConsolidationRegistration::query()->updateOrCreate(
-            ['year' => $year, 'quarter' => $quarter],
-            [
-                'mici_updated_count' => $miciUpdated,
-                'mici_outdated_count' => $miciOutdated,
-                'micdt_updated_count' => $micdtUpdated,
-                'micdt_outdated_count' => $micdtOutdated,
-            ]
-        );
-
-        $tablesReport['tb_fat_cad_individual']['status'] = 'success';
-        $tablesReport['tb_fat_cad_individual']['rows'] = $miciUpdated + $miciOutdated;
-        $tablesReport['tb_fat_cad_individual']['message'] = sprintf('%d cadastros individuais consolidados (MICI).', $miciUpdated + $miciOutdated);
-
-        $tablesReport['tb_fat_cad_domiciliar']['status'] = 'success';
-        $tablesReport['tb_fat_cad_domiciliar']['rows'] = $micdtUpdated + $micdtOutdated;
-        $tablesReport['tb_fat_cad_domiciliar']['message'] = sprintf('%d cadastros domiciliares consolidados (MICDT).', $micdtUpdated + $micdtOutdated);
 
         // ETAPA 5: Conclusão (100%)
         $executionTimeMs = round((microtime(true) - $startTime) * 1000, 2);
+        $scopeTitle = $scope === 'c1' ? 'Indicador C1 (Mais Acesso)' : 'Geral Completo';
 
         $syncLog->update([
             'status' => SyncStatus::Success,
@@ -442,7 +471,8 @@ class EsusDataProcessingService
         return [
             'success' => true,
             'message' => sprintf(
-                'Processamento concluído com sucesso em %0.1f s! Quadrimestre %d/Q%d consolidado com acompanhamento mensal de %d equipes.',
+                'Processamento [%s] concluído com sucesso em %0.2f s! Quadrimestre %d/Q%d consolidado com %d equipes.',
+                $scopeTitle,
                 $executionTimeMs / 1000,
                 $year,
                 $quarter,
@@ -452,6 +482,101 @@ class EsusDataProcessingService
             'tables' => $tablesReport,
             'execution_time_ms' => $executionTimeMs,
         ];
+    }
+
+    /**
+     * Extrai a lista de equipes do e-SUS PEC com inspeção dinâmica de schema.
+     *
+     * @return list<array{ine: string, name: string, type: string}>
+     */
+    private function extractTeamsFromPec(ConnectionInterface $connection): array
+    {
+        // 1. Descobre dinamicamente as colunas existentes na tb_dim_equipe
+        $cols = [];
+        try {
+            $cols = collect($connection->select("
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE LOWER(table_name) = 'tb_dim_equipe'
+            "))->pluck('column_name')->map(fn ($c) => strtolower(trim((string) $c)))->all();
+        } catch (Throwable) {
+            $cols = [];
+        }
+
+        $ineCol = in_array('nu_ine', $cols, true) ? 'nu_ine' : (in_array('co_ine', $cols, true) ? 'co_ine' : 'nu_ine');
+        $nameCol = in_array('no_equipe', $cols, true) ? 'no_equipe' : (in_array('ds_equipe', $cols, true) ? 'ds_equipe' : 'no_equipe');
+
+        $whereParts = ["{$ineCol} IS NOT NULL", "TRIM({$ineCol}::text) != ''", "{$ineCol}::text != 'SEM_INE'"];
+        if (in_array('st_ativo', $cols, true)) {
+            $whereParts[] = "(st_ativo = 1 OR st_ativo IS NULL)";
+        } elseif (in_array('st_registro_valido', $cols, true)) {
+            $whereParts[] = "(st_registro_valido = 1 OR st_registro_valido IS NULL)";
+        }
+
+        $whereSql = implode(' AND ', $whereParts);
+
+        $teamsByIne = [];
+        try {
+            $rawTeams = $connection->select("
+                SELECT 
+                    COALESCE({$ineCol}::text, '') AS nu_ine,
+                    COALESCE({$nameCol}::text, 'Equipe de Saúde') AS no_equipe
+                FROM tb_dim_equipe
+                WHERE {$whereSql}
+                ORDER BY {$nameCol}
+            ");
+
+            foreach ($rawTeams as $rt) {
+                $ine = trim((string) $rt->nu_ine);
+                if ($ine === '' || $ine === 'SEM_INE' || $ine === '0') {
+                    continue;
+                }
+
+                $name = trim((string) $rt->no_equipe);
+                $type = (stripos($name, 'eap') !== false || stripos($name, 'atenção primária') !== false) ? '76' : '70';
+
+                $teamsByIne[$ine] = [
+                    'ine' => $ine,
+                    'name' => $name,
+                    'type' => $type,
+                ];
+            }
+        } catch (Throwable) {
+            // Se a consulta direta na tb_dim_equipe falhar, segue para a extração via atendimentos
+        }
+
+        // 2. Garante inclusão de qualquer equipe com produção na tb_fat_atendimento_individual
+        try {
+            $faiTeams = $connection->select("
+                SELECT DISTINCT
+                    e.{$ineCol}::text AS nu_ine,
+                    COALESCE(e.{$nameCol}::text, 'Equipe INE ' || e.{$ineCol}::text) AS no_equipe
+                FROM tb_fat_atendimento_individual fai
+                JOIN tb_dim_equipe e ON fai.co_dim_equipe_1 = e.co_seq_dim_equipe
+                WHERE e.{$ineCol} IS NOT NULL AND TRIM(e.{$ineCol}::text) != '' AND e.{$ineCol}::text != 'SEM_INE'
+            ");
+
+            foreach ($faiTeams as $ft) {
+                $ine = trim((string) $ft->nu_ine);
+                if ($ine === '' || $ine === 'SEM_INE' || $ine === '0') {
+                    continue;
+                }
+
+                if (! isset($teamsByIne[$ine])) {
+                    $name = trim((string) $ft->no_equipe);
+                    $type = (stripos($name, 'eap') !== false || stripos($name, 'atenção primária') !== false) ? '76' : '70';
+                    $teamsByIne[$ine] = [
+                        'ine' => $ine,
+                        'name' => $name,
+                        'type' => $type,
+                    ];
+                }
+            }
+        } catch (Throwable) {
+            // Segue com as equipes já extraídas
+        }
+
+        return array_values($teamsByIne);
     }
 
     /**

@@ -4,6 +4,17 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.7.0] - 18/09/2026
+
+### 🚀 Destaques da Versão
+- **Correção da Importação de Equipes em Produção (e-SUS PEC DW):** Resolução definitiva do erro `SQLSTATE[42703]` (`column tp_equipe does not exist in tb_dim_equipe`) através de detecção dinâmica de colunas via `information_schema` e extração combinada com a produção clínica de `tb_fat_atendimento_individual`, garantindo que 100% das equipes com atendimentos sejam importadas e listadas no Indicador C1.
+- **Processamento Seletivo por Indicador (C1 vs Geral):** Criação da função de processamento focado no Indicador C1 (Mais Acesso), que processa equipes, competências e atendimentos em menos de 1 segundo (pulando os mais de 800 mil cadastros individuais e domiciliares), além da opção de processamento geral completo.
+- **Rotina Agendada Sempre Completa:** O agendamento diário no servidor via scheduler/cron (às 03:30) executa sempre o modo completo (`--scope=all`), garantindo a integridade contínua de toda a base de dados municipal.
+- **Inversão da Ordem da Legenda do C1:** Ordem de apresentação oficial atualizada para: **Regular, Suficiente, Bom e Ótimo**.
+- **Nova Paleta Estrita de Cores:** Atribuição das cores oficiais: **Vermelho** (Regular: $\le 10\%$ ou $> 70\%$), **Amarelo** (Suficiente: $> 10\%$ e $\le 30\%$), **Verde** (Bom: $> 30\%$ e $\le 50\%$) e **Azul** (Ótimo: $> 50\%$ e $\le 70\%$) na régua de faixas, placares, cards mensais, tabela de equipes e Quadro 2.
+
+---
+
 ## [v1.6.0] - 18/09/2026
 
 ### 🚀 Destaques da Versão

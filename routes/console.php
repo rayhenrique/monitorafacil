@@ -12,3 +12,10 @@ Schedule::command('esus:sync-snapshot')
     ->dailyAt('03:00')
     ->timezone(config('esus.schedule_timezone'))
     ->withoutOverlapping();
+
+// Processamento analítico agendado é SEMPRE o completo (scope=all)
+Schedule::command('esus:process-data --scope=all')
+    ->dailyAt('03:30')
+    ->timezone(config('esus.schedule_timezone'))
+    ->withoutOverlapping();
+

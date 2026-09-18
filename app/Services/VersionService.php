@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.6.0';
+    public const CURRENT_VERSION = 'v1.7.0';
 
     public const CURRENT_RELEASE_DATE = '18/09/2026';
 
@@ -61,9 +61,25 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.6.0',
+                'version' => 'v1.7.0',
                 'date' => '18/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Extração de Equipes do e-SUS PEC, Processamento Seletivo C1 e Nova Legenda Invertida',
+                'summary' => 'Resolução definitiva da importação de equipes no ambiente de produção do e-SUS PEC com inspeção dinâmica de schema, novo pipeline seletivo para processar apenas o que interessa ao C1 ou execução geral completa, e inversão oficial da legenda com nova paleta de cores (Regular/Vermelho, Suficiente/Amarelo, Bom/Verde e Ótimo/Azul).',
+                'highlights' => [
+                    ['type' => 'correcao', 'text' => 'Correção de incompatibilidade com PostgreSQL DW do e-SUS PEC (eliminação do erro SQLSTATE[42703] na coluna tp_equipe) com inspeção dinâmica de schema.'],
+                    ['type' => 'novo', 'text' => 'Importação garantida de 100% das equipes que realizaram atendimentos clínicos com persistência limpa e sem mockados no Indicador C1.'],
+                    ['type' => 'novo', 'text' => 'Processamento Seletivo: Botão para processar apenas o Indicador C1 (Mais Acesso), finalizando em menos de 1 segundo ao desconsiderar cadastros pesados.'],
+                    ['type' => 'novo', 'text' => 'Processamento Geral (Completo) e garantia de que rotinas agendadas (cron/scheduler diário às 03:30) rodam sempre o escopo completo (--scope=all).'],
+                    ['type' => 'novo', 'text' => 'Comando Artisan esus:process-data {--scope=all|c1} para automação e rotinas em background.'],
+                    ['type' => 'melhoria', 'text' => 'Inversão da ordem oficial da legenda do C1 para Regular, Suficiente, Bom e Ótimo.'],
+                    ['type' => 'melhoria', 'text' => 'Aplicação da paleta estrita de cores: Vermelho (Regular), Amarelo (Suficiente), Verde (Bom) e Azul (Ótimo) na régua, placares e Quadro 2.'],
+                ],
+            ],
+            [
+                'version' => 'v1.6.0',
+                'date' => '18/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Processamento Real do e-SUS PEC & Acompanhamento Mensal do C1 (NT 08/2026)',
                 'summary' => 'Substituição de dados mockados por rotina de processamento real com barra de progresso e diagnóstico das 7 tabelas do e-SUS PEC, juntamente com o acompanhamento mensal e avaliação quadrimestral do Indicador C1 (Mais Acesso à APS) conforme a Nota Técnica nº 08/2026-DEAPS/SAPS/MS.',
                 'highlights' => [

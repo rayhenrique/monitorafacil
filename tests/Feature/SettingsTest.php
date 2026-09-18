@@ -358,4 +358,41 @@ XML;
             ->assertSee('tb_fat_atendimento_individual')
             ->assertSee('tb_dim_equipe');
     }
+
+    public function test_data_processing_livewire_can_run_scoped_c1_and_general(): void
+    {
+        $admin = User::query()->create([
+            'name' => 'Administrador',
+            'email' => 'admin@monitorafacil.gov.br',
+            'password' => Hash::make('password123'),
+        ]);
+
+        $this->actingAs($admin);
+
+        // Processamento Apenas C1
+        Livewire::test(DataProcessing::class)
+            ->call('processC1')
+            ->assertSet('progressPercent', 100)
+            ->assertSet('selectedScope', 'c1')
+            ->assertSee('Foco selecionado: Indicador C1 Mais Acesso');
+
+        // Processamento Geral Completo
+        Livewire::test(DataProcessing::class)
+            ->call('processAll')
+            ->assertSet('progressPercent', 100)
+            ->assertSet('selectedScope', 'all')
+            ->assertSee('cadastros individuais consolidados (MICI)');
+    }
+
+    public function test_esus_process_data_command_runs_with_scopes(): void
+    {
+        $this->artisan('esus:process-data', ['--scope' => 'c1'])
+            ->expectsOutputToContain('[Escopo: C1]')
+            ->assertExitCode(0);
+
+        $this->artisan('esus:process-data', ['--scope' => 'all'])
+            ->expectsOutputToContain('[Escopo: ALL]')
+            ->assertExitCode(0);
+    }
 }
+

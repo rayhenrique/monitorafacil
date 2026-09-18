@@ -28,22 +28,48 @@ class DataProcessing extends Component
     /** @var array<string, array{name: string, description: string, status: string, rows: int, message: string}> */
     public array $tablesReport = [];
 
+    public string $selectedScope = 'c1'; // 'c1' (Apenas C1) ou 'all' (Geral Completo)
+
     public ?float $executionTimeMs = null;
 
-    public function processNow(EsusDataProcessingService $service): void
+    public function setScope(string $scope): void
+    {
+        $this->selectedScope = in_array($scope, ['c1', 'all'], true) ? $scope : 'all';
+    }
+
+    public function processC1(EsusDataProcessingService $service): void
+    {
+        $this->selectedScope = 'c1';
+        $this->executeProcessing($service, 'c1');
+    }
+
+    public function processAll(EsusDataProcessingService $service): void
+    {
+        $this->selectedScope = 'all';
+        $this->executeProcessing($service, 'all');
+    }
+
+    public function processNow(EsusDataProcessingService $service, ?string $scope = null): void
+    {
+        $targetScope = $scope ?: $this->selectedScope;
+        $this->executeProcessing($service, $targetScope);
+    }
+
+    private function executeProcessing(EsusDataProcessingService $service, string $scope): void
     {
         $this->isProcessing = true;
         $this->processMessage = null;
         $this->processStatus = null;
         $this->progressPercent = 10;
-        $this->currentStep = 'Iniciando verificação do banco de dados e-SUS PEC...';
+        $scopeDesc = $scope === 'c1' ? 'Indicador C1 (Mais Acesso)' : 'Geral Completo';
+        $this->currentStep = "Iniciando verificação do banco de dados e-SUS PEC [{$scopeDesc}]...";
 
         try {
             $result = $service->process(function (int $percent, string $step, array $tables): void {
                 $this->progressPercent = $percent;
                 $this->currentStep = $step;
                 $this->tablesReport = $tables;
-            });
+            }, 2026, 3, $scope);
 
             $this->progressPercent = 100;
             $this->currentStep = 'Processamento concluído com sucesso!';

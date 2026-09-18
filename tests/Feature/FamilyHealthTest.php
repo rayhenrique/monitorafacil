@@ -209,4 +209,32 @@ class FamilyHealthTest extends TestCase
             ->assertSet('year', 2026)
             ->assertSet('quarter', 2);
     }
+
+    public function test_c1_legend_order_and_color_parameters(): void
+    {
+        $this->authenticateUser();
+
+        $meta = \App\Services\FamilyHealthService::getIndicatorMeta('c1');
+        $this->assertNotNull($meta);
+
+        $keys = array_keys($meta['parameters']);
+        // Ordem deve ser Regular, Suficiente, Bom e Ótimo
+        $this->assertSame(['regular', 'sufficient', 'good', 'optimal'], $keys);
+
+        // Cores respectivas: vermelho, amarelo, verde e azul
+        $this->assertSame('red', $meta['parameters']['regular']['color']);
+        $this->assertSame('yellow', $meta['parameters']['sufficient']['color']);
+        $this->assertSame('green', $meta['parameters']['good']['color']);
+        $this->assertSame('blue', $meta['parameters']['optimal']['color']);
+
+        // No template HTML do C1, a ordem da legenda é Regular, Suficiente, Bom e Ótimo
+        $response = $this->get('/saude-da-familia/c1');
+        $response->assertOk();
+        $response->assertSeeInOrder([
+            'Regular · 0,25 pt',
+            'Suficiente · 0,50 pt',
+            'Bom · 0,75 pt',
+            'Ótimo · 1,00 pt',
+        ]);
+    }
 }

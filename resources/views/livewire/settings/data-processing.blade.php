@@ -25,7 +25,7 @@
 
     <!-- Card de Ação Principal & Barra de Progresso -->
     <div class="rounded-3xl border border-line bg-white p-6 sm:p-8 shadow-sm space-y-6">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div class="max-w-2xl space-y-1">
                 <div class="flex items-center gap-2 mb-1">
                     <span class="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-2.5 py-0.5 text-[11px] font-bold text-teal-800 border border-teal-200">
@@ -35,30 +35,66 @@
                 </div>
                 <h2 class="text-base sm:text-lg font-bold text-ink">Processar Dados do e-SUS PEC</h2>
                 <p class="text-xs text-muted leading-relaxed">
-                    Executa a rotina de leitura e consolidação direta nas tabelas fatos e dimensões do e-SUS PEC (<span class="font-mono text-slate-800 font-medium">tb_fat_atendimento_individual</span>, <span class="font-mono text-slate-800 font-medium">tb_dim_equipe</span>, <span class="font-mono text-slate-800 font-medium">tb_dim_tempo</span>, <span class="font-mono text-slate-800 font-medium">tb_fat_cad_*</span>), alimentando o acompanhamento mensal e quadrimestral do Indicador C1 (Mais Acesso) e cadastros estruturantes.
+                    Executa a rotina de leitura e consolidação analítica nas tabelas do e-SUS PEC. Você pode escolher processar apenas o que interessa ao <strong class="text-teal-900">Indicador C1 (Mais Acesso)</strong> para execução rápida e focada, ou rodar o <strong class="text-slate-800">Processamento Geral Completo</strong>.
                 </p>
             </div>
 
-            <button
-                type="button"
-                wire:click="processNow"
-                wire:loading.attr="disabled"
-                class="inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-700 hover:bg-teal-800 disabled:opacity-60 px-6 py-3.5 text-xs font-semibold text-white shadow-md shadow-teal-950/20 transition focus:outline-none focus:ring-2 focus:ring-teal-500/30 cursor-pointer shrink-0"
-            >
-                <span wire:loading.remove wire:target="processNow" class="inline-flex items-center gap-2">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-                    </svg>
-                    <span>Processar Dados Agora</span>
-                </span>
-                <span wire:loading wire:target="processNow" class="inline-flex items-center gap-2">
-                    <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Processando tabelas...</span>
-                </span>
-            </button>
+            <!-- Botões de Ação por Escopo -->
+            <div class="flex flex-wrap items-center gap-3 shrink-0">
+                <!-- Botão 1: Apenas C1 -->
+                <button
+                    type="button"
+                    wire:click="processC1"
+                    wire:loading.attr="disabled"
+                    class="inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-700 hover:bg-teal-800 disabled:opacity-60 px-5 py-3.5 text-xs font-bold text-white shadow-md shadow-teal-950/20 transition focus:outline-none focus:ring-2 focus:ring-teal-500/30 cursor-pointer"
+                >
+                    <span wire:loading.remove wire:target="processC1" class="inline-flex items-center gap-2">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                        </svg>
+                        <span>Processar Apenas C1</span>
+                    </span>
+                    <span wire:loading wire:target="processC1" class="inline-flex items-center gap-2">
+                        <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Processando C1...</span>
+                    </span>
+                </button>
+
+                <!-- Botão 2: Processamento Geral Completo -->
+                <button
+                    type="button"
+                    wire:click="processAll"
+                    wire:loading.attr="disabled"
+                    class="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-800 hover:bg-slate-900 disabled:opacity-60 px-5 py-3.5 text-xs font-semibold text-white shadow-md transition focus:outline-none focus:ring-2 focus:ring-slate-500/30 cursor-pointer"
+                >
+                    <span wire:loading.remove wire:target="processAll" class="inline-flex items-center gap-2">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                        </svg>
+                        <span>Processamento Geral (Completo)</span>
+                    </span>
+                    <span wire:loading wire:target="processAll" class="inline-flex items-center gap-2">
+                        <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Processando Geral...</span>
+                    </span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Alerta Informativo sobre Rotina Agendada -->
+        <div class="rounded-2xl border border-teal-200 bg-teal-50/50 p-3.5 flex items-start gap-3 text-xs">
+            <svg class="h-5 w-5 text-teal-700 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div class="text-teal-900 leading-relaxed">
+                <strong>Rotina Agendada Automática:</strong> O processamento agendado no servidor executa diariamente (às 03:30) <strong>sempre o modo completo</strong> (<span class="font-mono font-medium">--scope=all</span>), auditando todos os indicadores, equipes e a totalidade dos cadastros territoriais (MICI e MICDT).
+            </div>
         </div>
 
         <!-- Barra de Progresso Interativa -->

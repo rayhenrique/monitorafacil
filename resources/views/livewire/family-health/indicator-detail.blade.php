@@ -8,10 +8,11 @@
     @php
         $level = $current['performance_level'];
         $score = $current['score_percent'];
+        $isC1 = $indicator === 'c1';
 
         $badgeStyles = match ($level) {
-            'otimo' => 'bg-emerald-100 text-emerald-800 border-emerald-300',
-            'bom' => 'bg-sky-100 text-sky-800 border-sky-300',
+            'otimo' => $isC1 ? 'bg-sky-100 text-sky-800 border-sky-300' : 'bg-emerald-100 text-emerald-800 border-emerald-300',
+            'bom' => $isC1 ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-sky-100 text-sky-800 border-sky-300',
             'suficiente' => 'bg-amber-100 text-amber-800 border-amber-300',
             default => 'bg-rose-100 text-rose-800 border-rose-300',
         };
@@ -24,13 +25,12 @@
         };
 
         $barColor = match ($level) {
-            'otimo' => 'bg-emerald-500',
-            'bom' => 'bg-sky-500',
+            'otimo' => $isC1 ? 'bg-sky-500' : 'bg-emerald-500',
+            'bom' => $isC1 ? 'bg-emerald-500' : 'bg-sky-500',
             'suficiente' => 'bg-amber-500',
             default => 'bg-rose-500',
         };
 
-        $isC1 = $indicator === 'c1';
         $c1Summary = $data['c1_quarter_summary'] ?? null;
         $c1Monthly = $data['c1_monthly_evolution'] ?? [];
         $agendaAlerts = $data['agenda_alerts'] ?? [];
@@ -271,28 +271,28 @@
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                            <div class="rounded-2xl p-3.5 border text-center transition {{ $score > 50.0 && $score <= 70.0 ? 'bg-emerald-500 text-white ring-4 ring-emerald-100 shadow-sm font-bold' : 'bg-emerald-50 text-emerald-900 border-emerald-200' }}">
-                                <span class="text-[10px] font-bold uppercase tracking-wider block opacity-80">Ótimo · 1,00 pt</span>
-                                <span class="text-sm font-black">&gt; 50% e ≤ 70%</span>
-                                <span class="text-[10px] block mt-0.5 opacity-90">Equilíbrio Perfeito de Agenda</span>
+                            <div class="rounded-2xl p-3.5 border text-center transition {{ ($score <= 10.0 || $score > 70.0) ? 'bg-rose-600 text-white ring-4 ring-rose-100 shadow-sm font-bold' : 'bg-rose-50 text-rose-900 border-rose-200' }}">
+                                <span class="text-[10px] font-bold uppercase tracking-wider block opacity-80">Regular · 0,25 pt</span>
+                                <span class="text-sm font-black">≤ 10% ou &gt; 70%</span>
+                                <span class="text-[10px] block mt-0.5 opacity-90">Agenda Desbalanceada</span>
                             </div>
 
-                            <div class="rounded-2xl p-3.5 border text-center transition {{ $score > 30.0 && $score <= 50.0 ? 'bg-sky-500 text-white ring-4 ring-sky-100 shadow-sm font-bold' : 'bg-sky-50 text-sky-900 border-sky-200' }}">
-                                <span class="text-[10px] font-bold uppercase tracking-wider block opacity-80">Bom · 0,75 pt</span>
-                                <span class="text-sm font-black">&gt; 30% e ≤ 50%</span>
-                                <span class="text-[10px] block mt-0.5 opacity-90">Boa Oferta Programada</span>
-                            </div>
-
-                            <div class="rounded-2xl p-3.5 border text-center transition {{ $score > 10.0 && $score <= 30.0 ? 'bg-amber-500 text-white ring-4 ring-amber-100 shadow-sm font-bold' : 'bg-amber-50 text-amber-900 border-amber-200' }}">
+                            <div class="rounded-2xl p-3.5 border text-center transition {{ ($score > 10.0 && $score <= 30.0) ? 'bg-amber-500 text-white ring-4 ring-amber-100 shadow-sm font-bold' : 'bg-amber-50 text-amber-900 border-amber-200' }}">
                                 <span class="text-[10px] font-bold uppercase tracking-wider block opacity-80">Suficiente · 0,50 pt</span>
                                 <span class="text-sm font-black">&gt; 10% e ≤ 30%</span>
                                 <span class="text-[10px] block mt-0.5 opacity-90">Predomínio Espontânea</span>
                             </div>
 
-                            <div class="rounded-2xl p-3.5 border text-center transition {{ $score <= 10.0 || $score > 70.0 ? 'bg-rose-500 text-white ring-4 ring-rose-100 shadow-sm font-bold' : 'bg-rose-50 text-rose-900 border-rose-200' }}">
-                                <span class="text-[10px] font-bold uppercase tracking-wider block opacity-80">Regular · 0,25 pt</span>
-                                <span class="text-sm font-black">≤ 10% ou &gt; 70%</span>
-                                <span class="text-[10px] block mt-0.5 opacity-90">Agenda Desbalanceada</span>
+                            <div class="rounded-2xl p-3.5 border text-center transition {{ ($score > 30.0 && $score <= 50.0) ? 'bg-emerald-600 text-white ring-4 ring-emerald-100 shadow-sm font-bold' : 'bg-emerald-50 text-emerald-900 border-emerald-200' }}">
+                                <span class="text-[10px] font-bold uppercase tracking-wider block opacity-80">Bom · 0,75 pt</span>
+                                <span class="text-sm font-black">&gt; 30% e ≤ 50%</span>
+                                <span class="text-[10px] block mt-0.5 opacity-90">Boa Oferta Programada</span>
+                            </div>
+
+                            <div class="rounded-2xl p-3.5 border text-center transition {{ ($score > 50.0 && $score <= 70.0) ? 'bg-sky-600 text-white ring-4 ring-sky-100 shadow-sm font-bold' : 'bg-sky-50 text-sky-900 border-sky-200' }}">
+                                <span class="text-[10px] font-bold uppercase tracking-wider block opacity-80">Ótimo · 1,00 pt</span>
+                                <span class="text-sm font-black">&gt; 50% e ≤ 70%</span>
+                                <span class="text-[10px] block mt-0.5 opacity-90">Equilíbrio Perfeito de Agenda</span>
                             </div>
                         </div>
                     </div>
@@ -320,14 +320,14 @@
                             @php
                                 $mLevel = $m['performance_level'];
                                 $mBadge = match ($mLevel) {
-                                    'otimo' => 'bg-emerald-100 text-emerald-800 border-emerald-300',
-                                    'bom' => 'bg-sky-100 text-sky-800 border-sky-300',
+                                    'otimo' => 'bg-sky-100 text-sky-800 border-sky-300',
+                                    'bom' => 'bg-emerald-100 text-emerald-800 border-emerald-300',
                                     'suficiente' => 'bg-amber-100 text-amber-800 border-amber-300',
                                     default => 'bg-rose-100 text-rose-800 border-rose-300',
                                 };
                                 $mBar = match ($mLevel) {
-                                    'otimo' => 'bg-emerald-500',
-                                    'bom' => 'bg-sky-500',
+                                    'otimo' => 'bg-sky-500',
+                                    'bom' => 'bg-emerald-500',
                                     'suficiente' => 'bg-amber-500',
                                     default => 'bg-rose-500',
                                 };
@@ -528,8 +528,8 @@
                             @php
                                 $tLevel = $team->performance_level;
                                 $tBadge = match ($tLevel) {
-                                    'otimo' => 'bg-emerald-100 text-emerald-800 border-emerald-200',
-                                    'bom' => 'bg-sky-100 text-sky-800 border-sky-200',
+                                    'otimo' => $isC1 ? 'bg-sky-100 text-sky-800 border-sky-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200',
+                                    'bom' => $isC1 ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-sky-100 text-sky-800 border-sky-200',
                                     'suficiente' => 'bg-amber-100 text-amber-800 border-amber-200',
                                     default => 'bg-rose-100 text-rose-800 border-rose-200',
                                 };
@@ -847,25 +847,25 @@
                         Componente III - Qualidade: Quadro 2 da NT 08/2026
                     </h4>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                        <div class="bg-white/80 rounded-xl p-2.5 border border-emerald-300">
-                            <span class="text-[10px] font-bold text-emerald-900 block">Conceito Ótimo</span>
-                            <span class="text-sm font-black text-emerald-700 font-mono">1,00 pt</span>
-                            <span class="text-[10px] text-muted block">&gt; 50% e ≤ 70%</span>
-                        </div>
-                        <div class="bg-white/80 rounded-xl p-2.5 border border-sky-300">
-                            <span class="text-[10px] font-bold text-sky-900 block">Conceito Bom</span>
-                            <span class="text-sm font-black text-sky-700 font-mono">0,75 pt</span>
-                            <span class="text-[10px] text-muted block">&gt; 30% e ≤ 50%</span>
+                        <div class="bg-white/80 rounded-xl p-2.5 border border-rose-300">
+                            <span class="text-[10px] font-bold text-rose-900 block">Conceito Regular</span>
+                            <span class="text-sm font-black text-rose-700 font-mono">0,25 pt</span>
+                            <span class="text-[10px] text-muted block">≤ 10% ou &gt; 70%</span>
                         </div>
                         <div class="bg-white/80 rounded-xl p-2.5 border border-amber-300">
                             <span class="text-[10px] font-bold text-amber-900 block">Conceito Suficiente</span>
                             <span class="text-sm font-black text-amber-700 font-mono">0,50 pt</span>
                             <span class="text-[10px] text-muted block">&gt; 10% e ≤ 30%</span>
                         </div>
-                        <div class="bg-white/80 rounded-xl p-2.5 border border-rose-300">
-                            <span class="text-[10px] font-bold text-rose-900 block">Conceito Regular</span>
-                            <span class="text-sm font-black text-rose-700 font-mono">0,25 pt</span>
-                            <span class="text-[10px] text-muted block">≤ 10% ou &gt; 70%</span>
+                        <div class="bg-white/80 rounded-xl p-2.5 border border-emerald-300">
+                            <span class="text-[10px] font-bold text-emerald-900 block">Conceito Bom</span>
+                            <span class="text-sm font-black text-emerald-700 font-mono">0,75 pt</span>
+                            <span class="text-[10px] text-muted block">&gt; 30% e ≤ 50%</span>
+                        </div>
+                        <div class="bg-white/80 rounded-xl p-2.5 border border-sky-300">
+                            <span class="text-[10px] font-bold text-sky-900 block">Conceito Ótimo</span>
+                            <span class="text-sm font-black text-sky-700 font-mono">1,00 pt</span>
+                            <span class="text-[10px] text-muted block">&gt; 50% e ≤ 70%</span>
                         </div>
                     </div>
                 </div>

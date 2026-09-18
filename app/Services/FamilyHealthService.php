@@ -36,10 +36,10 @@ class FamilyHealthService
                 'numerator_desc' => 'Nº total de atendimentos por demanda programada (consulta agendada programada, cuidado continuado e consulta agendada).',
                 'denominator_desc' => 'Nº total de atendimentos por todos os tipos de demandas (espontâneas e programadas).',
                 'parameters' => [
-                    'optimal' => ['min' => 50.01, 'max' => 70.0, 'label' => 'Ótimo (> 50% e ≤ 70%)', 'badge' => 'bg-emerald-100 text-emerald-800 border-emerald-300'],
-                    'good' => ['min' => 30.01, 'max' => 50.0, 'label' => 'Bom (> 30% e ≤ 50%)', 'badge' => 'bg-sky-100 text-sky-800 border-sky-300'],
-                    'sufficient' => ['min' => 10.01, 'max' => 30.0, 'label' => 'Suficiente (> 10% e ≤ 30%)', 'badge' => 'bg-amber-100 text-amber-800 border-amber-300'],
-                    'regular' => ['min' => 0.0, 'max' => 10.0, 'extra' => '> 70%', 'label' => 'Regular (≤ 10% ou > 70%)', 'badge' => 'bg-rose-100 text-rose-800 border-rose-300'],
+                    'regular' => ['min' => 0.0, 'max' => 10.0, 'extra' => '> 70%', 'label' => 'Regular (≤ 10% ou > 70%)', 'points' => '0,25 pt', 'color' => 'red', 'badge' => 'bg-rose-100 text-rose-800 border-rose-300'],
+                    'sufficient' => ['min' => 10.01, 'max' => 30.0, 'label' => 'Suficiente (> 10% e ≤ 30%)', 'points' => '0,50 pt', 'color' => 'yellow', 'badge' => 'bg-amber-100 text-amber-800 border-amber-300'],
+                    'good' => ['min' => 30.01, 'max' => 50.0, 'label' => 'Bom (> 30% e ≤ 50%)', 'points' => '0,75 pt', 'color' => 'green', 'badge' => 'bg-emerald-100 text-emerald-800 border-emerald-300'],
+                    'optimal' => ['min' => 50.01, 'max' => 70.0, 'label' => 'Ótimo (> 50% e ≤ 70%)', 'points' => '1,00 pt', 'color' => 'blue', 'badge' => 'bg-sky-100 text-sky-800 border-sky-300'],
                 ],
                 'cbos' => ['2251-42 (Médico ESF)', '2251-70 (Médico Generalista)', '2251-30 (Médico MFC)', '2251-25 (Médico Clínico)', '2252-50 (Médico Ginecologista/Obstetra)', '2235-65 (Enfermeiro ESF)', '2235-05 (Enfermeiro)'],
                 'good_practices' => [
