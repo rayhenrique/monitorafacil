@@ -8,7 +8,7 @@
 [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://mysql.com)
 [![e--SUS PEC](https://img.shields.io/badge/e--SUS_PEC-PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://sisaps.saude.gov.br/esus/)
-[![Testes](https://img.shields.io/badge/Testes-16%20Aprovados-10B981?style=for-the-badge&logo=pest&logoColor=white)](#testes-automatizados)
+[![Testes](https://img.shields.io/badge/Testes-17%20Aprovados-10B981?style=for-the-badge&logo=pest&logoColor=white)](#testes-automatizados)
 
 ---
 
@@ -246,7 +246,7 @@ ESUS_DB_SCHEMA=public
 ESUS_DB_SSLMODE=prefer
 
 # Arquivo XML de Homologação CNES e Fuso Horário
-ESUS_HOMOLOGATED_XML_PATH="C:/Users/rayhe/Downloads/monitorafacil/importacao/XmlParaESUS31_270915.xml"
+ESUS_HOMOLOGATED_XML_PATH="importacao/XmlParaESUS31_270915.xml"
 ESUS_SCHEDULE_TIMEZONE=America/Maceio
 
 # Credenciais do Administrador Inicial
@@ -353,8 +353,8 @@ Saída esperada:
    PASS  Tests\Feature\EsusSyncSnapshotTest
    PASS  Tests\Feature\ExampleTest
 
-   Tests:    16 passed (57 assertions)
-   Duration: ~1.10s
+   Tests:    17 passed (59 assertions)
+   Duration: ~1.20s
 ```
 
 ---

@@ -31,7 +31,7 @@
   - [x] Preparar script/instruções para setup do cronjob no servidor VPS (ex: integração com crontab padrão).
 
 - [x] **Fase 6: Homologação CNES e Gerenciamento de Credenciais**
-  - [x] Ajustar e validar caminho do arquivo XML de homologação ministerial CNES em `importacao/` (`ESUS_HOMOLOGATED_XML_PATH`).
+  - [x] Ajustar e validar caminho relativo do arquivo XML de homologação ministerial CNES em `importacao/` (`ESUS_HOMOLOGATED_XML_PATH="importacao/XmlParaESUS31_270915.xml"`) com suporte nativo a caminhos relativos (`base_path`).
   - [x] Configurar fuso horário oficial municipal `America/Maceio` (`ESUS_SCHEDULE_TIMEZONE`).
   - [x] Gerar e sincronizar nova senha de administrador no banco de dados e no `.env`.
   - [x] Criar comando Artisan `admin:reset-password` para redefinição manual ou geração aleatória segura de senhas via CLI.

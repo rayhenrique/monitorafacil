@@ -83,18 +83,34 @@ class EsusSyncSnapshot extends Command
         }
     }
 
+    private function resolveXmlPath(string $path): string
+    {
+        $trimmed = trim($path);
+        if ($trimmed === '') {
+            return '';
+        }
+
+        if (str_starts_with($trimmed, '/') || str_starts_with($trimmed, '\\') || preg_match('/^[a-zA-Z]:[\\\\\/]/', $trimmed)) {
+            return $trimmed;
+        }
+
+        return base_path($trimmed);
+    }
+
     /**
      * @return array{ibge: string, teams: list<array{ine: string, cnes: string, type: string}>}
      */
     private function readHomologatedTeams(string $path): array
     {
-        if ($path === '' || ! is_file($path) || ! is_readable($path)) {
+        $resolvedPath = $this->resolveXmlPath($path);
+
+        if ($resolvedPath === '' || ! is_file($resolvedPath) || ! is_readable($resolvedPath)) {
             throw new RuntimeException('Configure um XML CNES legível em ESUS_HOMOLOGATED_XML_PATH.');
         }
 
         $reader = new XMLReader;
 
-        if (! $reader->open($path, null, LIBXML_NONET)) {
+        if (! $reader->open($resolvedPath, null, LIBXML_NONET)) {
             throw new RuntimeException('Não foi possível abrir o XML CNES.');
         }
 

@@ -315,4 +315,18 @@ class EsusSyncSnapshotTest extends TestCase
             'error_message' => 'Configure um XML CNES legível em ESUS_HOMOLOGATED_XML_PATH.',
         ]);
     }
+
+    public function test_sync_snapshot_resolves_relative_xml_path(): void
+    {
+        $relative = 'importacao/XmlParaESUS31_270915.xml';
+        config()->set('esus.homologated_xml_path', $relative);
+
+        $command = new \App\Console\Commands\EsusSyncSnapshot();
+        $reflection = new \ReflectionClass($command);
+        $method = $reflection->getMethod('resolveXmlPath');
+
+        $resolved = $method->invoke($command, $relative);
+        $this->assertEquals(base_path($relative), $resolved);
+        $this->assertFileExists($resolved);
+    }
 }
