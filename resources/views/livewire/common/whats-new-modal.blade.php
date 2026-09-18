@@ -24,7 +24,7 @@
                         <div class="flex items-center gap-2 mb-3">
                             <span class="inline-flex items-center gap-1.5 rounded-full bg-teal-500/25 px-3 py-1 text-xs font-semibold text-teal-300 border border-teal-500/30">
                                 <span class="h-1.5 w-1.5 rounded-full bg-teal-400 animate-pulse"></span>
-                                Atualização do Sistema · {{ $release['version'] ?? 'v1.4.0' }}
+                                Atualização do Sistema · {{ $release['version'] ?? \App\Services\VersionService::CURRENT_VERSION }}
                             </span>
                             <span class="text-xs text-slate-400">Lançada em {{ $release['date'] ?? '' }}</span>
                         </div>

@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.8.0';
+    public const CURRENT_VERSION = 'v1.9.0';
 
     public const CURRENT_RELEASE_DATE = '18/09/2026';
 
@@ -61,9 +61,22 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.8.0',
+                'version' => 'v1.9.0',
                 'date' => '18/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Indicador C2 pelo DW PEC e coorte completa do quadrimestre',
+                'summary' => 'Leitura preliminar do C2 no DW do PEC, com pontuação das cinco boas práticas e separação entre todas as crianças que completam dois anos no quadrimestre e as que já chegaram ao aniversário na data da extração.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Cálculo do C2 com registros de puericultura, peso e altura, visitas ACS/TACS e vacinação, sem enviar dados ao PEC.'],
+                    ['type' => 'correcao', 'text' => 'Coorte do quadrimestre inclui os aniversários de dois anos dos quatro meses, inclusive os que ainda vão ocorrer.'],
+                    ['type' => 'melhoria', 'text' => 'Pontuação parcial considera apenas crianças já avaliadas; a tela mostra as contagens previstas e avaliadas separadamente.'],
+                    ['type' => 'melhoria', 'text' => 'Resultados antigos simulados deixam de ser exibidos até a nova extração do C2.'],
+                ],
+            ],
+            [
+                'version' => 'v1.8.0',
+                'date' => '18/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Filtragem Estrita de Equipes Elegíveis (eSF e eAP) e CBOs Habilitados no Indicador C1',
                 'summary' => 'Conformidade metodológica estrita com a Nota Metodológica C1 - Mais Acesso e NT 08/2026: apenas equipes de Saúde da Família (eSF - Tipo 70) e Atenção Primária (eAP - Tipo 76) participam do C1. Expurgo e isolamento de equipes de Saúde Bucal (eSB), eMulti, EMAD, EMAP, "SEM EQUIPE" e registros órfãos. Validação das 19 equipes eSF de Teotônio Vilela via XML CNES e restrição aos 7 CBOs oficiais de Médicos e Enfermeiros.',
                 'highlights' => [

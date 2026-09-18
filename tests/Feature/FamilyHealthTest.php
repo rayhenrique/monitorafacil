@@ -26,6 +26,7 @@ class FamilyHealthTest extends TestCase
         Schema::dropIfExists('consolidation_teams');
         Schema::dropIfExists('consolidation_registrations');
         Schema::dropIfExists('family_health_indicator_snapshots');
+        Schema::dropIfExists('c2_cohort_snapshots');
 
         Schema::create('users', function (Blueprint $table): void {
             $table->id();
@@ -93,6 +94,21 @@ class FamilyHealthTest extends TestCase
             $table->timestamps();
 
             $table->unique(['year', 'quarter', 'ine', 'indicator_code'], 'unique_team_indicator_period');
+        });
+
+        Schema::create('c2_cohort_snapshots', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedSmallInteger('year');
+            $table->unsignedTinyInteger('quarter');
+            $table->string('ine', 20)->nullable()->index();
+            $table->string('team_name', 150);
+            $table->string('team_type', 10);
+            $table->unsignedInteger('cohort_total');
+            $table->unsignedInteger('evaluated_total');
+            $table->json('monthly_counts');
+            $table->date('as_of');
+            $table->string('calculation_version', 40);
+            $table->timestamps();
         });
 
         Schema::dropIfExists('family_health_monthly_snapshots');
@@ -523,23 +539,59 @@ class FamilyHealthTest extends TestCase
         $team = ['0000171220' => ['ine' => '0000171220', 'name' => 'ESF CENTRO', 'type' => '70']];
         $source = \Mockery::mock(\App\Services\C2DwService::class);
         $source->shouldReceive('extract')->once()->andReturn([
-            '0000171220' => [
+            'scores' => ['0000171220' => [
                 1 => ['numerator' => 80, 'denominator' => 2, 'score_percent' => 40.0,
                     'practices' => ['A' => 1, 'B' => 1, 'C' => 1, 'D' => 1, 'E' => 0], 'incomplete' => 2],
                 3 => ['numerator' => 80, 'denominator' => 1, 'score_percent' => 80.0,
                     'practices' => ['A' => 1, 'B' => 1, 'C' => 1, 'D' => 1, 'E' => 0], 'incomplete' => 1],
-            ],
+            ]],
+            'cohort' => ['0000171220' => [1 => 2, 3 => 1, 4 => 2]],
+            'as_of' => '2026-03-18',
         ]);
         $writer = new \App\Services\C2SnapshotService($source);
         $stats = $writer->process(DB::connection('sqlite'), 2026, 1, $team);
 
-        $this->assertSame(['children' => 3, 'teams' => 1, 'months' => 2], $stats);
+        $this->assertSame(['children' => 3, 'cohort_children' => 5, 'teams' => 1, 'months' => 2], $stats);
         $detail = app(\App\Services\FamilyHealthService::class)->getIndicatorDetail('c2', 2026, 1);
         $this->assertSame(60.0, $detail['current']['score_percent']);
         $this->assertSame(2, $detail['quarter_summary']['valid_months']);
         $this->assertNull($detail['monthly_evolution'][1]['score_percent']);
         $this->assertSame(3, $detail['current']['denominator']);
+        $this->assertSame(5, $detail['current']['cohort_total']);
+        $this->assertSame(3, $detail['current']['evaluated_total']);
+        $this->assertSame(2, $detail['monthly_evolution'][3]['cohort_total']);
         $this->assertSame(160, $detail['current']['numerator']);
+    }
+
+    public function test_c2_future_only_cohort_has_count_without_fake_score(): void
+    {
+        $team = ['0000171220' => ['ine' => '0000171220', 'name' => 'ESF CENTRO', 'type' => '70']];
+        $source = \Mockery::mock(\App\Services\C2DwService::class);
+        $source->shouldReceive('extract')->once()->andReturn([
+            'scores' => [],
+            'cohort' => ['0000171220' => [12 => 4]],
+            'as_of' => '2026-09-18',
+        ]);
+
+        $stats = (new \App\Services\C2SnapshotService($source))
+            ->process(DB::connection('sqlite'), 2026, 3, $team);
+
+        $this->assertSame(4, $stats['cohort_children']);
+        $this->assertSame(0, $stats['children']);
+        $detail = app(\App\Services\FamilyHealthService::class)->getIndicatorDetail('c2', 2026, 3);
+        $this->assertSame(4, $detail['current']['cohort_total']);
+        $this->assertSame(0, $detail['current']['evaluated_total']);
+        $this->assertNull($detail['current']['score_percent']);
+        $this->assertSame(4, $detail['monthly_evolution'][3]['cohort_total']);
+
+        $overview = app(\App\Services\FamilyHealthService::class)->getMunicipalOverview(2026, 3);
+        $this->assertSame(4, $overview['indicators']['c2']['cohort_total']);
+        $this->assertNull($overview['indicators']['c2']['score_percent']);
+
+        $this->authenticateUser();
+        Livewire::test(IndicatorDetail::class, ['indicator' => 'c2', 'year' => 2026, 'quarter' => 3])
+            ->assertSee('4 crianças completam 2 anos neste período')
+            ->assertSee('ESF CENTRO');
     }
 
     public function test_c2_read_failure_preserves_existing_snapshots(): void

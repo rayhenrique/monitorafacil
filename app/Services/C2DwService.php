@@ -12,7 +12,7 @@ use RuntimeException;
  */
 class C2DwService
 {
-    public const VERSION = 'dw-c2-2026-09';
+    public const VERSION = 'dw-c2-2026-09-coorte-completa';
 
     /** @var array<string, list<int>> */
     private const ANTIGENS = [
@@ -26,7 +26,7 @@ class C2DwService
 
     /**
      * @param  array<string, array{ine:string,name:string,type:string}>  $teams
-     * @return array<string, array<int, array{numerator:int,denominator:int,score_percent:float,practices:array<string,int>,incomplete:int}>>
+     * @return array{scores:array<string, array<int, array{numerator:int,denominator:int,score_percent:float,practices:array<string,int>,incomplete:int}>>,cohort:array<string,array<int,int>>,as_of:string}
      */
     public function extract(ConnectionInterface $connection, int $year, int $quarter, array $teams): array
     {
@@ -37,10 +37,7 @@ class C2DwService
         $firstMonth = (($quarter - 1) * 4) + 1;
         $start = Carbon::create($year, $firstMonth, 1)->startOfDay();
         $end = (clone $start)->addMonths(4)->subDay();
-        $end = $end->min(Carbon::today());
-        if ($end->lt($start)) {
-            return [];
-        }
+        $asOf = Carbon::today();
 
         $ines = array_keys($teams);
         $placeholders = implode(',', array_fill(0, count($ines), '?'));
@@ -56,7 +53,7 @@ class C2DwService
               AND (dt_nascimento_cidadao + INTERVAL '2 years')::date BETWEEN ? AND ?
         SQL, [...$ines, $start->toDateString(), $end->toDateString()]);
 
-        $byId = [];
+        $allById = [];
         foreach ($children as $child) {
             $id = (int) $child->id;
             $ine = trim((string) $child->ine);
@@ -65,10 +62,23 @@ class C2DwService
             }
             $born = Carbon::parse($child->born)->startOfDay();
             $birthday = (clone $born)->addYearsNoOverflow(2);
-            $byId[$id] = [
+            $allById[$id] = [
                 'ine' => $ine,
                 'born' => $born,
                 'birthday' => $birthday,
+            ];
+        }
+
+        $cohort = [];
+        $byId = [];
+        foreach ($allById as $id => $child) {
+            $ine = $child['ine'];
+            $month = (int) $child['birthday']->month;
+            $cohort[$ine][$month] = ($cohort[$ine][$month] ?? 0) + 1;
+            if ($child['birthday']->gt($asOf)) {
+                continue;
+            }
+            $byId[$id] = $child + [
                 'consultations' => [],
                 'measurements' => [],
                 'visits' => [],
@@ -77,7 +87,7 @@ class C2DwService
         }
 
         if ($byId === []) {
-            return [];
+            return ['scores' => [], 'cohort' => $cohort, 'as_of' => $asOf->toDateString()];
         }
 
         foreach (array_chunk(array_keys($byId), 500) as $ids) {
@@ -248,7 +258,7 @@ class C2DwService
             }
         }
 
-        return $result;
+        return ['scores' => $result, 'cohort' => $cohort, 'as_of' => $asOf->toDateString()];
     }
 
     /**

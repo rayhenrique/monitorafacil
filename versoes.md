@@ -4,6 +4,17 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.9.0] - 18/09/2026
+
+### 🚀 Indicador C2 pelo DW PEC
+- Extração somente de leitura para calcular as cinco boas práticas do cuidado no desenvolvimento infantil e consolidar resultados por equipe e mês.
+- Coorte quadrimestral inclui todas as crianças vinculadas que completam dois anos entre o primeiro e o último dia dos quatro meses, inclusive aniversários futuros quando o período ainda está em andamento.
+- O painel distingue o total da coorte do número de crianças que já completaram dois anos e foram avaliadas. Meses futuros não recebem pontuação antecipada.
+- Resultados antigos simulados ficam ocultos até nova extração. O cálculo local permanece preliminar e pode divergir do Siaps por RNDS e vínculo histórico.
+- Nova tabela de snapshots agregados da coorte, sem persistir nome, CPF ou CNS das crianças.
+
+---
+
 ## [v1.8.0] - 18/09/2026
 
 ### 🚀 Destaques da Versão

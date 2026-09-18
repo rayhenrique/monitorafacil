@@ -126,17 +126,20 @@
                                 </span>
                                 <span class="text-xs text-muted block">
                                     @if ($slug === 'c2')
-                                        {{ $score !== null ? 'Estimativa local do DW PEC' : 'Aguardando extração válida do C2' }}
+                                        {{ $score !== null ? ($item['cohort_total'] !== null && $item['evaluated_total'] < $item['cohort_total'] ? 'Estimativa parcial do DW PEC' : 'Estimativa local do DW PEC') : 'Aguardando avaliação válida do C2' }}
                                     @else
                                         {{ number_format($item['numerator'], 0, '', '.') }} de {{ number_format($item['denominator'], 0, '', '.') }}
                                     @endif
                                 </span>
                             </div>
                             <div class="text-right">
-                                <span class="text-[11px] text-slate-500 block">Público Elegível</span>
+                                <span class="text-[11px] text-slate-500 block">{{ $slug === 'c2' ? 'Completam 2 anos no quadrimestre' : 'Público Elegível' }}</span>
                                 <span class="text-xs font-semibold text-slate-700">
-                                    {{ $slug === 'c2' && $score === null ? '—' : number_format($item['denominator'], 0, '', '.').' pessoas' }}
+                                    {{ $slug === 'c2' ? ($item['cohort_total'] !== null ? number_format($item['cohort_total'], 0, '', '.').' crianças' : '—') : number_format($item['denominator'], 0, '', '.').' pessoas' }}
                                 </span>
+                                @if ($slug === 'c2' && $item['cohort_total'] !== null)
+                                    <span class="text-[10px] text-slate-500 block">{{ number_format($item['evaluated_total'], 0, '', '.') }} já avaliadas{{ $item['cohort_as_of'] ? ' até '.$item['cohort_as_of'] : '' }}</span>
+                                @endif
                             </div>
                         </div>
 

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\TeamType;
+use App\Models\C2CohortSnapshot;
 use App\Models\ConsolidationTeam;
 use App\Models\FamilyHealthIndicatorSnapshot;
 use App\Models\FamilyHealthMonthlySnapshot;
@@ -321,6 +322,10 @@ class FamilyHealthService
     {
         $this->ensureBaselineSnapshots($year, $quarter);
 
+        $c2Cohort = C2CohortSnapshot::query()
+            ->where('year', $year)->where('quarter', $quarter)->whereNull('ine')
+            ->where('calculation_version', C2DwService::VERSION)->first();
+
         $indicatorsMeta = self::getIndicatorsMetadata();
         $snapshots = FamilyHealthIndicatorSnapshot::query()
             ->where('year', $year)
@@ -349,6 +354,9 @@ class FamilyHealthService
                 'performance_level' => $level,
                 'active_search_count' => $snap ? $snap->active_search_count : 0,
                 'has_data' => $snap !== null,
+                'cohort_total' => $slug === 'c2' ? $c2Cohort?->cohort_total : null,
+                'evaluated_total' => $slug === 'c2' ? $c2Cohort?->evaluated_total : null,
+                'cohort_as_of' => $slug === 'c2' ? $c2Cohort?->as_of?->format('d/m/Y') : null,
             ];
 
             if ($score !== null) {
@@ -477,6 +485,13 @@ class FamilyHealthService
         }
 
         $activeSnap = $code === 'c2' && $selectedIne ? $currentFocus : ($currentFocus ?? $municipalSnap);
+        $c2CohortTeams = $code === 'c2' ? C2CohortSnapshot::query()
+            ->where('year', $year)->where('quarter', $quarter)->whereNotNull('ine')
+            ->where('calculation_version', C2DwService::VERSION)->orderBy('team_name')->get() : collect();
+        $c2Cohort = $code === 'c2' ? C2CohortSnapshot::query()
+            ->where('year', $year)->where('quarter', $quarter)
+            ->when($selectedIne, fn ($q) => $q->where('ine', $selectedIne), fn ($q) => $q->whereNull('ine'))
+            ->where('calculation_version', C2DwService::VERSION)->first() : null;
 
         $detail = [
             'meta' => $meta,
@@ -490,8 +505,13 @@ class FamilyHealthService
                 'active_search_count' => $activeSnap ? $activeSnap->active_search_count : 0,
                 'good_practices_breakdown' => $activeSnap ? $activeSnap->good_practices_breakdown : [],
                 'has_data' => $activeSnap !== null,
+                'cohort_total' => $c2Cohort?->cohort_total,
+                'evaluated_total' => $c2Cohort?->evaluated_total,
+                'cohort_as_of' => $c2Cohort?->as_of?->format('d/m/Y'),
+                'monthly_cohort' => $c2Cohort?->monthly_counts ?? [],
             ],
             'teams' => $teams,
+            'cohort_teams' => $c2CohortTeams,
             'active_search_list' => $code === 'c2' ? [] : $this->generateActiveSearchSample($code, $activeSnap ? $activeSnap->active_search_count : 15, $selectedIne),
         ];
 
@@ -529,6 +549,7 @@ class FamilyHealthService
                     'month_in_quarter' => count($monthlyEvolution) + 1,
                     'numerator' => $snap ? $snap->numerator : 0,
                     'denominator' => $snap ? $snap->denominator : 0,
+                    'cohort_total' => $code === 'c2' ? ($c2Cohort?->monthly_counts[$mNum] ?? null) : null,
                     'score_percent' => $mScore,
                     'performance_level' => $mLevel,
                     'component_iii_points' => $mPoints,
@@ -557,6 +578,8 @@ class FamilyHealthService
                 'weighted_score' => $quarterPoints,
                 'formula' => $code === 'c2' ? 'Média dos meses com crianças que completaram 2 anos' : 'Média Aritmética: (Mês 1 + Mês 2 + Mês 3 + Mês 4) / 4',
                 'valid_months' => $countedMonths,
+                'cohort_total' => $code === 'c2' ? $c2Cohort?->cohort_total : null,
+                'evaluated_total' => $code === 'c2' ? $c2Cohort?->evaluated_total : null,
                 'balance_status' => match (true) {
                     $quarterAvgScore === null => 'sem_dados',
                     $code === 'c1' && $quarterAvgScore > 70.0 => 'excess_programmatic',

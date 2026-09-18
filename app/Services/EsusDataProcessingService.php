@@ -514,9 +514,9 @@ class EsusDataProcessingService
                     'name' => 'C2 · DW PEC',
                     'description' => 'Coorte de crianças que completaram 2 anos e boas práticas A–E',
                     'status' => 'success',
-                    'rows' => $c2Stats['children'],
-                    'message' => sprintf('%d crianças, %d equipes e %d meses válidos. Estimativa local sem RNDS.',
-                        $c2Stats['children'], $c2Stats['teams'], $c2Stats['months']),
+                    'rows' => $c2Stats['cohort_children'],
+                    'message' => sprintf('%d crianças completam 2 anos no quadrimestre; %d já avaliadas em %d equipes e %d meses. Estimativa local sem RNDS.',
+                        $c2Stats['cohort_children'], $c2Stats['children'], $c2Stats['teams'], $c2Stats['months']),
                 ];
             } catch (Throwable $e) {
                 $message = 'C2 não processado: '.$e->getMessage();

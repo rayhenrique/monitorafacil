@@ -95,7 +95,7 @@
   - [x] Calcular a média quadrimestral apenas dos meses com crianças que completaram dois anos e aplicar peso 2.
   - [x] Impedir geração ou exibição de C2 fictício; sinalizar ausência de resultado e origem preliminar do DW.
   - [x] Cobrir regras de pontuação, exceção eAP, meses sem coorte e falha de conexão com testes locais.
+  - [x] Separar a coorte dos quatro meses das crianças que já completaram dois anos no quadrimestre em andamento, sem pontuar meses futuros.
   - [ ] Validar o esquema e a execução somente de leitura no PEC acessível pela VPS.
   - [ ] Comparar amostra de resultados por equipe/mês com o Siaps e investigar diferenças por RNDS, ações coletivas e vínculo histórico.
-
 

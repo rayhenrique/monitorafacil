@@ -96,7 +96,7 @@
                 <!-- Card de Pontuação -->
                 <div class="rounded-3xl bg-white/10 border border-white/15 p-5 text-center min-w-[190px] backdrop-blur-xs">
                     <span class="text-[11px] font-semibold text-teal-300 uppercase tracking-wider block">
-                        {{ ($isC1 || $isC2) ? 'Média Quadrimestral' : 'Resultado Atual' }}
+                        {{ $isC2 && $current['cohort_total'] !== null && $current['evaluated_total'] < $current['cohort_total'] ? 'Média parcial' : (($isC1 || $isC2) ? 'Média Quadrimestral' : 'Resultado Atual') }}
                     </span>
                     <div class="text-3xl sm:text-4xl font-black text-white tabular-nums my-1">
                         {{ $hasC2Result ? number_format($score, 1, ',', '.').'%' : '—' }}
@@ -125,9 +125,15 @@
                 class="rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 focus:border-teal-500 focus:bg-white focus:outline-hidden"
             >
                 <option value="">Consolidado Municipal (Todas as Equipes)</option>
-                @foreach ($teams as $team)
+                @foreach ($isC2 ? $cohortTeams : $teams as $team)
                     <option value="{{ $team->ine }}">
-                        {{ $team->team_name }} (INE {{ $team->ine }}) - {{ number_format($team->score_percent, 1, ',', '.') }}%
+                        {{ $team->team_name }} (INE {{ $team->ine }})
+                        @if ($isC2)
+                            @php $teamScore = $teams->firstWhere('ine', $team->ine)?->score_percent; @endphp
+                            - {{ $teamScore !== null ? number_format($teamScore, 1, ',', '.').'%' : 'aguardando avaliação' }}
+                        @else
+                            - {{ number_format($team->score_percent, 1, ',', '.') }}%
+                        @endif
                     </option>
                 @endforeach
             </select>
@@ -163,7 +169,7 @@
                 @endif
             </div>
         @elseif ($isC2)
-            <div class="flex items-center gap-6 text-xs">
+            <div class="flex flex-wrap items-center gap-x-6 gap-y-3 text-xs">
                 <div>
                     <span class="text-slate-400 block">Pontos das práticas (A–E)</span>
                     <span class="font-bold text-teal-800 text-sm">
@@ -171,9 +177,15 @@
                     </span>
                 </div>
                 <div>
-                    <span class="text-slate-400 block">Crianças que completaram 2 anos</span>
+                    <span class="text-slate-400 block">Completam 2 anos no quadrimestre</span>
                     <span class="font-bold text-ink text-sm">
-                        {{ $hasC2Result ? number_format($current['denominator'], 0, '', '.') : '—' }}
+                        {{ $current['cohort_total'] !== null ? number_format($current['cohort_total'], 0, '', '.') : '—' }}
+                    </span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block">Já avaliadas{{ $current['cohort_as_of'] ? ' até '.$current['cohort_as_of'] : '' }}</span>
+                    <span class="font-bold text-ink text-sm">
+                        {{ $current['evaluated_total'] !== null ? number_format($current['evaluated_total'], 0, '', '.') : '—' }}
                     </span>
                 </div>
                 <div>
@@ -752,6 +764,11 @@
                 <div class="rounded-2xl border {{ $hasC2Result ? 'border-sky-200 bg-sky-50 text-sky-950' : 'border-amber-200 bg-amber-50 text-amber-950' }} p-4 text-sm" role="status">
                     @if ($hasC2Result)
                         <strong>Estimativa local do DW PEC.</strong> Os registros da RNDS e o vínculo histórico oficial do Siaps podem alterar o resultado. Use a nota do Siaps para avaliação e cofinanciamento.
+                        @if ($current['cohort_total'] !== null && $current['evaluated_total'] < $current['cohort_total'])
+                            Resultado parcial: {{ $current['evaluated_total'] }} de {{ $current['cohort_total'] }} crianças da coorte já completaram 2 anos até {{ $current['cohort_as_of'] }}.
+                        @endif
+                    @elseif ($current['cohort_total'] !== null)
+                        <strong>Coorte do quadrimestre identificada.</strong> {{ $current['cohort_total'] }} crianças completam 2 anos neste período; nenhuma chegou ao aniversário até {{ $current['cohort_as_of'] }}. A pontuação será exibida após a avaliação.
                     @else
                         <strong>Sem resultado C2 validado para este recorte.</strong> A extração do DW ainda não foi concluída ou não houve crianças que completaram dois anos no período. Dados anteriores do cálculo simulado não são exibidos.
                     @endif
@@ -961,7 +978,7 @@
                                 <h3 class="text-base font-bold text-ink">Acompanhamento Mensal do Desenvolvimento Infantil</h3>
                             </div>
                             <p class="text-xs text-muted">
-                                Evolução das boas práticas e acompanhamento de crianças &lt; 2 anos ao longo dos 4 meses do quadrimestre
+                                Coorte completa de aniversários de 2 anos e avaliação realizada em cada mês do quadrimestre
                             </p>
                         </div>
                         <span class="text-xs font-mono font-semibold text-slate-500 bg-slate-100 px-3 py-1 rounded-xl">
@@ -1008,7 +1025,7 @@
                                         @endif
                                     </div>
                                     <span class="rounded-full px-2 py-0.5 text-[10px] font-bold border {{ $mBadge }}">
-                                        {{ $mLevel ? ucfirst($mLevel) : 'Sem coorte' }}
+                                        {{ $mLevel ? ucfirst($mLevel) : ($m['cohort_total'] ? 'Aguardando avaliação' : 'Sem coorte') }}
                                     </span>
                                 </div>
 
@@ -1034,9 +1051,9 @@
                                         </span>
                                     </div>
                                     <div>
-                                        <span class="text-slate-400 block text-[10px]">Completaram 2 anos</span>
+                                        <span class="text-slate-400 block text-[10px]">Previstas / avaliadas</span>
                                         <span class="font-bold text-ink font-mono">
-                                            {{ $m['score_percent'] !== null ? number_format($m['denominator'], 0, '', '.') : '—' }}
+                                            {{ $m['cohort_total'] !== null ? number_format($m['cohort_total'], 0, '', '.') : '—' }} / {{ $m['cohort_total'] !== null ? number_format($m['denominator'], 0, '', '.') : '—' }}
                                         </span>
                                     </div>
                                 </div>
@@ -1081,8 +1098,8 @@
                                     wire:model.live="selectedIne"
                                     class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-teal-500 focus:outline-hidden shadow-2xs"
                                 >
-                                    <option value="">Todas as Equipes ({{ $teams->count() }})</option>
-                                    @foreach ($teams as $team)
+                                    <option value="">Todas as Equipes ({{ $cohortTeams->count() }})</option>
+                                    @foreach ($cohortTeams as $team)
                                         <option value="{{ $team->ine }}">
                                             {{ $team->team_name }} (INE {{ $team->ine }})
                                         </option>

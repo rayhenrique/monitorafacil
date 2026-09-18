@@ -108,11 +108,11 @@ graph TD
 
 #### C2 · estimativa local do DW PEC
 
-O processamento C2 faz somente consultas de leitura no PostgreSQL do PEC e grava agregados no MySQL local; a tela do indicador consulta apenas esses snapshots. Para cada mês, entram as crianças vinculadas a eSF/eAP que completaram dois anos; cada prática A–E vale 20 pontos. A média quadrimestral usa apenas meses com coorte, conforme a Nota Técnica nº 8/2026. Meses sem crianças elegíveis ficam sem resultado.
+O processamento C2 faz somente consultas de leitura no PostgreSQL do PEC e grava agregados no MySQL local; a tela do indicador consulta apenas esses snapshots. A coorte do quadrimestre inclui todas as crianças vinculadas a eSF/eAP que completam dois anos entre o primeiro e o último dia dos quatro meses. A tela distingue esse total das crianças que já fizeram aniversário e tiveram as práticas avaliadas até a data da extração. Cada prática A–E vale 20 pontos. A média quadrimestral usa apenas meses com crianças já avaliadas, conforme a Nota Técnica nº 8/2026; meses futuros não recebem pontuação antecipada.
 
 O cálculo lê vínculos atuais, atendimentos de puericultura, antropometria, visitas ACS/TACS e vacinação documentados no DW. É **estimativa preliminar**, pois o DW local pode não conter vacinas da RNDS, ações coletivas e o histórico de vínculo usado pelo Siaps. Não use o percentual local como resultado oficial de cofinanciamento. O C2 antigo calculado por simulação fica oculto até uma nova extração bem-sucedida.
 
-Na VPS com acesso ao PEC, após instalar esta versão, execute `php artisan esus:process-data --scope=c2 --year=2026 --quarter=3` e compare uma amostra de equipes e meses com o Siaps. A aplicação não envia fichas, XML ou Thrift para o PEC.
+Na VPS com acesso ao PEC, após instalar esta versão, execute `php artisan migrate --force` e `php artisan esus:process-data --scope=c2 --year=2026 --quarter=3`; confira a contagem completa da coorte e compare uma amostra de equipes e meses com o Siaps. A aplicação não envia fichas, XML ou Thrift para o PEC.
 
 ### 5. 💲 Simulador de Repasses e Planejamento Financeiro
 - Ferramenta de estimativa do componente de **Vínculo e Acompanhamento Territorial** de eSF (40h).

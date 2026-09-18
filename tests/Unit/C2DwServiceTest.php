@@ -12,6 +12,7 @@ class C2DwServiceTest extends TestCase
 {
     protected function tearDown(): void
     {
+        Carbon::setTestNow();
         Mockery::close();
         parent::tearDown();
     }
@@ -89,10 +90,49 @@ class C2DwServiceTest extends TestCase
             '0000171220' => ['ine' => '0000171220', 'name' => 'eAP', 'type' => '76'],
         ]);
 
-        $this->assertSame(1, $result['0000171220'][1]['denominator']);
-        $this->assertSame(20, $result['0000171220'][1]['numerator']);
-        $this->assertSame(20.0, $result['0000171220'][1]['score_percent']);
+        $this->assertSame(1, $result['scores']['0000171220'][1]['denominator']);
+        $this->assertSame(20, $result['scores']['0000171220'][1]['numerator']);
+        $this->assertSame(20.0, $result['scores']['0000171220'][1]['score_percent']);
         $this->assertSame(['A' => 0, 'B' => 0, 'C' => 0, 'D' => 1, 'E' => 0],
-            $result['0000171220'][1]['practices']);
+            $result['scores']['0000171220'][1]['practices']);
+        $this->assertSame([1 => 1], $result['cohort']['0000171220']);
+    }
+
+    public function test_current_quadrimester_counts_every_second_birthday_but_scores_only_elapsed_birthdays(): void
+    {
+        Carbon::setTestNow('2026-09-18');
+        $connection = Mockery::mock(ConnectionInterface::class);
+        $connection->shouldReceive('select')->times(6)->andReturn(
+            [
+                (object) ['id' => 7, 'born' => '2024-09-10', 'ine' => '0000171220'],
+                (object) ['id' => 8, 'born' => '2024-12-01', 'ine' => '0000171220'],
+            ],
+            [], [], [], [], []
+        );
+
+        $result = (new C2DwService)->extract($connection, 2026, 3, [
+            '0000171220' => ['ine' => '0000171220', 'name' => 'ESF', 'type' => '70'],
+        ]);
+
+        $this->assertSame([9 => 1, 12 => 1], $result['cohort']['0000171220']);
+        $this->assertSame(1, $result['scores']['0000171220'][9]['denominator']);
+        $this->assertArrayNotHasKey(12, $result['scores']['0000171220']);
+        $this->assertSame('2026-09-18', $result['as_of']);
+    }
+
+    public function test_future_only_cohort_is_preserved_without_scoring(): void
+    {
+        Carbon::setTestNow('2026-09-18');
+        $connection = Mockery::mock(ConnectionInterface::class);
+        $connection->shouldReceive('select')->once()->andReturn([
+            (object) ['id' => 8, 'born' => '2024-12-01', 'ine' => '0000171220'],
+        ]);
+
+        $result = (new C2DwService)->extract($connection, 2026, 3, [
+            '0000171220' => ['ine' => '0000171220', 'name' => 'ESF', 'type' => '70'],
+        ]);
+
+        $this->assertSame([], $result['scores']);
+        $this->assertSame([12 => 1], $result['cohort']['0000171220']);
     }
 }

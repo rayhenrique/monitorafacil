@@ -124,6 +124,7 @@ class IndicatorDetail extends Component
             'meta' => $data['meta'],
             'current' => $data['current'],
             'teams' => $data['teams'],
+            'cohortTeams' => $data['cohort_teams'],
             'c1Teams' => $filteredTeams,
             'c2Teams' => $filteredTeams,
             'filteredTeams' => $filteredTeams,

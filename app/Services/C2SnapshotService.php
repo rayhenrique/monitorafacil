@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\C2CohortSnapshot;
 use App\Models\FamilyHealthIndicatorSnapshot;
 use App\Models\FamilyHealthMonthlySnapshot;
 use Illuminate\Database\ConnectionInterface;
@@ -13,19 +14,60 @@ class C2SnapshotService
 
     /**
      * @param  array<string, array{ine:string,name:string,type:string}>  $teams
-     * @return array{children:int,teams:int,months:int}
+     * @return array{children:int,cohort_children:int,teams:int,months:int}
      */
     public function process(ConnectionInterface $pec, int $year, int $quarter, array $teams): array
     {
         // Todas as consultas terminam antes de alterar os snapshots locais.
-        $data = $this->dw->extract($pec, $year, $quarter, $teams);
-        $stats = ['children' => 0, 'teams' => 0, 'months' => 0];
+        $extraction = $this->dw->extract($pec, $year, $quarter, $teams);
+        $data = $extraction['scores'];
+        $cohort = $extraction['cohort'];
+        $stats = ['children' => 0, 'cohort_children' => 0, 'teams' => 0, 'months' => 0];
 
-        DB::transaction(function () use ($data, $teams, $year, $quarter, &$stats): void {
+        DB::transaction(function () use ($data, $cohort, $extraction, $teams, $year, $quarter, &$stats): void {
+            C2CohortSnapshot::query()->where('year', $year)->where('quarter', $quarter)->delete();
             FamilyHealthMonthlySnapshot::query()
                 ->where('year', $year)->where('quarter', $quarter)->where('indicator_code', 'c2')->delete();
             FamilyHealthIndicatorSnapshot::query()
                 ->where('year', $year)->where('quarter', $quarter)->where('indicator_code', 'c2')->delete();
+
+            $municipalCohort = [];
+            $municipalEvaluated = 0;
+            foreach ($cohort as $ine => $monthlyCounts) {
+                $total = array_sum($monthlyCounts);
+                $evaluated = array_sum(array_column($data[$ine] ?? [], 'denominator'));
+                $stats['cohort_children'] += $total;
+                $municipalEvaluated += $evaluated;
+                foreach ($monthlyCounts as $month => $count) {
+                    $municipalCohort[$month] = ($municipalCohort[$month] ?? 0) + $count;
+                }
+                C2CohortSnapshot::query()->create([
+                    'year' => $year,
+                    'quarter' => $quarter,
+                    'ine' => $ine,
+                    'team_name' => $teams[$ine]['name'],
+                    'team_type' => $teams[$ine]['type'],
+                    'cohort_total' => $total,
+                    'evaluated_total' => $evaluated,
+                    'monthly_counts' => $monthlyCounts,
+                    'as_of' => $extraction['as_of'],
+                    'calculation_version' => C2DwService::VERSION,
+                ]);
+            }
+            if ($municipalCohort !== []) {
+                C2CohortSnapshot::query()->create([
+                    'year' => $year,
+                    'quarter' => $quarter,
+                    'ine' => null,
+                    'team_name' => 'Consolidado Municipal',
+                    'team_type' => '70',
+                    'cohort_total' => $stats['cohort_children'],
+                    'evaluated_total' => $municipalEvaluated,
+                    'monthly_counts' => $municipalCohort,
+                    'as_of' => $extraction['as_of'],
+                    'calculation_version' => C2DwService::VERSION,
+                ]);
+            }
 
             $municipal = [];
             $municipalIncomplete = 0;
