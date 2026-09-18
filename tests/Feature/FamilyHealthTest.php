@@ -345,4 +345,57 @@ class FamilyHealthTest extends TestCase
         $this->assertCount(1, $remaining);
         $this->assertSame('0000171220', $remaining->first()->ine);
     }
+
+    public function test_sidebar_does_not_contain_c1_c7_badge(): void
+    {
+        $this->authenticateUser();
+
+        $response = $this->get(route('family-health.overview'));
+        $response->assertOk();
+        $response->assertSee('Saúde da Família');
+        $response->assertDontSee('C1-C7');
+        $response->assertDontSee('C1 - C7');
+    }
+
+    public function test_c1_monthly_tracking_and_filters(): void
+    {
+        $this->authenticateUser();
+
+        // Seed team snapshot for C1
+        \App\Models\FamilyHealthIndicatorSnapshot::query()->create([
+            'year' => 2026,
+            'quarter' => 1,
+            'ine' => '0000171220',
+            'team_name' => 'ESF CENTRO',
+            'team_type' => '70',
+            'indicator_code' => 'c1',
+            'numerator' => 45,
+            'denominator' => 100,
+            'score_percent' => 45.00,
+            'performance_level' => 'bom',
+            'component_iii_points' => 0.75,
+        ]);
+
+        Livewire::test(IndicatorDetail::class, ['indicator' => 'c1', 'year' => 2026, 'quarter' => 1])
+            ->assertSee('Acompanhamento Mensal da Demanda')
+            ->assertSee('Filtros do Acompanhamento Mensal')
+            ->assertSee('Equipe (eSF / eAP):')
+            ->assertSee('Mês de Competência:')
+            ->assertSee('Quadrimestre / Período:')
+            ->assertSee('Classificação Oficial:')
+            ->call('setMonth', 2)
+            ->assertSet('selectedMonth', 2)
+            ->call('setClassification', 'bom')
+            ->assertSet('selectedClassification', 'bom')
+            ->call('selectTeam', '0000171220')
+            ->assertSet('selectedIne', '0000171220')
+            ->call('setPeriodString', '2026-2')
+            ->assertSet('year', 2026)
+            ->assertSet('quarter', 2)
+            ->call('resetFilters')
+            ->assertSet('selectedIne', null)
+            ->assertSet('selectedMonth', null)
+            ->assertSet('selectedClassification', null);
+    }
 }
+

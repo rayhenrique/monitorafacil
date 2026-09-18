@@ -333,11 +333,20 @@
                                 };
                                 $espontanea = max(0, $m['denominator'] - $m['numerator']);
                             @endphp
-                            <div class="rounded-2xl border border-slate-200 bg-slate-50/70 hover:bg-slate-50 transition p-4 space-y-3">
+                            <div 
+                                wire:click="setMonth({{ $selectedMonth === $m['month_in_quarter'] ? 'null' : $m['month_in_quarter'] }})"
+                                class="rounded-2xl border transition p-4 space-y-3 cursor-pointer select-none {{ $selectedMonth === $m['month_in_quarter'] ? 'bg-teal-50/90 border-teal-500 ring-2 ring-teal-400 shadow-sm' : 'border-slate-200 bg-slate-50/70 hover:bg-slate-100 hover:border-slate-300' }}"
+                                title="Clique para filtrar apenas o {{ $m['label'] }}"
+                            >
                                 <div class="flex items-center justify-between">
-                                    <span class="text-xs font-bold text-ink">
-                                        {{ $m['label'] }}
-                                    </span>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-xs font-bold text-ink">
+                                            {{ $m['label'] }}
+                                        </span>
+                                        @if ($selectedMonth === $m['month_in_quarter'])
+                                            <span class="rounded bg-teal-600 text-white text-[9px] font-bold px-1.5 py-0.2">Ativo</span>
+                                        @endif
+                                    </div>
                                     <span class="rounded-full px-2 py-0.5 text-[10px] font-bold border {{ $mBadge }}">
                                         {{ ucfirst($mLevel) }}
                                     </span>
@@ -379,6 +388,287 @@
                                 </div>
                             </div>
                         @endforeach
+                    </div>
+
+                    <!-- BARRA DE FILTROS DO ACOMPANHAMENTO MENSAL: Equipe, Mês, Quadrimestre, Classificação -->
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50/90 p-4 sm:p-5 space-y-3.5 mt-2">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                            <div class="flex items-center gap-2">
+                                <span class="flex h-7 w-7 items-center justify-center rounded-xl bg-teal-600 text-white shadow-xs">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <h4 class="text-sm font-bold text-ink">Filtros do Acompanhamento Mensal</h4>
+                                    <p class="text-[11px] text-muted">Filtre por equipe, mês de competência, quadrimestre ou conceito alcançado</p>
+                                </div>
+                            </div>
+
+                            @if ($selectedIne || $selectedMonth || $selectedClassification)
+                                <button
+                                    type="button"
+                                    wire:click="resetFilters"
+                                    class="inline-flex items-center gap-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 text-xs font-semibold transition cursor-pointer self-start md:self-auto"
+                                >
+                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    <span>Limpar Filtros</span>
+                                </button>
+                            @endif
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+                            <!-- 1. Filtro: Equipe -->
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-bold text-slate-700 block">Equipe (eSF / eAP):</label>
+                                <select
+                                    wire:model.live="selectedIne"
+                                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-teal-500 focus:outline-hidden shadow-2xs"
+                                >
+                                    <option value="">Todas as Equipes ({{ $teams->count() }})</option>
+                                    @foreach ($teams as $team)
+                                        <option value="{{ $team->ine }}">
+                                            {{ $team->team_name }} (INE {{ $team->ine }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- 2. Filtro: Mês -->
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-bold text-slate-700 block">Mês de Competência:</label>
+                                <select
+                                    wire:model.live="selectedMonth"
+                                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-teal-500 focus:outline-hidden shadow-2xs"
+                                >
+                                    <option value="">Todos os 4 Meses (M1 a M4)</option>
+                                    @foreach ($c1Monthly as $m)
+                                        <option value="{{ $m['month_in_quarter'] }}">
+                                            Mês {{ $m['month_in_quarter'] }} · {{ $m['label'] }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- 3. Filtro: Quadrimestre -->
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-bold text-slate-700 block">Quadrimestre / Período:</label>
+                                <select
+                                    wire:change="setPeriodString($event.target.value)"
+                                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-teal-500 focus:outline-hidden shadow-2xs"
+                                >
+                                    @forelse ($periods as $p)
+                                        <option value="{{ $p['year'] }}-{{ $p['quarter'] }}" @selected($year === $p['year'] && $quarter === $p['quarter'])>
+                                            {{ $p['year'] }} · Q{{ $p['quarter'] }} ({{ $p['quarter'] === 1 ? 'Jan-Abr' : ($p['quarter'] === 2 ? 'Mai-Ago' : 'Set-Dez') }})
+                                        </option>
+                                    @empty
+                                        <option value="{{ $year }}-{{ $quarter }}" selected>
+                                            {{ $year }} · Q{{ $quarter }}
+                                        </option>
+                                    @endforelse
+                                </select>
+                            </div>
+
+                            <!-- 4. Filtro: Classificação -->
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-bold text-slate-700 block">Classificação Oficial:</label>
+                                <select
+                                    wire:model.live="selectedClassification"
+                                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-teal-500 focus:outline-hidden shadow-2xs"
+                                >
+                                    <option value="">Todas as Classificações</option>
+                                    <option value="regular">Regular (≤ 10% ou > 70% · Vermelho)</option>
+                                    <option value="suficiente">Suficiente (> 10% e ≤ 30% · Amarelo)</option>
+                                    <option value="bom">Bom (> 30% e ≤ 50% · Verde)</option>
+                                    <option value="otimo">Ótimo (> 50% e ≤ 70% · Azul)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TABELA DE EQUIPES NO ACOMPANHAMENTO MENSAL -->
+                    <div class="space-y-3 pt-2">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                            <div class="flex items-center gap-2">
+                                <span class="h-2 w-2 rounded-full bg-teal-600"></span>
+                                <h4 class="text-sm font-bold text-ink">Equipes no Acompanhamento Mensal</h4>
+                                <span class="rounded-full bg-teal-100 text-teal-800 font-mono text-[11px] font-bold px-2.5 py-0.5">
+                                    {{ $c1Teams->count() }} de {{ $teams->count() }} equipes
+                                </span>
+                                @if ($selectedMonth)
+                                    <span class="rounded-full bg-slate-200 text-slate-700 text-[11px] font-semibold px-2 py-0.5">
+                                        Mês {{ $selectedMonth }}
+                                    </span>
+                                @endif
+                                @if ($selectedClassification)
+                                    <span class="rounded-full bg-slate-200 text-slate-700 text-[11px] font-semibold px-2 py-0.5 capitalize">
+                                        {{ $selectedClassification }}
+                                    </span>
+                                @endif
+                            </div>
+
+                            <span class="text-xs font-mono font-medium text-slate-500">
+                                {{ $selectedMonth ? 'Detalhamento do Mês ' . $selectedMonth : 'Média Aritmética (M1 + M2 + M3 + M4) / 4' }}
+                            </span>
+                        </div>
+
+                        @if ($c1Teams->isEmpty())
+                            <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center space-y-2">
+                                <p class="text-sm font-semibold text-slate-600">Nenhuma equipe encontrada para os filtros selecionados.</p>
+                                <button
+                                    type="button"
+                                    wire:click="resetFilters"
+                                    class="text-xs text-teal-700 hover:text-teal-900 font-bold underline cursor-pointer"
+                                >
+                                    Limpar todos os filtros
+                                </button>
+                            </div>
+                        @else
+                            <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                                <table class="w-full text-left text-xs text-slate-700">
+                                    <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] tracking-wider border-b border-line font-bold">
+                                        <tr>
+                                            <th class="py-3 px-4">Equipe / Unidade</th>
+                                            <th class="py-3 px-3">Código INE</th>
+                                            <th class="py-3 px-3">Tipo</th>
+                                            @if ($selectedMonth === null)
+                                                <th class="py-3 px-3 text-center">Mês 1</th>
+                                                <th class="py-3 px-3 text-center">Mês 2</th>
+                                                <th class="py-3 px-3 text-center">Mês 3</th>
+                                                <th class="py-3 px-3 text-center">Mês 4</th>
+                                                <th class="py-3 px-4 text-center font-black text-ink bg-slate-100/60">Média Quad.</th>
+                                                <th class="py-3 px-3 text-center">Conceito</th>
+                                                <th class="py-3 px-3 text-center">Comp. III</th>
+                                                <th class="py-3 px-3 text-center">Status Agenda</th>
+                                            @else
+                                                <th class="py-3 px-3 text-center">Programadas</th>
+                                                <th class="py-3 px-3 text-center">Espontâneas</th>
+                                                <th class="py-3 px-3 text-center font-black text-ink">Total</th>
+                                                <th class="py-3 px-4 text-center font-black text-ink bg-slate-100/60">% Mês {{ $selectedMonth }}</th>
+                                                <th class="py-3 px-3 text-center">Conceito Mês</th>
+                                                <th class="py-3 px-3 text-center">Pontos Mês</th>
+                                                <th class="py-3 px-3 text-center">Status Mês</th>
+                                            @endif
+                                            <th class="py-3 px-4 text-right">Ação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 bg-white">
+                                        @foreach ($c1Teams as $team)
+                                            @php
+                                                $tScores = $team->monthly_scores ?? [1 => 0.0, 2 => 0.0, 3 => 0.0, 4 => 0.0];
+                                                $tDetails = $team->monthly_details ?? [];
+                                                $mDetail = $selectedMonth ? ($tDetails[$selectedMonth] ?? null) : null;
+                                                $tLevel = $selectedMonth ? ($mDetail['performance_level'] ?? 'regular') : ($team->quarter_level ?? $team->performance_level);
+                                                $tPoints = $selectedMonth ? ($mDetail['component_iii_points'] ?? 0.25) : ($team->component_iii_points ?? 0.25);
+
+                                                $tBadge = match ($tLevel) {
+                                                    'otimo' => 'bg-sky-100 text-sky-800 border-sky-300',
+                                                    'bom' => 'bg-emerald-100 text-emerald-800 border-emerald-300',
+                                                    'suficiente' => 'bg-amber-100 text-amber-800 border-amber-300',
+                                                    default => 'bg-rose-100 text-rose-800 border-rose-300',
+                                                };
+
+                                                $currScore = $selectedMonth ? ($mDetail['score_percent'] ?? 0.0) : ($team->quarter_average ?? $team->score_percent);
+
+                                                $statusText = match (true) {
+                                                    $currScore > 70.0 => 'Fechada (>70%)',
+                                                    $currScore < 30.0 => 'Espontânea (<30%)',
+                                                    default => 'Equilibrada',
+                                                };
+
+                                                $statusBadge = match (true) {
+                                                    $currScore > 70.0 => 'bg-rose-50 text-rose-800 border-rose-200',
+                                                    $currScore < 30.0 => 'bg-amber-50 text-amber-800 border-amber-200',
+                                                    default => 'bg-emerald-50 text-emerald-800 border-emerald-200',
+                                                };
+                                            @endphp
+                                            <tr class="hover:bg-slate-50/80 transition {{ $selectedIne === $team->ine ? 'bg-teal-50/70 font-semibold' : '' }}">
+                                                <td class="py-3 px-4 font-bold text-ink">
+                                                    {{ $team->team_name }}
+                                                </td>
+                                                <td class="py-3 px-3 font-mono text-slate-500 text-[11px]">
+                                                    {{ $team->ine }}
+                                                </td>
+                                                <td class="py-3 px-3">
+                                                    <span class="rounded px-1.5 py-0.5 text-[9px] font-bold {{ $team->team_type === '70' ? 'bg-teal-100 text-teal-800' : 'bg-slate-100 text-slate-800' }}">
+                                                        {{ $team->team_type === '70' ? 'eSF' : 'eAP' }}
+                                                    </span>
+                                                </td>
+
+                                                @if ($selectedMonth === null)
+                                                    <td class="py-3 px-3 text-center font-mono text-slate-600">
+                                                        {{ number_format($tScores[1] ?? 0, 1, ',', '.') }}%
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center font-mono text-slate-600">
+                                                        {{ number_format($tScores[2] ?? 0, 1, ',', '.') }}%
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center font-mono text-slate-600">
+                                                        {{ number_format($tScores[3] ?? 0, 1, ',', '.') }}%
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center font-mono text-slate-600">
+                                                        {{ number_format($tScores[4] ?? 0, 1, ',', '.') }}%
+                                                    </td>
+                                                    <td class="py-3 px-4 text-center font-mono font-black text-sm text-ink bg-slate-50/50">
+                                                        {{ number_format($team->quarter_average ?? $team->score_percent, 1, ',', '.') }}%
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center">
+                                                        <span class="rounded-full px-2 py-0.5 text-[10px] font-bold border {{ $tBadge }}">
+                                                            {{ ucfirst($tLevel) }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center font-mono font-bold text-emerald-700">
+                                                        {{ number_format($team->component_iii_points ?? 0.25, 2, ',', '.') }} pt
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center">
+                                                        <span class="rounded-lg px-2 py-0.5 text-[10px] font-bold border {{ $statusBadge }}">
+                                                            {{ $statusText }}
+                                                        </span>
+                                                    </td>
+                                                @else
+                                                    <td class="py-3 px-3 text-center font-mono font-bold text-teal-800">
+                                                        {{ number_format($mDetail['numerator'] ?? 0, 0, '', '.') }}
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center font-mono text-slate-600">
+                                                        {{ number_format($mDetail['spontaneous'] ?? 0, 0, '', '.') }}
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center font-mono font-black text-ink">
+                                                        {{ number_format($mDetail['denominator'] ?? 0, 0, '', '.') }}
+                                                    </td>
+                                                    <td class="py-3 px-4 text-center font-mono font-black text-sm text-ink bg-slate-50/50">
+                                                        {{ number_format($mDetail['score_percent'] ?? 0, 1, ',', '.') }}%
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center">
+                                                        <span class="rounded-full px-2 py-0.5 text-[10px] font-bold border {{ $tBadge }}">
+                                                            {{ ucfirst($tLevel) }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center font-mono font-bold text-emerald-700">
+                                                        {{ number_format($tPoints, 2, ',', '.') }} pt
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center">
+                                                        <span class="rounded-lg px-2 py-0.5 text-[10px] font-bold border {{ $statusBadge }}">
+                                                            {{ $statusText }}
+                                                        </span>
+                                                    </td>
+                                                @endif
+
+                                                <td class="py-3 px-4 text-right">
+                                                    <button
+                                                        type="button"
+                                                        wire:click="selectTeam('{{ $selectedIne === $team->ine ? '' : $team->ine }}')"
+                                                        class="text-xs font-semibold {{ $selectedIne === $team->ine ? 'text-teal-900 bg-teal-100 px-2 py-1 rounded-lg' : 'text-teal-700 hover:text-teal-900' }} cursor-pointer"
+                                                    >
+                                                        {{ $selectedIne === $team->ine ? 'Limpar Foco' : 'Filtrar' }}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
                     </div>
                 </div>
 

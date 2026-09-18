@@ -552,10 +552,28 @@ class FamilyHealthService
             foreach ($teams as $team) {
                 $tSnaps = $allTeamsMonthly->get($team->ine) ?? collect();
                 $scoresByMonth = [];
+                $detailsByMonth = [];
                 $monthIdx = 1;
                 foreach ($monthsConfig as $mNum => $cfg) {
                     $found = $tSnaps->firstWhere('month', $mNum);
-                    $scoresByMonth[$monthIdx] = $found ? (float) $found->score_percent : 0.0;
+                    $mScore = $found ? (float) $found->score_percent : 0.0;
+                    $mLevel = $found ? $found->performance_level : self::calculatePerformanceLevel('c1', $mScore);
+                    $mNumAtend = $found ? (int) $found->numerator : 0;
+                    $mDenAtend = $found ? (int) $found->denominator : 0;
+
+                    $scoresByMonth[$monthIdx] = $mScore;
+                    $detailsByMonth[$monthIdx] = [
+                        'month_number' => $mNum,
+                        'month_in_quarter' => $monthIdx,
+                        'name' => $cfg['name'],
+                        'label' => $cfg['label'],
+                        'numerator' => $mNumAtend,
+                        'denominator' => $mDenAtend,
+                        'spontaneous' => max(0, $mDenAtend - $mNumAtend),
+                        'score_percent' => $mScore,
+                        'performance_level' => $mLevel,
+                        'component_iii_points' => self::calculateComponentIIIPoints($mLevel),
+                    ];
                     $monthIdx++;
                 }
 
@@ -564,6 +582,7 @@ class FamilyHealthService
                 $tPoints = self::calculateComponentIIIPoints($tLevel);
 
                 $team->monthly_scores = $scoresByMonth;
+                $team->monthly_details = $detailsByMonth;
                 $team->quarter_average = $tAvg;
                 $team->quarter_level = $tLevel;
                 $team->component_iii_points = $tPoints;
