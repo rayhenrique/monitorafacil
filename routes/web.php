@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Livewire\Help\FillingGuide;
 use App\Livewire\Settings\AuditLogs;
 use App\Livewire\Settings\CnesImport;
 use App\Livewire\Settings\DataProcessing;
@@ -27,5 +28,10 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/conexao-esus', EsusConnection::class)->name('esus-connection');
         Route::get('/processar-dados', DataProcessing::class)->name('data-processing');
         Route::get('/importar-cnes-xml', CnesImport::class)->name('cnes-import');
+    });
+
+    Route::prefix('ajuda')->name('help.')->group(function (): void {
+        Route::get('/', fn () => redirect()->route('help.guide'));
+        Route::get('/guia-preenchimento', FillingGuide::class)->name('guide');
     });
 });

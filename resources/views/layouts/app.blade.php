@@ -128,6 +128,26 @@
                                             <a href="{{ route('settings.cnes-import') }}" @click="mobileMenuOpen = false" class="block rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('settings.cnes-import') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">Importar CNES / XML</a>
                                         </div>
                                     </div>
+
+                                    <!-- Ajuda com Sub-itens Mobile -->
+                                    <div x-data="{ open: {{ request()->routeIs('help.*') ? 'true' : 'false' }} }" class="space-y-1">
+                                        <div class="flex items-center justify-between rounded-xl transition {{ request()->routeIs('help.*') ? 'bg-teal-500/15 text-teal-300 font-semibold' : 'text-slate-300 hover:bg-[#132d27] hover:text-white font-medium' }}">
+                                            <a href="{{ route('help.guide') }}" @click="mobileMenuOpen = false" class="flex-1 flex items-center gap-3 px-3 py-2.5 text-sm">
+                                                <svg class="h-5 w-5 {{ request()->routeIs('help.*') ? 'text-teal-400' : 'text-slate-400' }} shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                                                </svg>
+                                                <span>Ajuda</span>
+                                            </a>
+                                            <button type="button" @click="open = !open" class="p-2.5 text-slate-400 hover:text-white transition" aria-label="Alternar menu ajuda">
+                                                <svg class="h-4 w-4 transition-transform duration-200" :class="{ 'rotate-180 text-teal-400': open }" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <div x-show="open" class="ml-4 pl-3 border-l border-[#1a3832] space-y-1 mt-1" style="{{ request()->routeIs('help.*') ? '' : 'display: none;' }}">
+                                            <a href="{{ route('help.guide') }}" @click="mobileMenuOpen = false" class="block rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('help.guide') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">Guia de Preenchimento</a>
+                                        </div>
+                                    </div>
                                 </nav>
                             </div>
                         </div>
@@ -239,6 +259,28 @@
                                 </a>
                                 <a href="{{ route('settings.cnes-import') }}" class="block rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('settings.cnes-import') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
                                     Importar CNES / XML
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Ajuda com Sub-itens -->
+                        <div x-data="{ open: {{ request()->routeIs('help.*') ? 'true' : 'false' }} }" class="space-y-1">
+                            <div class="flex items-center justify-between rounded-xl transition {{ request()->routeIs('help.*') ? 'bg-teal-500/15 text-teal-300 font-semibold' : 'text-slate-300 hover:bg-[#132d27] hover:text-white font-medium' }}">
+                                <a href="{{ route('help.guide') }}" class="flex-1 flex items-center gap-3 px-3.5 py-2.5 text-sm">
+                                    <svg class="h-5 w-5 {{ request()->routeIs('help.*') ? 'text-teal-400' : 'text-slate-400 group-hover:text-teal-300' }} shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                                    </svg>
+                                    <span>Ajuda</span>
+                                </a>
+                                <button type="button" @click="open = !open" class="p-2.5 text-slate-400 hover:text-white transition" aria-label="Alternar menu ajuda">
+                                    <svg class="h-4 w-4 transition-transform duration-200" :class="{ 'rotate-180 text-teal-400': open }" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div x-show="open" class="ml-4 pl-3 border-l border-[#1a3832] space-y-1 mt-1" style="{{ request()->routeIs('help.*') ? '' : 'display: none;' }}">
+                                <a href="{{ route('help.guide') }}" class="block rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('help.guide') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                    Guia de Preenchimento
                                 </a>
                             </div>
                         </div>
