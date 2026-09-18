@@ -146,6 +146,10 @@
                                         </div>
                                         <div x-show="open" class="ml-4 pl-3 border-l border-[#1a3832] space-y-1 mt-1" style="{{ request()->routeIs('help.*') ? '' : 'display: none;' }}">
                                             <a href="{{ route('help.guide') }}" @click="mobileMenuOpen = false" class="block rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('help.guide') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">Guia de Preenchimento</a>
+                                            <a href="{{ route('help.whats-new') }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('help.whats-new') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                                <span>Novidades da Versão</span>
+                                                <span class="rounded bg-teal-800 text-teal-200 px-1.5 py-0.5 text-[10px] font-bold">v1.4.0</span>
+                                            </a>
                                         </div>
                                     </div>
                                 </nav>
@@ -282,13 +286,17 @@
                                 <a href="{{ route('help.guide') }}" class="block rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('help.guide') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
                                     Guia de Preenchimento
                                 </a>
+                                <a href="{{ route('help.whats-new') }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('help.whats-new') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                    <span>Novidades da Versão</span>
+                                    <span class="rounded bg-teal-800 text-teal-200 px-1.5 py-0.5 text-[10px] font-bold">v1.4.0</span>
+                                </a>
                             </div>
                         </div>
                     </nav>
                 </div>
             </div>
 
-            <!-- Rodapé da Sidebar: Usuário Autenticado e Logout -->
+            <!-- Rodapé da Sidebar: Usuário Autenticado, Logout e Versão -->
             <div class="border-t border-[#1a3832] p-4 bg-[#081714]">
                 <div class="flex items-center justify-between gap-3">
                     <div class="flex items-center gap-3 min-w-0">
@@ -309,6 +317,12 @@
                             </svg>
                         </button>
                     </form>
+                </div>
+                <div class="mt-3 pt-2.5 border-t border-[#132d27] flex items-center justify-between text-[11px] text-slate-400">
+                    <span class="text-slate-400">Monitora Fácil</span>
+                    <a href="{{ route('help.whats-new') }}" class="inline-flex items-center gap-1 rounded bg-teal-900/80 hover:bg-teal-800 text-teal-300 px-1.5 py-0.5 font-mono text-[10px] font-bold transition border border-teal-700/50" title="Ver notas da versão e histórico">
+                        <span>v1.4.0</span>
+                    </a>
                 </div>
             </div>
         </aside>
@@ -345,6 +359,7 @@
             </footer>
         </div>
     </div>
+    @livewire('common.whats-new-modal')
     @livewireScripts
 </body>
 </html>

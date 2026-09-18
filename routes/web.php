@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Livewire\Help\FillingGuide;
+use App\Livewire\Help\WhatsNew;
 use App\Livewire\Settings\AuditLogs;
 use App\Livewire\Settings\CnesImport;
 use App\Livewire\Settings\DataProcessing;
@@ -33,5 +34,6 @@ Route::middleware('auth')->group(function (): void {
     Route::prefix('ajuda')->name('help.')->group(function (): void {
         Route::get('/', fn () => redirect()->route('help.guide'));
         Route::get('/guia-preenchimento', FillingGuide::class)->name('guide');
+        Route::get('/novidades', WhatsNew::class)->name('whats-new');
     });
 });

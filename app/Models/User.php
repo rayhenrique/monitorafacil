@@ -13,7 +13,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /** @var list<string> */
-    protected $fillable = ['name', 'email', 'password'];
+    protected $fillable = ['name', 'email', 'password', 'last_seen_version'];
 
     /** @var list<string> */
     protected $hidden = ['password', 'remember_token'];
