@@ -64,3 +64,8 @@
     - [x] Atribuição de valor 0 para dados ainda não consolidados no banco de dados.
   - [x] Adicionar testes automatizados cobrindo o componente de qualidade expandido (totalizando 16 testes aprovados e 57 asserções).
 
+- [x] **Fase 10: Controle de Versão Remoto e Repositório Público no GitHub**
+  - [x] Conectar com a conta GitHub oficial `rayhenrique`.
+  - [x] Criar repositório público `rayhenrique/monitorafacil`.
+  - [x] Vincular remote `origin` via HTTPS e configurar rastreamento da branch `main`.
+  - [x] Realizar push inicial de todo o código, documentação e suíte de testes.
