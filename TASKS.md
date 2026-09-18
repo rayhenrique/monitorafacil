@@ -75,3 +75,8 @@
   - [x] Mapear credenciais, paths do CloudPanel (`htdocs/.../public`), usuário SSH `kltecnologia-monitorafacil` e banco MySQL.
   - [x] Documentar emissão de SSL Let's Encrypt e agendamento de Cron Job no CloudPanel.
 
+- [x] **Fase 12: Simplificação da Sidebar e Módulo Visão Geral**
+  - [x] Manter exclusivamente o item "Visão Geral" na navegação principal da sidebar desktop e mobile.
+  - [x] Remover âncoras secundárias mantendo o painel limpo e modular.
+
+
