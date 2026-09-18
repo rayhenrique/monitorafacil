@@ -7,7 +7,7 @@ use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
-#[Signature('esus:process-data {--scope=all : Escopo de processamento: all (geral completo), c1 (indicador C1) ou c2 (indicador C2)} {--year=2026 : Ano de competência} {--quarter=3 : Quadrimestre de competência}')]
+#[Signature('esus:process-data {--scope=all : Escopo de processamento: all (geral completo), c1 (indicador C1) ou c2 (indicador C2)} {--year= : Ano de competência (padrão: atual)} {--quarter= : Quadrimestre de competência (padrão: atual)}')]
 #[Description('Executa o processamento e consolidação das tabelas do e-SUS PEC para os Indicadores da APS.')]
 class EsusProcessData extends Command
 {
@@ -18,8 +18,13 @@ class EsusProcessData extends Command
             $scope = 'all';
         }
 
-        $year = (int) ($this->option('year') ?: 2026);
-        $quarter = (int) ($this->option('quarter') ?: 3);
+        $year = (int) ($this->option('year') ?: now()->year);
+        $quarter = (int) ($this->option('quarter') ?: min(3, (int) ceil(now()->month / 4)));
+        if ($year < 2020 || $year > 2100 || $quarter < 1 || $quarter > 3) {
+            $this->error('Ano ou quadrimestre inválido.');
+
+            return self::FAILURE;
+        }
 
         $this->info(sprintf('Iniciando processamento analítico e-SUS PEC [Escopo: %s] para %d/Q%d...', strtoupper($scope), $year, $quarter));
 

@@ -68,6 +68,7 @@
                     $level = $item['performance_level'];
 
                     $badgeStyles = match ($level) {
+                        null => 'bg-slate-100 text-slate-700 border-slate-200',
                         'otimo' => 'bg-emerald-100 text-emerald-800 border-emerald-200',
                         'bom' => 'bg-sky-100 text-sky-800 border-sky-200',
                         'suficiente' => 'bg-amber-100 text-amber-800 border-amber-200',
@@ -75,6 +76,7 @@
                     };
 
                     $levelLabel = match ($level) {
+                        null => 'Sem resultado',
                         'otimo' => 'Ótimo',
                         'bom' => 'Bom',
                         'suficiente' => 'Suficiente',
@@ -82,6 +84,7 @@
                     };
 
                     $barColor = match ($level) {
+                        null => 'bg-slate-300',
                         'otimo' => 'bg-emerald-500',
                         'bom' => 'bg-sky-500',
                         'suficiente' => 'bg-amber-500',
@@ -119,28 +122,34 @@
                         <div class="flex items-end justify-between">
                             <div>
                                 <span class="text-2xl font-black text-ink tabular-nums">
-                                    {{ number_format($score, 1, ',', '.') }}%
+                                    {{ $score !== null ? number_format($score, 1, ',', '.').'%' : '—' }}
                                 </span>
                                 <span class="text-xs text-muted block">
-                                    {{ number_format($item['numerator'], 0, '', '.') }} de {{ number_format($item['denominator'], 0, '', '.') }}
+                                    @if ($slug === 'c2')
+                                        {{ $score !== null ? 'Estimativa local do DW PEC' : 'Aguardando extração válida do C2' }}
+                                    @else
+                                        {{ number_format($item['numerator'], 0, '', '.') }} de {{ number_format($item['denominator'], 0, '', '.') }}
+                                    @endif
                                 </span>
                             </div>
                             <div class="text-right">
                                 <span class="text-[11px] text-slate-500 block">Público Elegível</span>
                                 <span class="text-xs font-semibold text-slate-700">
-                                    {{ number_format($item['denominator'], 0, '', '.') }} pessoas
+                                    {{ $slug === 'c2' && $score === null ? '—' : number_format($item['denominator'], 0, '', '.').' pessoas' }}
                                 </span>
                             </div>
                         </div>
 
                         <!-- Barra de Progresso Visual -->
                         <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                            <div class="{{ $barColor }} h-2 rounded-full transition-all duration-500" style="width: {{ min(100, $score) }}%"></div>
+                            <div class="{{ $barColor }} h-2 rounded-full transition-all duration-500" style="width: {{ min(100, $score ?? 0) }}%"></div>
                         </div>
 
                         <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1">
                             <span>Meta Ótimo: > 75%</span>
-                            @if ($item['active_search_count'] > 0)
+                            @if ($slug === 'c2' && $score !== null)
+                                <span class="text-sky-700 font-semibold">Resultado preliminar</span>
+                            @elseif ($item['active_search_count'] > 0)
                                 <span class="text-amber-700 font-semibold inline-flex items-center gap-1">
                                     <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
                                     {{ $item['active_search_count'] }} em busca ativa

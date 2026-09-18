@@ -485,10 +485,10 @@ class FamilyHealthTest extends TestCase
             ->assertSet('selectedClassification', null);
     }
 
-    public function test_c2_scope_data_processing_command(): void
+    public function test_c2_command_does_not_generate_scores_without_pec(): void
     {
         $this->artisan('esus:process-data', ['--scope' => 'c2', '--year' => 2026, '--quarter' => 1])
-            ->assertSuccessful();
+            ->assertExitCode(1);
 
         $c2Snapshots = \App\Models\FamilyHealthIndicatorSnapshot::query()
             ->where('indicator_code', 'c2')
@@ -496,8 +496,73 @@ class FamilyHealthTest extends TestCase
             ->where('quarter', 1)
             ->count();
 
-        $this->assertGreaterThan(0, $c2Snapshots);
+        $this->assertSame(0, $c2Snapshots);
+    }
+
+    public function test_old_c2_snapshots_are_hidden_until_recalculated_from_dw(): void
+    {
+        $this->authenticateUser();
+        \App\Models\FamilyHealthIndicatorSnapshot::query()->create([
+            'year' => 2026, 'quarter' => 1, 'ine' => null,
+            'team_name' => 'Consolidado Municipal', 'team_type' => '70',
+            'indicator_code' => 'c2', 'numerator' => 800, 'denominator' => 10,
+            'score_percent' => 80, 'performance_level' => 'otimo',
+        ]);
+
+        $service = app(\App\Services\FamilyHealthService::class);
+        $detail = $service->getIndicatorDetail('c2', 2026, 1);
+        $this->assertNull($detail['current']['score_percent']);
+        $this->assertSame(0, $detail['quarter_summary']['valid_months']);
+        $this->assertSame([], $detail['active_search_list']);
+        $this->get('/saude-da-familia/c2?ano=2026&quadrimestre=1')
+            ->assertOk()->assertSee('Sem resultado C2 validado');
+    }
+
+    public function test_c2_snapshot_uses_only_months_with_two_year_old_cohort(): void
+    {
+        $team = ['0000171220' => ['ine' => '0000171220', 'name' => 'ESF CENTRO', 'type' => '70']];
+        $source = \Mockery::mock(\App\Services\C2DwService::class);
+        $source->shouldReceive('extract')->once()->andReturn([
+            '0000171220' => [
+                1 => ['numerator' => 80, 'denominator' => 2, 'score_percent' => 40.0,
+                    'practices' => ['A' => 1, 'B' => 1, 'C' => 1, 'D' => 1, 'E' => 0], 'incomplete' => 2],
+                3 => ['numerator' => 80, 'denominator' => 1, 'score_percent' => 80.0,
+                    'practices' => ['A' => 1, 'B' => 1, 'C' => 1, 'D' => 1, 'E' => 0], 'incomplete' => 1],
+            ],
+        ]);
+        $writer = new \App\Services\C2SnapshotService($source);
+        $stats = $writer->process(DB::connection('sqlite'), 2026, 1, $team);
+
+        $this->assertSame(['children' => 3, 'teams' => 1, 'months' => 2], $stats);
+        $detail = app(\App\Services\FamilyHealthService::class)->getIndicatorDetail('c2', 2026, 1);
+        $this->assertSame(60.0, $detail['current']['score_percent']);
+        $this->assertSame(2, $detail['quarter_summary']['valid_months']);
+        $this->assertNull($detail['monthly_evolution'][1]['score_percent']);
+        $this->assertSame(3, $detail['current']['denominator']);
+        $this->assertSame(160, $detail['current']['numerator']);
+    }
+
+    public function test_c2_read_failure_preserves_existing_snapshots(): void
+    {
+        \App\Models\FamilyHealthIndicatorSnapshot::query()->create([
+            'year' => 2026, 'quarter' => 1, 'ine' => '0000171220',
+            'team_name' => 'ESF CENTRO', 'team_type' => '70',
+            'indicator_code' => 'c2', 'numerator' => 40, 'denominator' => 1,
+            'score_percent' => 40, 'performance_level' => 'suficiente',
+        ]);
+        $source = \Mockery::mock(\App\Services\C2DwService::class);
+        $source->shouldReceive('extract')->once()->andThrow(new \RuntimeException('DW indisponível'));
+
+        try {
+            (new \App\Services\C2SnapshotService($source))->process(DB::connection('sqlite'), 2026, 1, [
+                '0000171220' => ['ine' => '0000171220', 'name' => 'ESF CENTRO', 'type' => '70'],
+            ]);
+            $this->fail('A leitura deveria falhar.');
+        } catch (\RuntimeException $e) {
+            $this->assertSame('DW indisponível', $e->getMessage());
+        }
+
+        $this->assertSame(1, \App\Models\FamilyHealthIndicatorSnapshot::query()
+            ->where('indicator_code', 'c2')->count());
     }
 }
-
-

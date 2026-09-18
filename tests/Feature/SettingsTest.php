@@ -355,8 +355,8 @@ XML;
             ->assertSet('progressPercent', 0)
             ->call('processNow')
             ->assertSet('progressPercent', 100)
-            ->assertSee('tb_fat_atendimento_individual')
-            ->assertSee('tb_dim_equipe');
+            ->assertSet('processStatus', 'error')
+            ->assertSee('A leitura do C2 exige conexão com o DW do PEC');
     }
 
     public function test_data_processing_livewire_can_run_scoped_c1_and_general(): void
@@ -380,15 +380,17 @@ XML;
         Livewire::test(DataProcessing::class)
             ->call('processC2')
             ->assertSet('progressPercent', 100)
+            ->assertSet('processStatus', 'error')
             ->assertSet('selectedScope', 'c2')
-            ->assertSee('Foco selecionado: Indicador C2 (Desenvolvimento Infantil)');
+            ->assertSee('A leitura do C2 exige conexão com o DW do PEC');
 
         // Processamento Geral Completo
         Livewire::test(DataProcessing::class)
             ->call('processAll')
             ->assertSet('progressPercent', 100)
+            ->assertSet('processStatus', 'error')
             ->assertSet('selectedScope', 'all')
-            ->assertSee('cadastros individuais consolidados (MICI)');
+            ->assertSee('A leitura do C2 exige conexão com o DW do PEC');
     }
 
     public function test_esus_process_data_command_runs_with_scopes(): void
@@ -399,11 +401,10 @@ XML;
 
         $this->artisan('esus:process-data', ['--scope' => 'c2'])
             ->expectsOutputToContain('[Escopo: C2]')
-            ->assertExitCode(0);
+            ->assertExitCode(1);
 
         $this->artisan('esus:process-data', ['--scope' => 'all'])
             ->expectsOutputToContain('[Escopo: ALL]')
-            ->assertExitCode(0);
+            ->assertExitCode(1);
     }
 }
-

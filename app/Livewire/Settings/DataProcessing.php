@@ -79,11 +79,11 @@ class DataProcessing extends Component
                 $this->progressPercent = $percent;
                 $this->currentStep = $step;
                 $this->tablesReport = $tables;
-            }, 2026, 3, $scope);
+            }, (int) now()->year, min(3, (int) ceil(now()->month / 4)), $scope);
 
             $this->progressPercent = 100;
-            $this->currentStep = 'Processamento concluído com sucesso!';
-            $this->processStatus = 'success';
+            $this->currentStep = $result['success'] ? 'Processamento concluído com sucesso!' : 'Falha durante o processamento.';
+            $this->processStatus = $result['success'] ? 'success' : 'error';
             $this->processMessage = $result['message'];
             $this->tablesReport = $result['tables'];
             $this->executionTimeMs = $result['execution_time_ms'];

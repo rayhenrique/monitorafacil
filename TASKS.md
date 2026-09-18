@@ -90,5 +90,12 @@
   - [x] **Submódulo 6 - Importar CNES / XML** (`/configuracoes/importar-cnes-xml`): Upload de arquivos XML homologados pelo Ministério da Saúde, validação de integridade sem DTD com `XMLReader`, verificação do código IBGE, prévia detalhada das equipes (eSF, eSB, eMulti) e salvamento em `importacao/`.
   - [x] Suíte de testes automatizados completa com 26 testes aprovados (104 asserções).
 
+- [ ] **Fase 14: Revisão do indicador C2 pelo DW PEC e notas técnicas**
+  - [x] Substituir o percentual simulado por extração de coorte mensal e boas práticas A–E documentadas no DW.
+  - [x] Calcular a média quadrimestral apenas dos meses com crianças que completaram dois anos e aplicar peso 2.
+  - [x] Impedir geração ou exibição de C2 fictício; sinalizar ausência de resultado e origem preliminar do DW.
+  - [x] Cobrir regras de pontuação, exceção eAP, meses sem coorte e falha de conexão com testes locais.
+  - [ ] Validar o esquema e a execução somente de leitura no PEC acessível pela VPS.
+  - [ ] Comparar amostra de resultados por equipe/mês com o Siaps e investigar diferenças por RNDS, ações coletivas e vínculo histórico.
 
 

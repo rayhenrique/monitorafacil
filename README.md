@@ -104,7 +104,15 @@ graph TD
   - **Saúde Bucal (B1 a B6)**: Primeira Consulta Programada (B1), Tratamento Concluído (B2), Taxa de Exodontias (B3), Escovação Supervisionada (B4), Procedimentos Preventivos (B5) e Restauração Atraumática - ART (B6).
   - **e-Multi (M1 e M2)**: Atendimentos por pessoa (M1) e Ações interprofissionais (M2).
 - Iconografia executiva contextual dedicada para cada indicador.
-- Tratamento compassivo para métricas em processamento com referência padrão `0`.
+- Ausência de resultado C2 exibida como **sem dados**, sem converter falta de coorte em zero.
+
+#### C2 · estimativa local do DW PEC
+
+O processamento C2 faz somente consultas de leitura no PostgreSQL do PEC e grava agregados no MySQL local; a tela do indicador consulta apenas esses snapshots. Para cada mês, entram as crianças vinculadas a eSF/eAP que completaram dois anos; cada prática A–E vale 20 pontos. A média quadrimestral usa apenas meses com coorte, conforme a Nota Técnica nº 8/2026. Meses sem crianças elegíveis ficam sem resultado.
+
+O cálculo lê vínculos atuais, atendimentos de puericultura, antropometria, visitas ACS/TACS e vacinação documentados no DW. É **estimativa preliminar**, pois o DW local pode não conter vacinas da RNDS, ações coletivas e o histórico de vínculo usado pelo Siaps. Não use o percentual local como resultado oficial de cofinanciamento. O C2 antigo calculado por simulação fica oculto até uma nova extração bem-sucedida.
+
+Na VPS com acesso ao PEC, após instalar esta versão, execute `php artisan esus:process-data --scope=c2 --year=2026 --quarter=3` e compare uma amostra de equipes e meses com o Siaps. A aplicação não envia fichas, XML ou Thrift para o PEC.
 
 ### 5. 💲 Simulador de Repasses e Planejamento Financeiro
 - Ferramenta de estimativa do componente de **Vínculo e Acompanhamento Territorial** de eSF (40h).
