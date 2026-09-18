@@ -159,11 +159,41 @@ class QualityOverview extends Component
         ];
     }
 
+    /**
+     * @return array<int, array{code: string, name: string, description: string, icon: string, optimal: int, good: int, sufficient: int, regular: int}>
+     */
+    public function getEMultiIndicators(): array
+    {
+        return [
+            [
+                'code' => 'M1',
+                'name' => 'Atendimentos por pessoa',
+                'description' => 'Média de atendimentos realizados pela eMulti por pessoa, nos últimos 4 meses.',
+                'icon' => 'users-multi',
+                'optimal' => 0,
+                'good' => 0,
+                'sufficient' => 0,
+                'regular' => 0,
+            ],
+            [
+                'code' => 'M2',
+                'name' => 'Ações interprofissionais',
+                'description' => 'Ações de cuidado compartilhadas entre a eMulti e outros profissionais da APS.',
+                'icon' => 'collaboration',
+                'optimal' => 0,
+                'good' => 0,
+                'sufficient' => 0,
+                'regular' => 0,
+            ],
+        ];
+    }
+
     public function render(): View
     {
         return view('livewire.dashboard.quality-overview', [
             'familyHealth' => $this->getFamilyHealthIndicators(),
             'oralHealth' => $this->getOralHealthIndicators(),
+            'eMulti' => $this->getEMultiIndicators(),
         ]);
     }
 }

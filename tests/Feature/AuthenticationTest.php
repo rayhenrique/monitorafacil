@@ -166,6 +166,10 @@ class AuthenticationTest extends TestCase
             ->assertSee('Componente de Qualidade')
             ->assertSee('Mais Acesso')
             ->assertSee('Primeira Consulta Programada')
+            ->assertSee('Atendimentos por pessoa')
+            ->assertSee('Ações interprofissionais')
+            ->assertSee('M1')
+            ->assertSee('M2')
             ->assertSee('Ótimo');
     }
 }

@@ -59,5 +59,8 @@
   - [x] Criar novo componente Livewire `QualityOverview` com os indicadores da Nota Técnica 30/2025:
     - [x] Saúde da Família: Indicadores C1 a C7 (Mais Acesso, Crianças, Gestante/Puérpera, Diabéticos, Hipertensos, Idosos, Mulheres).
     - [x] Saúde Bucal: Indicadores B1 a B6 (Primeira Consulta, Tratamento Concluído, Exodontias, Escovação Supervisionada, Procedimentos Preventivos, Restauração ART).
-    - [x] Atribuição de valor 0 para dados ainda não processados na base.
-  - [x] Adicionar testes automatizados cobrindo o novo componente de qualidade (totalizando 16 testes aprovados).
+    - [x] e-Multi: Indicadores M1 e M2 (Atendimentos por pessoa, Ações interprofissionais) com suporte a faixas de desempenho.
+    - [x] Ícones temáticos executivos dedicados integrados nos cards de todos os indicadores clínicos (C1 a C7, B1 a B6, M1 a M2).
+    - [x] Atribuição de valor 0 para dados ainda não consolidados no banco de dados.
+  - [x] Adicionar testes automatizados cobrindo o componente de qualidade expandido (totalizando 16 testes aprovados e 57 asserções).
+
