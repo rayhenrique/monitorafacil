@@ -104,6 +104,57 @@
                                         <span>Visão Geral</span>
                                     </a>
 
+                                    <!-- Saúde da Família Mobile -->
+                                    <div x-data="{ open: {{ request()->routeIs('family-health.*') ? 'true' : 'false' }} }" class="space-y-1">
+                                        <div class="flex items-center justify-between rounded-xl transition {{ request()->routeIs('family-health.*') ? 'bg-teal-500/15 text-teal-300 font-semibold' : 'text-slate-300 hover:bg-[#132d27] hover:text-white font-medium' }}">
+                                            <a href="{{ route('family-health.overview') }}" @click="mobileMenuOpen = false" class="flex-1 flex items-center gap-3 px-3 py-2.5 text-sm">
+                                                <svg class="h-5 w-5 {{ request()->routeIs('family-health.*') ? 'text-teal-400' : 'text-slate-400' }} shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                                                </svg>
+                                                <span class="flex items-center gap-2">
+                                                    <span>Saúde da Família</span>
+                                                    <span class="rounded bg-teal-500/20 px-1.5 py-0.5 text-[10px] font-bold text-teal-300">C1-C7</span>
+                                                </span>
+                                            </a>
+                                            <button type="button" @click="open = !open" class="p-2.5 text-slate-400 hover:text-white transition" aria-label="Alternar menu saúde da família">
+                                                <svg class="h-4 w-4 transition-transform duration-200" :class="{ 'rotate-180 text-teal-400': open }" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <div x-show="open" class="ml-4 pl-3 border-l border-[#1a3832] space-y-1 mt-1" style="{{ request()->routeIs('family-health.*') ? '' : 'display: none;' }}">
+                                            <a href="{{ route('family-health.overview') }}" @click="mobileMenuOpen = false" class="block rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('family-health.overview') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">Painel Municipal</a>
+                                            <a href="{{ route('family-health.indicator', 'c1') }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('family-health.indicator') && request()->route('indicator') === 'c1' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                                <span>C1 · Acesso APS</span>
+                                                <span class="text-[10px] text-teal-400 font-mono">Prop.</span>
+                                            </a>
+                                            <a href="{{ route('family-health.indicator', 'c2') }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('family-health.indicator') && request()->route('indicator') === 'c2' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                                <span>C2 · Desenv. Infantil</span>
+                                                <span class="text-[10px] text-teal-400 font-mono">5 BP</span>
+                                            </a>
+                                            <a href="{{ route('family-health.indicator', 'c3') }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('family-health.indicator') && request()->route('indicator') === 'c3' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                                <span>C3 · Pré-natal e Puerp.</span>
+                                                <span class="text-[10px] text-teal-400 font-mono">11 BP</span>
+                                            </a>
+                                            <a href="{{ route('family-health.indicator', 'c4') }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('family-health.indicator') && request()->route('indicator') === 'c4' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                                <span>C4 · Diabetes</span>
+                                                <span class="text-[10px] text-teal-400 font-mono">6 BP</span>
+                                            </a>
+                                            <a href="{{ route('family-health.indicator', 'c5') }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('family-health.indicator') && request()->route('indicator') === 'c5' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                                <span>C5 · Hipertensão</span>
+                                                <span class="text-[10px] text-teal-400 font-mono">4 BP</span>
+                                            </a>
+                                            <a href="{{ route('family-health.indicator', 'c6') }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('family-health.indicator') && request()->route('indicator') === 'c6' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                                <span>C6 · Pessoa Idosa</span>
+                                                <span class="text-[10px] text-teal-400 font-mono">4 BP</span>
+                                            </a>
+                                            <a href="{{ route('family-health.indicator', 'c7') }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('family-health.indicator') && request()->route('indicator') === 'c7' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                                <span>C7 · Câncer Mulher</span>
+                                                <span class="text-[10px] text-teal-400 font-mono">Pond.</span>
+                                            </a>
+                                        </div>
+                                    </div>
+
                                     <div x-data="{ open: {{ request()->routeIs('settings.*') ? 'true' : 'false' }} }" class="space-y-1">
                                         <div class="flex items-center justify-between rounded-xl transition {{ request()->routeIs('settings.*') ? 'bg-teal-500/15 text-teal-300 font-semibold' : 'text-slate-300 hover:bg-[#132d27] hover:text-white font-medium' }}">
                                             <a href="{{ route('settings.users') }}" @click="mobileMenuOpen = false" class="flex-1 flex items-center gap-3 px-3 py-2.5 text-sm">
@@ -228,6 +279,59 @@
                             </svg>
                             <span>Visão Geral</span>
                         </a>
+
+                        <!-- Saúde da Família (C1 ao C7) -->
+                        <div x-data="{ open: {{ request()->routeIs('family-health.*') ? 'true' : 'false' }} }" class="space-y-1">
+                            <div class="flex items-center justify-between rounded-xl transition {{ request()->routeIs('family-health.*') ? 'bg-teal-500/15 text-teal-300 font-semibold' : 'text-slate-300 hover:bg-[#132d27] hover:text-white font-medium' }}">
+                                <a href="{{ route('family-health.overview') }}" class="flex-1 flex items-center gap-3 px-3.5 py-2.5 text-sm">
+                                    <svg class="h-5 w-5 {{ request()->routeIs('family-health.*') ? 'text-teal-400' : 'text-slate-400 group-hover:text-teal-300' }} shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                                    </svg>
+                                    <span class="flex items-center gap-2">
+                                        <span>Saúde da Família</span>
+                                        <span class="rounded bg-teal-500/20 px-1.5 py-0.5 text-[10px] font-bold text-teal-300">C1-C7</span>
+                                    </span>
+                                </a>
+                                <button type="button" @click="open = !open" class="p-2.5 text-slate-400 hover:text-white transition" aria-label="Alternar menu saúde da família">
+                                    <svg class="h-4 w-4 transition-transform duration-200" :class="{ 'rotate-180 text-teal-400': open }" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div x-show="open" class="ml-4 pl-3 border-l border-[#1a3832] space-y-1 mt-1" style="{{ request()->routeIs('family-health.*') ? '' : 'display: none;' }}">
+                                <a href="{{ route('family-health.overview') }}" class="block rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('family-health.overview') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                    Painel Municipal
+                                </a>
+                                <a href="{{ route('family-health.indicator', 'c1') }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('family-health.indicator') && request()->route('indicator') === 'c1' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                    <span>C1 · Acesso APS</span>
+                                    <span class="text-[10px] font-mono text-teal-400/80">Prop.</span>
+                                </a>
+                                <a href="{{ route('family-health.indicator', 'c2') }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('family-health.indicator') && request()->route('indicator') === 'c2' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                    <span>C2 · Desenv. Infantil</span>
+                                    <span class="text-[10px] font-mono text-teal-400/80">5 BP</span>
+                                </a>
+                                <a href="{{ route('family-health.indicator', 'c3') }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('family-health.indicator') && request()->route('indicator') === 'c3' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                    <span>C3 · Pré-natal e Puerp.</span>
+                                    <span class="text-[10px] font-mono text-teal-400/80">11 BP</span>
+                                </a>
+                                <a href="{{ route('family-health.indicator', 'c4') }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('family-health.indicator') && request()->route('indicator') === 'c4' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                    <span>C4 · Diabetes</span>
+                                    <span class="text-[10px] font-mono text-teal-400/80">6 BP</span>
+                                </a>
+                                <a href="{{ route('family-health.indicator', 'c5') }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('family-health.indicator') && request()->route('indicator') === 'c5' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                    <span>C5 · Hipertensão</span>
+                                    <span class="text-[10px] font-mono text-teal-400/80">4 BP</span>
+                                </a>
+                                <a href="{{ route('family-health.indicator', 'c6') }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('family-health.indicator') && request()->route('indicator') === 'c6' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                    <span>C6 · Pessoa Idosa</span>
+                                    <span class="text-[10px] font-mono text-teal-400/80">4 BP</span>
+                                </a>
+                                <a href="{{ route('family-health.indicator', 'c7') }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('family-health.indicator') && request()->route('indicator') === 'c7' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                    <span>C7 · Câncer Mulher</span>
+                                    <span class="text-[10px] font-mono text-teal-400/80">Pond.</span>
+                                </a>
+                            </div>
+                        </div>
 
                         <!-- Configurações com Sub-itens -->
                         <div x-data="{ open: {{ request()->routeIs('settings.*') ? 'true' : 'false' }} }" class="space-y-1">

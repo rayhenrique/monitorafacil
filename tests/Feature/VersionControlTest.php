@@ -70,6 +70,7 @@ class VersionControlTest extends TestCase
         $response->assertOk();
         $response->assertSee('Novidades da Versão');
         $response->assertSee('Histórico de Atualizações do Monitora Fácil');
+        $response->assertSee('v1.5.0');
         $response->assertSee('v1.4.0');
         $response->assertSee('v1.3.0');
         $response->assertSee('v1.2.0');
@@ -82,20 +83,20 @@ class VersionControlTest extends TestCase
     {
         $user = $this->createUser(null);
 
-        $this->assertSame('v1.4.0', VersionService::getLatestVersion());
+        $this->assertSame('v1.5.0', VersionService::getLatestVersion());
         $this->assertTrue(VersionService::shouldShowModal($user));
 
-        $user->update(['last_seen_version' => 'v1.3.0']);
+        $user->update(['last_seen_version' => 'v1.4.0']);
         $this->assertTrue(VersionService::shouldShowModal($user->fresh()));
 
         VersionService::markAsSeen($user);
-        $this->assertSame('v1.4.0', $user->fresh()->last_seen_version);
+        $this->assertSame('v1.5.0', $user->fresh()->last_seen_version);
         $this->assertFalse(VersionService::shouldShowModal($user->fresh()));
 
         $allReleases = VersionService::getAllReleases();
-        $this->assertCount(5, $allReleases);
-        $this->assertSame('v1.4.0', $allReleases[0]['version']);
-        $this->assertSame('v1.0.0', $allReleases[4]['version']);
+        $this->assertCount(6, $allReleases);
+        $this->assertSame('v1.5.0', $allReleases[0]['version']);
+        $this->assertSame('v1.0.0', $allReleases[5]['version']);
     }
 
     public function test_whats_new_livewire_component_renders_and_filters(): void
@@ -105,11 +106,11 @@ class VersionControlTest extends TestCase
 
         Livewire::test(WhatsNew::class)
             ->assertSet('filter', 'all')
-            ->assertSee('v1.4.0')
-            ->assertSee('Controle de Versões')
+            ->assertSee('v1.5.0')
+            ->assertSee('Saúde da Família')
             ->call('setFilter', 'novo')
             ->assertSet('filter', 'novo')
-            ->assertSee('v1.4.0')
+            ->assertSee('v1.5.0')
             ->call('setFilter', 'correcao')
             ->assertSet('filter', 'correcao')
             ->assertSee('v1.3.0');
@@ -123,13 +124,13 @@ class VersionControlTest extends TestCase
         // Modal deve abrir pois last_seen_version é null
         Livewire::test(WhatsNewModal::class)
             ->assertSet('show', true)
-            ->assertSee('Atualização do Sistema · v1.4.0')
+            ->assertSee('Atualização do Sistema · v1.5.0')
             ->assertSee('Entendido, Continuar')
             ->call('acknowledge')
             ->assertSet('show', false);
 
         // Verifica se persistiu no banco de dados
-        $this->assertSame('v1.4.0', $user->fresh()->last_seen_version);
+        $this->assertSame('v1.5.0', $user->fresh()->last_seen_version);
 
         // Ao renderizar novamente para o mesmo usuário, não deve abrir
         Livewire::test(WhatsNewModal::class)

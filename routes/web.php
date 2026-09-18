@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Livewire\FamilyHealth\FamilyHealthOverview;
+use App\Livewire\FamilyHealth\IndicatorDetail;
 use App\Livewire\Help\FillingGuide;
 use App\Livewire\Help\WhatsNew;
 use App\Livewire\Settings\AuditLogs;
@@ -21,6 +23,11 @@ Route::middleware('guest')->group(function (): void {
 Route::middleware('auth')->group(function (): void {
     Route::view('/dashboard', 'dashboard')->name('dashboard');
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+    Route::prefix('saude-da-familia')->name('family-health.')->group(function (): void {
+        Route::get('/', FamilyHealthOverview::class)->name('overview');
+        Route::get('/{indicator}', IndicatorDetail::class)->name('indicator');
+    });
 
     Route::prefix('configuracoes')->name('settings.')->group(function (): void {
         Route::get('/usuarios', UsersManager::class)->name('users');

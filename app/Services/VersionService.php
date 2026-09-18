@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.4.0';
+    public const CURRENT_VERSION = 'v1.5.0';
 
     public const CURRENT_RELEASE_DATE = '18/09/2026';
 
@@ -61,9 +61,23 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.4.0',
+                'version' => 'v1.5.0',
                 'date' => '18/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Módulo Oficial de Saúde da Família (Indicadores C1 ao C7)',
+                'summary' => 'Implementação completa do módulo de monitoramento clínico dos 7 indicadores da Atenção Primária à Saúde conforme as notas metodológicas oficiais da Portaria GM/MS nº 3.493/2024, com painel municipal, detalhamento por equipe e busca ativa nominal.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Painel Municipal consolidado com visão executiva dos 7 indicadores clínicos (C1 a C7).'],
+                    ['type' => 'novo', 'text' => 'Páginas de detalhe para cada indicador com decomposição de boas práticas clínicas e pontuação oficial.'],
+                    ['type' => 'novo', 'text' => 'Acompanhamento de desempenho por equipe (eSF e eAP) com classificação oficial (Ótimo, Bom, Suficiente, Regular).'],
+                    ['type' => 'novo', 'text' => 'Módulo de Busca Ativa & Oportunidades com listagem nominal de cidadãos com pendências de cuidados.'],
+                    ['type' => 'novo', 'text' => 'Fichas técnicas e notas metodológicas oficiais completas (fórmulas, CBOs e modelos e-SUS PEC).'],
+                ],
+            ],
+            [
+                'version' => 'v1.4.0',
+                'date' => '18/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Controle de Versões, Central de Novidades e Notificação Automática',
                 'summary' => 'Nova arquitetura para acompanhamento transparente do ciclo de vida da plataforma, com modal automático de novidades no primeiro login após atualização e histórico completo de releases.',
                 'highlights' => [

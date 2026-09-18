@@ -4,6 +4,28 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.5.0] - 18/09/2026
+
+### 🚀 Destaques da Versão
+- **Módulo Saúde da Família (Indicadores C1 ao C7):** Implementação completa do módulo de monitoramento clínico dos 7 indicadores da Atenção Primária à Saúde conforme as notas metodológicas oficiais da Portaria GM/MS nº 3.493/2024.
+- **Painel Municipal Consolidado:** Visão executiva de desempenho global com métricas de cada indicador, médias ponderadas e status de homologação de equipes.
+- **Busca Ativa & Oportunidades:** Listagem nominal detalhada de cidadãos com pendências de cuidados para busca ativa precoce pelas equipes de Saúde da Família e Atenção Primária.
+
+### ✨ Novas Funcionalidades
+- **Navegação Integrada na Barra Lateral:** Acordeão dedicado "Saúde da Família" com acesso rápido à Visão Geral e a cada indicador individual (C1 a C7).
+- **Indicadores Contemplados:**
+  - **C1 · Mais Acesso à APS:** Percentual de acesso de demanda programada com faixa de meta ideal (30% a 70%).
+  - **C2 · Cuidado no Desenvolvimento Infantil:** Monitoramento de 5 boas práticas clínicas até 2 anos de idade (captação até 30 dias, 9 consultas, 9 antropometrias, 2 visitas do ACS e vacinação completa).
+  - **C3 · Cuidado na Gestação e Puerpério:** 11 boas práticas com captação no 1º trimestre, 7 consultas, PA, peso/altura, visitas domiciliares, vacina dTpa, testes rápidos e saúde bucal.
+  - **C4 · Cuidado da Pessoa com Diabetes:** 6 boas práticas com consultas semestrais, aferição de PA, antropometria, visitas de ACS, hemoglobina glicada anual e exame dos pés.
+  - **C5 · Cuidado da Pessoa com Hipertensão:** 4 boas práticas com consultas semestrais, aferição de PA, antropometria e visitas de ACS.
+  - **C6 · Cuidado Integral à Pessoa Idosa:** 4 boas práticas para população ≥ 60 anos com consulta anual, antropometria, visitas domiciliares de ACS e vacinação contra influenza.
+  - **C7 · Cuidado na Prevenção do Câncer da Mulher:** Métrica ponderada cobrindo exame citopatológico/HPV, vacinação contra HPV em meninas, saúde sexual/reprodutiva e mamografia de rastreamento.
+- **Detalhamento por Equipe:** Tabela comparativa com INE, tipo de equipe (eSF/eAP), numerador, denominador, percentual alcançado e classificação oficial (Ótimo, Bom, Suficiente e Regular).
+- **Caderno Metodológico Oficial:** Ficha técnica completa de cada indicador com fórmulas, CBOs habilitados e modelos de informação e-SUS (MIAI, MIP, MIVDT, RIA/RNDS).
+
+---
+
 ## [v1.4.0] - 18/09/2026
 
 ### 🚀 Destaques da Versão
