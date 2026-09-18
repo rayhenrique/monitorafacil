@@ -11,6 +11,7 @@ use App\Models\FamilyHealthMonthlySnapshot;
 use App\Models\SyncLog;
 use App\Services\CnesXmlParserService;
 use App\Services\FamilyHealthService;
+use App\Services\SettingsService;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -181,18 +182,35 @@ class EsusDataProcessingService
             ];
         }
 
-        // Persiste o consolidado de equipes reais no banco local
+        // Persiste o consolidado de equipes reais no banco local usando as contagens reais do XML CNES
+        $cnesParser = app(CnesXmlParserService::class);
+        $xmlPath = $cnesParser->resolveAvailableXmlPath();
+        $esfCount = count($teamsExtracted);
+        $esbCount = 0;
+        $emultiCount = 0;
+
+        if ($xmlPath !== null && is_file($xmlPath)) {
+            try {
+                $parsedXml = $cnesParser->parse($xmlPath);
+                $esfCount = ($parsedXml['counts']['esf'] ?? 0) + ($parsedXml['counts']['eap'] ?? 0);
+                $esbCount = $parsedXml['counts']['saude_bucal'] ?? 0;
+                $emultiCount = $parsedXml['counts']['emulti'] ?? 0;
+            } catch (Throwable) {
+                // Fallback: usa a contagem de equipes extraídas do PEC
+            }
+        }
+
         ConsolidationTeam::query()->updateOrCreate(
             ['year' => $year, 'quarter' => $quarter, 'type' => TeamType::Esf],
-            ['total_active' => count($teamsExtracted)]
+            ['total_active' => $esfCount]
         );
         ConsolidationTeam::query()->updateOrCreate(
             ['year' => $year, 'quarter' => $quarter, 'type' => TeamType::SaudeBucal],
-            ['total_active' => max(0, (int) round(count($teamsExtracted) * 0.8))]
+            ['total_active' => $esbCount]
         );
         ConsolidationTeam::query()->updateOrCreate(
             ['year' => $year, 'quarter' => $quarter, 'type' => TeamType::Emulti],
-            ['total_active' => count($teamsExtracted) > 0 ? 2 : 0]
+            ['total_active' => $emultiCount]
         );
 
         // ETAPA 2: tb_dim_tempo, tb_dim_cbo, tb_dim_tipo_atendimento (50%)
@@ -517,21 +535,78 @@ class EsusDataProcessingService
             $micdtOutdated = 0;
 
             if ($isLivePecConnected && $connection) {
-                try {
-                    $indCount = (int) ($connection->selectOne("SELECT COUNT(*) AS total FROM tb_fat_cad_individual")->total ?? 0);
-                    if ($indCount > 0) {
-                        $miciUpdated = (int) round($indCount * 0.88);
-                        $miciOutdated = max(0, $indCount - $miciUpdated);
-                    }
-                } catch (Throwable) {}
+                // Busca o código IBGE do município para filtrar corretamente
+                $settingsService = app(SettingsService::class);
+                $ibge = $settingsService->get('municipio_ibge');
 
-                try {
-                    $domCount = (int) ($connection->selectOne("SELECT COUNT(*) AS total FROM tb_fat_cad_domiciliar")->total ?? 0);
-                    if ($domCount > 0) {
-                        $micdtUpdated = (int) round($domCount * 0.92);
-                        $micdtOutdated = max(0, $domCount - $micdtUpdated);
+                // Se o IBGE não está configurado, tenta buscar no XML CNES
+                if (empty($ibge)) {
+                    $cnesParserReg = app(CnesXmlParserService::class);
+                    $xmlPathReg = $cnesParserReg->resolveAvailableXmlPath();
+                    if ($xmlPathReg !== null && is_file($xmlPathReg)) {
+                        try {
+                            $parsedReg = $cnesParserReg->parse($xmlPathReg);
+                            $ibge = $parsedReg['ibge'] ?? null;
+                        } catch (Throwable) {}
                     }
-                } catch (Throwable) {}
+                }
+
+                $today = Carbon::today();
+                $cutoff = $today->copy()->subMonthsNoOverflow(24);
+                $referenceDate = $today->toDateString();
+                $cutoffDate = $cutoff->toDateString();
+
+                if (! empty($ibge)) {
+                    try {
+                        $individual = $connection->selectOne("
+                            SELECT
+                                COUNT(*) FILTER (WHERE latest.registration_date >= ?) AS updated_count,
+                                COUNT(*) FILTER (WHERE latest.registration_date < ?) AS outdated_count
+                            FROM (
+                                SELECT ficha.co_fat_cidadao_pec, MAX(tempo.dt_registro) AS registration_date
+                                FROM tb_fat_cad_individual AS ficha
+                                INNER JOIN tb_dim_tempo AS tempo ON tempo.co_seq_dim_tempo = ficha.co_dim_tempo
+                                INNER JOIN tb_dim_municipio AS municipio ON municipio.co_seq_dim_municipio = ficha.co_dim_municipio
+                                WHERE municipio.co_ibge = ?
+                                    AND ficha.co_fat_cidadao_pec IS NOT NULL
+                                    AND ficha.st_ficha_inativa = 0
+                                    AND ficha.st_recusa_cadastro = 0
+                                    AND tempo.dt_registro <= ?
+                                GROUP BY ficha.co_fat_cidadao_pec
+                            ) AS latest
+                        ", [$cutoffDate, $cutoffDate, $ibge, $referenceDate]);
+
+                        if ($individual !== null) {
+                            $miciUpdated = (int) $individual->updated_count;
+                            $miciOutdated = (int) $individual->outdated_count;
+                        }
+                    } catch (Throwable) {}
+
+                    try {
+                        $domiciliary = $connection->selectOne("
+                            SELECT
+                                COUNT(*) FILTER (WHERE latest.registration_date >= ?) AS updated_count,
+                                COUNT(*) FILTER (WHERE latest.registration_date < ?) AS outdated_count
+                            FROM (
+                                SELECT ficha.nu_uuid_ficha_origem, MAX(tempo.dt_registro) AS registration_date
+                                FROM tb_fat_cad_domiciliar AS ficha
+                                INNER JOIN tb_dim_tempo AS tempo ON tempo.co_seq_dim_tempo = ficha.co_dim_tempo
+                                INNER JOIN tb_dim_municipio AS municipio ON municipio.co_seq_dim_municipio = ficha.co_dim_municipio
+                                WHERE municipio.co_ibge = ?
+                                    AND ficha.nu_uuid_ficha_origem IS NOT NULL
+                                    AND ficha.st_ativo = 1
+                                    AND ficha.st_recusa_cadastro = 0
+                                    AND tempo.dt_registro <= ?
+                                GROUP BY ficha.nu_uuid_ficha_origem
+                            ) AS latest
+                        ", [$cutoffDate, $cutoffDate, $ibge, $referenceDate]);
+
+                        if ($domiciliary !== null) {
+                            $micdtUpdated = (int) $domiciliary->updated_count;
+                            $micdtOutdated = (int) $domiciliary->outdated_count;
+                        }
+                    } catch (Throwable) {}
+                }
             } elseif (app()->environment('testing')) {
                 $miciUpdated = 100;
                 $miciOutdated = 10;

@@ -67,7 +67,11 @@ class DataProcessing extends Component
         $this->processMessage = null;
         $this->processStatus = null;
         $this->progressPercent = 10;
-        $scopeDesc = $scope === 'c1' ? 'Indicador C1 (Mais Acesso)' : 'Geral Completo';
+        $scopeDesc = match ($scope) {
+            'c1' => 'Indicador C1 (Mais Acesso)',
+            'c2' => 'Indicador C2 (Desenvolvimento Infantil)',
+            default => 'Geral Completo',
+        };
         $this->currentStep = "Iniciando verificação do banco de dados e-SUS PEC [{$scopeDesc}]...";
 
         try {
