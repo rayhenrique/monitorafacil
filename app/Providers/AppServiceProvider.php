@@ -22,6 +22,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (config('app.env') === 'production' || str_starts_with((string) config('app.url'), 'https://')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         View::composer(['layouts.app', 'auth.login'], static function (BladeView $view): void {
             $view->with('settings', app(SettingsService::class)->all());
         });
