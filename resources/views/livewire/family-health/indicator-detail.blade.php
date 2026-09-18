@@ -96,7 +96,7 @@
                 <!-- Card de Pontuação -->
                 <div class="rounded-3xl bg-white/10 border border-white/15 p-5 text-center min-w-[190px] backdrop-blur-xs">
                     <span class="text-[11px] font-semibold text-teal-300 uppercase tracking-wider block">
-                        {{ $isC2 && $current['cohort_total'] !== null && $current['evaluated_total'] < $current['cohort_total'] ? 'Média parcial' : (($isC1 || $isC2) ? 'Média Quadrimestral' : 'Resultado Atual') }}
+                        {{ $isC2 ? ($current['is_preview'] ? 'Prévia quadrimestral' : 'Média quadrimestral local') : ($isC1 ? 'Média Quadrimestral' : 'Resultado Atual') }}
                     </span>
                     <div class="text-3xl sm:text-4xl font-black text-white tabular-nums my-1">
                         {{ $hasC2Result ? number_format($score, 1, ',', '.').'%' : '—' }}
@@ -183,7 +183,7 @@
                     </span>
                 </div>
                 <div>
-                    <span class="text-slate-400 block">Já avaliadas{{ $current['cohort_as_of'] ? ' até '.$current['cohort_as_of'] : '' }}</span>
+                    <span class="text-slate-400 block">Já completaram 2 anos{{ $current['cohort_as_of'] ? ' até '.$current['cohort_as_of'] : '' }}</span>
                     <span class="font-bold text-ink text-sm">
                         {{ $current['evaluated_total'] !== null ? number_format($current['evaluated_total'], 0, '', '.') : '—' }}
                     </span>
@@ -763,12 +763,9 @@
             <div class="space-y-6 animate-fade-in">
                 <div class="rounded-2xl border {{ $hasC2Result ? 'border-sky-200 bg-sky-50 text-sky-950' : 'border-amber-200 bg-amber-50 text-amber-950' }} p-4 text-sm" role="status">
                     @if ($hasC2Result)
-                        <strong>Estimativa local do DW PEC.</strong> Os registros da RNDS e o vínculo histórico oficial do Siaps podem alterar o resultado. Use a nota do Siaps para avaliação e cofinanciamento.
-                        @if ($current['cohort_total'] !== null && $current['evaluated_total'] < $current['cohort_total'])
-                            Resultado parcial: {{ $current['evaluated_total'] }} de {{ $current['cohort_total'] }} crianças da coorte já completaram 2 anos até {{ $current['cohort_as_of'] }}.
-                        @endif
+                        <strong>Prévia local do DW PEC.</strong> As {{ $current['cohort_total'] }} crianças da coorte têm pontuação calculada com registros até {{ $current['cohort_as_of'] }}, inclusive as dos meses futuros. {{ $current['evaluated_total'] }} já completaram 2 anos. A prévia pode mudar com novos cuidados; RNDS e vínculo histórico do Siaps também podem alterar o resultado. Use a nota do Siaps para avaliação e cofinanciamento.
                     @elseif ($current['cohort_total'] !== null)
-                        <strong>Coorte do quadrimestre identificada.</strong> {{ $current['cohort_total'] }} crianças completam 2 anos neste período; nenhuma chegou ao aniversário até {{ $current['cohort_as_of'] }}. A pontuação será exibida após a avaliação.
+                        <strong>Coorte do quadrimestre identificada.</strong> {{ $current['cohort_total'] }} crianças completam 2 anos neste período. Execute novamente a extração para calcular a prévia.
                     @else
                         <strong>Sem resultado C2 validado para este recorte.</strong> A extração do DW ainda não foi concluída ou não houve crianças que completaram dois anos no período. Dados anteriores do cálculo simulado não são exibidos.
                     @endif
@@ -786,15 +783,15 @@
                                 </span>
                                 <span class="text-xs font-bold text-slate-500">Nota Metodológica C2</span>
                             </div>
-                            <h3 class="text-lg font-bold text-ink mt-1">Síntese da Avaliação Quadrimestral · C2</h3>
+                            <h3 class="text-lg font-bold text-ink mt-1">Prévia Quadrimestral · C2</h3>
                             <p class="text-xs text-muted">
-                                Conforme a NT 08/2026, a avaliação quadrimestral usa a <strong>média dos meses com crianças que completaram dois anos</strong>. Meses sem coorte não entram no divisor. Este painel mostra uma estimativa do DW do PEC para equipes eSF (tipo 70) e eAP (tipo 76).
+                                A prévia usa a <strong>média dos meses com crianças que completarão dois anos</strong>, inclusive M1–M4 futuros; meses sem coorte ficam fora do divisor. A avaliação oficial considera as crianças que já completaram dois anos. Dados locais do DW PEC para eSF (tipo 70) e eAP (tipo 76).
                             </p>
                         </div>
 
                         <div class="flex items-center gap-3">
                             <div class="rounded-2xl bg-slate-50 border border-slate-200 px-4 py-2.5 text-right">
-                                <span class="text-[10px] uppercase font-bold text-slate-400 block">Pontuação Componente III</span>
+                                <span class="text-[10px] uppercase font-bold text-slate-400 block">Prévia Componente III</span>
                                 <span class="text-base font-black text-sky-700 font-mono">
                                     {{ $quarterSummary['component_iii_points'] !== null ? number_format($quarterSummary['component_iii_points'], 2, ',', '.').' / 2,00 pt' : '—' }}
                                 </span>
@@ -978,7 +975,7 @@
                                 <h3 class="text-base font-bold text-ink">Acompanhamento Mensal do Desenvolvimento Infantil</h3>
                             </div>
                             <p class="text-xs text-muted">
-                                Coorte completa de aniversários de 2 anos e avaliação realizada em cada mês do quadrimestre
+                                Pontuação prévia das crianças de M1 a M4 com cuidados registrados até {{ $current['cohort_as_of'] ?? 'a extração' }}
                             </p>
                         </div>
                         <span class="text-xs font-mono font-semibold text-slate-500 bg-slate-100 px-3 py-1 rounded-xl">
@@ -1025,9 +1022,13 @@
                                         @endif
                                     </div>
                                     <span class="rounded-full px-2 py-0.5 text-[10px] font-bold border {{ $mBadge }}">
-                                        {{ $mLevel ? ucfirst($mLevel) : ($m['cohort_total'] ? 'Aguardando avaliação' : 'Sem coorte') }}
+                                        {{ $mLevel ? ucfirst($mLevel) : 'Sem coorte' }}
                                     </span>
                                 </div>
+
+                                @if ($m['score_percent'] !== null && $m['is_preview'])
+                                    <span class="inline-flex rounded-full bg-sky-100 text-sky-800 border border-sky-200 px-2 py-0.5 text-[10px] font-bold">Prévia · mês em andamento ou futuro</span>
+                                @endif
 
                                 <div>
                                     <div class="flex items-baseline justify-between">
@@ -1051,9 +1052,9 @@
                                         </span>
                                     </div>
                                     <div>
-                                        <span class="text-slate-400 block text-[10px]">Previstas / avaliadas</span>
+                                        <span class="text-slate-400 block text-[10px]">Crianças na coorte</span>
                                         <span class="font-bold text-ink font-mono">
-                                            {{ $m['cohort_total'] !== null ? number_format($m['cohort_total'], 0, '', '.') : '—' }} / {{ $m['cohort_total'] !== null ? number_format($m['denominator'], 0, '', '.') : '—' }}
+                                            {{ $m['cohort_total'] !== null ? number_format($m['cohort_total'], 0, '', '.') : '—' }}
                                         </span>
                                     </div>
                                 </div>
@@ -1144,7 +1145,7 @@
 
                             <!-- 4. Filtro: Classificação -->
                             <div class="space-y-1">
-                                <label class="text-[11px] font-bold text-slate-700 block">Classificação Oficial:</label>
+                                <label class="text-[11px] font-bold text-slate-700 block">Classificação da Prévia:</label>
                                 <select
                                     wire:model.live="selectedClassification"
                                     class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-teal-500 focus:outline-hidden shadow-2xs"
@@ -1181,7 +1182,7 @@
                             </div>
 
                             <span class="text-xs font-mono font-medium text-slate-500">
-                                {{ $selectedMonth ? 'Detalhamento do Mês ' . $selectedMonth : 'Média Aritmética (M1 + M2 + M3 + M4) / 4 · Peso 2.0' }}
+                                {{ $selectedMonth ? 'Prévia do Mês ' . $selectedMonth : 'Prévia da média dos meses com coorte · Peso 2.0' }}
                             </span>
                         </div>
 
@@ -1450,7 +1451,7 @@
                 <div>
                     <h3 class="text-base font-bold text-ink">Desempenho Individualizado por Equipe (INE)</h3>
                     <p class="text-xs text-muted">
-                        {{ ($isC1 || $isC2) ? 'Acompanhamento mês a mês (M1 a M4), média aritmética quadrimestral e pontuação no Componente III conforme NT 08/2026' : 'Resultados homologados das Equipes de Saúde da Família (eSF) e Atenção Primária (eAP)' }}
+                        {{ $isC2 ? 'Prévia local M1 a M4 e média quadrimestral das crianças da coorte; a nota oficial é publicada pelo Siaps' : ($isC1 ? 'Acompanhamento mês a mês (M1 a M4), média aritmética quadrimestral e pontuação no Componente III conforme NT 08/2026' : 'Resultados homologados das Equipes de Saúde da Família (eSF) e Atenção Primária (eAP)') }}
                     </p>
                 </div>
                 @if ($isC1 || $isC2)

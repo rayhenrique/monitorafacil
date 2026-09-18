@@ -14,7 +14,7 @@ class C2SnapshotService
 
     /**
      * @param  array<string, array{ine:string,name:string,type:string}>  $teams
-     * @return array{children:int,cohort_children:int,teams:int,months:int}
+     * @return array{children:int,cohort_children:int,completed_children:int,teams:int,months:int}
      */
     public function process(ConnectionInterface $pec, int $year, int $quarter, array $teams): array
     {
@@ -22,7 +22,7 @@ class C2SnapshotService
         $extraction = $this->dw->extract($pec, $year, $quarter, $teams);
         $data = $extraction['scores'];
         $cohort = $extraction['cohort'];
-        $stats = ['children' => 0, 'cohort_children' => 0, 'teams' => 0, 'months' => 0];
+        $stats = ['children' => 0, 'cohort_children' => 0, 'completed_children' => 0, 'teams' => 0, 'months' => 0];
 
         DB::transaction(function () use ($data, $cohort, $extraction, $teams, $year, $quarter, &$stats): void {
             C2CohortSnapshot::query()->where('year', $year)->where('quarter', $quarter)->delete();
@@ -35,8 +35,10 @@ class C2SnapshotService
             $municipalEvaluated = 0;
             foreach ($cohort as $ine => $monthlyCounts) {
                 $total = array_sum($monthlyCounts);
-                $evaluated = array_sum(array_column($data[$ine] ?? [], 'denominator'));
+                // Campo legado: representa aniversários já ocorridos, não o total com prévia.
+                $evaluated = array_sum($extraction['completed'][$ine] ?? []);
                 $stats['cohort_children'] += $total;
+                $stats['completed_children'] += $evaluated;
                 $municipalEvaluated += $evaluated;
                 foreach ($monthlyCounts as $month => $count) {
                     $municipalCohort[$month] = ($municipalCohort[$month] ?? 0) + $count;
@@ -134,7 +136,7 @@ class C2SnapshotService
                     'performance_level' => $level,
                     'good_practices_breakdown' => [
                         'calculation_version' => C2DwService::VERSION,
-                        'source' => 'PEC DW (estimativa local; sem RNDS)',
+                        'source' => 'PEC DW (prévia local; sem RNDS)',
                         'valid_months' => count($scores),
                         'practices' => $practiceTotals,
                         'component_iii_points' => FamilyHealthService::calculateComponentIIIPoints($level, 2.0),
@@ -183,7 +185,7 @@ class C2SnapshotService
                     'performance_level' => $level,
                     'good_practices_breakdown' => [
                         'calculation_version' => C2DwService::VERSION,
-                        'source' => 'PEC DW (estimativa local; sem RNDS)',
+                        'source' => 'PEC DW (prévia local; sem RNDS)',
                         'valid_months' => count($municipalScores),
                         'teams_count' => $stats['teams'],
                         'practices' => $municipalPractices,

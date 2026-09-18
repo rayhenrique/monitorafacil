@@ -4,6 +4,16 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.10.0] - 18/09/2026
+
+### 🚀 Prévia C2 dos quatro meses
+- Todas as crianças da coorte M1–M4 passam a ter pontuação prévia baseada nas práticas registradas no DW PEC até a data da extração, inclusive as que completarão dois anos nos meses futuros.
+- Os cards mensais mostram a pontuação e identificam meses em andamento ou futuros como prévia. A média quadrimestral local inclui todos os meses que possuem crianças na coorte.
+- O painel distingue a coorte total da quantidade de crianças que já completaram dois anos. A prévia serve para acompanhar o cuidado e não substitui a nota oficial do Siaps.
+- Consultas de fatos clínicos limitadas à data da extração; a sincronização continua somente de leitura no PEC e grava apenas agregados locais.
+
+---
+
 ## [v1.9.0] - 18/09/2026
 
 ### 🚀 Indicador C2 pelo DW PEC

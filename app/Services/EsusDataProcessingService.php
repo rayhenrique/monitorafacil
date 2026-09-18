@@ -515,8 +515,8 @@ class EsusDataProcessingService
                     'description' => 'Coorte de crianças que completaram 2 anos e boas práticas A–E',
                     'status' => 'success',
                     'rows' => $c2Stats['cohort_children'],
-                    'message' => sprintf('%d crianças completam 2 anos no quadrimestre; %d já avaliadas em %d equipes e %d meses. Estimativa local sem RNDS.',
-                        $c2Stats['cohort_children'], $c2Stats['children'], $c2Stats['teams'], $c2Stats['months']),
+                    'message' => sprintf('%d crianças na coorte com prévia calculada; %d já completaram 2 anos; %d equipes e %d meses com coorte. Estimativa local sem RNDS.',
+                        $c2Stats['cohort_children'], $c2Stats['completed_children'], $c2Stats['teams'], $c2Stats['months']),
                 ];
             } catch (Throwable $e) {
                 $message = 'C2 não processado: '.$e->getMessage();

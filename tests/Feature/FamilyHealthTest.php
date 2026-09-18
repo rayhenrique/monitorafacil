@@ -480,7 +480,7 @@ class FamilyHealthTest extends TestCase
         ]);
 
         Livewire::test(IndicatorDetail::class, ['indicator' => 'c2', 'year' => 2026, 'quarter' => 1])
-            ->assertSee('Síntese da Avaliação Quadrimestral · C2')
+            ->assertSee('Prévia Quadrimestral · C2')
             ->assertSee('As 5 Boas Práticas Oficiais do Cuidado Infantil')
             ->assertSee('1ª Consulta até 30 Dias')
             ->assertSee('≥ 9 Consultas até 2 Anos')
@@ -545,31 +545,36 @@ class FamilyHealthTest extends TestCase
                 3 => ['numerator' => 80, 'denominator' => 1, 'score_percent' => 80.0,
                     'practices' => ['A' => 1, 'B' => 1, 'C' => 1, 'D' => 1, 'E' => 0], 'incomplete' => 1],
             ]],
-            'cohort' => ['0000171220' => [1 => 2, 3 => 1, 4 => 2]],
+            'cohort' => ['0000171220' => [1 => 2, 3 => 1]],
+            'completed' => ['0000171220' => [1 => 2, 3 => 1]],
             'as_of' => '2026-03-18',
         ]);
         $writer = new \App\Services\C2SnapshotService($source);
         $stats = $writer->process(DB::connection('sqlite'), 2026, 1, $team);
 
-        $this->assertSame(['children' => 3, 'cohort_children' => 5, 'teams' => 1, 'months' => 2], $stats);
+        $this->assertSame(['children' => 3, 'cohort_children' => 3, 'completed_children' => 3, 'teams' => 1, 'months' => 2], $stats);
         $detail = app(\App\Services\FamilyHealthService::class)->getIndicatorDetail('c2', 2026, 1);
         $this->assertSame(60.0, $detail['current']['score_percent']);
         $this->assertSame(2, $detail['quarter_summary']['valid_months']);
         $this->assertNull($detail['monthly_evolution'][1]['score_percent']);
         $this->assertSame(3, $detail['current']['denominator']);
-        $this->assertSame(5, $detail['current']['cohort_total']);
+        $this->assertSame(3, $detail['current']['cohort_total']);
         $this->assertSame(3, $detail['current']['evaluated_total']);
-        $this->assertSame(2, $detail['monthly_evolution'][3]['cohort_total']);
+        $this->assertNull($detail['monthly_evolution'][3]['cohort_total']);
         $this->assertSame(160, $detail['current']['numerator']);
     }
 
-    public function test_c2_future_only_cohort_has_count_without_fake_score(): void
+    public function test_c2_future_only_cohort_has_local_preview_score(): void
     {
         $team = ['0000171220' => ['ine' => '0000171220', 'name' => 'ESF CENTRO', 'type' => '70']];
         $source = \Mockery::mock(\App\Services\C2DwService::class);
         $source->shouldReceive('extract')->once()->andReturn([
-            'scores' => [],
+            'scores' => ['0000171220' => [12 => [
+                'numerator' => 80, 'denominator' => 4, 'score_percent' => 20.0,
+                'practices' => ['A' => 0, 'B' => 0, 'C' => 0, 'D' => 4, 'E' => 0], 'incomplete' => 4,
+            ]]],
             'cohort' => ['0000171220' => [12 => 4]],
+            'completed' => [],
             'as_of' => '2026-09-18',
         ]);
 
@@ -577,20 +582,25 @@ class FamilyHealthTest extends TestCase
             ->process(DB::connection('sqlite'), 2026, 3, $team);
 
         $this->assertSame(4, $stats['cohort_children']);
-        $this->assertSame(0, $stats['children']);
+        $this->assertSame(4, $stats['children']);
+        $this->assertSame(0, $stats['completed_children']);
         $detail = app(\App\Services\FamilyHealthService::class)->getIndicatorDetail('c2', 2026, 3);
         $this->assertSame(4, $detail['current']['cohort_total']);
         $this->assertSame(0, $detail['current']['evaluated_total']);
-        $this->assertNull($detail['current']['score_percent']);
+        $this->assertSame(20.0, $detail['current']['score_percent']);
         $this->assertSame(4, $detail['monthly_evolution'][3]['cohort_total']);
+        $this->assertSame(20.0, $detail['monthly_evolution'][3]['score_percent']);
+        $this->assertTrue($detail['monthly_evolution'][3]['is_preview']);
 
         $overview = app(\App\Services\FamilyHealthService::class)->getMunicipalOverview(2026, 3);
         $this->assertSame(4, $overview['indicators']['c2']['cohort_total']);
-        $this->assertNull($overview['indicators']['c2']['score_percent']);
+        $this->assertSame(20.0, $overview['indicators']['c2']['score_percent']);
+        $this->assertTrue($overview['indicators']['c2']['is_preview']);
 
         $this->authenticateUser();
         Livewire::test(IndicatorDetail::class, ['indicator' => 'c2', 'year' => 2026, 'quarter' => 3])
-            ->assertSee('4 crianças completam 2 anos neste período')
+            ->assertSee('As 4 crianças da coorte têm pontuação calculada')
+            ->assertSee('Prévia · mês em andamento ou futuro')
             ->assertSee('ESF CENTRO');
     }
 

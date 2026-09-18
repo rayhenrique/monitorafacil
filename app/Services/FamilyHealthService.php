@@ -8,6 +8,7 @@ use App\Models\ConsolidationTeam;
 use App\Models\FamilyHealthIndicatorSnapshot;
 use App\Models\FamilyHealthMonthlySnapshot;
 use App\Models\Setting;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 class FamilyHealthService
@@ -357,6 +358,7 @@ class FamilyHealthService
                 'cohort_total' => $slug === 'c2' ? $c2Cohort?->cohort_total : null,
                 'evaluated_total' => $slug === 'c2' ? $c2Cohort?->evaluated_total : null,
                 'cohort_as_of' => $slug === 'c2' ? $c2Cohort?->as_of?->format('d/m/Y') : null,
+                'is_preview' => $slug === 'c2' && $c2Cohort?->as_of?->lt(Carbon::create($year, $quarter * 4, 1)->endOfMonth()),
             ];
 
             if ($score !== null) {
@@ -508,6 +510,7 @@ class FamilyHealthService
                 'cohort_total' => $c2Cohort?->cohort_total,
                 'evaluated_total' => $c2Cohort?->evaluated_total,
                 'cohort_as_of' => $c2Cohort?->as_of?->format('d/m/Y'),
+                'is_preview' => $code === 'c2' && $c2Cohort?->as_of?->lt(Carbon::create($year, $quarter * 4, 1)->endOfMonth()),
                 'monthly_cohort' => $c2Cohort?->monthly_counts ?? [],
             ],
             'teams' => $teams,
@@ -550,6 +553,7 @@ class FamilyHealthService
                     'numerator' => $snap ? $snap->numerator : 0,
                     'denominator' => $snap ? $snap->denominator : 0,
                     'cohort_total' => $code === 'c2' ? ($c2Cohort?->monthly_counts[$mNum] ?? null) : null,
+                    'is_preview' => $code === 'c2' && $c2Cohort?->as_of?->lt(Carbon::create($year, $mNum, 1)->endOfMonth()),
                     'score_percent' => $mScore,
                     'performance_level' => $mLevel,
                     'component_iii_points' => $mPoints,
@@ -576,8 +580,9 @@ class FamilyHealthService
                 'component_iii_points' => $quarterPoints,
                 'weight' => $weight,
                 'weighted_score' => $quarterPoints,
-                'formula' => $code === 'c2' ? 'Média dos meses com crianças que completaram 2 anos' : 'Média Aritmética: (Mês 1 + Mês 2 + Mês 3 + Mês 4) / 4',
+                'formula' => $code === 'c2' ? 'Prévia: média dos meses com crianças que completarão 2 anos' : 'Média Aritmética: (Mês 1 + Mês 2 + Mês 3 + Mês 4) / 4',
                 'valid_months' => $countedMonths,
+                'is_preview' => $detail['current']['is_preview'],
                 'cohort_total' => $code === 'c2' ? $c2Cohort?->cohort_total : null,
                 'evaluated_total' => $code === 'c2' ? $c2Cohort?->evaluated_total : null,
                 'balance_status' => match (true) {

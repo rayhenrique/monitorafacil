@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.9.0';
+    public const CURRENT_VERSION = 'v1.10.0';
 
     public const CURRENT_RELEASE_DATE = '18/09/2026';
 
@@ -61,9 +61,21 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.9.0',
+                'version' => 'v1.10.0',
                 'date' => '18/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Prévia C2 para todas as crianças dos meses M1–M4',
+                'summary' => 'O C2 agora calcula uma prévia para a coorte completa, inclusive crianças que completarão dois anos nos meses futuros. A tela distingue a prévia local da avaliação oficial do Siaps.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Pontuação prévia mensal e quadrimestral para todas as crianças da coorte com dados disponíveis até a extração.'],
+                    ['type' => 'melhoria', 'text' => 'M1–M4 exibem contagem, pontuação e classificação prévias, mesmo antes do segundo aniversário.'],
+                    ['type' => 'melhoria', 'text' => 'Contagem separada das crianças que já completaram dois anos e identificação dos meses em andamento ou futuros.'],
+                ],
+            ],
+            [
+                'version' => 'v1.9.0',
+                'date' => '18/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Indicador C2 pelo DW PEC e coorte completa do quadrimestre',
                 'summary' => 'Leitura preliminar do C2 no DW do PEC, com pontuação das cinco boas práticas e separação entre todas as crianças que completam dois anos no quadrimestre e as que já chegaram ao aniversário na data da extração.',
                 'highlights' => [

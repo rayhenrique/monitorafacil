@@ -12,7 +12,7 @@ use RuntimeException;
  */
 class C2DwService
 {
-    public const VERSION = 'dw-c2-2026-09-coorte-completa';
+    public const VERSION = 'dw-c2-2026-09-previa';
 
     /** @var array<string, list<int>> */
     private const ANTIGENS = [
@@ -26,7 +26,7 @@ class C2DwService
 
     /**
      * @param  array<string, array{ine:string,name:string,type:string}>  $teams
-     * @return array{scores:array<string, array<int, array{numerator:int,denominator:int,score_percent:float,practices:array<string,int>,incomplete:int}>>,cohort:array<string,array<int,int>>,as_of:string}
+     * @return array{scores:array<string, array<int, array{numerator:int,denominator:int,score_percent:float,practices:array<string,int>,incomplete:int}>>,cohort:array<string,array<int,int>>,completed:array<string,array<int,int>>,as_of:string}
      */
     public function extract(ConnectionInterface $connection, int $year, int $quarter, array $teams): array
     {
@@ -38,6 +38,7 @@ class C2DwService
         $start = Carbon::create($year, $firstMonth, 1)->startOfDay();
         $end = (clone $start)->addMonths(4)->subDay();
         $asOf = Carbon::today();
+        $eventCutoff = $asOf->lt($end) ? $asOf->toDateString() : $end->toDateString();
 
         $ines = array_keys($teams);
         $placeholders = implode(',', array_fill(0, count($ines), '?'));
@@ -70,13 +71,14 @@ class C2DwService
         }
 
         $cohort = [];
+        $completed = [];
         $byId = [];
         foreach ($allById as $id => $child) {
             $ine = $child['ine'];
             $month = (int) $child['birthday']->month;
             $cohort[$ine][$month] = ($cohort[$ine][$month] ?? 0) + 1;
-            if ($child['birthday']->gt($asOf)) {
-                continue;
+            if ($child['birthday']->lte($asOf)) {
+                $completed[$ine][$month] = ($completed[$ine][$month] ?? 0) + 1;
             }
             $byId[$id] = $child + [
                 'consultations' => [],
@@ -87,7 +89,7 @@ class C2DwService
         }
 
         if ($byId === []) {
-            return ['scores' => [], 'cohort' => $cohort, 'as_of' => $asOf->toDateString()];
+            return ['scores' => [], 'cohort' => $cohort, 'completed' => $completed, 'as_of' => $asOf->toDateString()];
         }
 
         foreach (array_chunk(array_keys($byId), 500) as $ids) {
@@ -116,7 +118,7 @@ class C2DwService
                   AND NULLIF(TRIM(prof.nu_cns::text), '') IS NOT NULL
                   AND (UPPER(ci.nu_ciap::text) IN ('A98','ABP004') OR UPPER(ci.no_ciap) LIKE '%PUERICULTURA%')
                   AND p.st_avaliado::text IN ('1','t','true')
-            SQL, [...$ids, $end->toDateString()]);
+            SQL, [...$ids, $eventCutoff]);
             foreach ($consultations as $row) {
                 $byId[(int) $row->id]['consultations'][(string) $row->event_id] = [
                     'date' => (string) $row->event_date,
@@ -157,7 +159,7 @@ class C2DwService
                   AND LEFT(REPLACE(c.nu_cbo::text, '-', ''), 4) IN
                       ('2231','2232','2234','2235','2236','2237','2238','2239','2241','2251','2252','2253','3222','5151')
                   AND NULLIF(TRIM(prof.nu_cns::text), '') IS NOT NULL
-            SQL, [...$ids, $end->toDateString(), ...$ids, $end->toDateString(), ...$ids, $end->toDateString()]);
+            SQL, [...$ids, $eventCutoff, ...$ids, $eventCutoff, ...$ids, $eventCutoff]);
             foreach ($measurements as $row) {
                 $date = (string) $row->event_date;
                 $id = (int) $row->id;
@@ -182,7 +184,7 @@ class C2DwService
                   AND NULLIF(TRIM(prof.nu_cns::text), '') IS NOT NULL
                   AND REGEXP_REPLACE(dp.co_proced::text, '[^0-9]', '', 'g') IN
                       ('0101040024','0301010269','0101040083','0101040075')
-            SQL, [...$ids, $end->toDateString()]);
+            SQL, [...$ids, $eventCutoff]);
             foreach ($procedures as $row) {
                 $date = (string) $row->event_date;
                 $id = (int) $row->id;
@@ -206,7 +208,7 @@ class C2DwService
                   AND NULLIF(TRIM(prof.nu_cns::text), '') IS NOT NULL
                   AND (v.st_acomp_recem_nascido::text IN ('1','t','true')
                        OR v.st_acomp_crianca::text IN ('1','t','true'))
-            SQL, [...$ids, $end->toDateString()]);
+            SQL, [...$ids, $eventCutoff]);
             foreach ($visits as $row) {
                 $byId[(int) $row->id]['visits'][(string) $row->event_date] = true;
             }
@@ -219,7 +221,7 @@ class C2DwService
                 JOIN tb_dim_tempo t ON t.co_seq_dim_tempo = dose.co_dim_tempo_vacina_aplicada
                 JOIN tb_dim_imunobiologico bio ON bio.co_seq_dim_imunobiologico = dose.co_dim_imunobiologico
                 WHERE v.co_fat_cidadao_pec IN ({$marks}) AND t.dt_registro <= ?
-            SQL, [...$ids, $end->toDateString()]);
+            SQL, [...$ids, $eventCutoff]);
             foreach ($vaccines as $row) {
                 $byId[(int) $row->id]['vaccines'][] = [
                     'date' => (string) $row->event_date,
@@ -258,7 +260,7 @@ class C2DwService
             }
         }
 
-        return ['scores' => $result, 'cohort' => $cohort, 'as_of' => $asOf->toDateString()];
+        return ['scores' => $result, 'cohort' => $cohort, 'completed' => $completed, 'as_of' => $asOf->toDateString()];
     }
 
     /**
