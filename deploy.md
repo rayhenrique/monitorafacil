@@ -129,6 +129,7 @@ Ajuste as linhas principais:
 ```env
 APP_NAME="Monitora Fácil"
 APP_ENV=production
+APP_KEY=
 APP_DEBUG=false
 APP_URL=https://monitorafacil.kltecnologia.com
 APP_TIMEZONE=America/Maceio
