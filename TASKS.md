@@ -79,4 +79,16 @@
   - [x] Manter exclusivamente o item "Visão Geral" na navegação principal da sidebar desktop e mobile.
   - [x] Remover âncoras secundárias mantendo o painel limpo e modular.
 
+- [x] **Fase 13: Módulo Configurações com Submódulos Completos**
+  - [x] Implementar menu expansível *accordion* "Configurações" na Sidebar (Desktop e Mobile).
+  - [x] Criar componente de cabeçalho com abas horizontais de navegação cruzada (`x-settings-tabs`).
+  - [x] **Submódulo 1 - Usuários** (`/configuracoes/usuarios`): CRUD completo de operadores com busca, paginação, modais de cadastro/edição, hash de senha e proteção contra autoexclusão.
+  - [x] **Submódulo 2 - Município** (`/configuracoes/municipio`): Edição institucional de Nome, Código IBGE, CNES da Sede e upload de Logotipo oficial com prévia imediata.
+  - [x] **Submódulo 3 - Log de Auditoria** (`/configuracoes/logs-auditoria`): Histórico paginado das execuções de sincronização (`sync_logs`) com filtros por status (Sucesso/Falha/Execução), tempo de duração e modal com detalhes do erro.
+  - [x] **Submódulo 4 - Conexão e-SUS** (`/configuracoes/conexao-esus`): Exibição dos parâmetros PostgreSQL (senhas mascaradas) e botão interativo para teste de conectividade em tempo real com diagnóstico de tabelas PEC (`tb_equipe`, `tb_cidadao`, etc.) e aferição de latência (ms).
+  - [x] **Submódulo 5 - Processar Dados** (`/configuracoes/processar-dados`): Disparo manual da rotina de consolidação (`esus:sync-snapshot`) com feedback ao vivo e cards de resumo do último snapshot de equipes e cadastros (MICI e MICDT).
+  - [x] **Submódulo 6 - Importar CNES / XML** (`/configuracoes/importar-cnes-xml`): Upload de arquivos XML homologados pelo Ministério da Saúde, validação de integridade sem DTD com `XMLReader`, verificação do código IBGE, prévia detalhada das equipes (eSF, eSB, eMulti) e salvamento em `importacao/`.
+  - [x] Suíte de testes automatizados completa com 26 testes aprovados (104 asserções).
+
+
 
