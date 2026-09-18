@@ -1,0 +1,22 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Segoe UI', ui-sans-serif, system-ui, sans-serif;
+    --color-canvas: #f5f7f6;
+    --color-ink: #16302c;
+    --color-muted: #58716b;
+    --color-line: #dce6e2;
+    --color-accent: #0f766e;
+    --shadow-panel: 0 12px 32px -28px rgb(22 48 44 / 35%);
+}
+
+@layer components {
+    .eyebrow {
+        @apply text-xs font-bold uppercase tracking-[0.18em] text-teal-800;
+    }
+}
