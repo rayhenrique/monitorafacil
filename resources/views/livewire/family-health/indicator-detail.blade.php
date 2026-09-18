@@ -9,10 +9,11 @@
         $level = $current['performance_level'];
         $score = $current['score_percent'];
         $isC1 = $indicator === 'c1';
+        $isC2 = $indicator === 'c2';
 
         $badgeStyles = match ($level) {
-            'otimo' => $isC1 ? 'bg-sky-100 text-sky-800 border-sky-300' : 'bg-emerald-100 text-emerald-800 border-emerald-300',
-            'bom' => $isC1 ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-sky-100 text-sky-800 border-sky-300',
+            'otimo' => in_array($indicator, ['c1', 'c2']) ? 'bg-sky-100 text-sky-800 border-sky-300' : 'bg-emerald-100 text-emerald-800 border-emerald-300',
+            'bom' => in_array($indicator, ['c1', 'c2']) ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-sky-100 text-sky-800 border-sky-300',
             'suficiente' => 'bg-amber-100 text-amber-800 border-amber-300',
             default => 'bg-rose-100 text-rose-800 border-rose-300',
         };
@@ -25,14 +26,16 @@
         };
 
         $barColor = match ($level) {
-            'otimo' => $isC1 ? 'bg-sky-500' : 'bg-emerald-500',
-            'bom' => $isC1 ? 'bg-emerald-500' : 'bg-sky-500',
+            'otimo' => in_array($indicator, ['c1', 'c2']) ? 'bg-sky-500' : 'bg-emerald-500',
+            'bom' => in_array($indicator, ['c1', 'c2']) ? 'bg-emerald-500' : 'bg-sky-500',
             'suficiente' => 'bg-amber-500',
             default => 'bg-rose-500',
         };
 
-        $c1Summary = $data['c1_quarter_summary'] ?? null;
-        $c1Monthly = $data['c1_monthly_evolution'] ?? [];
+        $quarterSummary = $data['quarter_summary'] ?? $data['c1_quarter_summary'] ?? $data['c2_quarter_summary'] ?? null;
+        $monthlyEvolution = $data['monthly_evolution'] ?? $data['c1_monthly_evolution'] ?? $data['c2_monthly_evolution'] ?? [];
+        $c1Summary = $quarterSummary;
+        $c1Monthly = $monthlyEvolution;
         $agendaAlerts = $data['agenda_alerts'] ?? [];
     @endphp
 
@@ -50,9 +53,14 @@
                     <span class="text-xs text-slate-400">
                         Público-Alvo: {{ $meta['target_population'] }}
                     </span>
-                    @if ($isC1)
+                    @if ($isC1 || $isC2)
                         <span class="rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 text-[10px] font-bold">
                             NT 08/2026 · Média de 4 Meses
+                        </span>
+                    @endif
+                    @if ($isC2)
+                        <span class="rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 px-2.5 py-0.5 text-[10px] font-bold">
+                            Peso 2.0 (até 2,00 pt)
                         </span>
                     @endif
                 </div>
@@ -84,7 +92,7 @@
                 <!-- Card de Pontuação -->
                 <div class="rounded-3xl bg-white/10 border border-white/15 p-5 text-center min-w-[190px] backdrop-blur-xs">
                     <span class="text-[11px] font-semibold text-teal-300 uppercase tracking-wider block">
-                        {{ $isC1 ? 'Média Quadrimestral' : 'Resultado Atual' }}
+                        {{ ($isC1 || $isC2) ? 'Média Quadrimestral' : 'Resultado Atual' }}
                     </span>
                     <div class="text-3xl sm:text-4xl font-black text-white tabular-nums my-1">
                         {{ number_format($score, 1, ',', '.') }}%
@@ -93,9 +101,9 @@
                         <span class="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold border {{ $badgeStyles }}">
                             {{ $levelLabel }}
                         </span>
-                        @if ($isC1 && $c1Summary)
+                        @if (($isC1 || $isC2) && $quarterSummary)
                             <span class="inline-block rounded-full px-2 py-0.5 text-[10px] font-mono font-bold bg-white/20 text-white border border-white/30">
-                                {{ number_format($c1Summary['component_iii_points'], 2, ',', '.') }} pt
+                                {{ number_format($quarterSummary['component_iii_points'], 2, ',', '.') }} pt
                             </span>
                         @endif
                     </div>
@@ -141,11 +149,40 @@
                         {{ number_format($current['denominator'], 0, '', '.') }}
                     </span>
                 </div>
-                @if ($c1Summary)
+                @if ($quarterSummary)
                     <div class="border-l border-slate-200 pl-4">
                         <span class="text-slate-400 block">Pontos Comp. III</span>
                         <span class="font-mono font-bold text-emerald-700 text-sm">
-                            {{ number_format($c1Summary['component_iii_points'], 2, ',', '.') }} / 1,00 pt
+                            {{ number_format($quarterSummary['component_iii_points'], 2, ',', '.') }} / 1,00 pt
+                        </span>
+                    </div>
+                @endif
+            </div>
+        @elseif ($isC2)
+            <div class="flex items-center gap-6 text-xs">
+                <div>
+                    <span class="text-slate-400 block">Cuidado Adequado (Média)</span>
+                    <span class="font-bold text-teal-800 text-sm">
+                        {{ number_format($current['numerator'], 0, '', '.') }}
+                    </span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block">Crianças Vinculadas (&lt;2 anos)</span>
+                    <span class="font-bold text-ink text-sm">
+                        {{ number_format($current['denominator'], 0, '', '.') }}
+                    </span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block">Busca Ativa Pendente</span>
+                    <span class="font-bold text-amber-700 text-sm">
+                        {{ number_format($current['active_search_count'], 0, '', '.') }}
+                    </span>
+                </div>
+                @if ($quarterSummary)
+                    <div class="border-l border-slate-200 pl-4">
+                        <span class="text-slate-400 block">Pontos Comp. III</span>
+                        <span class="font-mono font-bold text-emerald-700 text-sm">
+                            {{ number_format($quarterSummary['component_iii_points'], 2, ',', '.') }} / 2,00 pt
                         </span>
                     </div>
                 @endif
@@ -179,7 +216,7 @@
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
                 </svg>
-                <span>{{ $isC1 ? 'Acompanhamento Mensal & Avaliação Quadrimestral' : 'Visão do Indicador & Boas Práticas' }}</span>
+                <span>{{ ($isC1 || $isC2) ? 'Acompanhamento Mensal & Avaliação Quadrimestral' : 'Visão do Indicador & Boas Práticas' }}</span>
             </button>
 
             <button
@@ -201,12 +238,12 @@
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
                 </svg>
-                <span>{{ $isC1 ? 'Busca Ativa & Equilíbrio da Agenda' : 'Busca Ativa & Oportunidades' }}</span>
+                <span>{{ $isC1 ? 'Busca Ativa & Equilíbrio da Agenda' : ($isC2 ? 'Busca Ativa & Boas Práticas Infantis' : 'Busca Ativa & Oportunidades') }}</span>
                 @if ($isC1 && count($agendaAlerts) > 0)
                     <span class="rounded-full bg-rose-100 text-rose-800 px-2 py-0.5 text-[10px] font-bold">
                         {{ count($agendaAlerts) }} alertas
                     </span>
-                @elseif (! $isC1)
+                @else
                     <span class="rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[10px] font-bold">
                         {{ $current['active_search_count'] }} pendentes
                     </span>
@@ -705,8 +742,592 @@
                     </div>
                 </div>
             </div>
+        @elseif ($isC2)
+            <!-- MÓDULO C2: CUIDADO NO DESENVOLVIMENTO INFANTIL NA APS (NT 08/2026 - PESO 2.0) -->
+            <div class="space-y-6 animate-fade-in">
+                <!-- Card Síntese: Avaliação do Quadrimestre C2 -->
+                <div class="rounded-3xl border border-line bg-white p-6 sm:p-7 shadow-sm space-y-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="rounded-lg bg-teal-100 text-teal-900 px-2 py-0.5 text-xs font-mono font-bold">
+                                    NT 08/2026-DEAPS/SAPS/MS
+                                </span>
+                                <span class="rounded-lg bg-sky-100 text-sky-900 px-2 py-0.5 text-xs font-mono font-bold">
+                                    Quadro 1 e Quadro 2
+                                </span>
+                                <span class="text-xs font-bold text-slate-500">Nota Metodológica C2</span>
+                            </div>
+                            <h3 class="text-lg font-bold text-ink mt-1">Síntese da Avaliação Quadrimestral · C2</h3>
+                            <p class="text-xs text-muted">
+                                Conforme nota oficial, a avaliação é quadrimestral calculada pela <strong>média aritmética simples dos 4 meses</strong>: <code>(Mês 1 + Mês 2 + Mês 3 + Mês 4) / 4</code>. Monitora o cuidado integral a crianças de até 2 anos vinculadas às equipes eSF (tipo 70) e eAP (tipo 76).
+                            </p>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="rounded-2xl bg-slate-50 border border-slate-200 px-4 py-2.5 text-right">
+                                <span class="text-[10px] uppercase font-bold text-slate-400 block">Pontuação Componente III</span>
+                                <span class="text-base font-black text-sky-700 font-mono">
+                                    {{ number_format($quarterSummary['component_iii_points'] ?? 0, 2, ',', '.') }} / 2,00 pt
+                                </span>
+                            </div>
+                            <div class="rounded-2xl bg-teal-50 border border-teal-200 px-4 py-2.5 text-right">
+                                <span class="text-[10px] uppercase font-bold text-teal-700 block">Peso no Componente</span>
+                                <span class="text-base font-black text-teal-900 font-mono">
+                                    Peso 2.0 (Até 2,00 pts)
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Régua Oficial de Parâmetros e Pontuação (Quadro 2 / NT 08/2026) -->
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-bold text-slate-700">Faixas Oficiais do Indicador C2 · Cuidado no Desenvolvimento Infantil</span>
+                            <span class="text-muted">Ordem oficial e pontuação proporcional no Componente III (Multiplicador Peso 2.0)</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                            <div class="rounded-2xl p-3.5 border text-center transition {{ ($score <= 25.0) ? 'bg-rose-600 text-white ring-4 ring-rose-100 shadow-sm font-bold' : 'bg-rose-50 text-rose-900 border-rose-200' }}">
+                                <span class="text-[10px] font-bold uppercase tracking-wider block opacity-80">Regular · 0,50 pt</span>
+                                <span class="text-sm font-black">≤ 25%</span>
+                                <span class="text-[10px] block mt-0.5 opacity-90">Busca Ativa Crítica</span>
+                            </div>
+
+                            <div class="rounded-2xl p-3.5 border text-center transition {{ ($score > 25.0 && $score <= 50.0) ? 'bg-amber-500 text-white ring-4 ring-amber-100 shadow-sm font-bold' : 'bg-amber-50 text-amber-900 border-amber-200' }}">
+                                <span class="text-[10px] font-bold uppercase tracking-wider block opacity-80">Suficiente · 1,00 pt</span>
+                                <span class="text-sm font-black">&gt; 25% e ≤ 50%</span>
+                                <span class="text-[10px] block mt-0.5 opacity-90">Atenção a Vacinas e VD</span>
+                            </div>
+
+                            <div class="rounded-2xl p-3.5 border text-center transition {{ ($score > 50.0 && $score <= 75.0) ? 'bg-emerald-600 text-white ring-4 ring-emerald-100 shadow-sm font-bold' : 'bg-emerald-50 text-emerald-900 border-emerald-200' }}">
+                                <span class="text-[10px] font-bold uppercase tracking-wider block opacity-80">Bom · 1,50 pt</span>
+                                <span class="text-sm font-black">&gt; 50% e ≤ 75%</span>
+                                <span class="text-[10px] block mt-0.5 opacity-90">Bom Acompanhamento</span>
+                            </div>
+
+                            <div class="rounded-2xl p-3.5 border text-center transition {{ ($score > 75.0) ? 'bg-sky-600 text-white ring-4 ring-sky-100 shadow-sm font-bold' : 'bg-sky-50 text-sky-900 border-sky-200' }}">
+                                <span class="text-[10px] font-bold uppercase tracking-wider block opacity-80">Ótimo · 2,00 pt</span>
+                                <span class="text-sm font-black">&gt; 75% e ≤ 100%</span>
+                                <span class="text-[10px] block mt-0.5 opacity-90">Excelente Cobertura</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Decomposição das 5 Boas Práticas Oficiais (20 pts cada · Total 100 pts) -->
+                <div class="rounded-3xl border border-line bg-white p-6 sm:p-7 shadow-sm space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-100 pb-3">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="h-2 w-2 rounded-full bg-teal-600"></span>
+                                <h3 class="text-base font-bold text-ink">As 5 Boas Práticas Oficiais do Cuidado Infantil</h3>
+                            </div>
+                            <p class="text-xs text-muted">
+                                Quadro 01 da Nota Metodológica C2 · Cada boa prática computa 20 pontos, totalizando 100 pontos no numerador oficial
+                            </p>
+                        </div>
+                        <span class="rounded-full bg-teal-50 text-teal-800 border border-teal-200 px-3 py-1 text-xs font-bold font-mono">
+                            5 Práticas × 20 pts = 100 pts
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Prática A -->
+                        <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50/70 hover:bg-slate-50 transition space-y-2">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="flex h-7 w-7 items-center justify-center rounded-xl bg-teal-800 text-white font-bold text-xs font-mono">
+                                        A
+                                    </span>
+                                    <h4 class="text-xs sm:text-sm font-bold text-ink">1ª Consulta até 30 Dias</h4>
+                                </div>
+                                <span class="rounded-lg bg-teal-100 text-teal-900 px-2 py-0.5 text-[11px] font-bold shrink-0">
+                                    20 pts
+                                </span>
+                            </div>
+                            <p class="text-xs text-muted leading-relaxed pl-9">
+                                Consulta médica ou de enfermagem presencial realizada até o 30º dia de vida da criança (CBOs 2251, 2252, 2253, 2231 ou 2235). Registro no MIAI.
+                            </p>
+                        </div>
+
+                        <!-- Prática B -->
+                        <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50/70 hover:bg-slate-50 transition space-y-2">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="flex h-7 w-7 items-center justify-center rounded-xl bg-teal-800 text-white font-bold text-xs font-mono">
+                                        B
+                                    </span>
+                                    <h4 class="text-xs sm:text-sm font-bold text-ink">≥ 9 Consultas até 2 Anos</h4>
+                                </div>
+                                <span class="rounded-lg bg-teal-100 text-teal-900 px-2 py-0.5 text-[11px] font-bold shrink-0">
+                                    20 pts
+                                </span>
+                            </div>
+                            <p class="text-xs text-muted leading-relaxed pl-9">
+                                Pelo menos 9 consultas de puericultura (presenciais ou remotas) realizadas por médico ou enfermeiro até a criança completar 2 anos de idade.
+                            </p>
+                        </div>
+
+                        <!-- Prática C -->
+                        <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50/70 hover:bg-slate-50 transition space-y-2">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="flex h-7 w-7 items-center justify-center rounded-xl bg-teal-800 text-white font-bold text-xs font-mono">
+                                        C
+                                    </span>
+                                    <h4 class="text-xs sm:text-sm font-bold text-ink">≥ 9 Registros Peso e Altura</h4>
+                                </div>
+                                <span class="rounded-lg bg-teal-100 text-teal-900 px-2 py-0.5 text-[11px] font-bold shrink-0">
+                                    20 pts
+                                </span>
+                            </div>
+                            <p class="text-xs text-muted leading-relaxed pl-9">
+                                Ao menos 9 registros concomitantes de peso e altura na mesma data até 2 anos de vida, aferidos por profissionais habilitados (MIAI e MIP).
+                            </p>
+                        </div>
+
+                        <!-- Prática D -->
+                        <div class="rounded-2xl border border-teal-200 p-4 bg-teal-50/40 hover:bg-teal-50 transition space-y-2">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="flex h-7 w-7 items-center justify-center rounded-xl bg-teal-800 text-white font-bold text-xs font-mono">
+                                        D
+                                    </span>
+                                    <h4 class="text-xs sm:text-sm font-bold text-ink">≥ 2 Visitas Domiciliares ACS</h4>
+                                </div>
+                                <span class="rounded-lg bg-teal-100 text-teal-900 px-2 py-0.5 text-[11px] font-bold shrink-0">
+                                    20 pts
+                                </span>
+                            </div>
+                            <p class="text-xs text-muted leading-relaxed pl-9">
+                                Pelo menos 2 visitas domiciliares por ACS/TACS: a 1ª até 30 dias de vida e a 2ª até o 6º mês de vida (MIVDT).
+                            </p>
+                            <div class="ml-9 rounded-xl bg-amber-50 border border-amber-200 p-2 text-[11px] text-amber-900 font-medium">
+                                <strong>Regra Oficial eAP (tipo 76):</strong> Recebem pontuação integral (20 pts) nesta prática por não possuírem ACS na composição mínima.
+                            </div>
+                        </div>
+
+                        <!-- Prática E -->
+                        <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50/70 hover:bg-slate-50 transition space-y-2 md:col-span-2 lg:col-span-2">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="flex h-7 w-7 items-center justify-center rounded-xl bg-teal-800 text-white font-bold text-xs font-mono">
+                                        E
+                                    </span>
+                                    <h4 class="text-xs sm:text-sm font-bold text-ink">Vacinação Completa Recomendada</h4>
+                                </div>
+                                <span class="rounded-lg bg-teal-100 text-teal-900 px-2 py-0.5 text-[11px] font-bold shrink-0">
+                                    20 pts
+                                </span>
+                            </div>
+                            <p class="text-xs text-muted leading-relaxed pl-9">
+                                Registro no prontuário de todas as doses preconizadas do calendário infantil: <strong>Pentavalente</strong> (3 doses: 2m, 4m, 6m), <strong>VIP</strong> (3 doses: 2m, 4m, 6m), <strong>Tríplice Viral (SCR)</strong> (2 doses com a primeira aos 12 meses) e <strong>Pneumocócica 10V</strong> (2 doses: 2m, 4m).
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grid de Acompanhamento Mensal: 4 Meses do Quadrimestre (M1 a M4) -->
+                <div class="rounded-3xl border border-line bg-white p-6 sm:p-7 shadow-sm space-y-5">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="h-2 w-2 rounded-full bg-teal-600 animate-pulse"></span>
+                                <h3 class="text-base font-bold text-ink">Acompanhamento Mensal do Desenvolvimento Infantil</h3>
+                            </div>
+                            <p class="text-xs text-muted">
+                                Evolução das boas práticas e acompanhamento de crianças &lt; 2 anos ao longo dos 4 meses do quadrimestre
+                            </p>
+                        </div>
+                        <span class="text-xs font-mono font-semibold text-slate-500 bg-slate-100 px-3 py-1 rounded-xl">
+                            {{ $year }}/Q{{ $quarter }} (4 Competências)
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        @foreach ($monthlyEvolution as $m)
+                            @php
+                                $mLevel = $m['performance_level'];
+                                $mBadge = match ($mLevel) {
+                                    'otimo' => 'bg-sky-100 text-sky-800 border-sky-300',
+                                    'bom' => 'bg-emerald-100 text-emerald-800 border-emerald-300',
+                                    'suficiente' => 'bg-amber-100 text-amber-800 border-amber-300',
+                                    default => 'bg-rose-100 text-rose-800 border-rose-300',
+                                };
+                                $mBar = match ($mLevel) {
+                                    'otimo' => 'bg-sky-500',
+                                    'bom' => 'bg-emerald-500',
+                                    'suficiente' => 'bg-amber-500',
+                                    default => 'bg-rose-500',
+                                };
+                            @endphp
+                            <div 
+                                wire:click="setMonth({{ $selectedMonth === $m['month_in_quarter'] ? 'null' : $m['month_in_quarter'] }})"
+                                class="rounded-2xl border transition p-4 space-y-3 cursor-pointer select-none {{ $selectedMonth === $m['month_in_quarter'] ? 'bg-teal-50/90 border-teal-500 ring-2 ring-teal-400 shadow-sm' : 'border-slate-200 bg-slate-50/70 hover:bg-slate-100 hover:border-slate-300' }}"
+                                title="Clique para filtrar apenas o {{ $m['label'] }}"
+                            >
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-xs font-bold text-ink">
+                                            {{ $m['label'] }}
+                                        </span>
+                                        @if ($selectedMonth === $m['month_in_quarter'])
+                                            <span class="rounded bg-teal-600 text-white text-[9px] font-bold px-1.5 py-0.2">Ativo</span>
+                                        @endif
+                                    </div>
+                                    <span class="rounded-full px-2 py-0.5 text-[10px] font-bold border {{ $mBadge }}">
+                                        {{ ucfirst($mLevel) }}
+                                    </span>
+                                </div>
+
+                                <div>
+                                    <div class="flex items-baseline justify-between">
+                                        <span class="text-2xl font-black text-ink font-mono">
+                                            {{ number_format($m['score_percent'], 1, ',', '.') }}%
+                                        </span>
+                                        <span class="text-[11px] font-mono font-semibold text-sky-700">
+                                            {{ number_format($m['component_iii_points'], 2, ',', '.') }} / 2,00 pt
+                                        </span>
+                                    </div>
+                                    <div class="w-full bg-slate-200 rounded-full h-2 mt-1.5 overflow-hidden">
+                                        <div class="{{ $mBar }} h-2 rounded-full transition-all duration-500" style="width: {{ min(100, $m['score_percent']) }}%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="pt-2 border-t border-slate-200/80 grid grid-cols-2 gap-2 text-[11px]">
+                                    <div>
+                                        <span class="text-slate-400 block text-[10px]">Cuidado Adequado</span>
+                                        <span class="font-bold text-teal-800 font-mono">
+                                            {{ number_format($m['numerator'], 0, '', '.') }}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-400 block text-[10px]">Total Crianças &lt;2a</span>
+                                        <span class="font-bold text-ink font-mono">
+                                            {{ number_format($m['denominator'], 0, '', '.') }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <!-- BARRA DE FILTROS DO ACOMPANHAMENTO MENSAL C2: Equipe, Mês, Quadrimestre, Classificação -->
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50/90 p-4 sm:p-5 space-y-3.5 mt-2">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                            <div class="flex items-center gap-2">
+                                <span class="flex h-7 w-7 items-center justify-center rounded-xl bg-teal-600 text-white shadow-xs">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <h4 class="text-sm font-bold text-ink">Filtros do Acompanhamento Mensal · C2</h4>
+                                    <p class="text-[11px] text-muted">Filtre por equipe eSF/eAP, mês de competência, quadrimestre ou conceito alcançado</p>
+                                </div>
+                            </div>
+
+                            @if ($selectedIne || $selectedMonth || $selectedClassification)
+                                <button
+                                    type="button"
+                                    wire:click="resetFilters"
+                                    class="inline-flex items-center gap-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 text-xs font-semibold transition cursor-pointer self-start md:self-auto"
+                                >
+                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    <span>Limpar Filtros</span>
+                                </button>
+                            @endif
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+                            <!-- 1. Filtro: Equipe -->
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-bold text-slate-700 block">Equipe (eSF / eAP):</label>
+                                <select
+                                    wire:model.live="selectedIne"
+                                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-teal-500 focus:outline-hidden shadow-2xs"
+                                >
+                                    <option value="">Todas as Equipes ({{ $teams->count() }})</option>
+                                    @foreach ($teams as $team)
+                                        <option value="{{ $team->ine }}">
+                                            {{ $team->team_name }} (INE {{ $team->ine }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- 2. Filtro: Mês -->
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-bold text-slate-700 block">Mês de Competência:</label>
+                                <select
+                                    wire:model.live="selectedMonth"
+                                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-teal-500 focus:outline-hidden shadow-2xs"
+                                >
+                                    <option value="">Todos os 4 Meses (M1 a M4)</option>
+                                    @foreach ($monthlyEvolution as $m)
+                                        <option value="{{ $m['month_in_quarter'] }}">
+                                            Mês {{ $m['month_in_quarter'] }} · {{ $m['label'] }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- 3. Filtro: Quadrimestre -->
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-bold text-slate-700 block">Quadrimestre / Período:</label>
+                                <select
+                                    wire:change="setPeriodString($event.target.value)"
+                                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-teal-500 focus:outline-hidden shadow-2xs"
+                                >
+                                    @forelse ($periods as $p)
+                                        <option value="{{ $p['year'] }}-{{ $p['quarter'] }}" @selected($year === $p['year'] && $quarter === $p['quarter'])>
+                                            {{ $p['year'] }} · Q{{ $p['quarter'] }} ({{ $p['quarter'] === 1 ? 'Jan-Abr' : ($p['quarter'] === 2 ? 'Mai-Ago' : 'Set-Dez') }})
+                                        </option>
+                                    @empty
+                                        <option value="{{ $year }}-{{ $quarter }}" selected>
+                                            {{ $year }} · Q{{ $quarter }}
+                                        </option>
+                                    @endforelse
+                                </select>
+                            </div>
+
+                            <!-- 4. Filtro: Classificação -->
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-bold text-slate-700 block">Classificação Oficial:</label>
+                                <select
+                                    wire:model.live="selectedClassification"
+                                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-teal-500 focus:outline-hidden shadow-2xs"
+                                >
+                                    <option value="">Todas as Classificações</option>
+                                    <option value="regular">Regular (≤ 25% · Vermelho)</option>
+                                    <option value="suficiente">Suficiente (> 25% e ≤ 50% · Amarelo)</option>
+                                    <option value="bom">Bom (> 50% e ≤ 75% · Verde)</option>
+                                    <option value="otimo">Ótimo (> 75% e ≤ 100% · Azul)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TABELA DE EQUIPES NO ACOMPANHAMENTO MENSAL C2 -->
+                    <div class="space-y-3 pt-2">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                            <div class="flex items-center gap-2">
+                                <span class="h-2 w-2 rounded-full bg-teal-600"></span>
+                                <h4 class="text-sm font-bold text-ink">Equipes no Acompanhamento do Cuidado Infantil</h4>
+                                <span class="rounded-full bg-teal-100 text-teal-800 font-mono text-[11px] font-bold px-2.5 py-0.5">
+                                    {{ $c2Teams->count() }} de {{ $teams->count() }} equipes
+                                </span>
+                                @if ($selectedMonth)
+                                    <span class="rounded-full bg-slate-200 text-slate-700 text-[11px] font-semibold px-2 py-0.5">
+                                        Mês {{ $selectedMonth }}
+                                    </span>
+                                @endif
+                                @if ($selectedClassification)
+                                    <span class="rounded-full bg-slate-200 text-slate-700 text-[11px] font-semibold px-2 py-0.5 capitalize">
+                                        {{ $selectedClassification }}
+                                    </span>
+                                @endif
+                            </div>
+
+                            <span class="text-xs font-mono font-medium text-slate-500">
+                                {{ $selectedMonth ? 'Detalhamento do Mês ' . $selectedMonth : 'Média Aritmética (M1 + M2 + M3 + M4) / 4 · Peso 2.0' }}
+                            </span>
+                        </div>
+
+                        @if ($c2Teams->isEmpty())
+                            <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center space-y-2">
+                                <p class="text-sm font-semibold text-slate-600">Nenhuma equipe encontrada para os filtros selecionados.</p>
+                                <button
+                                    type="button"
+                                    wire:click="resetFilters"
+                                    class="text-xs text-teal-700 hover:text-teal-900 font-bold underline cursor-pointer"
+                                >
+                                    Limpar todos os filtros
+                                </button>
+                            </div>
+                        @else
+                            <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                                <table class="w-full text-left text-xs text-slate-700">
+                                    <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] tracking-wider border-b border-line font-bold">
+                                        <tr>
+                                            <th class="py-3 px-4">Equipe / Unidade</th>
+                                            <th class="py-3 px-3">Código INE</th>
+                                            <th class="py-3 px-3">Tipo</th>
+                                            @if ($selectedMonth === null)
+                                                <th class="py-3 px-3 text-center">Mês 1</th>
+                                                <th class="py-3 px-3 text-center">Mês 2</th>
+                                                <th class="py-3 px-3 text-center">Mês 3</th>
+                                                <th class="py-3 px-3 text-center">Mês 4</th>
+                                                <th class="py-3 px-4 text-center font-black text-ink bg-slate-100/60">Média Quad.</th>
+                                                <th class="py-3 px-3 text-center">Conceito</th>
+                                                <th class="py-3 px-3 text-center">Comp. III (Peso 2.0)</th>
+                                                <th class="py-3 px-3 text-center">Status Cuidado</th>
+                                            @else
+                                                <th class="py-3 px-3 text-center">Cuidado Adequado</th>
+                                                <th class="py-3 px-3 text-center">Total Crianças &lt;2a</th>
+                                                <th class="py-3 px-4 text-center font-black text-ink bg-slate-100/60">% Mês {{ $selectedMonth }}</th>
+                                                <th class="py-3 px-3 text-center">Conceito Mês</th>
+                                                <th class="py-3 px-3 text-center">Pontos Mês</th>
+                                                <th class="py-3 px-3 text-center">Status Mês</th>
+                                            @endif
+                                            <th class="py-3 px-4 text-right">Ação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 bg-white">
+                                        @foreach ($c2Teams as $team)
+                                            @php
+                                                $tScores = $team->monthly_scores ?? [1 => 0.0, 2 => 0.0, 3 => 0.0, 4 => 0.0];
+                                                $tDetails = $team->monthly_details ?? [];
+                                                $mDetail = $selectedMonth ? ($tDetails[$selectedMonth] ?? null) : null;
+                                                $tLevel = $selectedMonth ? ($mDetail['performance_level'] ?? 'regular') : ($team->quarter_level ?? $team->performance_level);
+                                                $tPoints = $selectedMonth ? ($mDetail['component_iii_points'] ?? 0.50) : ($team->component_iii_points ?? 0.50);
+
+                                                $tBadge = match ($tLevel) {
+                                                    'otimo' => 'bg-sky-100 text-sky-800 border-sky-300',
+                                                    'bom' => 'bg-emerald-100 text-emerald-800 border-emerald-300',
+                                                    'suficiente' => 'bg-amber-100 text-amber-800 border-amber-300',
+                                                    default => 'bg-rose-100 text-rose-800 border-rose-300',
+                                                };
+
+                                                $currScore = $selectedMonth ? ($mDetail['score_percent'] ?? 0.0) : ($team->quarter_average ?? $team->score_percent);
+
+                                                $statusText = match (true) {
+                                                    $currScore > 75.0 => 'Excelente Cobertura',
+                                                    $currScore > 50.0 => 'Bom Acompanhamento',
+                                                    $currScore > 25.0 => 'Atenção a Vacinas/VD',
+                                                    default => 'Busca Ativa Urgente',
+                                                };
+
+                                                $statusBadge = match (true) {
+                                                    $currScore > 75.0 => 'bg-sky-50 text-sky-800 border-sky-200',
+                                                    $currScore > 50.0 => 'bg-emerald-50 text-emerald-800 border-emerald-200',
+                                                    $currScore > 25.0 => 'bg-amber-50 text-amber-800 border-amber-200',
+                                                    default => 'bg-rose-50 text-rose-800 border-rose-200',
+                                                };
+                                            @endphp
+                                            <tr class="hover:bg-slate-50/80 transition {{ $selectedIne === $team->ine ? 'bg-teal-50/70 font-semibold' : '' }}">
+                                                <td class="py-3 px-4 font-bold text-ink">
+                                                    {{ $team->team_name }}
+                                                </td>
+                                                <td class="py-3 px-3 font-mono text-slate-500 text-[11px]">
+                                                    {{ $team->ine }}
+                                                </td>
+                                                <td class="py-3 px-3">
+                                                    <span class="rounded px-1.5 py-0.5 text-[9px] font-bold {{ $team->team_type === '70' ? 'bg-teal-100 text-teal-800' : 'bg-slate-100 text-slate-800' }}">
+                                                        {{ $team->team_type === '70' ? 'eSF' : 'eAP' }}
+                                                    </span>
+                                                </td>
+
+                                                @if ($selectedMonth === null)
+                                                    <td class="py-3 px-3 text-center font-mono text-slate-600">
+                                                        {{ number_format($tScores[1] ?? 0, 1, ',', '.') }}%
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center font-mono text-slate-600">
+                                                        {{ number_format($tScores[2] ?? 0, 1, ',', '.') }}%
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center font-mono text-slate-600">
+                                                        {{ number_format($tScores[3] ?? 0, 1, ',', '.') }}%
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center font-mono text-slate-600">
+                                                        {{ number_format($tScores[4] ?? 0, 1, ',', '.') }}%
+                                                    </td>
+                                                    <td class="py-3 px-4 text-center font-mono font-black text-sm text-ink bg-slate-50/50">
+                                                        {{ number_format($team->quarter_average ?? $team->score_percent, 1, ',', '.') }}%
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center">
+                                                        <span class="rounded-full px-2 py-0.5 text-[10px] font-bold border {{ $tBadge }}">
+                                                            {{ ucfirst($tLevel) }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center font-mono font-bold text-sky-700">
+                                                        {{ number_format($team->component_iii_points ?? 0.50, 2, ',', '.') }} pt
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center">
+                                                        <span class="rounded-lg px-2 py-0.5 text-[10px] font-bold border {{ $statusBadge }}">
+                                                            {{ $statusText }}
+                                                        </span>
+                                                    </td>
+                                                @else
+                                                    <td class="py-3 px-3 text-center font-mono font-bold text-teal-800">
+                                                        {{ number_format($mDetail['numerator'] ?? 0, 0, '', '.') }}
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center font-mono font-black text-ink">
+                                                        {{ number_format($mDetail['denominator'] ?? 0, 0, '', '.') }}
+                                                    </td>
+                                                    <td class="py-3 px-4 text-center font-mono font-black text-sm text-ink bg-slate-50/50">
+                                                        {{ number_format($mDetail['score_percent'] ?? 0, 1, ',', '.') }}%
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center">
+                                                        <span class="rounded-full px-2 py-0.5 text-[10px] font-bold border {{ $tBadge }}">
+                                                            {{ ucfirst($tLevel) }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center font-mono font-bold text-sky-700">
+                                                        {{ number_format($tPoints, 2, ',', '.') }} pt
+                                                    </td>
+                                                    <td class="py-3 px-3 text-center">
+                                                        <span class="rounded-lg px-2 py-0.5 text-[10px] font-bold border {{ $statusBadge }}">
+                                                            {{ $statusText }}
+                                                        </span>
+                                                    </td>
+                                                @endif
+
+                                                <td class="py-3 px-4 text-right">
+                                                    <button
+                                                        type="button"
+                                                        wire:click="selectTeam('{{ $selectedIne === $team->ine ? '' : $team->ine }}')"
+                                                        class="text-xs font-semibold {{ $selectedIne === $team->ine ? 'text-teal-900 bg-teal-100 px-2 py-1 rounded-lg' : 'text-teal-700 hover:text-teal-900' }} cursor-pointer"
+                                                    >
+                                                        {{ $selectedIne === $team->ine ? 'Limpar Foco' : 'Filtrar' }}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Recomendações e Diretrizes Clínicas da Primeira Infância na APS -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="rounded-3xl border border-teal-200 bg-teal-50/50 p-5 space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="h-6 w-6 rounded-xl bg-teal-700 text-white flex items-center justify-center font-bold text-xs">1</span>
+                            <h4 class="text-sm font-bold text-teal-950">Primeiros 1000 Dias & 1ª Consulta</h4>
+                        </div>
+                        <p class="text-xs text-teal-900 leading-relaxed">
+                            A primeira consulta presencial até o 30º dia de vida é crucial para a redução da mortalidade neonatal, apoio e orientação ao aleitamento materno exclusivo e conferência da triagem neonatal biológica e testes de triagem.
+                        </p>
+                    </div>
+
+                    <div class="rounded-3xl border border-sky-200 bg-sky-50/50 p-5 space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="h-6 w-6 rounded-xl bg-sky-700 text-white flex items-center justify-center font-bold text-xs">2</span>
+                            <h4 class="text-sm font-bold text-sky-950">Vigilância Antropométrica Contínua</h4>
+                        </div>
+                        <p class="text-xs text-sky-900 leading-relaxed">
+                            O registro simultâneo de peso e altura em todas as 9 consultas de puericultura garante o monitoramento das curvas de crescimento da OMS, permitindo detecção precoce de desnutrição, desaceleração do crescimento ou sobrepeso.
+                        </p>
+                    </div>
+
+                    <div class="rounded-3xl border border-emerald-200 bg-emerald-50/50 p-5 space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="h-6 w-6 rounded-xl bg-emerald-700 text-white flex items-center justify-center font-bold text-xs">3</span>
+                            <h4 class="text-sm font-bold text-emerald-950">Cobertura Vacinal & Visita ACS</h4>
+                        </div>
+                        <p class="text-xs text-emerald-900 leading-relaxed">
+                            A visita do ACS nos primeiros 30 dias e até o 6º mês estreita o vínculo territorial, monitorando o cumprimento do calendário vacinal básico (Penta, VIP, SCR e Pneumo) e acionando a equipe diante de atrasos vacinais.
+                        </p>
+                    </div>
+                </div>
+            </div>
         @else
-            <!-- MÓDULOS C2 A C7: VISÃO DO INDICADOR & BOAS PRÁTICAS -->
+            <!-- MÓDULOS C3 A C7: VISÃO DO INDICADOR & BOAS PRÁTICAS -->
             <div class="space-y-6 animate-fade-in">
                 <!-- Barra de Progresso e Faixas de Metas -->
                 <div class="rounded-3xl border border-line bg-white p-6 shadow-sm space-y-4">
@@ -778,12 +1399,12 @@
                 <div>
                     <h3 class="text-base font-bold text-ink">Desempenho Individualizado por Equipe (INE)</h3>
                     <p class="text-xs text-muted">
-                        {{ $isC1 ? 'Acompanhamento mês a mês (M1 a M4), média aritmética quadrimestral e pontuação no Componente III conforme NT 08/2026' : 'Resultados homologados das Equipes de Saúde da Família (eSF) e Atenção Primária (eAP)' }}
+                        {{ ($isC1 || $isC2) ? 'Acompanhamento mês a mês (M1 a M4), média aritmética quadrimestral e pontuação no Componente III conforme NT 08/2026' : 'Resultados homologados das Equipes de Saúde da Família (eSF) e Atenção Primária (eAP)' }}
                     </p>
                 </div>
-                @if ($isC1)
+                @if ($isC1 || $isC2)
                     <span class="text-xs font-mono font-semibold text-teal-800 bg-teal-50 px-3 py-1.5 rounded-xl border border-teal-200">
-                        Fórmula: (M1 + M2 + M3 + M4) / 4
+                        Fórmula: (M1 + M2 + M3 + M4) / 4 · Peso {{ $meta['weight'] }}
                     </span>
                 @endif
             </div>
@@ -795,15 +1416,15 @@
                             <th class="py-3 px-4">Equipe / Unidade</th>
                             <th class="py-3 px-4">Código INE</th>
                             <th class="py-3 px-4">Tipo</th>
-                            @if ($isC1)
+                            @if ($isC1 || $isC2)
                                 <th class="py-3 px-3 text-center">Mês 1</th>
                                 <th class="py-3 px-3 text-center">Mês 2</th>
                                 <th class="py-3 px-3 text-center">Mês 3</th>
                                 <th class="py-3 px-3 text-center">Mês 4</th>
                                 <th class="py-3 px-4 text-center font-black text-ink">Média Quad.</th>
                                 <th class="py-3 px-3 text-center">Conceito</th>
-                                <th class="py-3 px-3 text-center">Comp. III</th>
-                                <th class="py-3 px-3 text-center">Status Agenda</th>
+                                <th class="py-3 px-3 text-center">{{ $isC1 ? 'Comp. III (Peso 1.0)' : 'Comp. III (Peso 2.0)' }}</th>
+                                <th class="py-3 px-3 text-center">{{ $isC1 ? 'Status Agenda' : 'Status Cuidado' }}</th>
                             @else
                                 <th class="py-3 px-4 text-center">Numerador</th>
                                 <th class="py-3 px-4 text-center">Denominador</th>
@@ -818,8 +1439,8 @@
                             @php
                                 $tLevel = $team->performance_level;
                                 $tBadge = match ($tLevel) {
-                                    'otimo' => $isC1 ? 'bg-sky-100 text-sky-800 border-sky-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200',
-                                    'bom' => $isC1 ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-sky-100 text-sky-800 border-sky-200',
+                                    'otimo' => in_array($indicator, ['c1', 'c2']) ? 'bg-sky-100 text-sky-800 border-sky-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200',
+                                    'bom' => in_array($indicator, ['c1', 'c2']) ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-sky-100 text-sky-800 border-sky-200',
                                     'suficiente' => 'bg-amber-100 text-amber-800 border-amber-200',
                                     default => 'bg-rose-100 text-rose-800 border-rose-200',
                                 };
@@ -833,21 +1454,38 @@
                                     </span>
                                 </td>
 
-                                @if ($isC1)
+                                @if ($isC1 || $isC2)
                                     @php
                                         $mScores = $team->monthly_scores ?? [1 => 0.0, 2 => 0.0, 3 => 0.0, 4 => 0.0];
-                                        $points = $team->component_iii_points ?? 0.25;
-                                        $agendaStatus = $team->agenda_status ?? 'optimal';
-                                        $statusBadge = match ($agendaStatus) {
-                                            'excess_programmatic' => 'bg-rose-50 text-rose-800 border-rose-200',
-                                            'excess_spontaneous' => 'bg-amber-50 text-amber-800 border-amber-200',
-                                            default => 'bg-emerald-50 text-emerald-800 border-emerald-200',
-                                        };
-                                        $statusText = match ($agendaStatus) {
-                                            'excess_programmatic' => 'Fechada (>70%)',
-                                            'excess_spontaneous' => 'Espontânea (<30%)',
-                                            default => 'Equilibrada',
-                                        };
+                                        $points = $team->component_iii_points ?? ($isC2 ? 0.50 : 0.25);
+
+                                        if ($isC1) {
+                                            $agendaStatus = $team->agenda_status ?? 'optimal';
+                                            $statusBadge = match ($agendaStatus) {
+                                                'excess_programmatic' => 'bg-rose-50 text-rose-800 border-rose-200',
+                                                'excess_spontaneous' => 'bg-amber-50 text-amber-800 border-amber-200',
+                                                default => 'bg-emerald-50 text-emerald-800 border-emerald-200',
+                                            };
+                                            $statusText = match ($agendaStatus) {
+                                                'excess_programmatic' => 'Fechada (>70%)',
+                                                'excess_spontaneous' => 'Espontânea (<30%)',
+                                                default => 'Equilibrada',
+                                            };
+                                        } else {
+                                            $avg = $team->quarter_average ?? $team->score_percent;
+                                            $statusText = match (true) {
+                                                $avg > 75.0 => 'Excelente Cobertura',
+                                                $avg > 50.0 => 'Bom Acompanhamento',
+                                                $avg > 25.0 => 'Atenção Vacinas/VD',
+                                                default => 'Busca Ativa Urgente',
+                                            };
+                                            $statusBadge = match (true) {
+                                                $avg > 75.0 => 'bg-sky-50 text-sky-800 border-sky-200',
+                                                $avg > 50.0 => 'bg-emerald-50 text-emerald-800 border-emerald-200',
+                                                $avg > 25.0 => 'bg-amber-50 text-amber-800 border-amber-200',
+                                                default => 'bg-rose-50 text-rose-800 border-rose-200',
+                                            };
+                                        }
                                     @endphp
                                     <td class="py-3.5 px-3 text-center font-mono text-slate-600">
                                         {{ number_format($mScores[1] ?? 0, 1, ',', '.') }}%
@@ -869,7 +1507,7 @@
                                             {{ ucfirst($tLevel) }}
                                         </span>
                                     </td>
-                                    <td class="py-3.5 px-3 text-center font-mono font-bold text-emerald-700">
+                                    <td class="py-3.5 px-3 text-center font-mono font-bold {{ $isC2 ? 'text-sky-700' : 'text-emerald-700' }}">
                                         {{ number_format($points, 2, ',', '.') }} pt
                                     </td>
                                     <td class="py-3.5 px-3 text-center">
@@ -1016,8 +1654,62 @@
                     </div>
                 </div>
             </div>
+        @elseif ($isC2)
+            <!-- LISTA DE BUSCA ATIVA C2: CRIANÇAS ATÉ 2 ANOS COM PENDÊNCIAS DE BOAS PRÁTICAS -->
+            <div class="rounded-3xl border border-line bg-white p-6 shadow-sm space-y-4 animate-fade-in">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-line pb-4">
+                    <div>
+                        <h3 class="text-base font-bold text-ink">Lista de Busca Ativa · Crianças de 0 a 2 Anos com Pendências</h3>
+                        <p class="text-xs text-muted">Crianças vinculadas às equipes eSF/eAP que precisam de consulta médica/enfermagem, vacinas, antropometria ou visita do ACS</p>
+                    </div>
+                    <span class="rounded-full bg-amber-100 text-amber-900 border border-amber-300 px-3 py-1 text-xs font-bold">
+                        {{ count($activeSearchList) }} Crianças Identificadas
+                    </span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-700">
+                        <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] tracking-wider border-b border-line font-bold">
+                            <tr>
+                                <th class="py-3 px-4">Criança</th>
+                                <th class="py-3 px-4">Idade</th>
+                                <th class="py-3 px-4">Cartão SUS (CNS)</th>
+                                <th class="py-3 px-4">Equipe / Microárea</th>
+                                <th class="py-3 px-4">Ação Prioritária Pendente</th>
+                                <th class="py-3 px-4 text-center">Prioridade</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @foreach ($activeSearchList as $citizen)
+                                <tr class="hover:bg-slate-50 transition">
+                                    <td class="py-3.5 px-4 font-bold text-ink">{{ $citizen['name'] }}</td>
+                                    <td class="py-3.5 px-4 text-slate-600 font-medium">{{ $citizen['age'] }}</td>
+                                    <td class="py-3.5 px-4 font-mono text-slate-500">{{ $citizen['cns'] }}</td>
+                                    <td class="py-3.5 px-4 text-slate-600">
+                                        <span class="block font-medium text-ink">{{ $citizen['team_name'] }}</span>
+                                        <span class="text-[11px] text-muted">{{ $citizen['microarea'] }}</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 font-medium text-amber-900">
+                                        <span class="inline-flex items-center gap-1.5">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                                            {{ $citizen['pending_action'] }}
+                                        </span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-center">
+                                        @if ($citizen['priority'] === 'alta')
+                                            <span class="rounded-full bg-rose-100 text-rose-800 border border-rose-200 px-2 py-0.5 text-[10px] font-bold">Alta</span>
+                                        @else
+                                            <span class="rounded-full bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 text-[10px] font-bold">Média</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         @else
-            <!-- BUSCA ATIVA PADRÃO PARA OS DEMAIS INDICADORES (C2 A C7) -->
+            <!-- BUSCA ATIVA PADRÃO PARA OS DEMAIS INDICADORES (C3 A C7) -->
             <div class="rounded-3xl border border-line bg-white p-6 shadow-sm space-y-4 animate-fade-in">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-line pb-4">
                     <div>
@@ -1085,7 +1777,7 @@
                     <span class="text-xs font-mono font-semibold text-teal-800 bg-teal-50 px-3 py-1.5 rounded-xl border border-teal-200">
                         {{ $meta['source_pdf'] }}
                     </span>
-                    @if ($isC1)
+                    @if ($isC1 || $isC2)
                         <span class="text-xs font-mono font-semibold text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
                             NT 08/2026-DEAPS/SAPS/MS
                         </span>
@@ -1106,7 +1798,7 @@
                             <span class="text-xs font-bold text-teal-800 block">Denominador:</span>
                             <p class="text-xs text-slate-700 mt-0.5">{{ $meta['denominator_desc'] }}</p>
                         </div>
-                        @if ($isC1)
+                        @if ($isC1 || $isC2)
                             <div class="border-t border-slate-200 pt-2">
                                 <span class="text-xs font-bold text-emerald-800 block">Avaliação do Quadrimestre (NT 08/2026):</span>
                                 <p class="text-xs text-slate-700 mt-0.5">
@@ -1134,7 +1826,7 @@
             @if ($isC1)
                 <div class="rounded-2xl bg-emerald-50/70 border border-emerald-200 p-4 space-y-3">
                     <h4 class="text-xs font-bold text-emerald-950 uppercase tracking-wider">
-                        Componente III - Qualidade: Quadro 2 da NT 08/2026
+                        Componente III - Qualidade: Quadro 2 da NT 08/2026 (Peso 1.0 · Até 1,00 pt)
                     </h4>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                         <div class="bg-white/80 rounded-xl p-2.5 border border-rose-300">
@@ -1157,6 +1849,42 @@
                             <span class="text-sm font-black text-sky-700 font-mono">1,00 pt</span>
                             <span class="text-[10px] text-muted block">&gt; 50% e ≤ 70%</span>
                         </div>
+                    </div>
+                </div>
+            @elseif ($isC2)
+                <div class="rounded-2xl bg-sky-50/70 border border-sky-200 p-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-xs font-bold text-sky-950 uppercase tracking-wider">
+                            Componente III - Qualidade: Quadro 2 da NT 08/2026 (Peso 2.0 · Até 2,00 pts)
+                        </h4>
+                        <span class="rounded-lg bg-sky-200/80 text-sky-900 px-2 py-0.5 text-[10px] font-bold font-mono">
+                            Multiplicador 2.0×
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                        <div class="bg-white/90 rounded-xl p-2.5 border border-rose-300">
+                            <span class="text-[10px] font-bold text-rose-900 block">Conceito Regular</span>
+                            <span class="text-sm font-black text-rose-700 font-mono">0,50 pt</span>
+                            <span class="text-[10px] text-muted block">≤ 25%</span>
+                        </div>
+                        <div class="bg-white/90 rounded-xl p-2.5 border border-amber-300">
+                            <span class="text-[10px] font-bold text-amber-900 block">Conceito Suficiente</span>
+                            <span class="text-sm font-black text-amber-700 font-mono">1,00 pt</span>
+                            <span class="text-[10px] text-muted block">&gt; 25% e ≤ 50%</span>
+                        </div>
+                        <div class="bg-white/90 rounded-xl p-2.5 border border-emerald-300">
+                            <span class="text-[10px] font-bold text-emerald-900 block">Conceito Bom</span>
+                            <span class="text-sm font-black text-emerald-700 font-mono">1,50 pt</span>
+                            <span class="text-[10px] text-muted block">&gt; 50% e ≤ 75%</span>
+                        </div>
+                        <div class="bg-white/90 rounded-xl p-2.5 border border-sky-300">
+                            <span class="text-[10px] font-bold text-sky-900 block">Conceito Ótimo</span>
+                            <span class="text-sm font-black text-sky-700 font-mono">2,00 pt</span>
+                            <span class="text-[10px] text-muted block">&gt; 75% e ≤ 100%</span>
+                        </div>
+                    </div>
+                    <div class="rounded-xl bg-white/80 border border-sky-100 p-3 text-xs text-sky-900 leading-relaxed">
+                        <strong>Exceção Oficial para eAP (tipo 76):</strong> Conforme Nota Metodológica C2, Equipes de Atenção Primária pontuam integralmente 20 pontos na Prática D (Visitas Domiciliares do ACS), mantendo equidade com as equipes de Saúde da Família (eSF).
                     </div>
                 </div>
             @endif

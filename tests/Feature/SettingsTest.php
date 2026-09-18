@@ -374,7 +374,14 @@ XML;
             ->call('processC1')
             ->assertSet('progressPercent', 100)
             ->assertSet('selectedScope', 'c1')
-            ->assertSee('Foco selecionado: Indicador C1 Mais Acesso');
+            ->assertSee('Foco selecionado: Indicador C1 (Mais Acesso)');
+
+        // Processamento Apenas C2
+        Livewire::test(DataProcessing::class)
+            ->call('processC2')
+            ->assertSet('progressPercent', 100)
+            ->assertSet('selectedScope', 'c2')
+            ->assertSee('Foco selecionado: Indicador C2 (Desenvolvimento Infantil)');
 
         // Processamento Geral Completo
         Livewire::test(DataProcessing::class)
@@ -388,6 +395,10 @@ XML;
     {
         $this->artisan('esus:process-data', ['--scope' => 'c1'])
             ->expectsOutputToContain('[Escopo: C1]')
+            ->assertExitCode(0);
+
+        $this->artisan('esus:process-data', ['--scope' => 'c2'])
+            ->expectsOutputToContain('[Escopo: C2]')
             ->assertExitCode(0);
 
         $this->artisan('esus:process-data', ['--scope' => 'all'])

@@ -114,6 +114,16 @@ class FamilyHealthTest extends TestCase
 
             $table->unique(['year', 'month', 'ine', 'indicator_code'], 'unique_monthly_team_indicator');
         });
+
+        Schema::dropIfExists('sync_logs');
+        Schema::create('sync_logs', function (Blueprint $table): void {
+            $table->id();
+            $table->string('status');
+            $table->timestamp('started_at');
+            $table->timestamp('finished_at')->nullable();
+            $table->text('error_message')->nullable();
+            $table->timestamps();
+        });
     }
 
     private function authenticateUser(): User
@@ -397,5 +407,97 @@ class FamilyHealthTest extends TestCase
             ->assertSet('selectedMonth', null)
             ->assertSet('selectedClassification', null);
     }
+
+    public function test_c2_metadata_has_weight_two_and_five_good_practices_of_twenty_points(): void
+    {
+        $this->authenticateUser();
+
+        $meta = \App\Services\FamilyHealthService::getIndicatorMeta('c2');
+        $this->assertNotNull($meta);
+
+        // Peso 2.0 oficial conforme NT 08/2026 Quadro 2
+        $this->assertSame(2.0, (float) $meta['weight']);
+
+        // 5 Boas Práticas Oficiais de 20 pontos cada = 100 pontos
+        $this->assertCount(5, $meta['good_practices']);
+        $totalPoints = 0;
+        foreach ($meta['good_practices'] as $practice) {
+            $this->assertSame(20, $practice['points']);
+            $totalPoints += $practice['points'];
+        }
+        $this->assertSame(100, $totalPoints);
+
+        // Ordem oficial da régua: Regular, Suficiente, Bom e Ótimo
+        $keys = array_keys($meta['parameters']);
+        $this->assertSame(['regular', 'sufficient', 'good', 'optimal'], $keys);
+
+        // Cores respectivas: vermelho, amarelo, verde e azul
+        $this->assertSame('red', $meta['parameters']['regular']['color']);
+        $this->assertSame('yellow', $meta['parameters']['sufficient']['color']);
+        $this->assertSame('green', $meta['parameters']['good']['color']);
+        $this->assertSame('blue', $meta['parameters']['optimal']['color']);
+
+        // Pontuação Componente III com peso 2.0
+        $this->assertSame(2.00, \App\Services\FamilyHealthService::calculateComponentIIIPoints('otimo', 2.0));
+        $this->assertSame(1.50, \App\Services\FamilyHealthService::calculateComponentIIIPoints('bom', 2.0));
+        $this->assertSame(1.00, \App\Services\FamilyHealthService::calculateComponentIIIPoints('suficiente', 2.0));
+        $this->assertSame(0.50, \App\Services\FamilyHealthService::calculateComponentIIIPoints('regular', 2.0));
+    }
+
+    public function test_c2_monthly_tracking_and_filters(): void
+    {
+        $this->authenticateUser();
+
+        // Seed team snapshot for C2
+        \App\Models\FamilyHealthIndicatorSnapshot::query()->create([
+            'year' => 2026,
+            'quarter' => 1,
+            'ine' => '0000171220',
+            'team_name' => 'ESF CENTRO',
+            'team_type' => '70',
+            'indicator_code' => 'c2',
+            'numerator' => 82,
+            'denominator' => 100,
+            'score_percent' => 82.00,
+            'performance_level' => 'otimo',
+            'component_iii_points' => 2.00,
+        ]);
+
+        Livewire::test(IndicatorDetail::class, ['indicator' => 'c2', 'year' => 2026, 'quarter' => 1])
+            ->assertSee('Síntese da Avaliação Quadrimestral · C2')
+            ->assertSee('As 5 Boas Práticas Oficiais do Cuidado Infantil')
+            ->assertSee('1ª Consulta até 30 Dias')
+            ->assertSee('≥ 9 Consultas até 2 Anos')
+            ->assertSee('≥ 9 Registros Peso e Altura')
+            ->assertSee('≥ 2 Visitas Domiciliares ACS')
+            ->assertSee('Vacinação Completa Recomendada')
+            ->assertSee('Acompanhamento Mensal do Desenvolvimento Infantil')
+            ->assertSee('Filtros do Acompanhamento Mensal · C2')
+            ->call('setMonth', 1)
+            ->assertSet('selectedMonth', 1)
+            ->call('setClassification', 'otimo')
+            ->assertSet('selectedClassification', 'otimo')
+            ->call('selectTeam', '0000171220')
+            ->assertSet('selectedIne', '0000171220')
+            ->call('resetFilters')
+            ->assertSet('selectedIne', null)
+            ->assertSet('selectedMonth', null)
+            ->assertSet('selectedClassification', null);
+    }
+
+    public function test_c2_scope_data_processing_command(): void
+    {
+        $this->artisan('esus:process-data', ['--scope' => 'c2', '--year' => 2026, '--quarter' => 1])
+            ->assertSuccessful();
+
+        $c2Snapshots = \App\Models\FamilyHealthIndicatorSnapshot::query()
+            ->where('indicator_code', 'c2')
+            ->where('year', 2026)
+            ->where('quarter', 1)
+            ->count();
+
+        $this->assertGreaterThan(0, $c2Snapshots);
+    }
 }
+
 

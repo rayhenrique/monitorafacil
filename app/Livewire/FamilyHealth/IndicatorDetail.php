@@ -99,16 +99,16 @@ class IndicatorDetail extends Component
         $data = $service->getIndicatorDetail($this->indicator, $this->year, $this->quarter, $this->selectedIne);
         $periods = $snapshots->periods();
 
-        $c1Teams = $data['teams'];
+        $filteredTeams = $data['teams'];
 
-        // Se estiver no C1, aplica filtragem de Equipe e Classificação
-        if ($this->indicator === 'c1') {
+        // Se estiver no C1 ou C2, aplica filtragem reativa de Equipe e Classificação
+        if (in_array($this->indicator, ['c1', 'c2'])) {
             if ($this->selectedIne) {
-                $c1Teams = $c1Teams->filter(fn ($t) => $t->ine === $this->selectedIne);
+                $filteredTeams = $filteredTeams->filter(fn ($t) => $t->ine === $this->selectedIne);
             }
 
             if ($this->selectedClassification) {
-                $c1Teams = $c1Teams->filter(function ($t) {
+                $filteredTeams = $filteredTeams->filter(function ($t) {
                     if ($this->selectedMonth !== null && isset($t->monthly_details[$this->selectedMonth])) {
                         return $t->monthly_details[$this->selectedMonth]['performance_level'] === $this->selectedClassification;
                     }
@@ -124,7 +124,9 @@ class IndicatorDetail extends Component
             'meta' => $data['meta'],
             'current' => $data['current'],
             'teams' => $data['teams'],
-            'c1Teams' => $c1Teams,
+            'c1Teams' => $filteredTeams,
+            'c2Teams' => $filteredTeams,
+            'filteredTeams' => $filteredTeams,
             'activeSearchList' => $data['active_search_list'],
             'periods' => $periods,
         ]);

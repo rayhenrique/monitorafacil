@@ -58,26 +58,26 @@ class FamilyHealthService
                 'target_population' => 'Crianças com até 2 anos de idade (0 a 24 meses)',
                 'icon' => 'child',
                 'color' => 'blue',
-                'weight' => 1.0,
+                'weight' => 2.0,
                 'polarity' => 'Maior é melhor',
                 'periodicity' => 'Quadrimestral',
                 'source_pdf' => 'Nota Metodológica C2 - Cuidado no desenvolvimento infantil.pdf',
                 'objective' => 'Avaliar o acesso e monitoramento efetivo das crianças até dois anos de idade em relação aos episódios de cuidados necessários, incentivando a captação precoce e acompanhamento coordenado e contínuo.',
-                'numerator_desc' => 'Somatório das boas práticas pontuadas para cada criança com até 2 anos de vida vinculada à equipe.',
-                'denominator_desc' => 'Nº total de crianças com até 2 anos de vida vinculadas à equipe no período.',
+                'numerator_desc' => 'Somatório das boas práticas pontuadas para cada criança com até 2 anos de vida vinculada à equipe (0 a 100 pontos).',
+                'denominator_desc' => 'Nº total de crianças com até 2 anos de vida vinculadas à equipe no período avaliado.',
                 'parameters' => [
-                    'optimal' => ['min' => 75.01, 'max' => 100.0, 'label' => 'Ótimo (> 75% e ≤ 100%)', 'badge' => 'bg-emerald-100 text-emerald-800 border-emerald-300'],
-                    'good' => ['min' => 50.01, 'max' => 75.0, 'label' => 'Bom (> 50% e ≤ 75%)', 'badge' => 'bg-sky-100 text-sky-800 border-sky-300'],
-                    'sufficient' => ['min' => 25.01, 'max' => 50.0, 'label' => 'Suficiente (> 25% e ≤ 50%)', 'badge' => 'bg-amber-100 text-amber-800 border-amber-300'],
-                    'regular' => ['min' => 0.0, 'max' => 25.0, 'label' => 'Regular (≤ 25%)', 'badge' => 'bg-rose-100 text-rose-800 border-rose-300'],
+                    'regular' => ['min' => 0.0, 'max' => 25.0, 'label' => 'Regular (≤ 25%)', 'points' => '0,50 pt', 'color' => 'red', 'badge' => 'bg-rose-100 text-rose-800 border-rose-300'],
+                    'sufficient' => ['min' => 25.01, 'max' => 50.0, 'label' => 'Suficiente (> 25% e ≤ 50%)', 'points' => '1,00 pt', 'color' => 'yellow', 'badge' => 'bg-amber-100 text-amber-800 border-amber-300'],
+                    'good' => ['min' => 50.01, 'max' => 75.0, 'label' => 'Bom (> 50% e ≤ 75%)', 'points' => '1,50 pt', 'color' => 'green', 'badge' => 'bg-emerald-100 text-emerald-800 border-emerald-300'],
+                    'optimal' => ['min' => 75.01, 'max' => 100.0, 'label' => 'Ótimo (> 75% e ≤ 100%)', 'points' => '2,00 pts', 'color' => 'blue', 'badge' => 'bg-sky-100 text-sky-800 border-sky-300'],
                 ],
-                'cbos' => ['2235 (Enfermeiros)', '2231/2251/2252/2253 (Médicos)', '5151-05 (ACS)', '3222-55 (TACS)'],
+                'cbos' => ['2235 (Enfermeiros)', '2231 / 2251 / 2252 / 2253 (Médicos)', '5151-05 (ACS)', '3222-55 (TACS)'],
                 'good_practices' => [
-                    ['letter' => 'A', 'title' => 'Primeira Consulta até 30 Dias de Vida', 'desc' => '1ª consulta presencial realizada por médico ou enfermeiro até o 30º dia após o nascimento.', 'points' => 20],
-                    ['letter' => 'B', 'title' => 'Ao Menos 9 Consultas até 2 Anos', 'desc' => 'Mínimo de 9 consultas presenciais ou remotas realizadas por médico ou enfermeiro até 24 meses.', 'points' => 25],
-                    ['letter' => 'C', 'title' => 'Ao Menos 9 Registros Antropométricos', 'desc' => 'Mínimo de 9 registros simultâneos de peso e altura realizados na puericultura.', 'points' => 20],
-                    ['letter' => 'D', 'title' => 'Duas Visitas Domiciliares do ACS', 'desc' => 'Primeira visita até 30 dias de vida e a segunda visita até os 6 meses de vida.', 'points' => 15],
-                    ['letter' => 'E', 'title' => 'Esquema Vacinal Completo', 'desc' => 'Vacinas registradas: Pentavalente, VIP/VOP, Tríplice Viral e Pneumocócica 10v.', 'points' => 20],
+                    ['letter' => 'A', 'title' => 'Primeira Consulta até 30 Dias de Vida', 'desc' => '1ª consulta presencial realizada por médico ou enfermeiro até o 30º dia de vida com indicação de Puericultura.', 'points' => 20],
+                    ['letter' => 'B', 'title' => 'Ao Menos 9 Consultas de Puericultura até 2 Anos', 'desc' => 'Mínimo de 9 consultas presenciais ou remotas realizadas por médico ou enfermeiro até os 2 anos com Puericultura.', 'points' => 20],
+                    ['letter' => 'C', 'title' => 'Ao Menos 9 Registros Antropométricos Simultâneos', 'desc' => 'Mínimo de 9 registros simultâneos de peso e altura realizados no mesmo dia até os dois anos de vida.', 'points' => 20],
+                    ['letter' => 'D', 'title' => 'Duas Visitas Domiciliares do ACS/TACS', 'desc' => 'Primeira visita até 30 dias de vida e a segunda visita até os 6 meses de vida (pontuação integral para eAP tipo 76).', 'points' => 20],
+                    ['letter' => 'E', 'title' => 'Esquema Vacinal Completo Recomendado', 'desc' => 'Todas as doses: Pentavalente (3 doses), VIP (3 doses), Tríplice/Tetraviral (2 doses após 12m) e Pneumocócica (2 doses).', 'points' => 20],
                 ],
             ],
 
@@ -297,16 +297,19 @@ class FamilyHealthService
 
     /**
      * Retorna a pontuação do conceito no Componente III - Qualidade (Quadro 2 / NT 08/2026).
-     * Ótimo = 1,00 | Bom = 0,75 | Suficiente = 0,50 | Regular = 0,25.
+     * Base: Ótimo = 1,00 | Bom = 0,75 | Suficiente = 0,50 | Regular = 0,25.
+     * Multiplica pelo peso do indicador (ex: C1 peso 1.0 = até 1,00 pt; C2 peso 2.0 = até 2,00 pts).
      */
-    public static function calculateComponentIIIPoints(string $performanceLevel): float
+    public static function calculateComponentIIIPoints(string $performanceLevel, float $weight = 1.0): float
     {
-        return match (strtolower($performanceLevel)) {
+        $base = match (strtolower($performanceLevel)) {
             'otimo' => 1.00,
             'bom' => 0.75,
             'suficiente' => 0.50,
             default => 0.25,
         };
+
+        return round($base * $weight, 2);
     }
 
     /**
@@ -433,7 +436,7 @@ class FamilyHealthService
             ->where('indicator_code', $code)
             ->whereNotNull('ine');
 
-        if ($code === 'c1') {
+        if (in_array($code, ['c1', 'c2'])) {
             $teamsQuery->where(function ($q) {
                 $q->whereIn('team_type', ['70', '76'])
                   ->orWhereNull('team_type');
@@ -476,15 +479,16 @@ class FamilyHealthService
             'active_search_list' => $this->generateActiveSearchSample($code, $activeSnap ? $activeSnap->active_search_count : 15, $selectedIne),
         ];
 
-        // Lógica específica para o Indicador C1 (Acompanhamento Mensal e Avaliação Quadrimestral - NT 08/2026)
-        if ($code === 'c1') {
+        // Lógica específica para Indicadores com Acompanhamento Mensal e Avaliação Quadrimestral (C1 e C2 - NT 08/2026)
+        if (in_array($code, ['c1', 'c2'])) {
+            $weight = (float) ($meta['weight'] ?? 1.0);
             $monthsConfig = self::getMonthsForQuarter($quarter);
 
             // 1. Acompanhamento Mensal do Escopo Ativo (Equipe Selecionada ou Consolidado Municipal)
             $monthlySnapshots = FamilyHealthMonthlySnapshot::query()
                 ->where('year', $year)
                 ->where('quarter', $quarter)
-                ->where('indicator_code', 'c1')
+                ->where('indicator_code', $code)
                 ->when($selectedIne, fn ($q) => $q->where('ine', $selectedIne), fn ($q) => $q->whereNull('ine'))
                 ->get()
                 ->keyBy('month');
@@ -496,8 +500,8 @@ class FamilyHealthService
             foreach ($monthsConfig as $mNum => $cfg) {
                 $snap = $monthlySnapshots->get($mNum);
                 $mScore = $snap ? (float) $snap->score_percent : 0.0;
-                $mLevel = $snap ? $snap->performance_level : self::calculatePerformanceLevel('c1', $mScore);
-                $mPoints = self::calculateComponentIIIPoints($mLevel);
+                $mLevel = $snap ? $snap->performance_level : self::calculatePerformanceLevel($code, $mScore);
+                $mPoints = self::calculateComponentIIIPoints($mLevel, $weight);
 
                 $monthlyEvolution[] = [
                     'month_number' => $mNum,
@@ -517,32 +521,43 @@ class FamilyHealthService
 
             // Média aritmética simples dos 4 meses conforme NT 08/2026: (M1 + M2 + M3 + M4) / 4
             $quarterAvgScore = $countedMonths > 0 ? round($sumScores / $countedMonths, 2) : ($activeSnap ? (float) $activeSnap->score_percent : 0.0);
-            $quarterLevel = self::calculatePerformanceLevel('c1', $quarterAvgScore);
-            $quarterPoints = self::calculateComponentIIIPoints($quarterLevel);
+            $quarterLevel = self::calculatePerformanceLevel($code, $quarterAvgScore);
+            $quarterPoints = self::calculateComponentIIIPoints($quarterLevel, $weight);
 
             $detail['current']['score_percent'] = $quarterAvgScore;
             $detail['current']['performance_level'] = $quarterLevel;
-            $detail['c1_monthly_evolution'] = $monthlyEvolution;
-            $detail['c1_quarter_summary'] = [
+            $detail['current']['component_iii_points'] = $quarterPoints;
+            $detail['monthly_evolution'] = $monthlyEvolution;
+            $detail['quarter_summary'] = [
                 'average_score' => $quarterAvgScore,
                 'performance_level' => $quarterLevel,
                 'component_iii_points' => $quarterPoints,
-                'weight' => 1.0,
-                'weighted_score' => round($quarterPoints * 1.0, 2),
+                'weight' => $weight,
+                'weighted_score' => $quarterPoints,
                 'formula' => 'Média Aritmética: (Mês 1 + Mês 2 + Mês 3 + Mês 4) / 4',
                 'balance_status' => match (true) {
-                    $quarterAvgScore > 70.0 => 'excess_programmatic',
-                    $quarterAvgScore < 30.0 => 'excess_spontaneous',
-                    $quarterAvgScore > 50.0 => 'optimal',
-                    default => 'good',
+                    $code === 'c1' && $quarterAvgScore > 70.0 => 'excess_programmatic',
+                    $code === 'c1' && $quarterAvgScore < 30.0 => 'excess_spontaneous',
+                    $quarterAvgScore > 75.0 => 'optimal',
+                    $quarterAvgScore > 50.0 => 'good',
+                    $quarterAvgScore > 25.0 => 'sufficient',
+                    default => 'regular',
                 },
             ];
+
+            // Atalhos específicos para retrocompatibilidade
+            $detail[$code.'_monthly_evolution'] = $monthlyEvolution;
+            $detail[$code.'_quarter_summary'] = $detail['quarter_summary'];
+            if ($code === 'c1') {
+                $detail['c1_monthly_evolution'] = $monthlyEvolution;
+                $detail['c1_quarter_summary'] = $detail['quarter_summary'];
+            }
 
             // 2. Decorar as equipes com seus resultados mensais M1..M4 e pontos do Componente III
             $allTeamsMonthly = FamilyHealthMonthlySnapshot::query()
                 ->where('year', $year)
                 ->where('quarter', $quarter)
-                ->where('indicator_code', 'c1')
+                ->where('indicator_code', $code)
                 ->whereNotNull('ine')
                 ->get()
                 ->groupBy('ine');
@@ -557,7 +572,7 @@ class FamilyHealthService
                 foreach ($monthsConfig as $mNum => $cfg) {
                     $found = $tSnaps->firstWhere('month', $mNum);
                     $mScore = $found ? (float) $found->score_percent : 0.0;
-                    $mLevel = $found ? $found->performance_level : self::calculatePerformanceLevel('c1', $mScore);
+                    $mLevel = $found ? $found->performance_level : self::calculatePerformanceLevel($code, $mScore);
                     $mNumAtend = $found ? (int) $found->numerator : 0;
                     $mDenAtend = $found ? (int) $found->denominator : 0;
 
@@ -572,14 +587,14 @@ class FamilyHealthService
                         'spontaneous' => max(0, $mDenAtend - $mNumAtend),
                         'score_percent' => $mScore,
                         'performance_level' => $mLevel,
-                        'component_iii_points' => self::calculateComponentIIIPoints($mLevel),
+                        'component_iii_points' => self::calculateComponentIIIPoints($mLevel, $weight),
                     ];
                     $monthIdx++;
                 }
 
                 $tAvg = count($scoresByMonth) > 0 ? round(array_sum($scoresByMonth) / count($scoresByMonth), 2) : (float) $team->score_percent;
-                $tLevel = self::calculatePerformanceLevel('c1', $tAvg);
-                $tPoints = self::calculateComponentIIIPoints($tLevel);
+                $tLevel = self::calculatePerformanceLevel($code, $tAvg);
+                $tPoints = self::calculateComponentIIIPoints($tLevel, $weight);
 
                 $team->monthly_scores = $scoresByMonth;
                 $team->monthly_details = $detailsByMonth;
@@ -587,28 +602,30 @@ class FamilyHealthService
                 $team->quarter_level = $tLevel;
                 $team->component_iii_points = $tPoints;
 
-                if ($tAvg > 70.0) {
-                    $team->agenda_status = 'excess_programmatic';
-                    $agendaAlerts[] = [
-                        'team_name' => $team->team_name,
-                        'ine' => $team->ine,
-                        'average' => $tAvg,
-                        'status' => 'excess_programmatic',
-                        'title' => 'Risco de Barreira à Demanda Espontânea (> 70%)',
-                        'recommendation' => 'Agenda com excesso de vagas programadas. Recomenda-se reservar cotas diárias de acolhimento imediato e escuta qualificada sem agendamento prévio.',
-                    ];
-                } elseif ($tAvg < 30.0) {
-                    $team->agenda_status = 'excess_spontaneous';
-                    $agendaAlerts[] = [
-                        'team_name' => $team->team_name,
-                        'ine' => $team->ine,
-                        'average' => $tAvg,
-                        'status' => 'excess_spontaneous',
-                        'title' => 'Déficit de Acompanhamento Longitudinal (< 30%)',
-                        'recommendation' => 'Predomínio excessivo de urgências/espontânea. Estruturar blocos de agenda para pré-natal, hipertensão, diabetes e puericultura.',
-                    ];
-                } else {
-                    $team->agenda_status = $tAvg > 50.0 ? 'optimal' : 'good';
+                if ($code === 'c1') {
+                    if ($tAvg > 70.0) {
+                        $team->agenda_status = 'excess_programmatic';
+                        $agendaAlerts[] = [
+                            'team_name' => $team->team_name,
+                            'ine' => $team->ine,
+                            'average' => $tAvg,
+                            'status' => 'excess_programmatic',
+                            'title' => 'Risco de Barreira à Demanda Espontânea (> 70%)',
+                            'recommendation' => 'Agenda com excesso de vagas programadas. Recomenda-se reservar cotas diárias de acolhimento imediato e escuta qualificada sem agendamento prévio.',
+                        ];
+                    } elseif ($tAvg < 30.0) {
+                        $team->agenda_status = 'excess_spontaneous';
+                        $agendaAlerts[] = [
+                            'team_name' => $team->team_name,
+                            'ine' => $team->ine,
+                            'average' => $tAvg,
+                            'status' => 'excess_spontaneous',
+                            'title' => 'Déficit de Acompanhamento Longitudinal (< 30%)',
+                            'recommendation' => 'Predomínio excessivo de urgências/espontânea. Estruturar blocos de agenda para pré-natal, hipertensão, diabetes e puericultura.',
+                        ];
+                    } else {
+                        $team->agenda_status = $tAvg > 50.0 ? 'optimal' : 'good';
+                    }
                 }
             }
 
@@ -646,12 +663,23 @@ class FamilyHealthService
 
         $pendingActionsByIndicator = [
             'c1' => 'Atendimento programático / consulta agendada pendente',
-            'c2' => 'Puericultura: Pesa/altura ou vacinação em atraso (Penta/VIP)',
+            'c2' => 'Puericultura: Peso/altura ou vacinação em atraso (Penta/VIP)',
             'c3' => 'Pré-natal: Exame do 3º trimestre (Sífilis/HIV) ou visita puerperal',
             'c4' => 'Diabetes: Hemoglobina Glicada anual ou Avaliação dos Pés pendente',
             'c5' => 'Hipertensão: Aferição de PA no semestre ou visita do ACS pendente',
             'c6' => 'Idoso: Vacina Influenza anual ou antropometria nos últimos 12 meses',
             'c7' => 'Mulher: Citopatológico (> 36 meses) ou mamografia de rastreamento pendente',
+        ];
+
+        $c2PendingActions = [
+            'Prática A: 1ª consulta até o 30º dia de vida pendente (recém-nascido)',
+            'Prática B: 9 consultas de puericultura incompletas (apenas 4 realizadas)',
+            'Prática C: Antropometria pendente (registro simultâneo de peso e altura)',
+            'Prática D: 2ª visita domiciliar de ACS até os 6 meses pendente',
+            'Prática E: Vacina Pentavalente / VIP (3ª dose) em atraso',
+            'Prática E: Vacina Tríplice Viral (SCR aos 12 meses) pendente',
+            'Prática E: Vacina Pneumocócica 10-valente (2ª dose) pendente',
+            'Prática B: Puericultura médica/enfermagem no 2º semestre atrasada',
         ];
 
         $items = [];
@@ -662,13 +690,17 @@ class FamilyHealthService
             $cnsPrefix = '7' . str_pad((string) (10000000000000 + ($i * 73921)), 14, '0', STR_PAD_LEFT);
             $cpf = sprintf('%03d.%03d.%03d-**', 120 + $i, 450 + $i, 780 + $i);
             $age = match ($code) {
-                'c2' => sprintf('%d meses', 3 + ($i * 2)),
+                'c2' => sprintf('%d meses', max(1, min(23, 1 + ($i * 2)))),
                 'c3' => sprintf('%d anos (Gestante)', 18 + ($i * 2)),
                 'c4', 'c5' => sprintf('%d anos', 48 + ($i * 3)),
                 'c6' => sprintf('%d anos', 62 + ($i * 3)),
                 'c7' => sprintf('%d anos', 26 + ($i * 3)),
                 default => sprintf('%d anos', 22 + ($i * 4)),
             };
+
+            $pendingAction = $code === 'c2'
+                ? $c2PendingActions[$i % count($c2PendingActions)]
+                : ($pendingActionsByIndicator[$code] ?? 'Ação prioritária pendente');
 
             $items[] = [
                 'name' => $name,
@@ -678,7 +710,7 @@ class FamilyHealthService
                 'ine' => $ine ?? sprintf('0001%04d', 201 + ($i % 4)),
                 'team_name' => sprintf('eSF Unidade %02d', ($i % 4) + 1),
                 'microarea' => sprintf('Microárea %02d', ($i % 6) + 1),
-                'pending_action' => $pendingActionsByIndicator[$code] ?? 'Ação prioritária pendente',
+                'pending_action' => $pendingAction,
                 'priority' => ($i % 3 === 0) ? 'alta' : 'media',
             ];
         }
@@ -700,15 +732,25 @@ class FamilyHealthService
             ['ine' => '0001839253', 'name' => 'eAP 01 · Atenção Primária Noturna', 'type' => '76'],
         ];
 
-        // 1. Garante que os snapshots mensais do Indicador C1 existam (Acompanhamento Mensal)
-        $monthlyCount = FamilyHealthMonthlySnapshot::query()
+        // 1. Garante que os snapshots mensais dos Indicadores C1 e C2 existam (Acompanhamento Mensal)
+        $monthlyCountC1 = FamilyHealthMonthlySnapshot::query()
             ->where('year', $year)
             ->where('quarter', $quarter)
             ->where('indicator_code', 'c1')
             ->count();
 
-        if ($monthlyCount === 0) {
+        if ($monthlyCountC1 === 0) {
             $this->ensureBaselineMonthlyC1($year, $quarter, $teams);
+        }
+
+        $monthlyCountC2 = FamilyHealthMonthlySnapshot::query()
+            ->where('year', $year)
+            ->where('quarter', $quarter)
+            ->where('indicator_code', 'c2')
+            ->count();
+
+        if ($monthlyCountC2 === 0) {
+            $this->ensureBaselineMonthlyC2($year, $quarter, $teams);
         }
 
         // 2. Garante os snapshots quadrimestrais consolidados de C1 a C7
@@ -873,14 +915,121 @@ class FamilyHealthService
     }
 
     /**
+     * Gera snapshots mensais de baseline para o indicador C2 nos 4 meses do quadrimestre.
+     *
+     * @param list<array{ine: string, name: string, type: string}> $teams
+     */
+    public function ensureBaselineMonthlyC2(int $year, int $quarter, array $teams): void
+    {
+        $monthsConfig = self::getMonthsForQuarter($quarter);
+
+        $monthBaseScores = [
+            1 => 78.50,
+            2 => 81.20,
+            3 => 79.40,
+            4 => 83.00,
+        ];
+
+        /** @var array<int, array{num: int, den: int, scores: list<float>}> $teamMonthlySum */
+        $teamMonthlySum = [];
+
+        foreach ($teams as $tIdx => $team) {
+            $ine = $team['ine'];
+            $teamVariance = [-4.0, 3.5, 6.0, -5.2, 2.0][$tIdx % 5];
+
+            $mIndex = 1;
+            foreach ($monthsConfig as $monthNum => $cfg) {
+                $basePct = $monthBaseScores[$mIndex] + $teamVariance;
+                $pct = min(98.0, max(20.0, round($basePct, 2)));
+                $den = 20 + ($mIndex * 2) + ($tIdx * 3);
+                $num = (int) round(($pct / 100) * ($den * 100)); // total de pontos das boas práticas
+                $level = self::calculatePerformanceLevel('c2', $pct);
+
+                FamilyHealthMonthlySnapshot::query()->updateOrCreate(
+                    [
+                        'year' => $year,
+                        'month' => $monthNum,
+                        'ine' => $ine,
+                        'indicator_code' => 'c2',
+                    ],
+                    [
+                        'quarter' => $quarter,
+                        'month_in_quarter' => $mIndex,
+                        'team_name' => $team['name'],
+                        'team_type' => $team['type'],
+                        'numerator' => $num,
+                        'denominator' => $den,
+                        'score_percent' => $pct,
+                        'performance_level' => $level,
+                    ]
+                );
+
+                if (! isset($teamMonthlySum[$monthNum])) {
+                    $teamMonthlySum[$monthNum] = ['num' => 0, 'den' => 0, 'scores' => []];
+                }
+                $teamMonthlySum[$monthNum]['num'] += $num;
+                $teamMonthlySum[$monthNum]['den'] += $den;
+                $teamMonthlySum[$monthNum]['scores'][] = $pct;
+
+                $mIndex++;
+            }
+        }
+
+        // Snapshots municipais consolidados para cada mês
+        $mIndex = 1;
+        foreach ($monthsConfig as $monthNum => $cfg) {
+            $data = $teamMonthlySum[$monthNum];
+            $mAvgScore = count($data['scores']) > 0 ? round(array_sum($data['scores']) / count($data['scores']), 2) : 0.0;
+            $mLevel = self::calculatePerformanceLevel('c2', $mAvgScore);
+
+            FamilyHealthMonthlySnapshot::query()->updateOrCreate(
+                [
+                    'year' => $year,
+                    'month' => $monthNum,
+                    'ine' => null,
+                    'indicator_code' => 'c2',
+                ],
+                [
+                    'quarter' => $quarter,
+                    'month_in_quarter' => $mIndex,
+                    'team_name' => 'Consolidado Municipal',
+                    'team_type' => '70',
+                    'numerator' => $data['num'],
+                    'denominator' => $data['den'],
+                    'score_percent' => $mAvgScore,
+                    'performance_level' => $mLevel,
+                ]
+            );
+
+            $mIndex++;
+        }
+    }
+
+    /**
      * Remove snapshots inválidos do indicador C1 (equipes que não são eSF ou eAP).
      */
     public static function purgeInvalidC1Snapshots(): int
     {
+        return self::purgeInvalidTeamSnapshots('c1');
+    }
+
+    /**
+     * Remove snapshots inválidos do indicador C2 (equipes que não são eSF ou eAP).
+     */
+    public static function purgeInvalidC2Snapshots(): int
+    {
+        return self::purgeInvalidTeamSnapshots('c2');
+    }
+
+    /**
+     * Remove snapshots de equipes inválidas para um indicador específico (eSF Tipo 70 e eAP Tipo 76).
+     */
+    public static function purgeInvalidTeamSnapshots(string $code): int
+    {
         $deleted = 0;
 
         $query = FamilyHealthIndicatorSnapshot::query()
-            ->where('indicator_code', 'c1')
+            ->where('indicator_code', $code)
             ->whereNotNull('ine')
             ->where(function ($q) {
                 $q->whereNotIn('team_type', ['70', '76'])
@@ -903,7 +1052,7 @@ class FamilyHealthService
         $deleted += $query->delete();
 
         $monthlyQuery = FamilyHealthMonthlySnapshot::query()
-            ->where('indicator_code', 'c1')
+            ->where('indicator_code', $code)
             ->whereNotNull('ine')
             ->where(function ($q) {
                 $q->where('ine', 'like', 'ESB%')

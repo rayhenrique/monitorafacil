@@ -28,19 +28,25 @@ class DataProcessing extends Component
     /** @var array<string, array{name: string, description: string, status: string, rows: int, message: string}> */
     public array $tablesReport = [];
 
-    public string $selectedScope = 'c1'; // 'c1' (Apenas C1) ou 'all' (Geral Completo)
+    public string $selectedScope = 'c2'; // 'c1', 'c2' ou 'all' (Geral Completo)
 
     public ?float $executionTimeMs = null;
 
     public function setScope(string $scope): void
     {
-        $this->selectedScope = in_array($scope, ['c1', 'all'], true) ? $scope : 'all';
+        $this->selectedScope = in_array($scope, ['c1', 'c2', 'all'], true) ? $scope : 'all';
     }
 
     public function processC1(EsusDataProcessingService $service): void
     {
         $this->selectedScope = 'c1';
         $this->executeProcessing($service, 'c1');
+    }
+
+    public function processC2(EsusDataProcessingService $service): void
+    {
+        $this->selectedScope = 'c2';
+        $this->executeProcessing($service, 'c2');
     }
 
     public function processAll(EsusDataProcessingService $service): void
