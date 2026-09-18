@@ -14,11 +14,15 @@ class SettingsService
     /** @return array<string, string|null> */
     public function all(): array
     {
-        return Cache::remember(
-            self::CACHE_KEY,
-            self::CACHE_TTL_SECONDS,
-            static fn (): array => Setting::query()->pluck('value', 'key')->all(),
-        );
+        try {
+            return Cache::remember(
+                self::CACHE_KEY,
+                self::CACHE_TTL_SECONDS,
+                static fn (): array => Setting::query()->pluck('value', 'key')->all(),
+            );
+        } catch (\Throwable) {
+            return [];
+        }
     }
 
     public function get(string $key, ?string $default = null): ?string
