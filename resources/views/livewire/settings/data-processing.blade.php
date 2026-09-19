@@ -56,147 +56,282 @@
             }
         }"
     >
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div class="max-w-2xl space-y-1">
-                <div class="flex items-center gap-2 mb-1">
-                    <span class="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-2.5 py-0.5 text-[11px] font-bold text-teal-800 border border-teal-200">
-                        <span class="h-1.5 w-1.5 rounded-full bg-teal-600 animate-pulse"></span>
-                        Cofinanciamento Federal · Portaria GM/MS 3.493/2024
-                    </span>
-                </div>
-                <h2 class="text-base sm:text-lg font-bold text-ink">Processar Dados do e-SUS PEC</h2>
-                <p class="text-xs text-muted leading-relaxed">
-                    Executa a rotina de leitura e consolidação analítica nas tabelas do e-SUS PEC. Você pode escolher processar exclusivamente o <strong class="text-emerald-800">Vínculo e Acompanhamento Territorial (CVAT e Lista Nominal)</strong>, indicadores específicos de Saúde da Família (<strong class="text-teal-900">C1</strong>, <strong class="text-indigo-900">C2</strong>, <strong class="text-rose-900">C3</strong>) para execução rápida, ou rodar o <strong class="text-slate-800">Processamento Geral Completo</strong>.
-                </p>
+        <!-- Cabeçalho Expandido (Largura Total sem Compressão) -->
+        <div class="space-y-2.5 border-b border-line pb-5">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-teal-800 border border-teal-200">
+                    <span class="h-2 w-2 rounded-full bg-teal-600 animate-pulse"></span>
+                    Cofinanciamento Federal · Portaria GM/MS 3.493/2024
+                </span>
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600 border border-slate-200">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                    Sincronização Direta com PostgreSQL e-SUS PEC
+                </span>
             </div>
 
-            <!-- Botões de Ação por Escopo -->
-            <div class="flex flex-wrap items-center gap-3 shrink-0">
-                <!-- Botão Exclusivo: Vínculo e Acompanhamento Territorial -->
+            <div>
+                <h2 class="text-xl sm:text-2xl font-extrabold text-ink tracking-tight flex items-center gap-2.5 mt-1">
+                    <svg class="h-6 w-6 text-teal-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                    </svg>
+                    <span>Processar Dados do e-SUS PEC</span>
+                </h2>
+                <p class="text-xs sm:text-sm text-muted mt-1.5 leading-relaxed max-w-4xl">
+                    Executa a leitura, validação e consolidação analítica nas tabelas do e-SUS PEC. Escolha abaixo o escopo desejado: processe sob demanda um componente específico para resposta rápida ou acione a rotina geral completa.
+                </p>
+            </div>
+        </div>
+
+        <!-- Grid Responsivo de Ações por Escopo -->
+        <div class="space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-muted">Selecione o Escopo de Processamento</span>
+                <span class="text-[11px] text-slate-500 hidden sm:inline">Clique no card correspondente para iniciar</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3.5">
+                <!-- Card 1: Vínculo & Território (CVAT) -->
                 <button
                     type="button"
                     wire:click="processCvat"
                     x-on:click="startProgress('o Vínculo e Acompanhamento Territorial (CVAT)')"
                     wire:loading.attr="disabled"
-                    class="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 px-5 py-3.5 text-xs font-bold text-white shadow-md shadow-emerald-950/20 transition focus:outline-none focus:ring-2 focus:ring-emerald-500/30 cursor-pointer"
+                    class="group relative flex flex-col justify-between p-4 sm:p-4.5 rounded-2xl border transition-all duration-200 text-left cursor-pointer bg-gradient-to-b from-emerald-50/80 to-white border-emerald-300/80 hover:border-emerald-500 hover:shadow-md hover:shadow-emerald-950/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 disabled:opacity-60"
                 >
-                    <span wire:loading.remove wire:target="processCvat" class="inline-flex items-center gap-2">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-                        </svg>
-                        <span>Processar Vínculo e Acompanhamento</span>
-                    </span>
-                    <span wire:loading wire:target="processCvat" class="inline-flex items-center gap-2">
-                        <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span>Processando Vínculo & Território...</span>
-                    </span>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="rounded-lg bg-emerald-100/90 text-emerald-800 p-2 group-hover:scale-105 transition">
+                                <svg class="h-5 w-5 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                                </svg>
+                            </span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider rounded-full px-2 py-0.5 bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                CVAT
+                            </span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-ink group-hover:text-emerald-900 transition leading-snug">
+                                Vínculo & Território
+                            </h3>
+                            <p class="text-[11px] text-slate-500 mt-0.5 leading-normal">
+                                MICI, MICDT & Nominal
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-emerald-100 flex items-center justify-between text-xs font-semibold text-emerald-800">
+                        <span wire:loading.remove wire:target="processCvat" class="inline-flex items-center gap-1">
+                            <span>Processar</span>
+                            <svg class="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                            </svg>
+                        </span>
+                        <span wire:loading wire:target="processCvat" class="inline-flex items-center gap-1.5 text-emerald-700 font-bold">
+                            <svg class="animate-spin h-3.5 w-3.5 text-emerald-700" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Extraindo...</span>
+                        </span>
+                    </div>
                 </button>
 
-                <!-- Botão 1: Apenas C1 -->
+                <!-- Card 2: Indicador C1 -->
                 <button
                     type="button"
                     wire:click="processC1"
                     x-on:click="startProgress('o Indicador C1')"
                     wire:loading.attr="disabled"
-                    class="inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-700 hover:bg-teal-800 disabled:opacity-60 px-5 py-3.5 text-xs font-bold text-white shadow-md shadow-teal-950/20 transition focus:outline-none focus:ring-2 focus:ring-teal-500/30 cursor-pointer"
+                    class="group relative flex flex-col justify-between p-4 sm:p-4.5 rounded-2xl border transition-all duration-200 text-left cursor-pointer bg-gradient-to-b from-teal-50/80 to-white border-teal-300/80 hover:border-teal-500 hover:shadow-md hover:shadow-teal-950/10 focus:outline-none focus:ring-2 focus:ring-teal-500/40 disabled:opacity-60"
                 >
-                    <span wire:loading.remove wire:target="processC1" class="inline-flex items-center gap-2">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-                        </svg>
-                        <span>Processar Apenas C1</span>
-                    </span>
-                    <span wire:loading wire:target="processC1" class="inline-flex items-center gap-2">
-                        <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span>Processando C1...</span>
-                    </span>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="rounded-lg bg-teal-100/90 text-teal-800 p-2 group-hover:scale-105 transition">
+                                <svg class="h-5 w-5 text-teal-700" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                                </svg>
+                            </span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider rounded-full px-2 py-0.5 bg-teal-100 text-teal-800 border border-teal-200">
+                                Indicador C1
+                            </span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-ink group-hover:text-teal-900 transition leading-snug">
+                                Mais Acesso
+                            </h3>
+                            <p class="text-[11px] text-slate-500 mt-0.5 leading-normal">
+                                Atendimentos Médicos & Enf.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-teal-100 flex items-center justify-between text-xs font-semibold text-teal-800">
+                        <span wire:loading.remove wire:target="processC1" class="inline-flex items-center gap-1">
+                            <span>Processar</span>
+                            <svg class="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                            </svg>
+                        </span>
+                        <span wire:loading wire:target="processC1" class="inline-flex items-center gap-1.5 text-teal-700 font-bold">
+                            <svg class="animate-spin h-3.5 w-3.5 text-teal-700" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Processando...</span>
+                        </span>
+                    </div>
                 </button>
 
-                <!-- Botão 2: Apenas C2 -->
+                <!-- Card 3: Indicador C2 -->
                 <button
                     type="button"
                     wire:click="processC2"
                     x-on:click="startProgress('o Indicador C2 e a lista de crianças')"
                     wire:loading.attr="disabled"
-                    class="inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 px-5 py-3.5 text-xs font-bold text-white shadow-md shadow-indigo-950/20 transition focus:outline-none focus:ring-2 focus:ring-indigo-500/30 cursor-pointer"
+                    class="group relative flex flex-col justify-between p-4 sm:p-4.5 rounded-2xl border transition-all duration-200 text-left cursor-pointer bg-gradient-to-b from-indigo-50/80 to-white border-indigo-300/80 hover:border-indigo-500 hover:shadow-md hover:shadow-indigo-950/10 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 disabled:opacity-60"
                 >
-                    <span wire:loading.remove wire:target="processC2" class="inline-flex items-center gap-2">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-                        </svg>
-                        <span>Processar C2 & Lista Crianças</span>
-                    </span>
-                    <span wire:loading wire:target="processC2" class="inline-flex items-center gap-2">
-                        <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span>Processando C2...</span>
-                    </span>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="rounded-lg bg-indigo-100/90 text-indigo-800 p-2 group-hover:scale-105 transition">
+                                <svg class="h-5 w-5 text-indigo-700" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                                </svg>
+                            </span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider rounded-full px-2 py-0.5 bg-indigo-100 text-indigo-800 border border-indigo-200">
+                                Indicador C2
+                            </span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-ink group-hover:text-indigo-900 transition leading-snug">
+                                Crianças (C2)
+                            </h3>
+                            <p class="text-[11px] text-slate-500 mt-0.5 leading-normal">
+                                Desenvolvimento Infantil
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-indigo-100 flex items-center justify-between text-xs font-semibold text-indigo-800">
+                        <span wire:loading.remove wire:target="processC2" class="inline-flex items-center gap-1">
+                            <span>Processar</span>
+                            <svg class="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                            </svg>
+                        </span>
+                        <span wire:loading wire:target="processC2" class="inline-flex items-center gap-1.5 text-indigo-700 font-bold">
+                            <svg class="animate-spin h-3.5 w-3.5 text-indigo-700" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Processando...</span>
+                        </span>
+                    </div>
                 </button>
 
-                <!-- Botão 3: Apenas C3 -->
+                <!-- Card 4: Indicador C3 -->
                 <button
                     type="button"
                     wire:click="processC3"
                     x-on:click="startProgress('o Indicador C3 e a lista de gestantes')"
                     wire:loading.attr="disabled"
-                    class="inline-flex items-center justify-center gap-2 rounded-2xl bg-rose-600 hover:bg-rose-700 disabled:opacity-60 px-5 py-3.5 text-xs font-bold text-white shadow-md shadow-rose-950/20 transition focus:outline-none focus:ring-2 focus:ring-rose-500/30 cursor-pointer"
+                    class="group relative flex flex-col justify-between p-4 sm:p-4.5 rounded-2xl border transition-all duration-200 text-left cursor-pointer bg-gradient-to-b from-rose-50/80 to-white border-rose-300/80 hover:border-rose-500 hover:shadow-md hover:shadow-rose-950/10 focus:outline-none focus:ring-2 focus:ring-rose-500/40 disabled:opacity-60"
                 >
-                    <span wire:loading.remove wire:target="processC3" class="inline-flex items-center gap-2">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                        </svg>
-                        <span>Processar C3 & Lista Gestantes</span>
-                    </span>
-                    <span wire:loading wire:target="processC3" class="inline-flex items-center gap-2">
-                        <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span>Processando C3...</span>
-                    </span>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="rounded-lg bg-rose-100/90 text-rose-800 p-2 group-hover:scale-105 transition">
+                                <svg class="h-5 w-5 text-rose-700" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                                </svg>
+                            </span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider rounded-full px-2 py-0.5 bg-rose-100 text-rose-800 border border-rose-200">
+                                Indicador C3
+                            </span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-ink group-hover:text-rose-900 transition leading-snug">
+                                Gestantes (C3)
+                            </h3>
+                            <p class="text-[11px] text-slate-500 mt-0.5 leading-normal">
+                                Pré-Natal & Puerpério
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-rose-100 flex items-center justify-between text-xs font-semibold text-rose-800">
+                        <span wire:loading.remove wire:target="processC3" class="inline-flex items-center gap-1">
+                            <span>Processar</span>
+                            <svg class="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                            </svg>
+                        </span>
+                        <span wire:loading wire:target="processC3" class="inline-flex items-center gap-1.5 text-rose-700 font-bold">
+                            <svg class="animate-spin h-3.5 w-3.5 text-rose-700" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Processando...</span>
+                        </span>
+                    </div>
                 </button>
 
-                <!-- Botão 3: Processamento Geral Completo -->
+                <!-- Card 5: Processamento Geral Completo -->
                 <button
                     type="button"
                     wire:click="processAll"
                     x-on:click="startProgress('o processamento geral')"
                     wire:loading.attr="disabled"
-                    class="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-800 hover:bg-slate-900 disabled:opacity-60 px-5 py-3.5 text-xs font-semibold text-white shadow-md transition focus:outline-none focus:ring-2 focus:ring-slate-500/30 cursor-pointer"
+                    class="group relative flex flex-col justify-between p-4 sm:p-4.5 rounded-2xl border transition-all duration-200 text-left cursor-pointer bg-slate-900 border-slate-700/80 hover:bg-slate-800 hover:border-slate-600 hover:shadow-lg hover:shadow-slate-950/20 focus:outline-none focus:ring-2 focus:ring-slate-400 disabled:opacity-60 text-white"
                 >
-                    <span wire:loading.remove wire:target="processAll" class="inline-flex items-center gap-2">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-                        </svg>
-                        <span>Processamento Geral (Completo)</span>
-                    </span>
-                    <span wire:loading wire:target="processAll" class="inline-flex items-center gap-2">
-                        <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span>Processando Geral...</span>
-                    </span>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="rounded-lg bg-slate-800 text-teal-400 p-2 group-hover:scale-105 transition border border-slate-700">
+                                <svg class="h-5 w-5 text-teal-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                </svg>
+                            </span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider rounded-full px-2 py-0.5 bg-teal-950/80 text-teal-300 border border-teal-800/80">
+                                Geral
+                            </span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-white group-hover:text-teal-200 transition leading-snug">
+                                Processamento Geral
+                            </h3>
+                            <p class="text-[11px] text-slate-300 mt-0.5 leading-normal">
+                                Todos os Indicadores & Dados
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs font-semibold text-teal-300">
+                        <span wire:loading.remove wire:target="processAll" class="inline-flex items-center gap-1">
+                            <span>Processar Tudo</span>
+                            <svg class="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                            </svg>
+                        </span>
+                        <span wire:loading wire:target="processAll" class="inline-flex items-center gap-1.5 text-teal-300 font-bold">
+                            <svg class="animate-spin h-3.5 w-3.5 text-teal-300" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Processando...</span>
+                        </span>
+                    </div>
                 </button>
             </div>
         </div>
 
         <!-- Alerta Informativo sobre Rotina Agendada -->
-        <div class="rounded-2xl border border-teal-200 bg-teal-50/50 p-3.5 flex items-start gap-3 text-xs">
-            <svg class="h-5 w-5 text-teal-700 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <div class="text-teal-900 leading-relaxed">
-                <strong>Rotina Agendada Automática:</strong> O processamento agendado no servidor executa diariamente (às 03:30) <strong>sempre o modo completo</strong> (<span class="font-mono font-medium">--scope=all</span>), auditando todos os indicadores, equipes e a totalidade dos cadastros territoriais (MICI e MICDT).
+        <div class="rounded-2xl border border-teal-200/80 bg-teal-50/40 p-4 flex items-start gap-3.5 text-xs">
+            <div class="p-1.5 rounded-xl bg-teal-100 text-teal-800 shrink-0 mt-0.5">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div class="text-teal-950 leading-relaxed">
+                <strong class="font-bold text-teal-900">Rotina Noturna Agendada Automática:</strong> O processamento automatizado no servidor executa diariamente às <strong>03:30 (horário de Brasília)</strong> sempre no modo geral completo (<span class="font-mono font-bold bg-teal-100/70 px-1.5 py-0.5 rounded text-[11px]">--scope=all</span>), auditando e consolidando todos os indicadores clínicos e territoriais (MICI e MICDT).
             </div>
         </div>
 
@@ -205,7 +340,7 @@
             class="hidden border-t border-line pt-5 space-y-3"
             wire:loading.class.remove="hidden"
             wire:loading.class.add="block"
-            wire:target="processC1,processC2,processC3,processAll,processNow"
+            wire:target="processC1,processC2,processC3,processAll,processNow,processCvat"
         >
             <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between text-xs" aria-live="polite" aria-atomic="true">
                 <div class="min-w-0 flex items-start gap-2">
@@ -244,7 +379,7 @@
         </div>
 
         @if ($progressPercent > 0 && $processStatus !== null)
-            <div wire:loading.remove wire:target="processC1,processC2,processC3,processAll,processNow">
+            <div wire:loading.remove wire:target="processC1,processC2,processC3,processAll,processNow,processCvat">
                 <x-processing-progress
                     :percent="$progressPercent"
                     :step="$currentStep ?: 'Preparando o processamento...'"

@@ -4,6 +4,26 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.22.3] - 19/09/2026
+
+### 🎨 Redesign Responsivo do Painel de Processamento de Dados
+- **Eliminação de Esmagamento Visual e Quebra de Layout**:
+  - Reestruturação da seção superior do processamento de dados (`/configuracoes/processar-dados`), separando verticalmente o bloco de apresentação conceitual dos gatilhos de execução.
+  - O cabeçalho agora ocupa 100% da largura útil do container, exibindo com destaque as diretrizes de cofinanciamento federal (Portaria GM/MS 3.493/2024), sincronização direta com o PostgreSQL do e-SUS PEC e textos explicativos sem compressão lateral.
+- **Grid Adaptativo com 5 Cards de Ação Temáticos**:
+  - Criação de um grid responsivo (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3.5`) que se ajusta fluidamente em smartphones (1 coluna), tablets (2 ou 3 colunas) e desktops (5 colunas simétricas).
+  - Cards temáticos com paleta e identidade visual exclusiva:
+    1. **Vínculo & Território (CVAT)**: Tom verde esmeralda com foco em MICI, MICDT e Relação Nominal da busca ativa.
+    2. **Mais Acesso (C1)**: Tom teal focado em atendimentos médicos e de enfermagem.
+    3. **Crianças (C2)**: Tom índigo focado em desenvolvimento infantil e vacinação.
+    4. **Gestantes (C3)**: Tom rose focado em pré-natal e puerpério.
+    5. **Processamento Geral (Completo)**: Tom slate 900 escuro corporativo com badge dourada/teal para execução irrestrita de todas as tabelas.
+- **Micro-interações e Feedback de Carregamento**:
+  - Badges de escopo, divisórias sutis, transições de foco/hover suaves e spinners dedicados em cada card via Livewire (`wire:loading`).
+  - Barra de progresso estimada e real vinculada com precisão através da inclusão de `processCvat` nas diretivas `wire:target`.
+
+---
+
 ## [v1.22.2] - 19/09/2026
 
 ### 📌 Regra Estrita de 24 Meses para MICI e MICDT (Dimensão Cadastro)

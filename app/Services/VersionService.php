@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.22.2';
+    public const CURRENT_VERSION = 'v1.22.3';
 
     public const CURRENT_RELEASE_DATE = '19/09/2026';
 
@@ -61,9 +61,22 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.22.2',
+                'version' => 'v1.22.3',
                 'date' => '19/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Redesign Responsivo do Painel de Processamento de Dados',
+                'summary' => 'Aprimoramento completo do layout da tela de Processamento de Dados: cabeçalho em largura total sem compressão e grid adaptativo de 5 cards temáticos para mobile, tablet e desktop.',
+                'highlights' => [
+                    ['type' => 'melhoria', 'text' => 'Cabeçalho em largura total com badges de cofinanciamento e conexão direta PostgreSQL, eliminando esmagamento de texto em telas menores.'],
+                    ['type' => 'melhoria', 'text' => 'Grid responsivo de 5 cards temáticos (CVAT em esmeralda, C1 em teal, C2 em índigo, C3 em rose e Geral em slate 900) adaptáveis de 1 a 5 colunas.'],
+                    ['type' => 'melhoria', 'text' => 'Feedback visual refinado com micro-interações de hover, badges de escopo, divisórias sutis e spinners de loading no Livewire.'],
+                    ['type' => 'melhoria', 'text' => 'Integração de processCvat no monitoramento do wire:target para ativação consistente da barra de progresso.'],
+                ],
+            ],
+            [
+                'version' => 'v1.22.2',
+                'date' => '19/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Regra Estrita de 24 Meses para MICI e MICDT',
                 'summary' => 'Critério oficial para a Dimensão Cadastro: um MICI ou MICDT só é desatualizado se tiver mais de 24 meses em relação ao encerramento do quadrimestre; atualizações em menos de 24 meses mantêm status atualizado.',
                 'highlights' => [
