@@ -4,12 +4,27 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.17.0] - 19/09/2026
+
+### 🤰 Revisão Normativa e de Desempenho do C3
+- **Correção do timeout**: removida a subconsulta correlacionada sobre procedimentos e o histórico sem data inicial; a extração usa lotes de 100 cidadãos, datas delimitadas e `statement_timeout` de 30 segundos somente durante o C3.
+- **DUM oficial**: `co_dim_tempo_dum` passa a referenciar `tb_dim_tempo_dum.co_seq_dim_tempo_dum`; não há mais DUM artificial quando DUM e idade gestacional não existem.
+- **Coorte correta**: cada gestação pertence ao quadrimestre em que ocorre o 42º dia do puerpério; códigos CIAP/CID de interrupção são aplicados dentro do episódio gestacional.
+- **Práticas clínicas**: A–F e I–K são contadas apenas em suas janelas; E começa após a primeira consulta; F começa na 20ª semana; I usa consultas reais no puerpério.
+- **Exames G/H**: sífilis, HIV, hepatites B e C passam a ser apurados por códigos SIGTAP em `tb_fat_atd_ind_exames` e procedimentos avaliados, sem inferência pelo número de consultas.
+- **Cobertura DW**: procedimentos individualizados (MIP) complementam os registros de pressão arterial, exames e saúde bucal.
+- **Integridade nominal**: exige nome, nascimento e CPF ou CNS; MICI/MICDT e distrito deixam de receber valores fictícios.
+- **Busca ativa**: seletor de colunas e tabela nominal usam as mesmas chaves; a produção deixa de exibir coorte simulada quando ainda não há snapshot C3.
+- **Validação automatizada**: testes cobrem as 11 práticas, janelas clínicas, exceção eAP e o formato da consulta que gerou `SQLSTATE[57014]`.
+
+---
+
 ## [v1.16.1] - 19/09/2026
 
 ### 🔧 Compatibilidade Dinâmica com DW e-SUS PEC (Colunas e Tabelas)
 - **Correção SQLSTATE[42P01]**: `relation "tb_dim_cid10" does not exist` — tabela oficial é `tb_dim_cid` (PK `co_seq_dim_cid`, coluna `nu_cid`).
 - **Correção SQLSTATE[42703]**: `column a.nu_idade_gestacional does not exist` — coluna oficial é `nu_idade_gestacional_semanas`.
-- **Detecção Dinâmica de DUM**: `dt_ultima_menstruacao` (legado) vs `co_dim_tempo_dum` (FK para `tb_dim_tempo` no DW v8.7+).
+- **Detecção Dinâmica de DUM**: `dt_ultima_menstruacao` (legado) vs `co_dim_tempo_dum` (FK para `tb_dim_tempo_dum` no DW v8.7+).
 - **Detecção Dinâmica de PA**: `nu_pressao_sistolica`/`nu_pressao_diastolica` (legado) vs `nu_medicao_pressao_sistolica`/`nu_medicao_pressao_diastolica` (v8.7+).
 - **Fallback Seguro**: Se colunas não existirem no PEC, a query omite os campos/JOINs e filtra gestantes pelos critérios disponíveis.
 

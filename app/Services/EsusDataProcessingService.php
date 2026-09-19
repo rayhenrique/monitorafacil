@@ -590,6 +590,11 @@ class EsusDataProcessingService
                     throw new \RuntimeException('A leitura do C3 exige conexão com o DW do PEC. Nenhum resultado foi gerado.');
                 }
 
+                // As consultas C3 são limitadas por data e lotes pequenos, mas percorrem
+                // várias tabelas fato. O teto específico evita o cancelamento prematuro
+                // observado na VPS sem remover a proteção global contra consultas presas.
+                $connection->statement("SET statement_timeout TO '30s'");
+
                 $c3Periods = C3ActiveSearchService::getActiveSearchQuarterPairs($year, $quarter);
                 $totalC3Cohort = 0;
                 $totalC3Completed = 0;
@@ -626,7 +631,15 @@ class EsusDataProcessingService
                         $maxC3Teams
                     ),
                 ];
+                $connection->statement("SET statement_timeout TO '10s'");
             } catch (Throwable $e) {
+                if ($connection) {
+                    try {
+                        $connection->statement("SET statement_timeout TO '10s'");
+                    } catch (Throwable) {
+                        // A conexão já pode estar indisponível; preserva o erro original.
+                    }
+                }
                 $message = 'C3 não processado: '.$e->getMessage();
                 $tablesReport['c3_dw'] = [
                     'name' => 'C3 · DW PEC',

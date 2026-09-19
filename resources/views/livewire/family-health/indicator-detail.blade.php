@@ -3884,10 +3884,10 @@
                                         <th class="py-3 px-3 text-center">DPP</th>
                                     @endif
                                     @if (in_array('pregnancy_end_date', $visibleColumns, true))
-                                        <th class="py-3 px-3 text-center">Data Parto</th>
+                                        <th class="py-3 px-3 text-center">Desfecho estimado</th>
                                     @endif
                                     @if (in_array('puerperium_end_date', $visibleColumns, true))
-                                        <th class="py-3 px-3 text-center">42º Dia Puerpério</th>
+                                        <th class="py-3 px-3 text-center">42º dia estimado</th>
                                     @endif
                                     @if (in_array('practice_a_met', $visibleColumns, true))
                                         <th class="py-3 px-2 text-center" title="Captação Precoce (até 12ª sem) · 10 pts">A (10p)</th>
@@ -4529,7 +4529,7 @@
                                         <div><span class="font-semibold text-slate-500">ACS Responsável:</span> {{ $selectedPregnancy['professional_name'] ?: 'Não vinculado' }}</div>
                                         <div><span class="font-semibold text-slate-500">DUM / DPP:</span> {{ $selectedPregnancy['dum'] ? \Carbon\Carbon::parse($selectedPregnancy['dum'])->format('d/m/Y') : '—' }} / {{ $selectedPregnancy['dpp'] ? \Carbon\Carbon::parse($selectedPregnancy['dpp'])->format('d/m/Y') : '—' }}</div>
                                         @if (! empty($selectedPregnancy['puerperium_end_date']))
-                                            <div><span class="font-semibold text-slate-500">Fim Puerpério (42d):</span> {{ \Carbon\Carbon::parse($selectedPregnancy['puerperium_end_date'])->format('d/m/Y') }}</div>
+                                            <div><span class="font-semibold text-slate-500">Fim estimado do puerpério (42d):</span> {{ \Carbon\Carbon::parse($selectedPregnancy['puerperium_end_date'])->format('d/m/Y') }}</div>
                                         @endif
                                     </div>
                                 </div>

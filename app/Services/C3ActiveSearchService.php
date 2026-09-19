@@ -112,24 +112,25 @@ class C3ActiveSearchService
             'professional' => 'Profissional / ACS',
             'microarea' => 'Microárea',
             'current_status' => 'Status Clínico',
-            'gestational_age' => 'Idade Gestacional (Sem)',
+            'gestational_age_weeks' => 'Idade Gestacional (Sem)',
             'dum' => 'DUM',
             'dpp' => 'DPP Provável',
-            'puerperium_end' => 'Fim do Puerpério (42d)',
+            'pregnancy_end_date' => 'Desfecho estimado (DUM + 294d)',
+            'puerperium_end_date' => 'Fim estimado do Puerpério (42d)',
             'month_ref' => 'Mês de Referência',
             'mici' => 'Cadastro Atualizado?',
-            'practice_a' => 'Captação Precoce (A)',
-            'practice_b' => '7+ Consultas (B)',
-            'practice_c' => '7+ PA Aferida (C)',
-            'practice_d' => '7+ Peso e Altura (D)',
-            'practice_e' => '3+ Visitas ACS (E)',
-            'practice_f' => 'Vacina dTpa (F)',
-            'practice_g' => 'Exames 1º Trim (G)',
-            'practice_h' => 'Exames 3º Trim (H)',
-            'practice_i' => 'Consulta Puerpério (I)',
-            'practice_j' => 'Visita Puerpério (J)',
-            'practice_k' => 'Saúde Bucal (K)',
-            'score_percent' => 'Pontuação Individual',
+            'practice_a_met' => 'Captação Precoce (A)',
+            'practice_b_met' => '7+ Consultas (B)',
+            'practice_c_met' => '7+ PA Aferida (C)',
+            'practice_d_met' => '7+ Peso e Altura (D)',
+            'practice_e_met' => '3+ Visitas ACS (E)',
+            'practice_f_met' => 'Vacina dTpa (F)',
+            'practice_g_met' => 'Exames 1º Trim (G)',
+            'practice_h_met' => 'Exames 3º Trim (H)',
+            'practice_i_met' => 'Consulta Puerpério (I)',
+            'practice_j_met' => 'Visita Puerpério (J)',
+            'practice_k_met' => 'Saúde Bucal (K)',
+            'total_points' => 'Pontuação Individual',
             'actions' => 'Ações',
         ];
     }
@@ -146,22 +147,22 @@ class C3ActiveSearchService
             'cpf',
             'name',
             'current_status',
-            'gestational_age',
+            'gestational_age_weeks',
             'dpp',
             'facility',
             'team',
-            'practice_a',
-            'practice_b',
-            'practice_c',
-            'practice_d',
-            'practice_e',
-            'practice_f',
-            'practice_g',
-            'practice_h',
-            'practice_i',
-            'practice_j',
-            'practice_k',
-            'score_percent',
+            'practice_a_met',
+            'practice_b_met',
+            'practice_c_met',
+            'practice_d_met',
+            'practice_e_met',
+            'practice_f_met',
+            'practice_g_met',
+            'practice_h_met',
+            'practice_i_met',
+            'practice_j_met',
+            'practice_k_met',
+            'total_points',
             'actions',
         ];
     }
@@ -205,7 +206,7 @@ class C3ActiveSearchService
                     'race_color' => $p->race_color ?? 'Não informada',
                     'cnes' => $p->cnes ?? '',
                     'facility_name' => $p->facility_name ?? '',
-                    'district' => $p->district ?? 'Centro',
+                    'district' => $p->district ?? '',
                     'ine' => $p->ine ?? '',
                     'team_name' => $p->team_name ?? '',
                     'professional_cns' => $p->professional_cns ?? '',
@@ -214,6 +215,7 @@ class C3ActiveSearchService
                     'dum' => $p->dum?->format('Y-m-d') ?? '',
                     'dpp' => $p->dpp?->format('Y-m-d') ?? '',
                     'outcome_date' => $p->outcome_date?->format('Y-m-d') ?? '',
+                    'pregnancy_end_date' => $p->outcome_date?->format('Y-m-d') ?? '',
                     'puerperium_end_date' => $puerperiumEnd = $p->puerperium_end_date?->format('Y-m-d') ?? '',
                     'gestational_age_weeks' => $p->gestational_age_weeks,
                     'current_status' => $p->current_status,
@@ -223,9 +225,13 @@ class C3ActiveSearchService
                     'is_accompanied' => (bool) $p->is_accompanied,
                     'practice_a' => $p->practice_a,
                     'practice_b' => $p->practice_b,
+                    'practice_b_count' => $p->practice_b,
                     'practice_c' => $p->practice_c,
+                    'practice_c_count' => $p->practice_c,
                     'practice_d' => $p->practice_d,
+                    'practice_d_count' => $p->practice_d,
                     'practice_e' => $p->practice_e,
+                    'practice_e_count' => $p->practice_e,
                     'practice_f' => $p->practice_f,
                     'practice_g' => $p->practice_g,
                     'practice_h' => $p->practice_h,
@@ -244,13 +250,19 @@ class C3ActiveSearchService
                     'practice_j_met' => (bool) $p->practice_j_met,
                     'practice_k_met' => (bool) $p->practice_k_met,
                     'score_percent' => (float) $p->score_percent,
+                    'total_points' => (float) $p->score_percent,
+                    'days_postpartum' => $p->outcome_date && $p->current_status === 'puerpera'
+                        ? (int) $p->outcome_date->diffInDays(today())
+                        : null,
                     'is_real_data' => true,
                 ];
             });
         }
 
-        // Caso a base nominal ainda não tenha sido sincronizada, provê coorte simulada realista
-        return $this->generateRealisticFallbackCohort($year, $quarter, $selectedIne);
+        // Dados simulados são permitidos somente em desenvolvimento/testes.
+        return app()->environment('local', 'testing')
+            ? $this->generateRealisticFallbackCohort($year, $quarter, $selectedIne)
+            : collect();
     }
 
     /**
@@ -426,6 +438,7 @@ class C3ActiveSearchService
                 'dum' => $dum->format('Y-m-d'),
                 'dpp' => $dpp->format('Y-m-d'),
                 'outcome_date' => $outcomeDate?->format('Y-m-d'),
+                'pregnancy_end_date' => $outcomeDate?->format('Y-m-d'),
                 'puerperium_end_date' => $puerperiumEnd->format('Y-m-d'),
                 'gestational_age_weeks' => $gestationalWeeks,
                 'current_status' => $statusCategory,
@@ -435,9 +448,13 @@ class C3ActiveSearchService
                 'is_accompanied' => true,
                 'practice_a' => $metA ? 1 : 0,
                 'practice_b' => $pBCount,
+                'practice_b_count' => $pBCount,
                 'practice_c' => $pCCount,
+                'practice_c_count' => $pCCount,
                 'practice_d' => $pDCount,
+                'practice_d_count' => $pDCount,
                 'practice_e' => $pECount,
+                'practice_e_count' => $pECount,
                 'practice_f' => $pFCount,
                 'practice_g' => $metG ? 1 : 0,
                 'practice_h' => $metH ? 1 : 0,
@@ -456,6 +473,10 @@ class C3ActiveSearchService
                 'practice_j_met' => $metJ,
                 'practice_k_met' => $metK,
                 'score_percent' => (float) $score,
+                'total_points' => (float) $score,
+                'days_postpartum' => $statusCategory === 'puerpera' && $outcomeDate
+                    ? $outcomeDate->diffInDays($baseDate)
+                    : null,
                 'is_real_data' => false,
             ];
         }

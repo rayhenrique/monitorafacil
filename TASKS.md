@@ -166,3 +166,13 @@
   - [x] Testes de Feature completos (`tests/Feature/FamilyHealthC3Test.php`) com 100% de aprovação.
   - [x] **Patch v1.16.1**: Detecção dinâmica (`information_schema`) de todas as tabelas/colunas que variam entre versões do DW PEC: `tb_dim_cid`/`tb_dim_cid10`, `nu_idade_gestacional`/`nu_idade_gestacional_semanas`, `dt_ultima_menstruacao`/`co_dim_tempo_dum`, `nu_pressao_sistolica`/`nu_medicao_pressao_sistolica`. Corrige `SQLSTATE[42P01]` e `SQLSTATE[42703]` em produção.
 
+- [x] **Fase 21: Revisão normativa e de desempenho do C3 (v1.17.0)**
+  - [x] Remoção da consulta correlacionada e do filtro histórico ilimitado responsáveis por `SQLSTATE[57014]`; leitura em lotes de 100 cidadãos e intervalo máximo DUM + 294 + 42 dias.
+  - [x] Correção da dimensão da DUM para `tb_dim_tempo_dum`, sem criação de DUM fictícia quando DUM e idade gestacional estão ausentes.
+  - [x] Aplicação das listas de CIAP/CID de inclusão e exclusão da Nota Metodológica, resolvidas nas dimensões e filtradas por chave.
+  - [x] Coorte limitada ao quadrimestre em que ocorre o 42º dia do puerpério, com prévia mantida para os quadrimestres futuros.
+  - [x] Práticas A–K recalculadas em janelas clínicas: visita após primeira consulta, dTpa após 20 semanas, exames SIGTAP reais nos 1º/3º trimestres e consulta/visita puerperal até 42 dias.
+  - [x] Eventos do MIP incorporados à pressão arterial, exames laboratoriais e saúde bucal quando individualizados no DW.
+  - [x] MICI/MICDT deixam de ser marcados como atualizados sem evidência no DW e o distrito fictício foi removido.
+  - [x] Busca ativa C3 alinhada às colunas reais da tabela e dados simulados bloqueados no ambiente de produção.
+  - [x] Testes unitários de pontuação, janelas clínicas, exceção eAP e regressão da consulta PostgreSQL.

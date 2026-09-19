@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.16.1';
+    public const CURRENT_VERSION = 'v1.17.0';
 
     public const CURRENT_RELEASE_DATE = '19/09/2026';
 
@@ -61,9 +61,23 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.16.1',
+                'version' => 'v1.17.0',
                 'date' => '19/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Revisão Normativa e de Desempenho do C3',
+                'summary' => 'Revisão do C3 conforme a Nota Metodológica e o DW PEC 8.7: coorte pelo 42º dia do puerpério, janelas clínicas por evento, exames reais nas práticas G/H, consulta puerperal efetiva e consultas PostgreSQL limitadas por período e lotes menores.',
+                'highlights' => [
+                    ['type' => 'correcao', 'text' => 'Eliminada a consulta histórica sem limite que causava SQLSTATE[57014] por statement_timeout; o C3 agora usa lotes de 100 cidadãos, intervalo de datas e teto específico de 30 segundos.'],
+                    ['type' => 'correcao', 'text' => 'DUM passa a usar a dimensão oficial tb_dim_tempo_dum; sem DUM e sem idade gestacional o sistema não fabrica uma gestação.'],
+                    ['type' => 'correcao', 'text' => 'CID/CIAP de gestação e de exclusão são resolvidos previamente nas dimensões e aplicados por chave, sem o filtro amplo CID O%.'],
+                    ['type' => 'correcao', 'text' => 'Práticas G e H usam eventos SIGTAP de exames; prática I usa consultas médicas ou de enfermagem no puerpério; visitas, vacina, medidas e saúde bucal respeitam suas janelas clínicas.'],
+                    ['type' => 'melhoria', 'text' => 'Coorte nominal restrita às gestações cujo 42º dia pós desfecho pertence ao quadrimestre selecionado, mantendo a prévia de períodos futuros.'],
+                ],
+            ],
+            [
+                'version' => 'v1.16.1',
+                'date' => '19/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Compatibilidade Dinâmica com DW e-SUS PEC (Colunas e Tabelas)',
                 'summary' => 'Correção crítica na extração do C3: detecção dinâmica via information_schema de todas as tabelas e colunas que variam entre versões do DW PEC — tb_dim_cid/tb_dim_cid10, nu_idade_gestacional/nu_idade_gestacional_semanas, dt_ultima_menstruacao/co_dim_tempo_dum, nu_pressao_sistolica/nu_medicao_pressao_sistolica.',
                 'highlights' => [

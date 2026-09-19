@@ -301,18 +301,18 @@ class FamilyHealthC3Test extends TestCase
         $this->assertGreaterThanOrEqual(20, count($columns));
         $this->assertArrayHasKey('name', $columns);
         $this->assertArrayHasKey('current_status', $columns);
-        $this->assertArrayHasKey('gestational_age', $columns);
+        $this->assertArrayHasKey('gestational_age_weeks', $columns);
         $this->assertArrayHasKey('dum', $columns);
         $this->assertArrayHasKey('dpp', $columns);
-        $this->assertArrayHasKey('practice_a', $columns);
-        $this->assertArrayHasKey('practice_f', $columns);
-        $this->assertArrayHasKey('score_percent', $columns);
+        $this->assertArrayHasKey('practice_a_met', $columns);
+        $this->assertArrayHasKey('practice_f_met', $columns);
+        $this->assertArrayHasKey('total_points', $columns);
 
         $defaultSelected = C3ActiveSearchService::getDefaultVisibleColumns();
         $this->assertContains('name', $defaultSelected);
         $this->assertContains('current_status', $defaultSelected);
         $this->assertContains('team', $defaultSelected);
-        $this->assertContains('score_percent', $defaultSelected);
+        $this->assertContains('total_points', $defaultSelected);
     }
 
     public function test_c3_active_search_service_simulation_fallback(): void
