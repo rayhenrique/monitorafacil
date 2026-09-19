@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.11.0';
+    public const CURRENT_VERSION = 'v1.12.0';
 
     public const CURRENT_RELEASE_DATE = '18/09/2026';
 
@@ -60,6 +60,18 @@ class VersionService
     public static function getAllReleases(): array
     {
         return [
+            [
+                'version' => 'v1.12.0',
+                'date' => '18/09/2026',
+                'badge' => 'Versão Atual',
+                'title' => 'Inventário seguro do esquema DW PEC',
+                'summary' => 'Novo comando somente leitura inventaria tabelas, colunas, índices e estimativas do DW disponível na VPS antes da criação da camada analítica local no MySQL.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Comando esus:inspect-schema executado dentro de transação PostgreSQL explicitamente somente leitura.'],
+                    ['type' => 'novo', 'text' => 'Relatório JSON privado contém apenas metadados técnicos, sem linhas clínicas nem identificadores de cidadãos.'],
+                    ['type' => 'melhoria', 'text' => 'Arquitetura alvo separada em referências, entidades canônicas, eventos clínicos e produtos analíticos auditáveis.'],
+                ],
+            ],
             [
                 'version' => 'v1.11.0',
                 'date' => '18/09/2026',

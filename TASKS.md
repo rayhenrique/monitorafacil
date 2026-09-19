@@ -115,6 +115,7 @@
   - [x] Mapear a lista funcional para tabelas normalizadas, evitando cópias concorrentes de cidadãos, PSE e resultados.
   - [x] Mapear os conjuntos mínimos de dados exigidos pelas notas metodológicas C1 a C7.
   - [x] Documentar limites de fidelidade entre DW local, Siaps, SCNES e RNDS.
+  - [x] Implementar e testar o comando `esus:inspect-schema` para inventário de metadados em transação somente leitura.
   - [ ] Executar inventário somente leitura do esquema e da versão do PEC na VPS.
   - [ ] Fechar o dicionário origem-coluna-destino com amostras e contagens da VPS.
   - [ ] Definir política de retenção, criptografia e perfis para dados nominais de saúde.

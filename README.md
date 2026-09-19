@@ -302,6 +302,16 @@ Acesse no navegador: `http://127.0.0.1:8000`
 
 ## 🛠 Comandos Artisan Personalizados
 
+### Inventário somente leitura do DW PEC
+
+Antes de criar ou atualizar o espelho analítico no MySQL, gere o contrato real do esquema acessível pela VPS:
+
+```bash
+php artisan esus:inspect-schema
+```
+
+O comando abre uma transação PostgreSQL explicitamente somente leitura e grava em `storage/app/private/` um JSON com tabelas, colunas, tipos, índices e estimativas do catálogo. Nenhuma linha clínica ou identificação de cidadão é extraída. Um caminho alternativo pode ser informado com `--output=arquivo.json`.
+
 ### Sincronização e Consolidação do e-SUS PEC
 
 Executa a leitura das tabelas do e-SUS PEC, cruza com as equipes ativas do XML homologado e gera o snapshot do quadrimestre:

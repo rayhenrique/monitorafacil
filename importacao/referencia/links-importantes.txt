@@ -1,0 +1,37 @@
+links-importantes
+
+Layouts (Thrift/XML)
+
+Layouts Thrift RAS:
+https://github.com/laboratoriobridge/esusab-integracao/tree/master/thrift/layout-ras
+
+Layout Thrift Cidadão:
+https://github.com/laboratoriobridge/esusab-integracao/tree/master/thrift/layout-cidadao
+
+Layouts XML RAS:
+https://github.com/laboratoriobridge/esusab-integracao/tree/master/XSD
+
+
+Exemplos de implementação Thrift/XML
+
+Exemplos de implementação Thrift:
+https://github.com/laboratoriobridge/esusab-integracao/tree/master/thrift-exemplo
+
+Exemplos de implementação XML:
+https://github.com/laboratoriobridge/esusab-integracao/tree/master/xml-exemplo
+
+
+Dicionário de Dados:
+https://integracao.esusab.ufsc.br/
+
+LEDI APS:
+https://integracao.esusaps.bridge.ufsc.tech/ledi/index.html
+
+DW PEC:
+https://integracao.esusaps.bridge.ufsc.tech/dw/index.html
+
+Sistemas Externos:
+https://integracao.esusaps.bridge.ufsc.tech/sistemas_externos/index.html
+
+Data Warehouse:
+https://integracao.esusaps.bridge.ufsc.tech/dw/

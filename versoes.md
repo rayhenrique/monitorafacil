@@ -4,6 +4,17 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.12.0] - 18/09/2026
+
+### 🧭 Inventário seguro do DW PEC
+- Novo comando `php artisan esus:inspect-schema` para inventariar o esquema disponível na VPS antes da criação da camada analítica local.
+- A inspeção roda em transação PostgreSQL explicitamente somente leitura e coleta somente metadados: tabelas, colunas, tipos, índices e estimativas do catálogo.
+- O relatório JSON é gravado em `storage/app/private/` e não contém linhas clínicas, CPF, CNS, nomes ou outros dados de cidadãos.
+- A arquitetura do MySQL foi planejada em quatro camadas: referências, entidades canônicas, eventos clínicos e produtos analíticos.
+- O mapeamento prevê evidências por cidadão e por boa prática para C1 a C7, além de vínculo, Saúde Bucal, e-Multi, vigilância e vacinação infantil.
+
+---
+
 ## [v1.11.0] - 18/09/2026
 
 ### 🧭 Revisão normativa do C1 pelo DW PEC

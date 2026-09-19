@@ -94,7 +94,7 @@ class VersionControlTest extends TestCase
         $this->assertFalse(VersionService::shouldShowModal($user->fresh()));
 
         $allReleases = VersionService::getAllReleases();
-        $this->assertCount(12, $allReleases);
+        $this->assertCount(13, $allReleases);
         $this->assertSame(VersionService::CURRENT_VERSION, $allReleases[0]['version']);
         $this->assertSame('v1.0.0', end($allReleases)['version']);
     }
@@ -124,7 +124,7 @@ class VersionControlTest extends TestCase
         // Modal deve abrir pois last_seen_version é null
         Livewire::test(WhatsNewModal::class)
             ->assertSet('show', true)
-            ->assertSee('Atualização do Sistema · ' . VersionService::CURRENT_VERSION)
+            ->assertSee('Atualização do Sistema · '.VersionService::CURRENT_VERSION)
             ->assertSee('Entendido, Continuar')
             ->call('acknowledge')
             ->assertSet('show', false);
