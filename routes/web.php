@@ -11,6 +11,7 @@ use App\Livewire\Settings\DataProcessing;
 use App\Livewire\Settings\EsusConnection;
 use App\Livewire\Settings\MunicipalitySettings;
 use App\Livewire\Settings\UsersManager;
+use App\Livewire\TerritorialBonding\NominalList;
 use App\Livewire\TerritorialBonding\TerritorialBondingOverview;
 use Illuminate\Support\Facades\Route;
 
@@ -27,6 +28,7 @@ Route::middleware('auth')->group(function (): void {
 
     Route::prefix('vinculo-e-acompanhamento')->name('territorial-bonding.')->group(function (): void {
         Route::get('/', TerritorialBondingOverview::class)->name('overview');
+        Route::get('/relacao-nominal', NominalList::class)->name('nominal');
     });
 
     Route::prefix('saude-da-familia')->name('family-health.')->group(function (): void {

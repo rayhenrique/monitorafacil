@@ -203,3 +203,15 @@
   - [x] Enquadramento no Quadro 5 da NT 08/2026 (média municipal de 8,77 em Q1/26 com classificação Ótimo e 100% de incentivo financeiro).
   - [x] Integração dos números oficiais de vínculo no dashboard inicial com link direto para o módulo.
   - [x] Testes automatizados cobrindo rotas, serviço CVAT e componente Livewire.
+
+- [x] **Fase 25: Submódulo Relação Nominal e Busca Ativa no PEC (v1.21.0)**
+  - [x] Criação de tabelas e models `cvat_nominal_metrics` e `cvat_nominal_citizens` com campos cadastrais completos, auditoria e LGPD.
+  - [x] Serviço `CvatNominalDwService` para extração dos dados do DW PEC e motor de sincronização com persistência e fallback gracioso.
+  - [x] Comando Artisan `php artisan cvat:sync-nominal` e integração no fluxo de deploy contínuo (`scripts/deploy.sh` e `deploy.sh`).
+  - [x] Painel da Dimensão Cadastro com totalizadores de MICI (36.951), atualizados (36.751), desatualizados (200), sem MICDT (2.047), com MICDT (34.904) e vinculados (35.401).
+  - [x] Painel retrátil da Dimensão Acompanhamento com matriz 4×3 cruzando critérios de vulnerabilidade e acompanhamento (Sem Critério, Idoso/Criança, BPC/PBF, Idoso/Criança + BPC/PBF).
+  - [x] Barra de busca ativa e filtros instantâneos (CNS, CPF, Nome Cidadão, CNS Profissional, Nome Profissional, CNES, INE, Raça/Cor e paginação de 10 a 100).
+  - [x] Tabela nominal de alta densidade com 18 colunas, ordenação, máscaras LGPD com toggle visual e cópia para área de transferência.
+  - [x] Modais interativos de Busca Avançada multicritério e Prontuário de Vínculo com ficha completa do cidadão.
+  - [x] Navegação integrada no sidebar desktop e gaveta mobile, abas do módulo CVAT e rota `/vinculo-e-acompanhamento/relacao-nominal`.
+  - [x] Testes automatizados de rota, renderização, filtros e paginação da Relação Nominal.

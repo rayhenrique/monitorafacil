@@ -4,6 +4,36 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.21.0] - 19/09/2026
+
+### 📋 Submódulo Relação Nominal e Busca Ativa no PEC (Vínculo e Acompanhamento)
+- **Painel Gerencial Fidedigno (Dimensão Cadastro)**:
+  - Mês de referência `2026 / M12` e data do último atendimento registrado.
+  - Indicadores exatos: Total Geral de MICI (**36.951**), MICI Atualizados (**36.751** - 99,46%), MICI Desatualizados (**200** - 0,54%).
+  - Total Geral de MICI Sem MICDT (**2.047**), MICI Atua. e MICDT Desat. ou Sem (**2.061** - 5,58%), MICI Atualizados e Sem MICDT (**1.947** - 95,11%).
+  - Total MICI Com MICDT (**34.904** - 94,46%), MICI e MICDT Atualizados (**34.690** - 99,39%), MICI e MICDT Desatualizados (**214** - 0,61%).
+  - Cidadãos Vinculados (**35.401** - 95,81%) e Não Vinculados (**1.550** - 4,19%).
+- **Painel Retrátil da Dimensão Acompanhamento**:
+  - Matriz completa de 4 colunas cruzando critérios de vulnerabilidade com status de acompanhamento:
+    - *Sem Critério*: Total 20.550 | Acompanhados 19.348 | Não acompanhados 1.202.
+    - *Idoso ou Criança*: Total 7.617 | Acompanhados 7.544 | Não acompanhados 73.
+    - *BPC ou PBF*: Total 7.688 | Acompanhados 7.527 | Não acompanhados 161.
+    - *Idoso/Criança + BPC/PBF*: Total 1.096 | Acompanhados 1.085 | Não acompanhados 11.
+- **Barra de Filtros e Busca Ativa**:
+  - Filtros rápidos por CNS, CPF, Nome do Cidadão, CNS do Profissional, Nome do Profissional, CNES, INE, Raça/Cor (R/C) e paginação por página (10, 15, 30, 50, 100).
+- **Tabela Nominal de Alta Densidade com LGPD**:
+  - 18 colunas detalhadas (#, CNS, CPF, CPF/CNS Responsável, Nascimento, Nome, Idade, R/C, Unidade, Equipe, Profissional, Microárea, MICI Atualização, MICDT Atualização, Vulnerabilidade Idade, BPC/PBF, Acompanhada, Ações).
+  - Máscara LGPD instantânea com botão de revelar/ocultar olho e botão de copiar para a área de transferência.
+  - Badges coloridos idênticos às telas de referência (Verde para atualizado/sim, Vermelho para desatualizado/sem micdt, Laranja para idoso/criança).
+- **Modais Integrados**:
+  - *Busca Avançada*: modal com filtros combinados de status MICI, MICDT, vinculação e vulnerabilidade.
+  - *Prontuário de Vínculo (Detalhes)*: modal com ficha completa do cidadão, dados cadastrais, endereço domiciliar, equipe e profissional de referência e histórico de visitas do ACS.
+- **Comando Artisan e Pipeline**:
+  - `php artisan cvat:sync-nominal` para sincronização com o banco do e-SUS PEC e fallback para base de dados local.
+  - Integração no `scripts/deploy.sh` e `deploy.sh`.
+
+---
+
 ## [v1.20.0] - 19/09/2026
 
 ### 🗺️ Módulo Vínculo e Acompanhamento Territorial (Componente II - CVAT)

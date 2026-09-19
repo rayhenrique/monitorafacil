@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.20.0';
+    public const CURRENT_VERSION = 'v1.21.0';
 
     public const CURRENT_RELEASE_DATE = '19/09/2026';
 
@@ -61,9 +61,22 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.20.0',
+                'version' => 'v1.21.0',
                 'date' => '19/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Submódulo Relação Nominal e Busca Ativa no PEC',
+                'summary' => 'Lançamento da Relação Nominal no módulo Vínculo e Acompanhamento, com extração do PEC, métricas oficiais da Dimensão Cadastro e Acompanhamento, filtros avançados e prontuário de vínculo.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Submódulo Relação Nominal com matriz de indicadores da Dimensão Cadastro (MICI/MICDT) e Dimensão Acompanhamento.'],
+                    ['type' => 'novo', 'text' => 'Listagem nominal fidedigna com 18 colunas, busca por CNS/CPF/Nome/Profissional/CNES/INE, paginação e visualização com máscara LGPD e cópia rápida.'],
+                    ['type' => 'novo', 'text' => 'Modais de Busca Avançada por filtros combinados e Prontuário de Detalhes do Vínculo e Histórico do Cidadão.'],
+                    ['type' => 'melhoria', 'text' => 'Comando artisan cvat:sync-nominal com extração direta do e-SUS PEC e integração ao pipeline de deploy contínuo.'],
+                ],
+            ],
+            [
+                'version' => 'v1.20.0',
+                'date' => '19/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Módulo Vínculo e Acompanhamento Territorial',
                 'summary' => 'Implementação oficial do Componente II (CVAT) com resultados do Siaps (Q2/25, Q3/25 e Q1/26), reprodução fidedigna dos gráficos de barras empilhadas e avaliação individual das 19 equipes eSF.',
                 'highlights' => [

@@ -122,6 +122,10 @@
                                         </div>
                                         <div x-show="open" class="ml-4 pl-3 border-l border-[#1a3832] space-y-1 mt-1" style="{{ request()->routeIs('territorial-bonding.*') ? '' : 'display: none;' }}">
                                             <a href="{{ route('territorial-bonding.overview') }}" @click="mobileMenuOpen = false" class="block rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('territorial-bonding.overview') && !request()->has('aba') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">Painel Oficial CVAT</a>
+                                            <a href="{{ route('territorial-bonding.nominal') }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('territorial-bonding.nominal') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                                <span>Relação Nominal</span>
+                                                <span class="rounded bg-sky-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-sky-300">PEC</span>
+                                            </a>
                                             <a href="{{ route('territorial-bonding.overview', ['aba' => 'cadastro']) }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->query('aba') === 'cadastro' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
                                                 <span>Dimensão Cadastro</span>
                                                 <span class="text-[10px] text-teal-400 font-mono">Peso 3</span>
@@ -330,6 +334,10 @@
                             <div x-show="open" class="ml-4 pl-3 border-l border-[#1a3832] space-y-1 mt-1" style="{{ request()->routeIs('territorial-bonding.*') ? '' : 'display: none;' }}">
                                 <a href="{{ route('territorial-bonding.overview') }}" class="block rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('territorial-bonding.overview') && !request()->has('aba') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
                                     Painel Oficial CVAT
+                                </a>
+                                <a href="{{ route('territorial-bonding.nominal') }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('territorial-bonding.nominal') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                    <span>Relação Nominal</span>
+                                    <span class="rounded bg-sky-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-sky-300">PEC</span>
                                 </a>
                                 <a href="{{ route('territorial-bonding.overview', ['aba' => 'cadastro']) }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->query('aba') === 'cadastro' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
                                     <span>Dimensão Cadastro</span>
