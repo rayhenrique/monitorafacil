@@ -36,11 +36,104 @@
         </div>
     </div>
 
-    <!-- BOX 1: DIMENSÃO CADASTRO (EXATA CONFORME IMAGEM 1) -->
+    <!-- PAINEL EXECUTIVO: RESULTADO OFICIAL COMPONENTE II (PORTARIA SAPS/MS Nº 161/2024 & NT Nº 30/2025) -->
+    <div class="bg-white rounded-3xl border border-line shadow-panel p-5 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-line pb-3">
+            <div class="flex items-center gap-2">
+                <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-100 text-teal-800 font-bold text-xs">
+                    NT
+                </span>
+                <div>
+                    <h2 class="text-sm font-bold text-ink flex items-center gap-2">
+                        <span>Aferição Oficial de Desempenho · Portaria SAPS/MS nº 161/2024 & NT nº 30/2025</span>
+                        <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold">19 eSF · Meta: {{ number_format($metrics->target_population, 0, '', '.') }} munícipes</span>
+                    </h2>
+                    <p class="text-[11px] text-muted">
+                        Critérios: MICI/MICDT em até 24 meses (sem FA/Mudou-se) · Acompanhamento: &ge; 2 contatos em 12 meses com &ge; 1 prática de cuidado.
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-500 font-medium">Classificação Ministerial:</span>
+                <span class="px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider shadow-xs {{ $metrics->final_classification === 'ÓTIMO' ? 'bg-blue-600 text-white' : ($metrics->final_classification === 'BOM' ? 'bg-emerald-600 text-white' : ($metrics->final_classification === 'SUFICIENTE' ? 'bg-amber-500 text-white' : 'bg-rose-600 text-white')) }}">
+                    {{ $metrics->final_classification }}
+                </span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Escore Final -->
+            <div class="bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80 flex flex-col justify-between">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Escore Final (X + Y)</span>
+                    <span class="text-[11px] font-bold text-teal-800 bg-teal-50 px-2 py-0.5 rounded border border-teal-200">
+                        {{ in_array($metrics->final_classification, ['ÓTIMO', 'BOM']) ? '100% Repasse' : ($metrics->final_classification === 'SUFICIENTE' ? '75% Repasse' : '50% Repasse') }}
+                    </span>
+                </div>
+                <div class="my-2 flex items-baseline gap-2">
+                    <span class="text-3xl font-black text-ink tabular-nums">{{ number_format($metrics->final_score, 2, ',', '.') }}</span>
+                    <span class="text-xs text-muted font-semibold">/ 10,00 pts</span>
+                </div>
+                <div class="text-[11px] text-slate-500 flex items-center justify-between border-t border-slate-200/60 pt-2">
+                    <span>Corte Ótimo: &gt; 8,50 pts</span>
+                    <span>Bom: &ge; 7,00 pts</span>
+                </div>
+            </div>
+
+            <!-- Dimensão Cadastro (X) -->
+            <div class="bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80 flex flex-col justify-between">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-teal-900 uppercase tracking-wider">Dimensão Cadastro (X)</span>
+                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold {{ $metrics->classification_x === 'Ótimo' ? 'bg-blue-100 text-blue-800' : ($metrics->classification_x === 'Bom' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800') }}">
+                        {{ $metrics->classification_x }}
+                    </span>
+                </div>
+                <div class="my-2 flex items-baseline justify-between">
+                    <div class="flex items-baseline gap-1.5">
+                        <span class="text-3xl font-black text-teal-900 tabular-nums">{{ number_format($metrics->score_x, 2, ',', '.') }}</span>
+                        <span class="text-xs text-muted font-semibold">/ 3,00 pts</span>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-slate-600">Índice: {{ number_format($metrics->index_x, 1, ',', '.') }}%</span>
+                </div>
+                <div class="text-[11px] text-slate-500 border-t border-slate-200/60 pt-2 flex items-center justify-between">
+                    <span>MICI (&times;0,75) + MICDT (&times;1,5)</span>
+                    <span class="font-bold text-teal-800">Meta: 100%</span>
+                </div>
+            </div>
+
+            <!-- Dimensão Acompanhamento (Y) -->
+            <div class="bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80 flex flex-col justify-between">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-blue-900 uppercase tracking-wider">Dimensão Acompanhamento (Y)</span>
+                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold {{ $metrics->classification_y === 'Ótimo' ? 'bg-blue-100 text-blue-800' : ($metrics->classification_y === 'Bom' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800') }}">
+                        {{ $metrics->classification_y }}
+                    </span>
+                </div>
+                <div class="my-2 flex items-baseline justify-between">
+                    <div class="flex items-baseline gap-1.5">
+                        <span class="text-3xl font-black text-blue-900 tabular-nums">{{ number_format($metrics->score_y, 2, ',', '.') }}</span>
+                        <span class="text-xs text-muted font-semibold">/ 7,00 pts</span>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-slate-600">Índice: {{ number_format($metrics->index_y, 1, ',', '.') }}%</span>
+                </div>
+                <div class="text-[11px] text-slate-500 border-t border-slate-200/60 pt-2 flex items-center justify-between">
+                    <span>Ponderação: 1,0 · 1,2 · 1,3 · 2,5</span>
+                    <span class="font-bold text-blue-800">Meta: 50%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOX 1: DIMENSÃO CADASTRO (EXATA CONFORME IMAGEM 1 COM MÉTRICAS DA NT 30/2025) -->
     <div class="bg-white rounded-3xl border border-line shadow-panel overflow-hidden">
         <!-- Título da Seção -->
-        <div class="bg-slate-50/60 py-2.5 px-4 text-center border-b border-line">
+        <div class="bg-slate-50/60 py-2.5 px-4 flex flex-col sm:flex-row items-center justify-between gap-2 border-b border-line">
             <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">DIMENSÃO CADASTRO</h2>
+            <div class="flex items-center gap-2 text-[11px]">
+                <span class="text-slate-500 font-medium">Índice Ponderado (X): <strong class="text-teal-800">{{ number_format($metrics->index_x, 2, ',', '.') }}%</strong></span>
+                <span class="text-slate-300">·</span>
+                <span class="text-slate-500 font-medium">Escore Oficial: <strong class="text-teal-800">{{ number_format($metrics->score_x, 2, ',', '.') }} / 3,00 pts</strong> ({{ $metrics->classification_x }})</span>
+            </div>
         </div>
 
         <!-- Grid de Métricas de Cadastro -->
@@ -144,20 +237,29 @@
         </div>
     </div>
 
-    <!-- BOX 2: DIMENSÃO ACOMPANHAMENTO (RETRÁTIL CONFORME IMAGEM 2) -->
+    <!-- BOX 2: DIMENSÃO ACOMPANHAMENTO (RETRÁTIL CONFORME IMAGEM 2 COM MÉTRICAS DA NT 30/2025) -->
     <div class="bg-white rounded-3xl border border-line shadow-panel overflow-hidden">
         <!-- Cabeçalho com Botão Retrátil -->
         <div
             wire:click="toggleAcompanhamento"
-            class="bg-slate-50/60 py-2.5 px-5 flex items-center justify-between border-b border-line cursor-pointer hover:bg-slate-100/70 transition select-none"
+            class="bg-slate-50/60 py-2.5 px-5 flex flex-col sm:flex-row items-center justify-between gap-2 border-b border-line cursor-pointer hover:bg-slate-100/70 transition select-none"
         >
-            <div class="w-6"></div>
-            <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">DIMENSÃO ACOMPANHAMENTO</h2>
-            <button type="button" class="text-slate-400 hover:text-slate-600 transition">
-                <svg class="h-4 w-4 transition-transform duration-200 {{ $acompanhamentoExpanded ? 'rotate-180' : '' }}" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                </svg>
-            </button>
+            <div class="flex items-center gap-2">
+                <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">DIMENSÃO ACOMPANHAMENTO</h2>
+                <span class="text-[10px] text-slate-400">(&ge; 2 contatos com prática de cuidado)</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 text-[11px]">
+                    <span class="text-slate-500 font-medium">Índice Ponderado (Y): <strong class="text-blue-800">{{ number_format($metrics->index_y, 2, ',', '.') }}%</strong></span>
+                    <span class="text-slate-300">·</span>
+                    <span class="text-slate-500 font-medium">Escore Oficial: <strong class="text-blue-800">{{ number_format($metrics->score_y, 2, ',', '.') }} / 7,00 pts</strong> ({{ $metrics->classification_y }})</span>
+                </div>
+                <button type="button" class="text-slate-400 hover:text-slate-600 transition ml-2">
+                    <svg class="h-4 w-4 transition-transform duration-200 {{ $acompanhamentoExpanded ? 'rotate-180' : '' }}" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
+                </button>
+            </div>
         </div>
 
         <!-- Matriz de Vulnerabilidade e Acompanhamento -->
@@ -691,7 +793,7 @@
                         <select wire:model="advVulnerability" class="w-full rounded-xl border border-slate-200 p-2 text-xs">
                             <option value="ALL">Todas as faixas</option>
                             <option value="idoso">Idoso (60+ anos)</option>
-                            <option value="crianca">Criança (0 a 11 anos)</option>
+                            <option value="crianca">Criança (até 5 anos incompletos · NT 30/2025)</option>
                             <option value="sem_criterio">Sem Critério de Idade</option>
                         </select>
                     </div>

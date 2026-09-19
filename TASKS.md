@@ -254,3 +254,12 @@
   - [x] Atualização dos atalhos do dashboard para apontar diretamente para a listagem nominal.
   - [x] Atualização dos testes automatizados de redirecionamento e das dimensões.
 
+- [x] **Fase 32: Alinhamento Integral à Nota Técnica nº 30/2025-CGESCO/DESCO/SAPS/MS & Portaria SAPS nº 161/2024 (v1.23.0)**
+  - [x] Definição oficial de Pessoa Acompanhada (Item 2.6.4): $\ge 2$ contatos assistenciais em 12 meses, com obrigatoriedade de $\ge 1$ contato ser Prática de Cuidado (atendimento clínico individual médico/enfermeiro, odontologia, visita do ACS ou atividade coletiva).
+  - [x] Ajuste do critério etário de criança para vulnerabilidade: até 5 anos incompletos (4 anos, 11 meses e 29 dias / `$age < 5`), revogando o critério anterior de $< 6$ anos.
+  - [x] Exclusões cadastrais na Dimensão Cadastro: desconsideração de cadastros com "Fora de Área (FA)" ou "Mudou-se" e cadastros rápidos simplificados (fator 0).
+  - [x] Apuração matemática dos Índices Ponderados X (fatores 0,75 e 1,50) e Y (fatores 1,0; 1,2; 1,3 e 2,5) sobre a população alvo de 47.500 pessoas (19 eSF $\times$ 2.500).
+  - [x] Painel Executivo com Escore Final (0 a 10,00 pts), Conceito Ministerial (Ótimo, Bom, Suficiente, Regular) e faixas de repasse do incentivo financeiro federal.
+  - [x] Caderno Metodológico (aba guide) integralmente reformulado como réplica didática da Portaria SAPS/MS nº 161/2024 e NT 30/2025, incluindo bônus de satisfação do Meu SUS Digital e regras de desempate de vínculos.
+  - [x] Atualização de testes automatizados e versionamento da plataforma.
+

@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.22.4';
+    public const CURRENT_VERSION = 'v1.23.0';
 
     public const CURRENT_RELEASE_DATE = '19/09/2026';
 
@@ -61,9 +61,23 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.22.4',
+                'version' => 'v1.23.0',
                 'date' => '19/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Alinhamento Integral à Nota Técnica nº 30/2025-CGESCO/DESCO/SAPS/MS & Portaria SAPS nº 161/2024',
+                'summary' => 'Adequação metodológica completa do módulo Vínculo e Acompanhamento Territorial: definição oficial de Pessoa Acompanhada (≥ 2 contatos no ano com ao menos uma prática de cuidado médica/odonto/ACS), corte de vulnerabilidade infantil para até 5 anos incompletos, exclusões cadastrais válidas, índices ponderados X e Y, escores oficiais e Caderno Metodológico fidedigno.',
+                'highlights' => [
+                    ['type' => 'regra', 'text' => 'Pessoa Acompanhada (Item 2.6.4 da NT 30/2025): exigência de mais de um contato assistencial no período de um ano (≥ 2 contatos), com obrigatoriedade de pelo menos uma Prática de Cuidado (atendimento clínico individual, odontológico, visita do ACS ou atividade coletiva).'],
+                    ['type' => 'regra', 'text' => 'Vulnerabilidade Infantil ajustada para até 5 anos incompletos (4 anos, 11 meses e 29 dias / < 5 anos), conforme itens 2.2 \'b\' e 3.10 da NT 30/2025.'],
+                    ['type' => 'regra', 'text' => 'Exclusões Cadastrais aplicadas: desconsideração de cadastros marcados com "Fora de Área" ou "Mudança de Território" e cadastros rápidos simplificados (fator 0).'],
+                    ['type' => 'novo', 'text' => 'Cálculo automático e exibição executiva dos Índices Ponderados X (Cadastro) e Y (Acompanhamento), Escores Oficiais (até 3,00 pts e até 7,00 pts), Escore Final (até 10,00 pts) e Classificação Ministerial (Ótimo, Bom, Suficiente, Regular) para a população parâmetro de 47.500 munícipes.'],
+                    ['type' => 'melhoria', 'text' => 'Caderno Metodológico (aba guide) integralmente reformulado como réplica didática e técnica da Portaria SAPS/MS nº 161/2024 e NT 30/2025, detalhando bonificação de satisfação do Meu SUS Digital e critérios de desempate de vínculo.'],
+                ],
+            ],
+            [
+                'version' => 'v1.22.4',
+                'date' => '19/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Relação Nominal como Primeiro Submódulo de Vínculo e Acompanhamento',
                 'summary' => 'Remoção do Painel Oficial CVAT e reordenação dos submódulos, abrindo diretamente a Relação Nominal e Busca Ativa ao acessar o módulo de Vínculo e Acompanhamento.',
                 'highlights' => [

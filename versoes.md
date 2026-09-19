@@ -4,6 +4,27 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.23.0] - 19/09/2026
+
+### 🏛️ Alinhamento Integral à Nota Técnica nº 30/2025-CGESCO/DESCO/SAPS/MS & Portaria SAPS nº 161/2024
+- **Definição Oficial de Pessoa Acompanhada (Item 2.6.4 da NT 30/2025)**:
+  - Exigência de **mais de um contato assistencial no período de um ano (12 meses)** ($\ge 2$ contatos) anteriores à data final do quadrimestre avaliado.
+  - Obrigatoriedade de que **pelo menos um contato seja Prática de Cuidado** (atendimento clínico individual médico/enfermeiro, atendimento odontológico individual, visita domiciliar de ACS ou atividade coletiva).
+  - O segundo contato pode ser outra prática de cuidado ou registro de procedimentos (vacinação ou procedimentos gerais ambulatoriais).
+- **Ajuste da Vulnerabilidade Infantil**:
+  - Corte etário de criança corrigido estritamente para **até 5 anos incompletos (4 anos, 11 meses e 29 dias / `$age < 5` anos)** na data final do quadrimestre, conforme itens 2.2 "b" e 3.10 da NT 30/2025, alinhado às metas da primeira infância do Ministério da Saúde.
+  - Critério de idoso mantido em $\ge 60$ anos e benefícios sociais PBF/BPC preservados.
+- **Exclusões Cadastrais Válidas (Dimensão Cadastro)**:
+  - Cadastros individuais com indicação de *"Fora de Área (FA)"* ou *"Mudança de Território (Mudou-se)"* são desconsiderados da apuração da Dimensão Cadastro.
+  - Cadastros rápidos simplificados possuem fator zero na apuração.
+- **Painel Executivo e Apuração dos Índices Ponderados X e Y**:
+  - Implementação das fórmulas oficiais do **Índice Ponderado de Cadastro ($X$)** (ponderadores 0,75 e 1,50) e **Índice Ponderado de Acompanhamento ($Y$)** (ponderadores 1,0; 1,2; 1,3 e 2,5).
+  - Escores oficiais calculados e exibidos em tempo real: Escore $X$ (até 3,00 pts), Escore $Y$ (até 7,00 pts), Escore Final (até 10,00 pts) e Classificação Ministerial (Ótimo, Bom, Suficiente, Regular) com base no parâmetro de 47.500 munícipes de Teotônio Vilela (19 eSF).
+- **Caderno Metodológico Reformulado (Aba Guide)**:
+  - Reformulação completa da documentação técnica no sistema, reproduzindo a íntegra da metodologia, tabelas de escore, regras de repasse financeiro, bonificação de até +0,30 pts por avaliações no aplicativo Meu SUS Digital e critérios de desempate de vínculo de cidadão com equipes.
+
+---
+
 ## [v1.22.4] - 19/09/2026
 
 ### 📑 Relação Nominal como Submódulo Principal de Vínculo e Acompanhamento

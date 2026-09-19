@@ -305,6 +305,7 @@ class CvatNominalDwService
             $marks = implode(',', array_fill(0, count($batchIds), '?'));
 
             // 1. Informações de Cadastro Individual (MICI) e Domiciliar (MICDT) até o fim do período avaliado
+            // NT 30/2025: desconsidera cadastros Fora de Área (FA) e Mudança de Território
             $cadMap = [];
             $cadRows = $this->selectOptional($connection, <<<SQL
                 SELECT
@@ -312,7 +313,9 @@ class CvatNominalDwService
                     MAX(dt.dt_registro) AS mici_date,
                     MAX(CASE WHEN fci.co_fat_cad_domiciliar IS NOT NULL THEN dt.dt_registro ELSE NULL END) AS micdt_date,
                     MAX(CASE WHEN fci.co_fat_cad_domiciliar IS NOT NULL THEN 1 ELSE 0 END) AS has_micdt,
-                    MAX(CASE WHEN COALESCE(fci.st_beneficiario_bolsa_familia::text, '0') IN ('1', 't', 'true') THEN 1 ELSE 0 END) AS has_pbf
+                    MAX(CASE WHEN COALESCE(fci.st_beneficiario_bolsa_familia::text, '0') IN ('1', 't', 'true') THEN 1 ELSE 0 END) AS has_pbf,
+                    MAX(CASE WHEN COALESCE(fci.st_fora_area::text, '0') IN ('1', 't', 'true') THEN 1 ELSE 0 END) AS is_fora_area,
+                    MAX(CASE WHEN COALESCE(fci.st_mudou_se::text, '0') IN ('1', 't', 'true') THEN 1 ELSE 0 END) AS is_mudou_se
                 FROM tb_fat_cad_individual fci
                 JOIN tb_dim_tempo dt ON dt.co_seq_dim_tempo = fci.co_dim_tempo
                 WHERE fci.co_fat_cidadao_pec IN ({$marks})
@@ -321,46 +324,123 @@ class CvatNominalDwService
             SQL, [...$batchIds, $quarterEndStr]);
 
             foreach ($cadRows as $cRow) {
+                $isForaArea = (int) ($cRow->is_fora_area ?? 0) === 1;
+                $isMudouSe = (int) ($cRow->is_mudou_se ?? 0) === 1;
+                $isValidCad = ! $isForaArea && ! $isMudouSe;
+
                 $cadMap[(int) $cRow->id] = [
-                    'mici_date' => $cRow->mici_date ? (string) $cRow->mici_date : null,
-                    'micdt_date' => $cRow->micdt_date ? (string) $cRow->micdt_date : null,
-                    'has_micdt' => (int) $cRow->has_micdt === 1,
+                    'mici_date' => $isValidCad && $cRow->mici_date ? (string) $cRow->mici_date : null,
+                    'micdt_date' => $isValidCad && $cRow->micdt_date ? (string) $cRow->micdt_date : null,
+                    'has_micdt' => $isValidCad && (int) $cRow->has_micdt === 1,
                     'has_pbf' => (int) $cRow->has_pbf === 1,
+                    'is_valid' => $isValidCad,
                 ];
             }
 
-            // 2. Última Visita Domiciliar do ACS até o fim do período avaliado
-            $visitMap = [];
+            // 2. Práticas de Cuidado nos últimos 12 meses (NT 30/2025 item 2.6.4.4):
+            // - Visitas domiciliares e territoriais do ACS (MIVDT)
+            $visitCountMap = [];
+            $visitLastDateMap = [];
             $visitRows = $this->selectOptional($connection, <<<SQL
                 SELECT
                     vd.co_fat_cidadao_pec AS id,
+                    COUNT(*) AS visit_count,
                     MAX(dt.dt_registro) AS last_visit_date
                 FROM tb_fat_visita_domiciliar vd
                 JOIN tb_dim_tempo dt ON dt.co_seq_dim_tempo = vd.co_dim_tempo
                 WHERE vd.co_fat_cidadao_pec IN ({$marks})
+                  AND dt.dt_registro >= ?
                   AND dt.dt_registro <= ?
                 GROUP BY vd.co_fat_cidadao_pec
-            SQL, [...$batchIds, $quarterEndStr]);
+            SQL, [...$batchIds, $cutoffAccompanied, $quarterEndStr]);
 
             foreach ($visitRows as $vRow) {
-                $visitMap[(int) $vRow->id] = (string) $vRow->last_visit_date;
+                $visitCountMap[(int) $vRow->id] = (int) ($vRow->visit_count ?? 0);
+                $visitLastDateMap[(int) $vRow->id] = (string) $vRow->last_visit_date;
             }
 
-            // 3. Último Atendimento Individual (Consulta) até o fim do período avaliado
-            $atdMap = [];
+            // - Atendimentos Clínicos Individuais médicos/enfermagem (MIAI)
+            $atdCountMap = [];
+            $atdLastDateMap = [];
             $atdRows = $this->selectOptional($connection, <<<SQL
                 SELECT
                     ai.co_fat_cidadao_pec AS id,
+                    COUNT(*) AS atd_count,
                     MAX(dt.dt_registro) AS last_atd_date
                 FROM tb_fat_atendimento_individual ai
                 JOIN tb_dim_tempo dt ON dt.co_seq_dim_tempo = ai.co_dim_tempo
                 WHERE ai.co_fat_cidadao_pec IN ({$marks})
+                  AND dt.dt_registro >= ?
                   AND dt.dt_registro <= ?
                 GROUP BY ai.co_fat_cidadao_pec
-            SQL, [...$batchIds, $quarterEndStr]);
+            SQL, [...$batchIds, $cutoffAccompanied, $quarterEndStr]);
 
             foreach ($atdRows as $aRow) {
-                $atdMap[(int) $aRow->id] = (string) $aRow->last_atd_date;
+                $atdCountMap[(int) $aRow->id] = (int) ($aRow->atd_count ?? 0);
+                $atdLastDateMap[(int) $aRow->id] = (string) $aRow->last_atd_date;
+            }
+
+            // - Atendimentos Odontológicos Individuais (MIAOI)
+            $odontoCountMap = [];
+            $odontoLastDateMap = [];
+            $odontoRows = $this->selectOptional($connection, <<<SQL
+                SELECT
+                    ao.co_fat_cidadao_pec AS id,
+                    COUNT(*) AS odonto_count,
+                    MAX(dt.dt_registro) AS last_odonto_date
+                FROM tb_fat_atendimento_odonto ao
+                JOIN tb_dim_tempo dt ON dt.co_seq_dim_tempo = ao.co_dim_tempo
+                WHERE ao.co_fat_cidadao_pec IN ({$marks})
+                  AND dt.dt_registro >= ?
+                  AND dt.dt_registro <= ?
+                GROUP BY ao.co_fat_cidadao_pec
+            SQL, [...$batchIds, $cutoffAccompanied, $quarterEndStr]);
+
+            foreach ($odontoRows as $oRow) {
+                $odontoCountMap[(int) $oRow->id] = (int) ($oRow->odonto_count ?? 0);
+                $odontoLastDateMap[(int) $oRow->id] = (string) $oRow->last_odonto_date;
+            }
+
+            // 3. Procedimentos nos últimos 12 meses (NT 30/2025 item 2.6.4.3):
+            // - Procedimentos gerais (MIP) e vacinação (MIV)
+            $procCountMap = [];
+            $procLastDateMap = [];
+            $procRows = $this->selectOptional($connection, <<<SQL
+                SELECT
+                    p.co_fat_cidadao_pec AS id,
+                    COUNT(*) AS proc_count,
+                    MAX(dt.dt_registro) AS last_proc_date
+                FROM tb_fat_procedimento p
+                JOIN tb_dim_tempo dt ON dt.co_seq_dim_tempo = p.co_dim_tempo
+                WHERE p.co_fat_cidadao_pec IN ({$marks})
+                  AND dt.dt_registro >= ?
+                  AND dt.dt_registro <= ?
+                GROUP BY p.co_fat_cidadao_pec
+            SQL, [...$batchIds, $cutoffAccompanied, $quarterEndStr]);
+
+            foreach ($procRows as $pRow) {
+                $procCountMap[(int) $pRow->id] = (int) ($pRow->proc_count ?? 0);
+                $procLastDateMap[(int) $pRow->id] = (string) $pRow->last_proc_date;
+            }
+
+            $vacCountMap = [];
+            $vacLastDateMap = [];
+            $vacRows = $this->selectOptional($connection, <<<SQL
+                SELECT
+                    v.co_fat_cidadao_pec AS id,
+                    COUNT(*) AS vac_count,
+                    MAX(dt.dt_registro) AS last_vac_date
+                FROM tb_fat_vacinacao v
+                JOIN tb_dim_tempo dt ON dt.co_seq_dim_tempo = v.co_dim_tempo
+                WHERE v.co_fat_cidadao_pec IN ({$marks})
+                  AND dt.dt_registro >= ?
+                  AND dt.dt_registro <= ?
+                GROUP BY v.co_fat_cidadao_pec
+            SQL, [...$batchIds, $cutoffAccompanied, $quarterEndStr]);
+
+            foreach ($vacRows as $vRow) {
+                $vacCountMap[(int) $vRow->id] = (int) ($vRow->vac_count ?? 0);
+                $vacLastDateMap[(int) $vRow->id] = (string) $vRow->last_vac_date;
             }
 
             // 4. Monta os registros locais
@@ -378,9 +458,8 @@ class CvatNominalDwService
                     }
                 }
 
-                // Regra Oficial do CVAT (Dimensão Cadastro):
-                // Um MICI só é considerado desatualizado se tiver mais de 24 meses da referência do último dia do quadrimestre.
-                // Caso tenha atualização em menos de 24 meses, ele está atualizado.
+                // Regra Oficial do CVAT (Dimensão Cadastro - NT 30/2025 item 2.6.3):
+                // Um MICI só é considerado desatualizado se tiver mais de 24 meses da data de corte final do quadrimestre.
                 $miciDate = $cadMap[$id]['mici_date'] ?? null;
                 if ($miciDate !== null) {
                     $miciUpdated = ($miciDate >= $cutoffMici);
@@ -402,19 +481,33 @@ class CvatNominalDwService
                     $micdtDate = $quarterEndStr;
                 }
 
-                $lastVisit = $visitMap[$id] ?? null;
-                $lastAtd = $atdMap[$id] ?? null;
-                $lastContact = $lastVisit && $lastAtd ? max($lastVisit, $lastAtd) : ($lastVisit ?? $lastAtd);
-                
-                // Acompanhado: visita ou consulta nos últimos 12 meses (365 dias) até o fim do quadrimestre
-                $isAccompanied = $lastContact !== null && $lastContact >= $cutoffAccompanied && $lastContact <= $quarterEndStr;
+                // Regra Oficial de Acompanhamento Territorial (NT 30/2025 item 2.6.4):
+                // Mais de um contato assistencial no período de um ano (12 meses),
+                // sendo necessário que pelo menos um desses contatos seja uma Prática de Cuidado
+                $carePractices = ($visitCountMap[$id] ?? 0) + ($atdCountMap[$id] ?? 0) + ($odontoCountMap[$id] ?? 0);
+                $procedures = ($procCountMap[$id] ?? 0) + ($vacCountMap[$id] ?? 0);
+                $totalContacts = $carePractices + $procedures;
+
+                $isAccompanied = ($carePractices >= 1 && $totalContacts >= 2);
+
+                // Determina a data do último contato
+                $contactDates = array_filter([
+                    $visitLastDateMap[$id] ?? null,
+                    $atdLastDateMap[$id] ?? null,
+                    $odontoLastDateMap[$id] ?? null,
+                    $procLastDateMap[$id] ?? null,
+                    $vacLastDateMap[$id] ?? null,
+                ]);
+                $lastContact = ! empty($contactDates) ? max($contactDates) : null;
 
                 $ine = trim((string) ($row->ine ?? ''));
                 $isLinked = $ine !== '';
 
                 $hasPbf = $cadMap[$id]['has_pbf'] ?? false;
                 $isElderly = ($age >= 60);
-                $isChild = ($age < 6);
+
+                // NT nº 30/2025 item 2.2 'b': idade até 5 anos incompletos (4 anos, 11 meses e 29 dias)
+                $isChild = ($age < 5);
 
                 $vuln = $isElderly ? 'idoso' : ($isChild ? 'crianca' : 'sem_criterio');
                 $benefit = $hasPbf ? 'pbf' : 'nenhum';

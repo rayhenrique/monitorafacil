@@ -63,10 +63,10 @@ class CvatNominalListTest extends TestCase
             ->assertSee('7.617')
             ->assertSee('7.688')
             ->assertSee('1.096')
-            ->assertSee($firstCitizen->no_cidadao)
+            ->assertSee($firstCitizen->name)
             ->assertSet('filterCns', '')
             ->assertSet('filterCpf', '')
-            ->assertSet('filterNome', '');
+            ->assertSet('filterName', '');
     }
 
     public function test_nominal_list_filters_by_citizen_name(): void
@@ -77,10 +77,10 @@ class CvatNominalListTest extends TestCase
         app(CvatNominalDwService::class)->syncFromPec();
 
         Livewire::test(NominalList::class)
-            ->set('filterNome', 'ABEL ANDREZA')
+            ->set('filterName', 'ABEL ANDREZA')
             ->assertSee('ABEL ANDREZA')
-            ->set('filterNome', 'NOME_INEXISTENTE_XYZ')
-            ->assertSee('Nenhum cidadão encontrado com os filtros aplicados');
+            ->set('filterName', 'NOME_INEXISTENTE_XYZ')
+            ->assertSee('Nenhum cidadão encontrado');
     }
 
     public function test_nominal_list_filters_by_raca_cor(): void
@@ -91,7 +91,7 @@ class CvatNominalListTest extends TestCase
         app(CvatNominalDwService::class)->syncFromPec();
 
         Livewire::test(NominalList::class)
-            ->set('filterRacaCor', 'Amarela')
+            ->set('filterRaceColor', 'Amarela')
             ->assertSee('Amarela');
     }
 
@@ -105,12 +105,12 @@ class CvatNominalListTest extends TestCase
         $citizen = CvatNominalCitizen::first();
 
         Livewire::test(NominalList::class)
-            ->assertSet('showDetailModal', false)
-            ->call('openCitizenModal', $citizen->id)
-            ->assertSet('showDetailModal', true)
-            ->assertSee($citizen->no_cidadao)
-            ->call('closeCitizenModal')
-            ->assertSet('showDetailModal', false);
+            ->assertSet('detailsModalOpen', false)
+            ->call('openDetails', $citizen->id)
+            ->assertSet('detailsModalOpen', true)
+            ->assertSee($citizen->name)
+            ->call('closeDetails')
+            ->assertSet('detailsModalOpen', false);
     }
 
     public function test_nominal_list_modal_advanced_search(): void
@@ -119,12 +119,39 @@ class CvatNominalListTest extends TestCase
         $this->actingAs($user);
 
         Livewire::test(NominalList::class)
-            ->assertSet('showAdvancedModal', false)
+            ->assertSet('advancedModalOpen', false)
             ->call('openAdvancedModal')
-            ->assertSet('showAdvancedModal', true)
-            ->assertSee('Busca Avançada de Cidadãos')
+            ->assertSet('advancedModalOpen', true)
+            ->assertSee('Busca Avançada')
             ->call('closeAdvancedModal')
-            ->assertSet('showAdvancedModal', false);
+            ->assertSet('advancedModalOpen', false);
+    }
+
+    public function test_cvat_nominal_metric_calculates_scores_according_to_nt_30_2025(): void
+    {
+        $metric = new CvatNominalMetric([
+            'year' => 2026,
+            'month' => 9,
+            'mici_total' => 36951,
+            'mici_updated' => 35401,
+            'mici_outdated' => 1550,
+            'mici_updated_micdt_outdated_or_none' => 14851,
+            'mici_and_micdt_updated' => 20550,
+            'no_criteria_accompanied' => 2047,
+            'elderly_or_child_accompanied' => 3804,
+            'bpc_or_pbf_accompanied' => 4565,
+            'elderly_child_and_benefit_accompanied' => 1096,
+        ]);
+
+        $this->assertEquals(47500, $metric->target_population);
+
+        // Teste de cálculo de X e Y
+        $this->assertGreaterThan(50.0, $metric->index_x);
+        $this->assertGreaterThan(0.0, $metric->index_y);
+        $this->assertContains($metric->classification_x, ['Ótimo', 'Bom', 'Suficiente', 'Regular']);
+        $this->assertContains($metric->classification_y, ['Ótimo', 'Bom', 'Suficiente', 'Regular']);
+        $this->assertContains($metric->final_classification, ['ÓTIMO', 'BOM', 'SUFICIENTE', 'REGULAR']);
+        $this->assertLessThanOrEqual(10.0, $metric->final_score);
     }
 
     public function test_data_processing_has_exclusive_cvat_action_and_executes(): void
