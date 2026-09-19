@@ -109,3 +109,19 @@
   - [x] Cobrir a consulta estrita e a ausência de resultado com testes automatizados locais.
   - [ ] Confirmar na VPS a disponibilidade e o conteúdo das colunas usadas pela consulta, incluindo uma fonte estável para o nome do cidadão.
   - [ ] Comparar amostra por equipe e competência com o resultado preliminar publicado no Siaps.
+
+- [ ] **Fase 16: Camada analítica local do DW PEC no MySQL**
+  - [x] Separar referências, entidades canônicas, eventos clínicos e produtos analíticos no desenho do banco.
+  - [x] Mapear a lista funcional para tabelas normalizadas, evitando cópias concorrentes de cidadãos, PSE e resultados.
+  - [x] Mapear os conjuntos mínimos de dados exigidos pelas notas metodológicas C1 a C7.
+  - [x] Documentar limites de fidelidade entre DW local, Siaps, SCNES e RNDS.
+  - [ ] Executar inventário somente leitura do esquema e da versão do PEC na VPS.
+  - [ ] Fechar o dicionário origem-coluna-destino com amostras e contagens da VPS.
+  - [ ] Definir política de retenção, criptografia e perfis para dados nominais de saúde.
+  - [ ] Implementar controle de lotes, checkpoints, rejeições e validação do contrato de origem.
+  - [ ] Implementar referências, unidades, equipes, cidadãos, unificação, vínculos, famílias e condições.
+  - [ ] Implementar eventos de cadastro, atendimento, odontologia, procedimentos, atividade coletiva, consumo alimentar, visita e vacinação.
+  - [ ] Implementar coortes e evidências por boa prática para C1 a C7.
+  - [ ] Implementar produtos de vínculo, Saúde Bucal, e-Multi, vigilância e vacinação infantil.
+  - [ ] Validar desempenho, idempotência, correções tardias e preservação do último lote válido.
+  - [ ] Comparar amostras por equipe e período com Siaps antes de classificar qualquer resultado como homologado.
