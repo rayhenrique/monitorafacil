@@ -37,6 +37,8 @@ class FamilyHealthTest extends TestCase
         Schema::dropIfExists('family_health_indicator_snapshots');
         Schema::dropIfExists('c2_cohort_snapshots');
         Schema::dropIfExists('c2_nominal_children');
+        Schema::dropIfExists('c3_cohort_snapshots');
+        Schema::dropIfExists('c3_nominal_pregnancies');
 
         Schema::create('users', function (Blueprint $table): void {
             $table->id();
@@ -155,6 +157,76 @@ class FamilyHealthTest extends TestCase
             $table->boolean('practice_c_met')->default(false);
             $table->boolean('practice_d_met')->default(false);
             $table->boolean('practice_e_met')->default(false);
+            $table->decimal('score_percent', 5, 2)->default(0.00);
+            $table->string('calculation_version', 50);
+            $table->timestamps();
+        });
+
+        Schema::create('c3_cohort_snapshots', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedSmallInteger('year');
+            $table->unsignedTinyInteger('quarter');
+            $table->string('ine', 20)->nullable()->index();
+            $table->string('team_name', 150);
+            $table->string('team_type', 10);
+            $table->unsignedInteger('cohort_total');
+            $table->unsignedInteger('evaluated_total');
+            $table->json('monthly_counts');
+            $table->date('as_of');
+            $table->string('calculation_version', 40);
+            $table->timestamps();
+        });
+
+        Schema::create('c3_nominal_pregnancies', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedSmallInteger('year');
+            $table->unsignedTinyInteger('quarter');
+            $table->unsignedBigInteger('cidadao_pec_id')->nullable()->index();
+            $table->string('cns', 20)->nullable()->index();
+            $table->string('cpf', 20)->nullable()->index();
+            $table->string('name', 200)->index();
+            $table->date('birth_date');
+            $table->unsignedSmallInteger('age_years')->default(0);
+            $table->string('race_color', 50)->nullable();
+            $table->string('cnes', 20)->nullable()->index();
+            $table->string('facility_name', 200)->nullable();
+            $table->string('ine', 20)->nullable()->index();
+            $table->string('team_name', 200)->nullable();
+            $table->string('microarea', 20)->nullable();
+            $table->string('current_status', 30)->default('gestante');
+            $table->date('dum')->nullable();
+            $table->date('dpp')->nullable();
+            $table->date('outcome_date')->nullable();
+            $table->date('puerperium_end_date')->nullable();
+            $table->unsignedSmallInteger('gestational_age_weeks')->default(0);
+            $table->string('trimester', 20)->nullable();
+            $table->string('risk_classification', 20)->default('habitual');
+            $table->boolean('is_evaluated_cohort')->default(false);
+            $table->date('first_prenatal_date')->nullable();
+            $table->unsignedSmallInteger('first_prenatal_ga_weeks')->nullable();
+            $table->boolean('practice_a_met')->default(false);
+            $table->unsignedSmallInteger('prenatal_visits_count')->default(0);
+            $table->boolean('practice_b_met')->default(false);
+            $table->unsignedSmallInteger('blood_pressure_records_count')->default(0);
+            $table->boolean('practice_c_met')->default(false);
+            $table->unsignedSmallInteger('weight_height_records_count')->default(0);
+            $table->boolean('practice_d_met')->default(false);
+            $table->unsignedSmallInteger('acs_prenatal_visits_count')->default(0);
+            $table->boolean('practice_e_met')->default(false);
+            $table->boolean('practice_f_met')->default(false);
+            $table->boolean('has_syphilis_1st_tri')->default(false);
+            $table->boolean('has_hiv_1st_tri')->default(false);
+            $table->boolean('has_hepb_1st_tri')->default(false);
+            $table->boolean('has_hepc_1st_tri')->default(false);
+            $table->boolean('practice_g_met')->default(false);
+            $table->boolean('has_syphilis_3rd_tri')->default(false);
+            $table->boolean('has_hiv_3rd_tri')->default(false);
+            $table->boolean('practice_h_met')->default(false);
+            $table->unsignedSmallInteger('puerperal_consultations_count')->default(0);
+            $table->boolean('practice_i_met')->default(false);
+            $table->unsignedSmallInteger('puerperal_acs_visits_count')->default(0);
+            $table->boolean('practice_j_met')->default(false);
+            $table->boolean('practice_k_met')->default(false);
             $table->decimal('score_percent', 5, 2)->default(0.00);
             $table->string('calculation_version', 50);
             $table->timestamps();

@@ -154,3 +154,14 @@
   - [x] Filtro de Idade (meses) com chips rápidos (`0-6 meses`, `7-12 meses`, `13-24 meses`) e menu multiselect retrátil com seleção geral ("Selecionar todos"), busca e seleção de meses de 0 a 24.
   - [x] Expansão do processamento no e-SUS PEC para 7 quadrimestres (atual + 6 futuros), cobrindo crianças de 0 a 24 meses de idade para funcionamento pleno do filtro etário.
   - [x] Testes automatizados abrangentes cobrindo novos filtros, seletores e coorte de 7 quadrimestres.
+
+- [x] **Fase 20: Módulo C3 - Cuidado na Gestação e Puerpério na APS (v1.16.0)**
+  - [x] Modelagem de dados: Migrations e Models `c3_cohort_snapshots` e `c3_nominal_pregnancies`.
+  - [x] Motor DW e-SUS PEC (`C3DwService`): Extração com catálogo adaptativo do PostgreSQL, cálculo das 11 boas práticas (A=10 pts, B a K=9 pts cada), cálculo de DUM, DPP, desfecho e fim do 42º dia do puerpério.
+  - [x] Persistência em lote (`C3SnapshotService`): Snapshots quadrimestrais e mensais (M1 a M4) para consolidado municipal e individualizado por equipe (INE).
+  - [x] Serviço de Busca Ativa (`C3ActiveSearchService`): Suporte a 22 colunas customizáveis, ordenação, paginação, filtros avançados e cálculo de KPIs do banner.
+  - [x] Regras de Negócio e Componente III (`FamilyHealthService`): Peso 2.0 (até 2,00 pts), tabela de conceitos da NT 08/2026 e regra de equidade para eAP (tipo 76 - práticas E e J garantidas).
+  - [x] Integração Centralizada no Processamento de Dados (`EsusDataProcessingService`, `DataProcessing`): Escopo `--scope=c3` e botão "Processar C3 & Lista Gestantes".
+  - [x] Frontend Livewire (`IndicatorDetail`): Cabeçalho C3, decomposição das 11 práticas, evolução M1 a M4, desempenho por equipe, tabela interativa com seletor de colunas, modal de busca avançada e modal de auditoria clínica.
+  - [x] Testes de Feature completos (`tests/Feature/FamilyHealthC3Test.php`) com 100% de aprovação.
+

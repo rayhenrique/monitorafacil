@@ -6,9 +6,9 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.15.0';
+    public const CURRENT_VERSION = 'v1.16.0';
 
-    public const CURRENT_RELEASE_DATE = '18/09/2026';
+    public const CURRENT_RELEASE_DATE = '19/09/2026';
 
     /**
      * Retorna a versão mais recente do sistema.
@@ -61,9 +61,25 @@ class VersionService
     {
         return [
             [
+                'version' => 'v1.16.0',
+                'date' => '19/09/2026',
+                'badge' => 'Versão Atual',
+                'title' => 'Módulo C3 - Cuidado na Gestação e Puerpério na APS (Componente III)',
+                'summary' => 'Implementação completa do Indicador C3 em conformidade estrita com a Nota Metodológica C3 (SAPS/MS), NT 06/2025, NT 08/2026 e DW e-SUS PEC (UFSC): peso 2.0 (até 2,00 pts), 11 boas práticas oficiais (100 pontos totais: A=10 pts, B a K=9 pts cada), coorte do 42º dia do puerpério, evolução mensal M1 a M4, busca ativa prospectiva com 22 colunas customizáveis, modal de busca avançada e auditoria clínica detalhada.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Módulo completo do Indicador C3 (Gestação e Puerpério) com peso 2.0 e nota até 2,00 pontos no Componente III - Qualidade.'],
+                    ['type' => 'novo', 'text' => 'Monitoramento analítico das 11 boas práticas clínicas (A: Captação precoce até 12ª sem [10 pts]; B: ≥ 7 consultas [9 pts]; C: ≥ 7 aferições de PA [9 pts]; D: ≥ 7 peso/altura [9 pts]; E: 3 visitas ACS [9 pts]; F: dTpa [9 pts]; G: Exames 1º Tri [9 pts]; H: Exames 3º Tri [9 pts]; I: Consulta Puerpério [9 pts]; J: Visita ACS Puerpério [9 pts]; K: Saúde Bucal [9 pts]).'],
+                    ['type' => 'novo', 'text' => 'Busca Ativa e Coorte nominal de gestantes e puérperas com seletor de 22 colunas visíveis, ordenação, paginação e KPIs em tempo real.'],
+                    ['type' => 'novo', 'text' => 'Modal de Busca Avançada C3 com filtros por Equipe, Microárea, Nome, CPF, CNS, Status Clínico, Trimestre e metas das 11 práticas.'],
+                    ['type' => 'novo', 'text' => 'Modal de Auditoria Clínica Individualizada com ficha completa da gestante/puérpera e checklist explicativo das 11 práticas oficiais.'],
+                    ['type' => 'melhoria', 'text' => 'Centralização da rotina de extração e consolidação do C3 no submódulo de Processamento de Dados em Configurações.'],
+                    ['type' => 'melhoria', 'text' => 'Regra de equidade oficial aplicada: equipes eAP (tipo 76) recebem pontuação integral nas práticas E e J por não possuírem ACS na composição mínima.'],
+                ],
+            ],
+            [
                 'version' => 'v1.15.0',
                 'date' => '18/09/2026',
-                'badge' => 'Versão Atual',
+                'badge' => 'Versão Anterior',
                 'title' => 'Refinamento da Busca Avançada C2 e Coorte de 0 a 24 Meses (7 Quadrimestres)',
                 'summary' => 'Remoção dos campos de Distrito e Unidade na Busca Avançada do C2, mantendo Equipe real e Microárea; novos seletores customizados de Mês (MM / YYYY) e Opção de Mês; novo seletor multiselect de Idade com chips (0-6, 7-12, 13-24) e seleção de meses de 0 a 24; e processamento de 6 quadrimestres futuros no e-SUS PEC para cobertura de toda a faixa etária infantil.',
                 'highlights' => [

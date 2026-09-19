@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\TeamType;
 use App\Models\C2CohortSnapshot;
+use App\Models\C3CohortSnapshot;
 use App\Models\ConsolidationTeam;
 use App\Models\FamilyHealthIndicatorSnapshot;
 use App\Models\FamilyHealthMonthlySnapshot;
@@ -90,12 +91,12 @@ class FamilyHealthService
                 'target_population' => 'Gestantes e Puérperas (até 42 dias pós-parto)',
                 'icon' => 'maternal',
                 'color' => 'rose',
-                'weight' => 1.0,
+                'weight' => 2.0,
                 'polarity' => 'Maior é melhor',
                 'periodicity' => 'Quadrimestral',
                 'source_pdf' => 'Nota Metodológica C3 - Cuidado na gestação e puerpério.pdf',
                 'objective' => 'Avaliar o acesso e monitoramento integral durante a gestação e puerpério, com incentivo à captação precoce, acompanhamento odontológico, testes rápidos e cuidados no puerpério.',
-                'numerator_desc' => 'Somatório das boas práticas pontuadas para a pessoa gestante e puérpera durante cada gestação.',
+                'numerator_desc' => 'Somatório das boas práticas pontuadas para a pessoa gestante e puérpera durante cada gestação (0 a 100 pontos).',
                 'denominator_desc' => 'Nº total de gestantes e puérperas vinculadas à equipe no período avaliado.',
                 'parameters' => [
                     'optimal' => ['min' => 75.01, 'max' => 100.0, 'label' => 'Ótimo (> 75% e ≤ 100%)', 'badge' => 'bg-emerald-100 text-emerald-800 border-emerald-300'],
@@ -105,17 +106,17 @@ class FamilyHealthService
                 ],
                 'cbos' => ['2235 (Enfermeiros)', '2231/2251/2252/2253 (Médicos)', '2232 (Cirurgiões-Dentistas)', '5151-05 (ACS)'],
                 'good_practices' => [
-                    ['letter' => 'A', 'title' => 'Captação Precoce (até 12ª semana)', 'desc' => '1ª consulta pré-natal presencial ou remota realizada até a 12ª semana de idade gestacional.', 'points' => 15],
-                    ['letter' => 'B', 'title' => 'Ao Menos 7 Consultas de Pré-Natal', 'desc' => 'Mínimo de 7 consultas presenciais ou remotas realizadas por médico ou enfermeiro.', 'points' => 15],
-                    ['letter' => 'C', 'title' => 'Ao Menos 7 Aferições de Pressão Arterial', 'desc' => 'Aferições de PA registradas ao longo das consultas pré-natais.', 'points' => 10],
-                    ['letter' => 'D', 'title' => 'Ao Menos 7 Registros de Peso e Altura', 'desc' => 'Avaliação antropométrica com peso e altura simultâneos nas consultas.', 'points' => 10],
-                    ['letter' => 'E', 'title' => 'Três Visitas Domiciliares do ACS', 'desc' => 'Mínimo de 3 visitas realizadas após o início do pré-natal.', 'points' => 10],
-                    ['letter' => 'F', 'title' => 'Vacina dTpa a partir da 20ª semana', 'desc' => 'Registro da vacina acelular dTpa durante a gestação.', 'points' => 10],
-                    ['letter' => 'G', 'title' => 'Exames do 1º Trimestre (Sífilis, HIV, Hep B e C)', 'desc' => 'Testes rápidos ou exames laboratoriais avaliados no 1º trimestre.', 'points' => 10],
-                    ['letter' => 'H', 'title' => 'Exames do 3º Trimestre (Sífilis e HIV)', 'desc' => 'Testes rápidos ou exames laboratoriais avaliados no 3º trimestre.', 'points' => 5],
-                    ['letter' => 'I', 'title' => 'Consulta no Puerpério (até 42 dias)', 'desc' => 'Ao menos 1 consulta médica ou de enfermagem realizada no puerpério.', 'points' => 5],
-                    ['letter' => 'J', 'title' => 'Visita Domiciliar no Puerpério', 'desc' => 'Ao menos 1 visita do ACS realizada nos primeiros 42 dias pós-parto.', 'points' => 5],
-                    ['letter' => 'K', 'title' => 'Atividade de Saúde Bucal na Gestação', 'desc' => 'Consulta odontológica ou atividade com cirurgião-dentista ou TSB.', 'points' => 5],
+                    ['letter' => 'A', 'title' => 'Captação Precoce (até 12ª semana)', 'desc' => '1ª consulta pré-natal presencial ou remota realizada até a 12ª semana de idade gestacional.', 'points' => 10],
+                    ['letter' => 'B', 'title' => 'Ao Menos 7 Consultas de Pré-Natal', 'desc' => 'Mínimo de 7 consultas presenciais ou remotas realizadas por médico ou enfermeiro.', 'points' => 9],
+                    ['letter' => 'C', 'title' => 'Ao Menos 7 Aferições de Pressão Arterial', 'desc' => 'Aferições de PA registradas ao longo das consultas pré-natais.', 'points' => 9],
+                    ['letter' => 'D', 'title' => 'Ao Menos 7 Registros de Peso e Altura', 'desc' => 'Avaliação antropométrica com peso e altura simultâneos nas consultas.', 'points' => 9],
+                    ['letter' => 'E', 'title' => 'Três Visitas Domiciliares do ACS', 'desc' => 'Mínimo de 3 visitas realizadas após o início do pré-natal (eAP tipo 76 pontua integral).', 'points' => 9],
+                    ['letter' => 'F', 'title' => 'Vacina dTpa a partir da 20ª semana', 'desc' => 'Registro da vacina acelular dTpa durante a gestação.', 'points' => 9],
+                    ['letter' => 'G', 'title' => 'Exames do 1º Trimestre (Sífilis, HIV, Hep B e C)', 'desc' => 'Testes rápidos ou exames laboratoriais avaliados no 1º trimestre (até 13ª semana).', 'points' => 9],
+                    ['letter' => 'H', 'title' => 'Exames do 3º Trimestre (Sífilis e HIV)', 'desc' => 'Testes rápidos ou exames laboratoriais avaliados no 3º trimestre (a partir da 28ª semana).', 'points' => 9],
+                    ['letter' => 'I', 'title' => 'Consulta no Puerpério (até 42 dias)', 'desc' => 'Ao menos 1 consulta médica ou de enfermagem realizada no puerpério.', 'points' => 9],
+                    ['letter' => 'J', 'title' => 'Visita Domiciliar no Puerpério', 'desc' => 'Ao menos 1 visita do ACS realizada nos primeiros 42 dias pós-parto (eAP pontua integral).', 'points' => 9],
+                    ['letter' => 'K', 'title' => 'Atividade de Saúde Bucal na Gestação', 'desc' => 'Consulta odontológica ou atividade com cirurgião-dentista (CBO 2232) ou TSB.', 'points' => 9],
                 ],
             ],
 
@@ -325,6 +326,10 @@ class FamilyHealthService
             ->where('year', $year)->where('quarter', $quarter)->whereNull('ine')
             ->where('calculation_version', C2DwService::VERSION)->first();
 
+        $c3Cohort = C3CohortSnapshot::query()
+            ->where('year', $year)->where('quarter', $quarter)->whereNull('ine')
+            ->where('calculation_version', C3DwService::VERSION)->first();
+
         $indicatorsMeta = self::getIndicatorsMetadata();
         $snapshots = FamilyHealthIndicatorSnapshot::query()
             ->where('year', $year)
@@ -345,7 +350,10 @@ class FamilyHealthService
             if ($slug === 'c2' && ($snap?->good_practices_breakdown['calculation_version'] ?? null) !== C2DwService::VERSION) {
                 $snap = null;
             }
-            $score = $snap ? (float) $snap->score_percent : (in_array($slug, ['c1', 'c2'], true) ? null : 0.0);
+            if ($slug === 'c3' && ($snap?->good_practices_breakdown['calculation_version'] ?? null) !== C3DwService::VERSION) {
+                $snap = null;
+            }
+            $score = $snap ? (float) $snap->score_percent : (in_array($slug, ['c1', 'c2', 'c3'], true) ? null : 0.0);
             $level = $score !== null ? self::calculatePerformanceLevel($slug, $score) : null;
 
             $cards[$slug] = [
@@ -356,12 +364,15 @@ class FamilyHealthService
                 'performance_level' => $level,
                 'active_search_count' => $snap ? $snap->active_search_count : 0,
                 'has_data' => $snap !== null,
-                'cohort_total' => $slug === 'c2' ? $c2Cohort?->cohort_total : null,
-                'evaluated_total' => $slug === 'c2' ? $c2Cohort?->evaluated_total : null,
-                'cohort_as_of' => $slug === 'c2' ? $c2Cohort?->as_of?->format('d/m/Y') : null,
-                'is_preview' => $slug === 'c1'
-                    ? (bool) ($snap?->good_practices_breakdown['is_preview'] ?? false)
-                    : ($slug === 'c2' && $c2Cohort?->as_of?->lt(Carbon::create($year, $quarter * 4, 1)->endOfMonth())),
+                'cohort_total' => $slug === 'c2' ? $c2Cohort?->cohort_total : ($slug === 'c3' ? $c3Cohort?->cohort_total : null),
+                'evaluated_total' => $slug === 'c2' ? $c2Cohort?->evaluated_total : ($slug === 'c3' ? $c3Cohort?->evaluated_total : null),
+                'cohort_as_of' => $slug === 'c2' ? $c2Cohort?->as_of?->format('d/m/Y') : ($slug === 'c3' ? $c3Cohort?->as_of?->format('d/m/Y') : null),
+                'is_preview' => match ($slug) {
+                    'c1' => (bool) ($snap?->good_practices_breakdown['is_preview'] ?? false),
+                    'c2' => (bool) ($c2Cohort?->as_of?->lt(Carbon::create($year, $quarter * 4, 1)->endOfMonth())),
+                    'c3' => (bool) ($c3Cohort?->as_of?->lt(Carbon::create($year, $quarter * 4, 1)->endOfMonth())),
+                    default => false,
+                },
             ];
 
             if ($score !== null) {
@@ -435,7 +446,7 @@ class FamilyHealthService
     public function getIndicatorDetail(string $code, int $year, int $quarter, ?string $selectedIne = null): array
     {
         $code = strtolower($code);
-        if (! in_array($code, ['c1', 'c2'], true)) {
+        if (! in_array($code, ['c1', 'c2', 'c3'], true)) {
             $this->ensureBaselineSnapshots($year, $quarter);
         }
 
@@ -457,6 +468,9 @@ class FamilyHealthService
         if ($code === 'c2' && ($municipalSnap?->good_practices_breakdown['calculation_version'] ?? null) !== C2DwService::VERSION) {
             $municipalSnap = null;
         }
+        if ($code === 'c3' && ($municipalSnap?->good_practices_breakdown['calculation_version'] ?? null) !== C3DwService::VERSION) {
+            $municipalSnap = null;
+        }
 
         // Lista por equipes
         $teamsQuery = FamilyHealthIndicatorSnapshot::query()
@@ -465,7 +479,7 @@ class FamilyHealthService
             ->where('indicator_code', $code)
             ->whereNotNull('ine');
 
-        if (in_array($code, ['c1', 'c2'])) {
+        if (in_array($code, ['c1', 'c2', 'c3'], true)) {
             $teamsQuery->where(function ($q) {
                 $q->whereIn('team_type', ['70', '76'])
                     ->orWhereNull('team_type');
@@ -483,6 +497,9 @@ class FamilyHealthService
         }
 
         $teams = $teamsQuery->orderByDesc('score_percent')->get();
+        if ($code === 'c3') {
+            $teams = $teams->filter(fn ($team) => ($team->good_practices_breakdown['calculation_version'] ?? null) === C3DwService::VERSION);
+        }
         if ($code === 'c2') {
             $teams = $teams->filter(fn ($team) => ($team->good_practices_breakdown['calculation_version'] ?? null) === C2DwService::VERSION);
         }
@@ -496,7 +513,7 @@ class FamilyHealthService
             $currentFocus = $teams->firstWhere('ine', $selectedIne);
         }
 
-        $activeSnap = $code === 'c2' && $selectedIne ? $currentFocus : ($currentFocus ?? $municipalSnap);
+        $activeSnap = in_array($code, ['c2', 'c3'], true) && $selectedIne ? $currentFocus : ($currentFocus ?? $municipalSnap);
         $c2CohortTeams = $code === 'c2' ? C2CohortSnapshot::query()
             ->where('year', $year)->where('quarter', $quarter)->whereNotNull('ine')
             ->where('calculation_version', C2DwService::VERSION)->orderBy('team_name')->get() : collect();
@@ -505,33 +522,44 @@ class FamilyHealthService
             ->when($selectedIne, fn ($q) => $q->where('ine', $selectedIne), fn ($q) => $q->whereNull('ine'))
             ->where('calculation_version', C2DwService::VERSION)->first() : null;
 
+        $c3CohortTeams = $code === 'c3' ? C3CohortSnapshot::query()
+            ->where('year', $year)->where('quarter', $quarter)->whereNotNull('ine')
+            ->where('calculation_version', C3DwService::VERSION)->orderBy('team_name')->get() : collect();
+        $c3Cohort = $code === 'c3' ? C3CohortSnapshot::query()
+            ->where('year', $year)->where('quarter', $quarter)
+            ->when($selectedIne, fn ($q) => $q->where('ine', $selectedIne), fn ($q) => $q->whereNull('ine'))
+            ->where('calculation_version', C3DwService::VERSION)->first() : null;
+
         $detail = [
             'meta' => $meta,
-            'municipal_score' => $municipalSnap ? (float) $municipalSnap->score_percent : (in_array($code, ['c1', 'c2'], true) ? null : 0.0),
-            'municipal_level' => $municipalSnap ? $municipalSnap->performance_level : (in_array($code, ['c1', 'c2'], true) ? null : 'regular'),
+            'municipal_score' => $municipalSnap ? (float) $municipalSnap->score_percent : (in_array($code, ['c1', 'c2', 'c3'], true) ? null : 0.0),
+            'municipal_level' => $municipalSnap ? $municipalSnap->performance_level : (in_array($code, ['c1', 'c2', 'c3'], true) ? null : 'regular'),
             'current' => [
                 'numerator' => $activeSnap ? $activeSnap->numerator : 0,
                 'denominator' => $activeSnap ? $activeSnap->denominator : 0,
-                'score_percent' => $activeSnap ? (float) $activeSnap->score_percent : (in_array($code, ['c1', 'c2'], true) ? null : 0.0),
-                'performance_level' => $activeSnap ? $activeSnap->performance_level : (in_array($code, ['c1', 'c2'], true) ? null : 'regular'),
+                'score_percent' => $activeSnap ? (float) $activeSnap->score_percent : (in_array($code, ['c1', 'c2', 'c3'], true) ? null : 0.0),
+                'performance_level' => $activeSnap ? $activeSnap->performance_level : (in_array($code, ['c1', 'c2', 'c3'], true) ? null : 'regular'),
                 'active_search_count' => $activeSnap ? $activeSnap->active_search_count : 0,
                 'good_practices_breakdown' => $activeSnap ? $activeSnap->good_practices_breakdown : [],
                 'has_data' => $activeSnap !== null,
-                'cohort_total' => $c2Cohort?->cohort_total,
-                'evaluated_total' => $c2Cohort?->evaluated_total,
-                'cohort_as_of' => $c2Cohort?->as_of?->format('d/m/Y'),
-                'is_preview' => $code === 'c1'
-                    ? (bool) ($activeSnap?->good_practices_breakdown['is_preview'] ?? false)
-                    : ($code === 'c2' && $c2Cohort?->as_of?->lt(Carbon::create($year, $quarter * 4, 1)->endOfMonth())),
-                'monthly_cohort' => $c2Cohort?->monthly_counts ?? [],
+                'cohort_total' => $code === 'c2' ? $c2Cohort?->cohort_total : ($code === 'c3' ? $c3Cohort?->cohort_total : null),
+                'evaluated_total' => $code === 'c2' ? $c2Cohort?->evaluated_total : ($code === 'c3' ? $c3Cohort?->evaluated_total : null),
+                'cohort_as_of' => $code === 'c2' ? $c2Cohort?->as_of?->format('d/m/Y') : ($code === 'c3' ? $c3Cohort?->as_of?->format('d/m/Y') : null),
+                'is_preview' => match ($code) {
+                    'c1' => (bool) ($activeSnap?->good_practices_breakdown['is_preview'] ?? false),
+                    'c2' => (bool) ($c2Cohort?->as_of?->lt(Carbon::create($year, $quarter * 4, 1)->endOfMonth())),
+                    'c3' => (bool) ($c3Cohort?->as_of?->lt(Carbon::create($year, $quarter * 4, 1)->endOfMonth())),
+                    default => false,
+                },
+                'monthly_cohort' => ($code === 'c2' ? $c2Cohort?->monthly_counts : ($code === 'c3' ? $c3Cohort?->monthly_counts : [])) ?? [],
             ],
             'teams' => $teams,
-            'cohort_teams' => $c2CohortTeams,
-            'active_search_list' => $code === 'c2' ? [] : $this->generateActiveSearchSample($code, $activeSnap ? $activeSnap->active_search_count : 15, $selectedIne),
+            'cohort_teams' => $code === 'c3' ? $c3CohortTeams : $c2CohortTeams,
+            'active_search_list' => in_array($code, ['c2', 'c3'], true) ? [] : $this->generateActiveSearchSample($code, $activeSnap ? $activeSnap->active_search_count : 15, $selectedIne),
         ];
 
-        // Lógica específica para Indicadores com Acompanhamento Mensal e Avaliação Quadrimestral (C1 e C2 - NT 08/2026)
-        if (in_array($code, ['c1', 'c2'])) {
+        // Lógica específica para Indicadores com Acompanhamento Mensal e Avaliação Quadrimestral (C1, C2 e C3 - NT 08/2026)
+        if (in_array($code, ['c1', 'c2', 'c3'], true)) {
             $weight = (float) ($meta['weight'] ?? 1.0);
             $monthsConfig = self::getMonthsForQuarter($quarter);
 
@@ -543,7 +571,7 @@ class FamilyHealthService
                 ->when($selectedIne, fn ($q) => $q->where('ine', $selectedIne), fn ($q) => $q->whereNull('ine'))
                 ->get()
                 ->keyBy('month');
-            if (in_array($code, ['c1', 'c2'], true) && ! $activeSnap) {
+            if (in_array($code, ['c1', 'c2', 'c3'], true) && ! $activeSnap) {
                 $monthlySnapshots = collect();
             }
 
@@ -553,19 +581,26 @@ class FamilyHealthService
 
             foreach ($monthsConfig as $mNum => $cfg) {
                 $snap = $monthlySnapshots->get($mNum);
-                $mScore = $snap ? (float) $snap->score_percent : (in_array($code, ['c1', 'c2'], true) ? null : 0.0);
-                $mLevel = $snap ? $snap->performance_level : (in_array($code, ['c1', 'c2'], true) ? null : self::calculatePerformanceLevel($code, $mScore));
+                $mScore = $snap ? (float) $snap->score_percent : (in_array($code, ['c1', 'c2', 'c3'], true) ? null : 0.0);
+                $mLevel = $snap ? $snap->performance_level : (in_array($code, ['c1', 'c2', 'c3'], true) ? null : self::calculatePerformanceLevel($code, $mScore));
                 $mPoints = $mLevel ? self::calculateComponentIIIPoints($mLevel, $weight) : null;
 
                 $monthlyEvolution[] = [
+                    'year' => $year,
+                    'month' => $mNum,
                     'month_number' => $mNum,
                     'month_name' => $cfg['name'],
                     'label' => $cfg['label'],
                     'month_in_quarter' => count($monthlyEvolution) + 1,
                     'numerator' => $snap ? $snap->numerator : 0,
                     'denominator' => $snap ? $snap->denominator : 0,
-                    'cohort_total' => $code === 'c2' ? ($c2Cohort?->monthly_counts[$mNum] ?? null) : null,
-                    'is_preview' => $code === 'c2' && $c2Cohort?->as_of?->lt(Carbon::create($year, $mNum, 1)->endOfMonth()),
+                    'cohort_total' => $code === 'c2' ? ($c2Cohort?->monthly_counts[$mNum] ?? null) : ($code === 'c3' ? ($c3Cohort?->monthly_counts[$mNum] ?? null) : null),
+                    'is_preview' => match ($code) {
+                        'c1' => false,
+                        'c2' => (bool) ($c2Cohort?->as_of?->lt(Carbon::create($year, $mNum, 1)->endOfMonth())),
+                        'c3' => (bool) ($c3Cohort?->as_of?->lt(Carbon::create($year, $mNum, 1)->endOfMonth())),
+                        default => false,
+                    },
                     'score_percent' => $mScore,
                     'performance_level' => $mLevel,
                     'component_iii_points' => $mPoints,
@@ -578,7 +613,7 @@ class FamilyHealthService
             }
 
             // Média aritmética simples dos 4 meses conforme NT 08/2026: (M1 + M2 + M3 + M4) / 4
-            $quarterAvgScore = $countedMonths > 0 ? round($sumScores / $countedMonths, 2) : (in_array($code, ['c1', 'c2'], true) ? null : ($activeSnap ? (float) $activeSnap->score_percent : 0.0));
+            $quarterAvgScore = $countedMonths > 0 ? round($sumScores / $countedMonths, 2) : (in_array($code, ['c1', 'c2', 'c3'], true) ? null : ($activeSnap ? (float) $activeSnap->score_percent : 0.0));
             $quarterLevel = $quarterAvgScore !== null ? self::calculatePerformanceLevel($code, $quarterAvgScore) : null;
             $quarterPoints = $quarterLevel ? self::calculateComponentIIIPoints($quarterLevel, $weight) : null;
 
@@ -592,15 +627,17 @@ class FamilyHealthService
                 'component_iii_points' => $quarterPoints,
                 'weight' => $weight,
                 'weighted_score' => $quarterPoints,
-                'formula' => $code === 'c2'
-                    ? 'Prévia: média dos meses com crianças que completarão 2 anos'
-                    : ($countedMonths < 4
+                'formula' => match ($code) {
+                    'c2' => 'Prévia: média dos meses com crianças que completarão 2 anos',
+                    'c3' => 'Prévia: média dos meses com gestantes encerrando o puerpério (42 dias)',
+                    default => ($countedMonths < 4
                         ? sprintf('Prévia local: média de %d competência(s) monitorada(s)', $countedMonths)
                         : 'Média Aritmética: (Mês 1 + Mês 2 + Mês 3 + Mês 4) / 4'),
+                },
                 'valid_months' => $countedMonths,
                 'is_preview' => $detail['current']['is_preview'],
-                'cohort_total' => $code === 'c2' ? $c2Cohort?->cohort_total : null,
-                'evaluated_total' => $code === 'c2' ? $c2Cohort?->evaluated_total : null,
+                'cohort_total' => $code === 'c2' ? $c2Cohort?->cohort_total : ($code === 'c3' ? $c3Cohort?->cohort_total : null),
+                'evaluated_total' => $code === 'c2' ? $c2Cohort?->evaluated_total : ($code === 'c3' ? $c3Cohort?->evaluated_total : null),
                 'balance_status' => match (true) {
                     $quarterAvgScore === null => 'sem_dados',
                     $code === 'c1' && $quarterAvgScore > 70.0 => 'excess_programmatic',
@@ -801,7 +838,7 @@ class FamilyHealthService
         ];
 
         // Gera apenas demonstrações dos indicadores ainda não integrados ao DW.
-        // C1 e C2 nunca recebem baseline: seus resultados dependem de extração válida.
+        // C1, C2 e C3 nunca recebem baseline: seus resultados dependem de extração válida.
         $existingCount = FamilyHealthIndicatorSnapshot::query()
             ->where('year', $year)
             ->where('quarter', $quarter)
@@ -815,7 +852,6 @@ class FamilyHealthService
 
         // Valores base de referência coerentes com as metas ministeriais
         $baselineData = [
-            'c3' => ['num' => 95, 'den' => 120, 'pct' => 79.17, 'practices' => ['A' => 88, 'B' => 75, 'C' => 85, 'D' => 80, 'E' => 70, 'F' => 78, 'G' => 82, 'H' => 74, 'I' => 68, 'J' => 65, 'K' => 72]],
             'c4' => ['num' => 310, 'den' => 420, 'pct' => 73.81, 'practices' => ['A' => 80, 'B' => 78, 'C' => 72, 'D' => 68, 'E' => 75, 'F' => 65]],
             'c5' => ['num' => 740, 'den' => 950, 'pct' => 77.89, 'practices' => ['A' => 82, 'B' => 85, 'C' => 74, 'D' => 70]],
             'c6' => ['num' => 560, 'den' => 780, 'pct' => 71.79, 'practices' => ['A' => 76, 'B' => 72, 'C' => 68, 'D' => 71]],
@@ -823,7 +859,7 @@ class FamilyHealthService
         ];
 
         foreach ($indicators as $slug => $meta) {
-            if (in_array($slug, ['c1', 'c2'], true)) {
+            if (in_array($slug, ['c1', 'c2', 'c3'], true)) {
                 continue;
             }
             $base = $baselineData[$slug];

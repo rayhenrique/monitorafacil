@@ -28,13 +28,13 @@ class DataProcessing extends Component
     /** @var array<string, array{name: string, description: string, status: string, rows: int, message: string}> */
     public array $tablesReport = [];
 
-    public string $selectedScope = 'c2'; // 'c1', 'c2' ou 'all' (Geral Completo)
+    public string $selectedScope = 'all'; // 'c1', 'c2', 'c3' ou 'all' (Geral Completo)
 
     public ?float $executionTimeMs = null;
 
     public function setScope(string $scope): void
     {
-        $this->selectedScope = in_array($scope, ['c1', 'c2', 'all'], true) ? $scope : 'all';
+        $this->selectedScope = in_array($scope, ['c1', 'c2', 'c3', 'all'], true) ? $scope : 'all';
     }
 
     public function processC1(EsusDataProcessingService $service): void
@@ -47,6 +47,12 @@ class DataProcessing extends Component
     {
         $this->selectedScope = 'c2';
         $this->executeProcessing($service, 'c2');
+    }
+
+    public function processC3(EsusDataProcessingService $service): void
+    {
+        $this->selectedScope = 'c3';
+        $this->executeProcessing($service, 'c3');
     }
 
     public function processAll(EsusDataProcessingService $service): void
@@ -70,6 +76,7 @@ class DataProcessing extends Component
         $scopeDesc = match ($scope) {
             'c1' => 'Indicador C1 (Mais Acesso)',
             'c2' => 'Indicador C2 (Desenvolvimento Infantil)',
+            'c3' => 'Indicador C3 (Gestação e Puerpério)',
             default => 'Geral Completo',
         };
         $this->currentStep = "Iniciando verificação do banco de dados e-SUS PEC [{$scopeDesc}]...";

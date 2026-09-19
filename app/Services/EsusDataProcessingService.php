@@ -108,6 +108,7 @@ class EsusDataProcessingService
         $scopeDesc = match ($scope) {
             'c1' => 'Indicador C1 (Mais Acesso)',
             'c2' => 'Indicador C2 (Desenvolvimento Infantil)',
+            'c3' => 'Indicador C3 (Gestação e Puerpério)',
             default => 'Geral Completo',
         };
         $this->notifyProgress($progressCallback, 10, "Iniciando conexão e validação com o e-SUS PEC [{$scopeDesc}]...", $tablesReport);
@@ -580,8 +581,78 @@ class EsusDataProcessingService
             }
         }
 
+        // ETAPA 3.6: Indicador C3 Cuidado na Gestação e Puerpério (11 Boas Práticas e Lista Nominal)
+        $c3FailureMessage = null;
+        if ($scope === 'all' || $scope === 'c3') {
+            $this->notifyProgress($progressCallback, 80, 'Processando Indicador C3 (Gestação, Puerpério e Boas Práticas A–K)...', $tablesReport);
+            try {
+                if (! $isLivePecConnected || ! $connection) {
+                    throw new \RuntimeException('A leitura do C3 exige conexão com o DW do PEC. Nenhum resultado foi gerado.');
+                }
+
+                $c3Periods = C3ActiveSearchService::getActiveSearchQuarterPairs($year, $quarter);
+                $totalC3Cohort = 0;
+                $totalC3Completed = 0;
+                $maxC3Teams = 0;
+                $c3QuartersProcessed = [];
+
+                foreach ($c3Periods as $idx => $p) {
+                    $qLabel = sprintf('%d/Q%d', $p['year'], $p['quarter']);
+                    $this->notifyProgress(
+                        $progressCallback,
+                        80 + (int) round((($idx + 1) / count($c3Periods)) * 5),
+                        sprintf('Processando Indicador C3 (%s - %d de %d quadrimestres)...', $qLabel, $idx + 1, count($c3Periods)),
+                        $tablesReport
+                    );
+
+                    $c3Stats = app(C3SnapshotService::class)->process($connection, $p['year'], $p['quarter'], $eligibleTeamsByIne);
+                    $totalC3Cohort += $c3Stats['cohort_pregnancies'];
+                    $totalC3Completed += $c3Stats['completed_pregnancies'];
+                    $maxC3Teams = max($maxC3Teams, $c3Stats['teams']);
+                    $c3QuartersProcessed[] = $qLabel;
+                }
+
+                $tablesReport['c3_dw'] = [
+                    'name' => 'C3 · DW PEC',
+                    'description' => 'Coorte de gestantes e puérperas, 11 boas práticas A–K e lista nominal de busca ativa',
+                    'status' => 'success',
+                    'rows' => $totalC3Cohort,
+                    'message' => sprintf(
+                        '%d gestantes/puérperas na coorte gravadas (%s a %s); %d concluíram o puerpério (42 dias); %d equipes com lista nominal pronta.',
+                        $totalC3Cohort,
+                        $c3QuartersProcessed[0] ?? '',
+                        end($c3QuartersProcessed),
+                        $totalC3Completed,
+                        $maxC3Teams
+                    ),
+                ];
+            } catch (Throwable $e) {
+                $message = 'C3 não processado: '.$e->getMessage();
+                $tablesReport['c3_dw'] = [
+                    'name' => 'C3 · DW PEC',
+                    'description' => 'Coorte de gestantes e puérperas e 11 boas práticas A–K',
+                    'status' => 'error',
+                    'rows' => 0,
+                    'message' => $message,
+                ];
+                $syncLog->update(['status' => SyncStatus::Failed, 'finished_at' => now(), 'error_message' => $message]);
+                if ($scope === 'c3') {
+                    $this->notifyProgress($progressCallback, 100, $message, $tablesReport);
+
+                    return [
+                        'success' => false,
+                        'message' => $message,
+                        'progress' => 100,
+                        'tables' => $tablesReport,
+                        'execution_time_ms' => round((microtime(true) - $startTime) * 1000, 2),
+                    ];
+                }
+                $c3FailureMessage = $message;
+            }
+        }
+
         // ETAPA 4: tb_fat_cad_individual e tb_fat_cad_domiciliar
-        if (in_array($scope, ['c1', 'c2'], true)) {
+        if (in_array($scope, ['c1', 'c2', 'c3'], true)) {
             $tablesReport['tb_fat_cad_individual']['status'] = 'info';
             $tablesReport['tb_fat_cad_individual']['rows'] = 0;
             $tablesReport['tb_fat_cad_individual']['message'] = sprintf('Não processado (Foco selecionado: %s).', $scopeDesc);
@@ -704,22 +775,25 @@ class EsusDataProcessingService
         $scopeTitle = match ($scope) {
             'c1' => 'Indicador C1 (Mais Acesso)',
             'c2' => 'Indicador C2 (Desenvolvimento Infantil)',
+            'c3' => 'Indicador C3 (Gestação e Puerpério)',
             default => 'Geral Completo',
         };
 
+        $combinedFailureMessage = trim(($c2FailureMessage ? $c2FailureMessage.' ' : '').($c3FailureMessage ? $c3FailureMessage.' ' : ''));
+
         $syncLog->update([
-            'status' => $c2FailureMessage ? SyncStatus::Failed : SyncStatus::Success,
+            'status' => $combinedFailureMessage !== '' ? SyncStatus::Failed : SyncStatus::Success,
             'finished_at' => now(),
-            'error_message' => $c2FailureMessage,
+            'error_message' => $combinedFailureMessage !== '' ? $combinedFailureMessage : null,
         ]);
 
         $this->notifyProgress($progressCallback, 100,
-            $c2FailureMessage ? 'Processamento geral concluído com falha no C2.' : 'Processamento concluído com sucesso!',
+            $combinedFailureMessage !== '' ? 'Processamento geral concluído com falhas parciais.' : 'Processamento concluído com sucesso!',
             $tablesReport);
 
         return [
-            'success' => $c2FailureMessage === null,
-            'message' => ($c2FailureMessage ? 'Demais consolidados processados. '.$c2FailureMessage.' ' : '').sprintf(
+            'success' => $combinedFailureMessage === '',
+            'message' => ($combinedFailureMessage !== '' ? 'Demais consolidados processados. '.$combinedFailureMessage.' ' : '').sprintf(
                 'Processamento [%s] encerrado em %0.2f s. Quadrimestre %d/Q%d consolidado com %d equipes.',
                 $scopeTitle,
                 $executionTimeMs / 1000,

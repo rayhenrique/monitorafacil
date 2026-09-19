@@ -4,6 +4,39 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.16.0] - 19/09/2026
+
+### 🤰 Módulo C3 - Cuidado na Gestação e Puerpério na APS (Componente III)
+- **Implementação Oficial Completa**: Conforme a **Nota Metodológica C3** (SAPS/MS), **NT 06/2025**, **NT 08/2026** (Componente III - Qualidade) e modelo DW e-SUS PEC (UFSC v8.7.0).
+- **Peso e Pontuação Oficial**:
+  - Peso **2.0** no Componente III - Qualidade com pontuação máxima de até **2,00 pontos** (Quadro 2 da NT 08/2026).
+  - Conceito Regular: `≤ 25%` (0,50 pt) · Conceito Suficiente: `> 25% e ≤ 50%` (1,00 pt) · Conceito Bom: `> 50% e ≤ 75%` (1,50 pt) · Conceito Ótimo: `> 75% e ≤ 100%` (2,00 pts).
+- **As 11 Boas Práticas Clínicas (100 Pontos Totais)**:
+  - **Prática A (10 pts)**: Captação precoce da gestante com primeira consulta pré-natal (médico ou enfermeiro) realizada até a 12ª semana de gestação (≤ 12 sem).
+  - **Prática B (9 pts)**: Mínimo de 7 consultas pré-natais realizadas por médico ou enfermeiro durante a gestação.
+  - **Prática C (9 pts)**: Mínimo de 7 registros de aferição de pressão arterial ao longo do pré-natal.
+  - **Prática D (9 pts)**: Mínimo de 7 registros de avaliação antropométrica simultânea (peso e altura aferidos no mesmo dia).
+  - **Prática E (9 pts)**: Mínimo de 3 visitas domiciliares realizadas pelo ACS/TACS após o início do pré-natal (*equipes eAP tipo 76 pontuam integralmente 9 pts*).
+  - **Prática F (9 pts)**: Administração de pelo menos 1 dose da vacina dTpa a partir da 20ª semana gestacional.
+  - **Prática G (9 pts)**: Realização ou avaliação de exames do 1º trimestre (Sífilis, HIV, Hepatite B e Hepatite C) até a 13ª semana gestacional.
+  - **Prática H (9 pts)**: Realização ou avaliação de exames do 3º trimestre (Sífilis e HIV) a partir da 28ª semana gestacional.
+  - **Prática I (9 pts)**: Realização de consulta médica ou de enfermagem no período puerperal (até 42 dias pós-parto).
+  - **Prática J (9 pts)**: Realização de visita domiciliar pelo ACS/TACS no puerpério até o 42º dia (*equipes eAP tipo 76 pontuam integralmente 9 pts*).
+  - **Prática K (9 pts)**: Pelo menos 1 atendimento em saúde bucal com Cirurgião-Dentista (CBO 2232) ou TSB durante o período gestacional.
+- **Definição Estrita da Coorte Avaliada**:
+  - A pessoa gestante entra na coorte avaliada do quadrimestre quando o **42º dia de puerpério** (fim do puerpério) ocorre nos meses daquele quadrimestre (item 4.1.1 da Nota Metodológica C3).
+- **Busca Ativa & Coorte Nominal**:
+  - Visualização de gestantes ativas (semanas 1 a 42), puérperas recentes (até 42 dias pós-parto) e coorte avaliada.
+  - Seletor de 22 colunas customizáveis com persistência de preferências.
+  - Paginação rápida, ordenação por qualquer coluna e busca textual por Nome, CPF, CNS, Equipe, CNES e Telefone.
+  - **Modal de Busca Avançada C3**: Filtros por Equipe, Microárea, Nome, CPF, CNS, Status Clínico (Gestante / Puérpera / Encerrada), Idade Gestacional, Trimestre e metas individuais das 11 práticas clínicas.
+  - **Modal de Auditoria Clínica Individual**: Ficha completa da gestante com dados cadastrais, vínculo territorial, histórico da gestação (DUM, DPP, desfecho, fim do puerpério) e checklist minucioso do cumprimento das 11 práticas oficiais.
+- **Integração com o Processamento de Dados**:
+  - Adicionado escopo `--scope=c3` ao comando `php artisan esus:process-data` e botão dedicado "Processar C3 & Lista Gestantes" em Configurações.
+  - Snapshot de coorte em `c3_cohort_snapshots` e registros nominais em `c3_nominal_pregnancies`.
+
+---
+
 ## [v1.15.0] - 18/09/2026
 
 ### 👶 Refinamento da Busca Avançada C2 e Coorte de 0 a 24 Meses (7 Quadrimestres)
