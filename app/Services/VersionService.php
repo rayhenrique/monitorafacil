@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.14.0';
+    public const CURRENT_VERSION = 'v1.14.1';
 
     public const CURRENT_RELEASE_DATE = '18/09/2026';
 
@@ -61,9 +61,21 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.14.0',
+                'version' => 'v1.14.1',
                 'date' => '18/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Compatibilidade Dinâmica de Colunas DW PEC no C2',
+                'summary' => 'Detecção dinâmica e segura das colunas disponíveis na visualização tb_acomp_cidadaos_vinculados do PostgreSQL e-SUS PEC, eliminando erros de colunas inexistentes (como no_mae_cidadao) e garantindo a sincronização em produção.',
+                'highlights' => [
+                    ['type' => 'correcao', 'text' => 'Detecção dinâmica via information_schema das colunas físicas presentes no PEC da VPS, prevenindo falha SQLSTATE[42703].'],
+                    ['type' => 'correcao', 'text' => 'Remoção da dependência estrita de no_mae_cidadao e tratamento seguro para variações de microárea e raça/cor.'],
+                    ['type' => 'melhoria', 'text' => 'Mapeamento automático de CNES e nome da Unidade de Saúde a partir do cadastro oficial das 19 equipes eSF.'],
+                ],
+            ],
+            [
+                'version' => 'v1.14.0',
+                'date' => '18/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Conexão Nominal Real do C2 ao DW e-SUS PEC',
                 'summary' => 'Extração e persistência da coorte nominal real de crianças com 2 anos a partir do banco PostgreSQL e-SUS PEC no MySQL local, com sincronização em 1 clique e identificação visual de dados reais.',
                 'highlights' => [

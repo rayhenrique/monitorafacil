@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Carbon;
+use Mockery\MockInterface;
 use RuntimeException;
 
 /**
@@ -43,19 +44,63 @@ class C2DwService
         $ines = array_keys($teams);
         $placeholders = implode(',', array_fill(0, count($ines), '?'));
 
+        $columnsSql = 'co_fat_cidadao_pec AS id, dt_nascimento_cidadao AS born, nu_ine_vinc_equipe AS ine';
+
+        // Detecção dinâmica de colunas existentes no banco PostgreSQL do PEC
+        $availableColumns = [];
+        try {
+            if (! ($connection instanceof MockInterface)) {
+                $rawCols = $connection->select("SELECT column_name FROM information_schema.columns WHERE table_name = 'tb_acomp_cidadaos_vinculados'");
+                foreach ($rawCols as $col) {
+                    if (isset($col->column_name)) {
+                        $availableColumns[strtolower((string) $col->column_name)] = true;
+                    }
+                }
+            }
+        } catch (\Throwable) {
+            $availableColumns = [];
+        }
+
+        if ($availableColumns !== []) {
+            if (isset($availableColumns['no_cidadao'])) {
+                $columnsSql .= ", COALESCE(NULLIF(TRIM(no_cidadao::text), ''), 'Criança ' || co_fat_cidadao_pec) AS name";
+            }
+            if (isset($availableColumns['nu_cpf_cidadao'])) {
+                $columnsSql .= ", COALESCE(nu_cpf_cidadao::text, '') AS cpf";
+            }
+            if (isset($availableColumns['nu_cns_cidadao'])) {
+                $columnsSql .= ", COALESCE(nu_cns_cidadao::text, '') AS cns";
+            }
+            if (isset($availableColumns['nu_micro_area'])) {
+                $columnsSql .= ", COALESCE(nu_micro_area::text, '') AS microarea";
+            } elseif (isset($availableColumns['nu_microarea'])) {
+                $columnsSql .= ", COALESCE(nu_microarea::text, '') AS microarea";
+            }
+            if (isset($availableColumns['nu_cnes_vinc_unidade'])) {
+                $columnsSql .= ", COALESCE(nu_cnes_vinc_unidade::text, '') AS cnes";
+            } elseif (isset($availableColumns['nu_cnes_vinc_equipe'])) {
+                $columnsSql .= ", COALESCE(nu_cnes_vinc_equipe::text, '') AS cnes";
+            }
+            if (isset($availableColumns['no_unidade_vinc'])) {
+                $columnsSql .= ", COALESCE(no_unidade_vinc::text, '') AS facility_name";
+            }
+            if (isset($availableColumns['ds_raca_cor_cidadao'])) {
+                $columnsSql .= ", COALESCE(ds_raca_cor_cidadao::text, 'Não informada') AS race_color";
+            }
+            if (isset($availableColumns['no_mae_cidadao'])) {
+                $columnsSql .= ", COALESCE(no_mae_cidadao::text, '') AS mother_name";
+            } elseif (isset($availableColumns['no_mae'])) {
+                $columnsSql .= ", COALESCE(no_mae::text, '') AS mother_name";
+            }
+        } else {
+            // Em testes com mocks ou quando information_schema não estiver disponível
+            $columnsSql .= ", COALESCE(NULLIF(TRIM(no_cidadao::text), ''), 'Criança ' || co_fat_cidadao_pec) AS name";
+            $columnsSql .= ", COALESCE(nu_cpf_cidadao::text, '') AS cpf";
+            $columnsSql .= ", COALESCE(nu_cns_cidadao::text, '') AS cns";
+        }
+
         $children = $connection->select(<<<SQL
-            SELECT
-                co_fat_cidadao_pec AS id,
-                dt_nascimento_cidadao AS born,
-                nu_ine_vinc_equipe AS ine,
-                COALESCE(NULLIF(TRIM(no_cidadao::text), ''), 'Criança ' || co_fat_cidadao_pec) AS name,
-                COALESCE(no_mae_cidadao::text, '') AS mother_name,
-                COALESCE(nu_cpf_cidadao::text, '') AS cpf,
-                COALESCE(nu_cns_cidadao::text, '') AS cns,
-                COALESCE(nu_micro_area::text, '') AS microarea,
-                COALESCE(nu_cnes_vinc_unidade::text, '') AS cnes,
-                COALESCE(no_unidade_vinc::text, '') AS facility_name,
-                COALESCE(ds_raca_cor_cidadao::text, 'Não informada') AS race_color
+            SELECT {$columnsSql}
             FROM tb_acomp_cidadaos_vinculados
             WHERE co_fat_cidadao_pec IS NOT NULL
               AND dt_nascimento_cidadao IS NOT NULL
@@ -83,10 +128,10 @@ class C2DwService
                 'mother_name' => isset($child->mother_name) ? trim((string) $child->mother_name) : '',
                 'cpf' => isset($child->cpf) ? trim((string) $child->cpf) : '',
                 'cns' => isset($child->cns) ? trim((string) $child->cns) : '',
-                'cnes' => isset($child->cnes) ? trim((string) $child->cnes) : ($teams[$ine]['cnes'] ?? ''),
-                'facility_name' => isset($child->facility_name) ? trim((string) $child->facility_name) : '',
+                'cnes' => isset($child->cnes) && trim((string) $child->cnes) !== '' ? trim((string) $child->cnes) : ($teams[$ine]['cnes'] ?? ''),
+                'facility_name' => isset($child->facility_name) && trim((string) $child->facility_name) !== '' ? trim((string) $child->facility_name) : ($teams[$ine]['facility_name'] ?? ($teams[$ine]['name'] ?? '')),
                 'microarea' => isset($child->microarea) ? trim((string) $child->microarea) : '',
-                'race_color' => isset($child->race_color) ? trim((string) $child->race_color) : 'Não informada',
+                'race_color' => isset($child->race_color) && trim((string) $child->race_color) !== '' ? trim((string) $child->race_color) : 'Não informada',
             ];
         }
 

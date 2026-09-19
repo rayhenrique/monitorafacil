@@ -144,5 +144,6 @@
   - [x] Sincronização sob demanda via botão "Sincronizar PEC" no componente Livewire `IndicatorDetail`.
   - [x] Badges no topo identificando origem: "Base Real e-SUS PEC" vs "Demonstração".
   - [x] Cobertura completa de testes automatizados unitários e de feature.
+  - [x] **Patch v1.14.1**: Detecção dinâmica via `information_schema` das colunas de `tb_acomp_cidadaos_vinculados`, eliminando `no_mae_cidadao` e prevenindo erro `SQLSTATE[42703]`.
 
 

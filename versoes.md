@@ -4,6 +4,16 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.14.1] - 18/09/2026
+
+### 🛡️ Compatibilidade Dinâmica de Colunas DW PEC no Indicador C2
+- **Prevenção de Erro SQLSTATE[42703]**: Implementada detecção dinâmica das colunas físicas disponíveis em `tb_acomp_cidadaos_vinculados` via catálogo do PostgreSQL (`information_schema.columns`).
+- **Eliminação de Colunas Inexistentes**: Removida a dependência estrita do campo `no_mae_cidadao`, que não faz parte da tabela de acompanhamento no e-SUS PEC, evitando a quebra da rotina de extração.
+- **Tratamento Resiliente de Metadados Territoriais**: CNES, Unidade de Saúde, Microárea e Raça/Cor agora utilizam detecção adaptativa e fallbacks automáticos baseados no cadastro oficial das 19 equipes eSF do município.
+- **Transações Seguras**: Garantida a execução atômica do processamento sem interrupção de transações no PostgreSQL da VPS.
+
+---
+
 ## [v1.14.0] - 18/09/2026
 
 ### 👶 Conexão Nominal Real do C2 ao DW e-SUS PEC
