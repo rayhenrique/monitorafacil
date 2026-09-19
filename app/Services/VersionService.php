@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.14.1';
+    public const CURRENT_VERSION = 'v1.14.2';
 
     public const CURRENT_RELEASE_DATE = '18/09/2026';
 
@@ -61,9 +61,21 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.14.1',
+                'version' => 'v1.14.2',
                 'date' => '18/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Centralização do Processamento de Dados',
+                'summary' => 'Remoção do botão de sincronização pontual no detalhamento do indicador C2 e consolidação de todo o processamento de dados (incluindo a coorte e lista nominal do C2) centralizado no módulo de Processamento de Dados em Configurações.',
+                'highlights' => [
+                    ['type' => 'melhoria', 'text' => 'Centralização de todas as rotinas de sincronização e processamento analítico no submódulo oficial de Processamento de Dados.'],
+                    ['type' => 'melhoria', 'text' => 'Botão "Processar C2 & Lista Nominal" dedicado no módulo de Processamento de Dados com relatório de execução detalhado.'],
+                    ['type' => 'melhoria', 'text' => 'Interface do C2 limpa e focada exclusivamente na análise clínica e busca ativa das crianças.'],
+                ],
+            ],
+            [
+                'version' => 'v1.14.1',
+                'date' => '18/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Compatibilidade Dinâmica de Colunas DW PEC no C2',
                 'summary' => 'Detecção dinâmica e segura das colunas disponíveis na visualização tb_acomp_cidadaos_vinculados do PostgreSQL e-SUS PEC, eliminando erros de colunas inexistentes (como no_mae_cidadao) e garantindo a sincronização em produção.',
                 'highlights' => [

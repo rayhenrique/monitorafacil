@@ -35,7 +35,7 @@
                 </div>
                 <h2 class="text-base sm:text-lg font-bold text-ink">Processar Dados do e-SUS PEC</h2>
                 <p class="text-xs text-muted leading-relaxed">
-                    Executa a rotina de leitura e consolidação analítica nas tabelas do e-SUS PEC. Você pode escolher processar apenas o que interessa ao <strong class="text-teal-900">Indicador C1 (Mais Acesso)</strong> ou ao <strong class="text-indigo-900">Indicador C2 (Desenvolvimento Infantil)</strong> para execução rápida e focada, ou rodar o <strong class="text-slate-800">Processamento Geral Completo</strong>.
+                    Executa a rotina de leitura e consolidação analítica nas tabelas do e-SUS PEC. Você pode escolher processar apenas o que interessa ao <strong class="text-teal-900">Indicador C1 (Mais Acesso)</strong> ou ao <strong class="text-indigo-900">Indicador C2 (Desenvolvimento Infantil & Lista Nominal)</strong> para execução rápida e focada, ou rodar o <strong class="text-slate-800">Processamento Geral Completo</strong>.
                 </p>
             </div>
 
@@ -74,14 +74,14 @@
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
                         </svg>
-                        <span>Processar Apenas C2</span>
+                        <span>Processar C2 & Lista Nominal</span>
                     </span>
                     <span wire:loading wire:target="processC2" class="inline-flex items-center gap-2">
                         <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        <span>Processando C2...</span>
+                        <span>Processando C2 & Lista Nominal...</span>
                     </span>
                 </button>
 

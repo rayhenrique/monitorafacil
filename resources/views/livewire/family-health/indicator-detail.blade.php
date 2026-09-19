@@ -1741,7 +1741,7 @@
                             @else
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
                                     <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
-                                    Demonstração · Sincronize para carregar do PEC
+                                    Demonstração · Processe em Configurações > Processamento de Dados
                                 </span>
                             @endif
                         </div>
@@ -1751,23 +1751,6 @@
                     </div>
 
                     <div class="flex items-center gap-2 flex-wrap">
-                        <button
-                            type="button"
-                            wire:click="syncC2FromPec"
-                            wire:loading.attr="disabled"
-                            class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold text-sky-800 bg-sky-50 border border-sky-200 hover:bg-sky-100 transition cursor-pointer shadow-2xs"
-                            title="Sincronizar a base nominal diretamente do banco PostgreSQL do e-SUS PEC"
-                        >
-                            <svg wire:loading.remove wire:target="syncC2FromPec" class="h-3.5 w-3.5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-                            </svg>
-                            <svg wire:loading wire:target="syncC2FromPec" class="animate-spin h-3.5 w-3.5 text-sky-600" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span wire:loading.remove wire:target="syncC2FromPec">Sincronizar PEC</span>
-                            <span wire:loading wire:target="syncC2FromPec">Sincronizando...</span>
-                        </button>
 
                         @if ($activeFiltersCount > 0)
                             <button

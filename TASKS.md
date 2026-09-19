@@ -141,9 +141,10 @@
   - [x] Extração de colunas nominais reais (`no_cidadao`, `no_mae_cidadao`, `nu_cpf_cidadao`, `nu_cns_cidadao`, `nu_micro_area`, `nu_cnes_vinc_unidade`, `no_unidade_vinc`, `ds_raca_cor_cidadao`) de `tb_acomp_cidadaos_vinculados` no `C2DwService`.
   - [x] Persistência chunked em lotes de 100 registros durante a extração pelo `C2SnapshotService`.
   - [x] Consulta, filtros e paginação direta sobre a tabela real no `C2ActiveSearchService` com fallback seguro apenas quando a tabela estiver vazia e o PEC indisponível.
-  - [x] Sincronização sob demanda via botão "Sincronizar PEC" no componente Livewire `IndicatorDetail`.
+  - [x] Processamento e sincronização centralizados no módulo oficial de Processamento de Dados (`/configuracoes/processamento-dados`).
   - [x] Badges no topo identificando origem: "Base Real e-SUS PEC" vs "Demonstração".
   - [x] Cobertura completa de testes automatizados unitários e de feature.
   - [x] **Patch v1.14.1**: Detecção dinâmica via `information_schema` das colunas de `tb_acomp_cidadaos_vinculados`, eliminando `no_mae_cidadao` e prevenindo erro `SQLSTATE[42703]`.
+  - [x] **Patch v1.14.2**: Remoção do botão isolado "Sincronizar PEC" da aba C2 e centralização unificada no módulo de Processamento de Dados com botão dedicado "Processar C2 & Lista Nominal".
 
 

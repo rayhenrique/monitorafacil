@@ -4,6 +4,16 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.14.2] - 18/09/2026
+
+### 🎯 Centralização do Processamento de Dados
+- **Remoção de Sincronização Isolada no C2**: O botão pontual "Sincronizar PEC" foi removido da visualização do Indicador C2 para manter uma arquitetura coesa e centralizada.
+- **Módulo Unificado de Processamento**: Todas as extrações, consolidações e atualizações da coorte nominal e indicadores passam a ser disparadas exclusivamente pelo submódulo **Processamento de Dados** (`/configuracoes/processamento-dados`).
+- **Botão Dedicado no Painel de Processamento**: O botão `Processar C2 & Lista Nominal` permite processar especificamente a coorte de crianças e alimentar a tabela nominal sem necessidade de reprocessar todos os cadastros.
+- **Foco Analítico na Busca Ativa**: A aba de Busca Ativa permanece limpa e focada em auditoria, filtros, navegação e prontuário das crianças, exibindo a procedência dos dados (Base Real vs Demonstração).
+
+---
+
 ## [v1.14.1] - 18/09/2026
 
 ### 🛡️ Compatibilidade Dinâmica de Colunas DW PEC no Indicador C2

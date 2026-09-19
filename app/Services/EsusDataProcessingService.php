@@ -516,10 +516,10 @@ class EsusDataProcessingService
                 $c2Stats = app(C2SnapshotService::class)->process($connection, $year, $quarter, $eligibleTeamsByIne);
                 $tablesReport['c2_dw'] = [
                     'name' => 'C2 · DW PEC',
-                    'description' => 'Coorte de crianças que completaram 2 anos e boas práticas A–E',
+                    'description' => 'Coorte de crianças de 2 anos, boas práticas A–E e lista nominal de busca ativa',
                     'status' => 'success',
                     'rows' => $c2Stats['cohort_children'],
-                    'message' => sprintf('%d crianças na coorte com prévia calculada; %d já completaram 2 anos; %d equipes e %d meses com coorte. Estimativa local sem RNDS.',
+                    'message' => sprintf('%d crianças na coorte com lista nominal gravada; %d já completaram 2 anos; %d equipes e %d meses com coorte. Estimativa local sem RNDS.',
                         $c2Stats['cohort_children'], $c2Stats['completed_children'], $c2Stats['teams'], $c2Stats['months']),
                 ];
             } catch (Throwable $e) {
