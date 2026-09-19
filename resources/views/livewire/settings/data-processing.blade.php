@@ -24,7 +24,38 @@
     @endif
 
     <!-- Card de Ação Principal & Barra de Progresso -->
-    <div class="rounded-3xl border border-line bg-white p-6 sm:p-8 shadow-sm space-y-6">
+    <div
+        class="rounded-3xl border border-line bg-white p-6 sm:p-8 shadow-sm space-y-6"
+        x-data="{
+            estimatedProgress: 8,
+            estimatedStep: 'Preparando o processamento...',
+            processingScope: 'dados do e-SUS PEC',
+            progressTimer: null,
+            startProgress(scope) {
+                window.clearInterval(this.progressTimer);
+                this.processingScope = scope;
+                this.estimatedProgress = 8;
+                this.estimatedStep = `Iniciando ${scope}...`;
+                this.progressTimer = window.setInterval(() => {
+                    if (this.estimatedProgress >= 92) {
+                        window.clearInterval(this.progressTimer);
+                        return;
+                    }
+
+                    const increment = this.estimatedProgress < 45 ? 4 : (this.estimatedProgress < 75 ? 2 : 1);
+                    this.estimatedProgress = Math.min(92, this.estimatedProgress + increment);
+
+                    if (this.estimatedProgress >= 75) {
+                        this.estimatedStep = `Finalizando ${this.processingScope}...`;
+                    } else if (this.estimatedProgress >= 45) {
+                        this.estimatedStep = `Consolidando ${this.processingScope}...`;
+                    } else if (this.estimatedProgress >= 20) {
+                        this.estimatedStep = 'Validando a conexão e as tabelas necessárias...';
+                    }
+                }, 900);
+            }
+        }"
+    >
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div class="max-w-2xl space-y-1">
                 <div class="flex items-center gap-2 mb-1">
@@ -45,6 +76,7 @@
                 <button
                     type="button"
                     wire:click="processC1"
+                    x-on:click="startProgress('o Indicador C1')"
                     wire:loading.attr="disabled"
                     class="inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-700 hover:bg-teal-800 disabled:opacity-60 px-5 py-3.5 text-xs font-bold text-white shadow-md shadow-teal-950/20 transition focus:outline-none focus:ring-2 focus:ring-teal-500/30 cursor-pointer"
                 >
@@ -67,6 +99,7 @@
                 <button
                     type="button"
                     wire:click="processC2"
+                    x-on:click="startProgress('o Indicador C2 e a lista de crianças')"
                     wire:loading.attr="disabled"
                     class="inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 px-5 py-3.5 text-xs font-bold text-white shadow-md shadow-indigo-950/20 transition focus:outline-none focus:ring-2 focus:ring-indigo-500/30 cursor-pointer"
                 >
@@ -89,6 +122,7 @@
                 <button
                     type="button"
                     wire:click="processC3"
+                    x-on:click="startProgress('o Indicador C3 e a lista de gestantes')"
                     wire:loading.attr="disabled"
                     class="inline-flex items-center justify-center gap-2 rounded-2xl bg-rose-600 hover:bg-rose-700 disabled:opacity-60 px-5 py-3.5 text-xs font-bold text-white shadow-md shadow-rose-950/20 transition focus:outline-none focus:ring-2 focus:ring-rose-500/30 cursor-pointer"
                 >
@@ -111,6 +145,7 @@
                 <button
                     type="button"
                     wire:click="processAll"
+                    x-on:click="startProgress('o processamento geral')"
                     wire:loading.attr="disabled"
                     class="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-800 hover:bg-slate-900 disabled:opacity-60 px-5 py-3.5 text-xs font-semibold text-white shadow-md transition focus:outline-none focus:ring-2 focus:ring-slate-500/30 cursor-pointer"
                 >
@@ -141,23 +176,57 @@
             </div>
         </div>
 
-        <!-- Barra de Progresso Interativa -->
-        @if ($progressPercent > 0 || $isProcessing)
-            <div class="border-t border-line pt-5 space-y-3 animate-fade-in">
-                <div class="flex items-center justify-between text-xs">
-                    <div class="flex items-center gap-2">
-                        <span class="font-bold text-ink">Progresso da Consolidação:</span>
-                        <span class="text-muted font-mono">{{ $currentStep }}</span>
+        <!-- Barra estimada visível durante toda a requisição Livewire -->
+        <div
+            class="hidden border-t border-line pt-5 space-y-3"
+            wire:loading.class.remove="hidden"
+            wire:loading.class.add="block"
+            wire:target="processC1,processC2,processC3,processAll,processNow"
+        >
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between text-xs" aria-live="polite" aria-atomic="true">
+                <div class="min-w-0 flex items-start gap-2">
+                    <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-teal-600 motion-safe:animate-pulse"></span>
+                    <div class="min-w-0">
+                        <span class="font-bold text-ink">Progresso estimado</span>
+                        <p class="mt-0.5 break-words font-mono text-[11px] leading-relaxed text-muted" x-text="estimatedStep"></p>
                     </div>
-                    <span class="font-mono font-bold text-teal-800">{{ $progressPercent }}%</span>
                 </div>
 
-                <div class="w-full bg-slate-100 rounded-full h-3.5 overflow-hidden border border-slate-200/80 p-0.5">
-                    <div
-                        class="bg-gradient-to-r from-teal-600 via-emerald-500 to-teal-500 h-full rounded-full transition-all duration-500 ease-out shadow-xs"
-                        style="width: {{ $progressPercent }}%"
-                    ></div>
+                <div class="flex shrink-0 items-center gap-2 sm:justify-end">
+                    <span class="rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 text-[10px] font-bold text-teal-800">Carregando</span>
+                    <span class="min-w-11 text-right font-mono font-bold text-teal-800" x-text="`${estimatedProgress}%`"></span>
                 </div>
+            </div>
+
+            <div
+                class="h-3.5 w-full overflow-hidden rounded-full border border-slate-200/80 bg-slate-100 p-0.5"
+                role="progressbar"
+                aria-label="Progresso estimado do processamento dos dados do e-SUS PEC"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                x-bind:aria-valuenow="estimatedProgress"
+                x-bind:aria-valuetext="`${estimatedProgress} por cento. ${estimatedStep}`"
+                aria-busy="true"
+            >
+                <div
+                    class="relative h-full overflow-hidden rounded-full bg-gradient-to-r from-teal-700 via-emerald-500 to-teal-500 transition-[width] duration-500 ease-out"
+                    x-bind:style="`width: ${estimatedProgress}%`"
+                >
+                    <span class="absolute inset-0 bg-white/20 motion-safe:animate-pulse"></span>
+                </div>
+            </div>
+
+            <p class="text-[11px] leading-relaxed text-muted">Mantenha esta página aberta. A barra avança enquanto o servidor processa e confirma o resultado ao terminar.</p>
+        </div>
+
+        @if ($progressPercent > 0 && $processStatus !== null)
+            <div wire:loading.remove wire:target="processC1,processC2,processC3,processAll,processNow">
+                <x-processing-progress
+                    :percent="$progressPercent"
+                    :step="$currentStep ?: 'Preparando o processamento...'"
+                    :running="false"
+                    :status="$processStatus"
+                />
             </div>
         @endif
     </div>

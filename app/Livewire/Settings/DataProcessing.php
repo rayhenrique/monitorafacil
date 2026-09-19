@@ -72,35 +72,41 @@ class DataProcessing extends Component
         $this->isProcessing = true;
         $this->processMessage = null;
         $this->processStatus = null;
-        $this->progressPercent = 10;
         $scopeDesc = match ($scope) {
             'c1' => 'Indicador C1 (Mais Acesso)',
             'c2' => 'Indicador C2 (Desenvolvimento Infantil)',
             'c3' => 'Indicador C3 (Gestação e Puerpério)',
             default => 'Geral Completo',
         };
-        $this->currentStep = "Iniciando verificação do banco de dados e-SUS PEC [{$scopeDesc}]...";
+        $this->updateProgress(10, "Iniciando verificação do banco de dados e-SUS PEC [{$scopeDesc}]...");
 
         try {
             $result = $service->process(function (int $percent, string $step, array $tables): void {
-                $this->progressPercent = $percent;
-                $this->currentStep = $step;
                 $this->tablesReport = $tables;
+                $this->updateProgress($percent, $step);
             }, (int) now()->year, min(3, (int) ceil(now()->month / 4)), $scope);
 
-            $this->progressPercent = 100;
-            $this->currentStep = $result['success'] ? 'Processamento concluído com sucesso!' : 'Falha durante o processamento.';
             $this->processStatus = $result['success'] ? 'success' : 'error';
             $this->processMessage = $result['message'];
             $this->tablesReport = $result['tables'];
             $this->executionTimeMs = $result['execution_time_ms'];
+            $this->updateProgress(
+                100,
+                $result['success'] ? 'Processamento concluído com sucesso!' : 'Processamento concluído com pendências.',
+            );
         } catch (Throwable $e) {
             $this->processStatus = 'error';
             $this->processMessage = 'Exceção ao executar o processamento: '.$e->getMessage();
-            $this->currentStep = 'Falha durante o processamento.';
+            $this->updateProgress(100, 'Falha durante o processamento.');
         } finally {
             $this->isProcessing = false;
         }
+    }
+
+    private function updateProgress(int $percent, string $step): void
+    {
+        $this->progressPercent = max(0, min(100, $percent));
+        $this->currentStep = $step;
     }
 
     public function render(): View

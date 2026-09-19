@@ -96,6 +96,8 @@ Símbolos simples e poucos; texto acompanha cada ação e indicador essencial.
 
 Transições discretas de hover. Respeitar `prefers-reduced-motion`; não animar números financeiros.
 
+Processamentos manuais longos exibem uma barra rotulada como estimativa desde o clique. A estimativa avança no máximo até 92%; somente a resposta final do servidor apresenta 100%, sucesso ou pendências. Toda animação deve ter texto equivalente e respeitar movimento reduzido.
+
 ### Content and data visualization
 
 Tom objetivo e institucional. Usar separadores de milhar e moeda `pt-BR`, ano e quadrimestre completos e fontes de dados identificadas.
@@ -107,4 +109,3 @@ Tom objetivo e institucional. Usar separadores de milhar e moeda `pt-BR`, ano e 
 - **Don't:** esconder ausência de consolidação atrás de zero.
 - **Don't:** usar cor como único sinal de classificação.
 - **REGRA INVIOLÁVEL (ORIGINALIDADE DO DESIGN):** Em nenhuma hipótese copiar ou replicar o design, cores, fontes, cabeçalhos ou componentes visuais de sistemas ou páginas de referência externas (ex: DashSaúde). Manter estritamente a identidade e o design system próprio do **Monitora Fácil** (sidebar executiva escura `#0c1f1c`, degradê esmeralda `#0f766e`/`#10b981`, canvas limpo `#f5f7f6` e badges `MF`). Páginas de referência servem **apenas e exclusivamente** como inspiração para descoberta de módulos e requisitos funcionais, sendo implementados de forma compassiva e gradual.
-

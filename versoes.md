@@ -4,6 +4,17 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.18.0] - 19/09/2026
+
+### ⏳ Progresso Visível no Processamento
+- **Feedback imediato**: os botões de C1, C2, C3 e Geral Completo exibem uma barra assim que o processamento começa.
+- **Progresso estimado**: a barra avança até 92% enquanto o servidor trabalha, sem apresentar a estimativa como percentual clínico ou resultado confirmado.
+- **Etapas legíveis**: conexão, validação, consolidação e finalização aparecem em texto durante a espera.
+- **Resultado real**: o retorno do servidor substitui a estimativa por 100% e informa sucesso ou pendências; os botões voltam a ficar disponíveis.
+- **Acessibilidade**: o progresso possui semântica `progressbar`, descrição textual, estado de carregamento e animação reduzida quando solicitado pelo sistema.
+
+---
+
 ## [v1.17.1] - 19/09/2026
 
 ### 🔧 Compatibilidade da Dimensão da DUM no C3

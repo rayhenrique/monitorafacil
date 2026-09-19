@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.17.1';
+    public const CURRENT_VERSION = 'v1.18.0';
 
     public const CURRENT_RELEASE_DATE = '19/09/2026';
 
@@ -61,9 +61,21 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.17.1',
+                'version' => 'v1.18.0',
                 'date' => '19/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Progresso Visível no Processamento',
+                'summary' => 'A tela de processamento agora mostra imediatamente uma barra de progresso estimado, a etapa em andamento e o resultado confirmado pelo servidor ao final da consolidação.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Barra de progresso estimado disponível nos processamentos C1, C2, C3 e Geral Completo.'],
+                    ['type' => 'melhoria', 'text' => 'A etapa atual e o percentual permanecem visíveis enquanto a requisição está em andamento.'],
+                    ['type' => 'melhoria', 'text' => 'Ao terminar, a barra exibe 100% com indicação textual de sucesso ou pendências e libera novamente os controles.'],
+                ],
+            ],
+            [
+                'version' => 'v1.17.1',
+                'date' => '19/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Compatibilidade da DUM no C3',
                 'summary' => 'O C3 agora identifica a dimensão associada a co_dim_tempo_dum nas versões atuais e legadas do DW PEC, permitindo processar a coorte na instalação de produção.',
                 'highlights' => [

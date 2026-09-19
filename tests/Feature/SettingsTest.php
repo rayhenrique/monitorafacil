@@ -347,6 +347,8 @@ XML;
 
         Livewire::test(DataProcessing::class)
             ->assertSet('progressPercent', 0)
+            ->assertSee('Progresso estimado')
+            ->assertSeeHtml('x-on:click="startProgress(\'o Indicador C1\')"')
             ->call('processNow')
             ->assertSet('progressPercent', 100)
             ->assertSet('processStatus', 'error')

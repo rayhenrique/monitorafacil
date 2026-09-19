@@ -177,3 +177,10 @@
   - [x] Busca ativa C3 alinhada às colunas reais da tabela e dados simulados bloqueados no ambiente de produção.
   - [x] Testes unitários de pontuação, janelas clínicas, exceção eAP e regressão da consulta PostgreSQL.
   - [x] **Patch v1.17.1**: resolução adaptativa de `co_dim_tempo_dum` para `tb_dim_tempo_dum` nas versões atuais ou `tb_dim_tempo` nas instalações legadas do DW PEC.
+
+- [x] **Fase 22: Progresso visível do processamento (v1.18.0)**
+  - [x] Barra de progresso estimado exibida imediatamente nos escopos C1, C2, C3 e Geral Completo.
+  - [x] Mensagens de etapa durante a conexão, validação, consolidação e finalização, com limite de 92% até a confirmação do servidor.
+  - [x] Estado final em 100%, distinguindo conclusão com sucesso ou pendências e liberando os controles.
+  - [x] Semântica acessível de `progressbar`, texto equivalente e movimento reduzido.
+  - [x] Validação funcional em navegador, viewport desktop e responsividade em 390 × 844 px.
