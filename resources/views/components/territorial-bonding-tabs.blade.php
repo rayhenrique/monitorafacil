@@ -74,7 +74,8 @@
                         <span class="ml-1 rounded-md px-1.5 py-0.5 text-[10px] font-mono {{ $isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500' }}">
                             {{ $tab['badge'] }}
                         </span>
-                         @elseif ($isNominalRoute)
+                    </a>
+                @elseif ($isNominalRoute)
                     <a
                         href="{{ route('territorial-bonding.overview', ['aba' => $key]) }}"
                         class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 whitespace-nowrap transition cursor-pointer {{ $isActive ? 'bg-teal-700 text-white font-semibold shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-ink' }}"

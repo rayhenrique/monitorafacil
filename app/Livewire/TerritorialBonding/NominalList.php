@@ -219,11 +219,14 @@ class NominalList extends Component
 
         $citizens = $service->queryCitizens($filters);
 
-        return view('livewire.territorial-bonding.nominal-list', [
-            'metrics' => $metrics,
-            'citizens' => $citizens,
-            'races' => ['ALL' => 'Todas as Raças/Cores', 'Parda' => 'Parda', 'Branca' => 'Branca', 'Preta' => 'Preta', 'Amarela' => 'Amarela', 'Indígena' => 'Indígena'],
-            'totalRecordsCount' => $citizens->total(),
-        ]);
+        return view('livewire.territorial-bonding.nominal-list', array_merge(
+            get_object_vars($this),
+            [
+                'metrics' => $metrics,
+                'citizens' => $citizens,
+                'races' => ['ALL' => 'Todas as Raças/Cores', 'Parda' => 'Parda', 'Branca' => 'Branca', 'Preta' => 'Preta', 'Amarela' => 'Amarela', 'Indígena' => 'Indígena'],
+                'totalRecordsCount' => $citizens->total(),
+            ]
+        ));
     }
 }

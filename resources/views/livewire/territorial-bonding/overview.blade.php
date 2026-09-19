@@ -15,19 +15,19 @@
                     <span>Monitoramento de Vínculo e Acompanhamento - Equipes (Mensal)</span>
                 </h1>
                 <div class="flex items-center gap-1.5 text-xs text-slate-500 mt-1 font-medium">
-                    <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <svg class="h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5" />
                     </svg>
                     <span>Último atendimento registrado em {{ $monthlySummary['last_attendance_date'] }}</span>
                 </div>
             </div>
 
-            <div class="flex items-center gap-2.5">
+            <div class="w-full sm:w-auto">
                 <!-- Botão Busca Avançada -->
                 <button
                     type="button"
                     wire:click="openAdvancedModal"
-                    class="inline-flex items-center gap-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 text-xs font-bold shadow-xs transition cursor-pointer"
+                    class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 text-xs font-bold shadow-xs transition cursor-pointer"
                 >
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -39,9 +39,9 @@
 
         <!-- PAINEL SUPERIOR DE SÍNTESE (REPRODUÇÃO FIEL DA IMAGEM OFICIAL) -->
         <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-            <div class="grid grid-cols-2 sm:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
+            <div class="grid grid-cols-2 sm:grid-cols-5 divide-slate-100">
                 <!-- Coluna 1: Mês -->
-                <div class="p-4 sm:p-5 flex flex-col items-center justify-center text-center col-span-2 sm:col-span-1 bg-slate-50/50">
+                <div class="p-4 sm:p-5 flex flex-col items-center justify-center text-center col-span-2 sm:col-span-1 bg-slate-50/50 border-b sm:border-b-0 sm:border-r border-slate-100">
                     <span class="text-xs font-semibold text-slate-500 mb-1">Mês</span>
                     <span class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">
                         {{ $monthlySummary['month_label'] }}
@@ -49,7 +49,7 @@
                 </div>
 
                 <!-- Coluna 2: Total Ótimo -->
-                <div class="p-4 sm:p-5 flex flex-col items-center justify-center text-center">
+                <div class="p-4 sm:p-5 flex flex-col items-center justify-center text-center border-r sm:border-r-0 border-slate-100">
                     <span class="text-xs font-bold text-sky-600 mb-1">Total Ótimo</span>
                     <div class="flex items-baseline gap-1.5">
                         <span class="text-2xl sm:text-3xl font-black text-slate-900 tabular-nums">{{ $monthlySummary['optimal'] }}</span>
@@ -58,7 +58,7 @@
                 </div>
 
                 <!-- Coluna 3: Total Bom -->
-                <div class="p-4 sm:p-5 flex flex-col items-center justify-center text-center">
+                <div class="p-4 sm:p-5 flex flex-col items-center justify-center text-center sm:border-l sm:border-r border-slate-100">
                     <span class="text-xs font-bold text-emerald-600 mb-1">Total Bom</span>
                     <div class="flex items-baseline gap-1.5">
                         <span class="text-2xl sm:text-3xl font-black text-slate-900 tabular-nums">{{ $monthlySummary['good'] }}</span>
@@ -67,7 +67,7 @@
                 </div>
 
                 <!-- Coluna 4: Total Suficiente -->
-                <div class="p-4 sm:p-5 flex flex-col items-center justify-center text-center">
+                <div class="p-4 sm:p-5 flex flex-col items-center justify-center text-center border-t sm:border-t-0 border-r sm:border-r-0 border-slate-100">
                     <span class="text-xs font-bold text-amber-600 mb-1">Total Suficiente</span>
                     <div class="flex items-baseline gap-1.5">
                         <span class="text-2xl sm:text-3xl font-black text-slate-900 tabular-nums">{{ $monthlySummary['sufficient'] }}</span>
@@ -76,7 +76,7 @@
                 </div>
 
                 <!-- Coluna 5: Total Regular -->
-                <div class="p-4 sm:p-5 flex flex-col items-center justify-center text-center">
+                <div class="p-4 sm:p-5 flex flex-col items-center justify-center text-center border-t sm:border-t-0 sm:border-l border-slate-100">
                     <span class="text-xs font-bold text-rose-600 mb-1">Total Regular</span>
                     <div class="flex items-baseline gap-1.5">
                         <span class="text-2xl sm:text-3xl font-black text-slate-900 tabular-nums">{{ $monthlySummary['regular'] }}</span>
@@ -86,10 +86,10 @@
             </div>
         </div>
 
-        <!-- BARRA DE FILTROS (CNES, Unidade, INE, Equipe, Classificação Final, Paginação) -->
-        <div class="flex flex-wrap items-center gap-2.5">
+        <!-- BARRA DE FILTROS RESPONSIVA (CNES, Unidade, INE, Equipe, Classificação Final, Paginação) -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
             <!-- CNES -->
-            <div class="w-28 sm:w-32">
+            <div>
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="filterCnes"
@@ -99,7 +99,7 @@
             </div>
 
             <!-- Unidade -->
-            <div class="flex-1 min-w-[180px]">
+            <div class="col-span-1 sm:col-span-2 lg:col-span-1">
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="filterUnit"
@@ -109,7 +109,7 @@
             </div>
 
             <!-- INE -->
-            <div class="w-32 sm:w-36">
+            <div>
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="filterIne"
@@ -119,7 +119,7 @@
             </div>
 
             <!-- Equipe -->
-            <div class="flex-1 min-w-[180px]">
+            <div class="col-span-1 sm:col-span-2 lg:col-span-1">
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="filterTeam"
@@ -129,7 +129,7 @@
             </div>
 
             <!-- Classificação Final -->
-            <div class="w-44 sm:w-48">
+            <div>
                 <select
                     wire:model.live="filterClassification"
                     class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition shadow-2xs font-medium cursor-pointer"
@@ -142,11 +142,11 @@
                 </select>
             </div>
 
-            <!-- Paginação (10, 15, 30, 50, 100) -->
-            <div class="w-20">
+            <!-- Paginação & Limpar Filtros -->
+            <div class="flex items-center gap-2">
                 <select
                     wire:model.live="perPage"
-                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition shadow-2xs font-bold cursor-pointer"
+                    class="w-16 rounded-xl border border-slate-300 bg-white px-2 py-2 text-xs text-slate-800 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition shadow-2xs font-bold cursor-pointer"
                 >
                     <option value="10">10</option>
                     <option value="15">15</option>
@@ -154,25 +154,25 @@
                     <option value="50">50</option>
                     <option value="100">100</option>
                 </select>
-            </div>
 
-            <!-- Botão Limpar Filtros se houver algum ativo -->
-            @if ($filterCnes || $filterUnit || $filterIne || $filterTeam || $filterClassification || $advMinScore !== null || $advMaxScore !== null)
-                <button
-                    type="button"
-                    wire:click="resetFilters"
-                    class="rounded-xl px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 border border-rose-200 transition cursor-pointer"
-                    title="Limpar todos os filtros aplicados"
-                >
-                    Limpar
-                </button>
-            @endif
+                <!-- Botão Limpar Filtros se houver algum ativo -->
+                @if ($filterCnes || $filterUnit || $filterIne || $filterTeam || $filterClassification || $advMinScore !== null || $advMaxScore !== null)
+                    <button
+                        type="button"
+                        wire:click="resetFilters"
+                        class="flex-1 rounded-xl px-2 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 border border-rose-200 transition cursor-pointer text-center"
+                        title="Limpar todos os filtros aplicados"
+                    >
+                        Limpar
+                    </button>
+                @endif
+            </div>
         </div>
 
-        <!-- TABELA DE EQUIPES COM AS 14 COLUNAS EXATAS DA IMAGEM -->
+        <!-- TABELA DE EQUIPES COM AS 14 COLUNAS EXATAS DA IMAGEM E MIN-W RESPONSIVO -->
         <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-xs whitespace-nowrap">
+                <table class="w-full text-left border-collapse text-xs whitespace-nowrap min-w-[1100px]">
                     <thead>
                         <tr class="bg-slate-50/90 text-slate-500 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200">
                             <th class="py-3.5 px-3 text-center cursor-pointer hover:text-sky-700" wire:click="sortByField('cnes')">
@@ -734,12 +734,12 @@
         </div>
     @endif
 
-    <!-- MODAL DE BUSCA AVANÇADA INTERATIVO -->
+    <!-- MODAL DE BUSCA AVANÇADA INTERATIVO RESPONSIVO -->
     @if ($showAdvancedModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in" role="dialog" aria-modal="true" aria-labelledby="modal-advanced-title">
-            <div class="relative w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl border border-slate-200 space-y-5 animate-scale-up" @click.outside="$wire.closeAdvancedModal()">
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in" role="dialog" aria-modal="true" aria-labelledby="modal-advanced-title">
+            <div class="relative w-full max-w-lg rounded-2xl sm:rounded-3xl bg-white p-4 sm:p-6 shadow-2xl border border-slate-200 space-y-4 sm:space-y-5 animate-scale-up max-h-[90vh] overflow-y-auto" @click.outside="$wire.closeAdvancedModal()">
                 <!-- Cabeçalho do Modal -->
-                <div class="flex items-start justify-between border-b border-slate-100 pb-4">
+                <div class="flex items-start justify-between border-b border-slate-100 pb-3 sm:pb-4">
                     <div class="flex items-center gap-3">
                         <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-sky-100 text-sky-800">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">

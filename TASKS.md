@@ -281,3 +281,12 @@
   - [x] Remoção definitiva do botão "Importar CSV" e modal de upload de CSV oficial Siaps, mantendo o sistema 100% integrado aos dados reais.
   - [x] Limpeza completa de métodos e propriedades de upload no Livewire `TerritorialBondingOverview`.
   - [x] Atualização da suíte de testes de funcionalidade e compilação de assets de produção com Vite.
+
+- [x] **Fase 35: Design Responsivo Global do Módulo Vínculo e Acompanhamento (v1.23.3)**
+  - [x] Relação Nominal: barra de filtros rápidos em grid responsivo de 1 a 8 colunas, eliminando corte de texto em celulares.
+  - [x] Relação Nominal: tabela de 18 colunas com proteção `min-w-[1300px]` para scroll horizontal suave no mobile.
+  - [x] Relação Nominal: modais de busca avançada e prontuário com `max-h-[90vh] overflow-y-auto` e padding adaptável.
+  - [x] Equipes (Mensal): painel superior de síntese com grade 2x2 no mobile e 5 colunas no desktop com divisórias perfeitas.
+  - [x] Equipes (Mensal): barra de filtros em grid de 6 colunas e tabela de 14 colunas com `min-w-[1100px]`.
+  - [x] Componente de Abas: correção de fechamento de tag `<a>` e tipografia fluida.
+  - [x] Validação de compilação de todas as 3 abas sem erros de sintaxe ou variáveis indefinidas.

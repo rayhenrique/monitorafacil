@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.23.2';
+    public const CURRENT_VERSION = 'v1.23.3';
 
     public const CURRENT_RELEASE_DATE = '19/09/2026';
 
@@ -61,9 +61,22 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.23.2',
+                'version' => 'v1.23.3',
                 'date' => '19/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Design Responsivo Global do Módulo Vínculo e Acompanhamento',
+                'summary' => 'Auditoria e refinamento de todas as abas do módulo CVAT (Relação Nominal, Equipes Mensal e Caderno Metodológico), garantindo layout 100% responsivo para mobile, tablet e desktop com proteção contra quebras de tabela e modais fluidos.',
+                'highlights' => [
+                    ['type' => 'interface', 'text' => 'Relação Nominal: filtros rápidos reorganizados em grid adaptativo de 1 a 8 colunas, tabela nominal de 18 colunas com rolagem protegida (min-w-[1300px]) e modais de busca avançada e prontuário com max-height adaptável.'],
+                    ['type' => 'interface', 'text' => 'Equipes (Mensal): painel de síntese superior com grade 2x2 no mobile e 5 colunas no desktop com divisórias limpas, barra de filtros em grid responsivo de 6 colunas e tabela de 14 colunas com min-w-[1100px].'],
+                    ['type' => 'interface', 'text' => 'Caderno Metodológico: tabelas analíticas com rolagem fluida e fórmulas protegidas contra estouro de largura em celulares.'],
+                    ['type' => 'correcao', 'text' => 'Correção de fechamento de tags HTML e passagem de estado reativo da classe Livewire para evitar falhas de contexto.'],
+                ],
+            ],
+            [
+                'version' => 'v1.23.2',
+                'date' => '19/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Caderno Metodológico Responsivo e Remoção de Importação Manual',
                 'summary' => 'Aba Caderno Metodológico 100% responsiva para dispositivos móveis e tablets com visualização suave de tabelas e fórmulas, além da eliminação definitiva da importação manual de CSV oficial Siaps.',
                 'highlights' => [

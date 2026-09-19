@@ -4,6 +4,27 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.23.3] - 19/09/2026
+
+### 🎨 Design Responsivo Global do Módulo Vínculo e Acompanhamento
+- **Auditoria de Responsividade Completa**:
+  - **Aba Relação Nominal (`/vinculo-e-acompanhamento/relacao-nominal`)**:
+    - Cabeçalho responsivo com botão de busca avançada adaptável (`w-full sm:w-auto`).
+    - Matriz da Dimensão Cadastro e Dimensão Acompanhamento com paddings e bordas proporcionais para smartphones e tablets.
+    - Barra de filtros rápidos reestruturada em grid adaptativo de 1 a 8 colunas (`grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8`), eliminando campos espremidos no celular.
+    - Controles de paginação, dropdowns e contador de registros organizados em pilha vertical no mobile e linha única no desktop.
+    - Tabela nominal de 18 colunas com proteção de largura mínima (`min-w-[1300px]`), permitindo rolagem horizontal suave sem deformação de dados.
+    - Modais de Busca Avançada e Prontuário de Detalhes ajustados com `max-h-[90vh] overflow-y-auto` e padding adaptável.
+  - **Aba Equipes Mensal (`/vinculo-e-acompanhamento?aba=teams`)**:
+    - Painel superior de síntese com grade 2x2 no mobile e 5 colunas no desktop, com divisórias estéticas limpas sem linhas órfãs.
+    - Barra de filtros reorganizada em grid responsivo de 6 colunas (`grid-cols-2 sm:grid-cols-3 lg:grid-cols-6`), com alinhamento uniforme.
+    - Tabela de equipes de 14 colunas com largura mínima garantida (`min-w-[1100px]`).
+    - Modal de busca avançada com scroll vertical automático em telas de baixa altura.
+  - **Componente de Abas (`territorial-bonding-tabs.blade.php`)**:
+    - Correção de fechamento de tags HTML e refinamento de tipografia do título e badges.
+
+---
+
 ## [v1.23.2] - 19/09/2026
 
 ### 📱 Caderno Metodológico Responsivo e Remoção de Importação Manual

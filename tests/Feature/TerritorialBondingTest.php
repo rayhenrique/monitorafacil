@@ -94,4 +94,17 @@ class TerritorialBondingTest extends TestCase
             ->assertSee('Dimensão Acompanhamento (Índice Y')
             ->assertDontSee('Importar CSV');
     }
+
+    public function test_nominal_list_renders_and_displays_metrics(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get('/vinculo-e-acompanhamento/relacao-nominal');
+
+        $response->assertOk();
+        $response->assertSee('Monitoramento de Vínculo e Acompanhamento - Relação Nominal');
+        $response->assertSee('DIMENSÃO CADASTRO');
+        $response->assertSee('DIMENSÃO ACOMPANHAMENTO');
+        $response->assertSee('Busca Avançada');
+    }
 }
