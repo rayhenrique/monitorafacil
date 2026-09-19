@@ -10,19 +10,56 @@ use Illuminate\Support\Facades\DB;
 class C2ActiveSearchService
 {
     /**
-     * Verifica se há registros reais na base local para a competência.
+     * Retorna os 7 quadrimestres (o atual mais 6 quadrimestres futuros) que formam a janela
+     * de acompanhamento da busca ativa de crianças de 0 a 24 meses do Indicador C2.
+     *
+     * @return list<array{year: int, quarter: int}>
      */
-    public static function isRealDataAvailable(int $year, int $quarter): bool
+    public static function getActiveSearchQuarterPairs(int $year, int $quarter): array
     {
-        return C2NominalChild::query()->where('year', $year)->where('quarter', $quarter)->exists();
+        $pairs = [];
+        $baseIndex = ($year * 3) + ($quarter - 1);
+        for ($i = 0; $i <= 6; $i++) {
+            $idx = $baseIndex + $i;
+            $pairs[] = [
+                'year' => intdiv($idx, 3),
+                'quarter' => ($idx % 3) + 1,
+            ];
+        }
+
+        return $pairs;
     }
 
     /**
-     * Retorna a quantidade de crianças reais na coorte gravada.
+     * Verifica se há registros reais na base local para a janela de acompanhamento.
+     */
+    public static function isRealDataAvailable(int $year, int $quarter): bool
+    {
+        $periods = self::getActiveSearchQuarterPairs($year, $quarter);
+
+        return C2NominalChild::query()->where(function ($query) use ($periods) {
+            foreach ($periods as $p) {
+                $query->orWhere(function ($sub) use ($p) {
+                    $sub->where('year', $p['year'])->where('quarter', $p['quarter']);
+                });
+            }
+        })->exists();
+    }
+
+    /**
+     * Retorna a quantidade de crianças reais na coorte gravada (janela de 7 quadrimestres).
      */
     public static function getRealChildrenCount(int $year, int $quarter, ?string $ine = null): int
     {
-        $q = C2NominalChild::query()->where('year', $year)->where('quarter', $quarter);
+        $periods = self::getActiveSearchQuarterPairs($year, $quarter);
+        $q = C2NominalChild::query()->where(function ($query) use ($periods) {
+            foreach ($periods as $p) {
+                $query->orWhere(function ($sub) use ($p) {
+                    $sub->where('year', $p['year'])->where('quarter', $p['quarter']);
+                });
+            }
+        });
+
         if ($ine) {
             $q->where('ine', $ine);
         }
@@ -31,7 +68,8 @@ class C2ActiveSearchService
     }
 
     /**
-     * Executa a extração em tempo real da base e-SUS PEC para a base local MySQL.
+     * Executa a extração em tempo real da base e-SUS PEC para a base local MySQL cobrindo
+     * o quadrimestre atual e 6 quadrimestres futuros (7 quadrimestres).
      *
      * @return array{children:int,cohort_children:int,completed_children:int,teams:int,months:int}
      */
@@ -39,8 +77,19 @@ class C2ActiveSearchService
     {
         $pec = DB::connection('pgsql_esus');
         $eligibleTeams = app(FamilyHealthService::class)->getEligibleTeams($year, $quarter);
+        $periods = self::getActiveSearchQuarterPairs($year, $quarter);
 
-        return app(C2SnapshotService::class)->process($pec, $year, $quarter, $eligibleTeams);
+        $totalStats = ['children' => 0, 'cohort_children' => 0, 'completed_children' => 0, 'teams' => 0, 'months' => 0];
+        foreach ($periods as $p) {
+            $stats = app(C2SnapshotService::class)->process($pec, $p['year'], $p['quarter'], $eligibleTeams);
+            $totalStats['children'] += $stats['children'];
+            $totalStats['cohort_children'] += $stats['cohort_children'];
+            $totalStats['completed_children'] += $stats['completed_children'];
+            $totalStats['teams'] = max($totalStats['teams'], $stats['teams']);
+            $totalStats['months'] += $stats['months'];
+        }
+
+        return $totalStats;
     }
 
     /**
@@ -109,10 +158,15 @@ class C2ActiveSearchService
      */
     public function getBaseCohort(int $year, int $quarter, ?string $selectedIne = null): Collection
     {
-        // 1. Tenta carregar da base nominal real local
-        $dbQuery = C2NominalChild::query()
-            ->where('year', $year)
-            ->where('quarter', $quarter);
+        // 1. Tenta carregar da base nominal real local (janela de 7 quadrimestres: atual + 6 futuros)
+        $periods = self::getActiveSearchQuarterPairs($year, $quarter);
+        $dbQuery = C2NominalChild::query()->where(function ($query) use ($periods) {
+            foreach ($periods as $p) {
+                $query->orWhere(function ($sub) use ($p) {
+                    $sub->where('year', $p['year'])->where('quarter', $p['quarter']);
+                });
+            }
+        });
 
         if ($selectedIne) {
             $dbQuery->where('ine', $selectedIne);
@@ -541,18 +595,6 @@ class C2ActiveSearchService
             }
 
             // Filtros Avançados
-            if (! empty($filters['advDistrict'])) {
-                if (mb_strtolower($item['district']) !== mb_strtolower($filters['advDistrict'])) {
-                    return false;
-                }
-            }
-
-            if (! empty($filters['advFacility'])) {
-                if ($item['cnes'] !== $filters['advFacility']) {
-                    return false;
-                }
-            }
-
             if (! empty($filters['advTeam'])) {
                 if ($item['ine'] !== $filters['advTeam']) {
                     return false;
@@ -596,6 +638,55 @@ class C2ActiveSearchService
                 }
             }
 
+            // Filtro por Mês de Referência (MM / YYYY) e Opção de Mês
+            if (! empty($filters['advMonth'])) {
+                $rawFilter = preg_replace('/\s+/', '', (string) $filters['advMonth']);
+                $rawItem = preg_replace('/\s+/', '', (string) ($item['month_ref'] ?? ''));
+
+                if (str_contains($rawFilter, '/')) {
+                    [$fMonth, $fYear] = explode('/', $rawFilter, 2);
+                    $filterIndex = ((int) $fYear * 12) + (int) $fMonth;
+
+                    $itemIndex = 0;
+                    if (str_contains($rawItem, '/')) {
+                        [$iMonth, $iYear] = explode('/', $rawItem, 2);
+                        $itemIndex = ((int) $iYear * 12) + (int) $iMonth;
+                    } elseif (! empty($item['birth_date'])) {
+                        $twoYearsLater = Carbon::parse($item['birth_date'])->addYears(2);
+                        $itemIndex = ($twoYearsLater->year * 12) + $twoYearsLater->month;
+                        $rawItem = $twoYearsLater->format('m/Y');
+                    }
+
+                    $monthOption = $filters['advMonthOption'] ?? 'selected_and_next';
+
+                    if ($monthOption === 'only_selected') {
+                        if ($rawItem !== $rawFilter) {
+                            return false;
+                        }
+                    } elseif ($monthOption === 'selected_and_next') {
+                        if ($itemIndex < $filterIndex) {
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            // Filtro por Quadrimestre (1, 2, 3)
+            if (! empty($filters['advQuarter'])) {
+                $targetQuarter = (int) $filters['advQuarter'];
+                $rawItem = preg_replace('/\s+/', '', (string) ($item['month_ref'] ?? ''));
+                $m = 0;
+                if (str_contains($rawItem, '/')) {
+                    [$mStr] = explode('/', $rawItem, 2);
+                    $m = (int) $mStr;
+                } elseif (! empty($item['birth_date'])) {
+                    $m = Carbon::parse($item['birth_date'])->addYears(2)->month;
+                }
+                if ($m > 0 && ceil($m / 4) != $targetQuarter) {
+                    return false;
+                }
+            }
+
             if (! empty($filters['advProfessionalCns'])) {
                 $rawCns = preg_replace('/\D/', '', (string) $filters['advProfessionalCns']);
                 $itemCns = preg_replace('/\D/', '', (string) $item['professional_cns']);
@@ -617,8 +708,14 @@ class C2ActiveSearchService
                 }
             }
 
-            // Filtro por faixa etária
-            if (! empty($filters['advAgeGroup'])) {
+            // Filtro por Idade (meses): multiselect de meses individuais ou faixa etária
+            if (! empty($filters['advAgeMonths']) && is_array($filters['advAgeMonths'])) {
+                $age = (int) $item['age_months'];
+                $selectedAges = array_map('intval', $filters['advAgeMonths']);
+                if (! in_array($age, $selectedAges, true)) {
+                    return false;
+                }
+            } elseif (! empty($filters['advAgeGroup'])) {
                 $age = (int) $item['age_months'];
                 $matchGroup = match ($filters['advAgeGroup']) {
                     '0-6' => $age >= 0 && $age <= 6,
@@ -765,53 +862,85 @@ class C2ActiveSearchService
      *
      * @return array<string, mixed>
      */
-    public function getFilterOptions(): array
+    public function getFilterOptions(?int $year = null, ?int $quarter = null): array
     {
+        $baseYear = $year ?? (int) now()->year;
+        $baseQuarter = $quarter ?? min(3, (int) ceil(now()->month / 4));
+
+        // 1. Equipes Reais: busca nas equipes elegíveis homologadas e nas equipes com crianças registradas
+        $teams = [];
+        try {
+            $eligible = app(FamilyHealthService::class)->getEligibleTeams($baseYear, $baseQuarter);
+            foreach ($eligible as $et) {
+                $teams[$et['ine']] = [
+                    'ine' => $et['ine'],
+                    'name' => $et['ine'].' · '.$et['name'],
+                ];
+            }
+        } catch (\Throwable) {
+        }
+
+        try {
+            $nominalTeams = C2NominalChild::query()
+                ->select('ine', 'team_name')
+                ->whereNotNull('ine')
+                ->distinct()
+                ->get();
+            foreach ($nominalTeams as $nt) {
+                if (! isset($teams[$nt->ine])) {
+                    $teams[$nt->ine] = [
+                        'ine' => $nt->ine,
+                        'name' => $nt->ine.' · '.($nt->team_name ?: 'Equipe eSF'),
+                    ];
+                }
+            }
+        } catch (\Throwable) {
+        }
+
+        if (empty($teams)) {
+            try {
+                $cnesParser = app(CnesXmlParserService::class);
+                $cnesTeams = $cnesParser->getEligibleC1Teams();
+                foreach ($cnesTeams as $ct) {
+                    $teams[$ct['ine']] = [
+                        'ine' => $ct['ine'],
+                        'name' => $ct['ine'].' · '.$ct['name'],
+                    ];
+                }
+            } catch (\Throwable) {
+            }
+        }
+
+        // 2. Lista de 28 Meses para a Janela de 7 Quadrimestres (Atual + 6 Futuros)
+        $months = [];
+        $startMonthNum = (($baseQuarter - 1) * 4) + 1;
+        $currentStart = Carbon::create($baseYear, $startMonthNum, 1);
+
+        for ($i = 0; $i < 28; $i++) {
+            $mDate = (clone $currentStart)->addMonths($i);
+            $months[] = [
+                'value' => $mDate->format('m/Y'),
+                'label' => $mDate->format('m / Y'),
+            ];
+        }
+
+        // 3. Opções de Idade de 0 a 24 meses individuais
+        $ageOptions = [];
+        for ($a = 0; $a <= 24; $a++) {
+            $ageOptions[] = [
+                'value' => $a,
+                'label' => $a === 1 ? '1 mês' : $a.' meses',
+            ];
+        }
+
         return [
-            'districts' => [
-                'Centro',
-                'São Jorge',
-                'Gulandin',
-                'Vila Nova',
-                'Bairro Novo',
-                'Palmeiras',
-                'Mutirão',
-                'Parque do Futuro',
-                'Zona Rural',
+            'teams' => array_values($teams),
+            'months' => $months,
+            'month_options' => [
+                ['value' => 'selected_and_next', 'label' => 'Mês Selecionado e Próximos Meses'],
+                ['value' => 'only_selected', 'label' => 'Apenas Mês Selecionado'],
             ],
-            'facilities' => [
-                ['cnes' => '0111791', 'name' => '0111791 · USF Centro de Saúde Central'],
-                ['cnes' => '2719886', 'name' => '2719886 · USF São Jorge'],
-                ['cnes' => '2722682', 'name' => '2722682 · USF Gulandim'],
-                ['cnes' => '2008556', 'name' => '2008556 · USF Vila Nova'],
-                ['cnes' => '2722593', 'name' => '2722593 · USF Bairro Novo'],
-                ['cnes' => '2722623', 'name' => '2722623 · USF Jardim das Palmeiras'],
-                ['cnes' => '4020596', 'name' => '4020596 · USF Mutirão'],
-                ['cnes' => '2719738', 'name' => '2719738 · USF Parque do Futuro'],
-                ['cnes' => '2719746', 'name' => '2719746 · USF Retiro'],
-                ['cnes' => '2719754', 'name' => '2719754 · USF Poço da Pedra'],
-            ],
-            'teams' => [
-                ['ine' => '0001715364', 'name' => '0001715364 · eSF 01 - Centro'],
-                ['ine' => '000171123', 'name' => '000171123 · eSF 02 - São Jorge'],
-                ['ine' => '000171220', 'name' => '000171220 · eSF 03 - Gulandim'],
-                ['ine' => '000171085', 'name' => '000171085 · eSF 04 - Vila Nova'],
-                ['ine' => '000171174', 'name' => '000171174 · eSF 05 - Bairro Novo'],
-                ['ine' => '000171704', 'name' => '000171704 · eSF 06 - Palmeiras'],
-                ['ine' => '000171239', 'name' => '000171239 · eSF 07 - Mutirão'],
-                ['ine' => '000171107', 'name' => '000171107 · eSF 08 - Parque do Futuro'],
-                ['ine' => '000171311', 'name' => '000171311 · eSF 09 - Retiro'],
-                ['ine' => '000171425', 'name' => '000171425 · eSF 10 - Poço da Pedra'],
-                ['ine' => '000171512', 'name' => '000171512 · eSF 11 - Alto da Boa Vista'],
-                ['ine' => '000171638', 'name' => '000171638 · eSF 12 - Miguel Arraes'],
-                ['ine' => '000171749', 'name' => '000171749 · eSF 13 - João Paulo II'],
-                ['ine' => '000171856', 'name' => '000171856 · eSF 14 - Canavieira'],
-                ['ine' => '000171963', 'name' => '000171963 · eSF 15 - Coqueiro'],
-                ['ine' => '000172074', 'name' => '000172074 · eSF 16 - Pau Amarelo'],
-                ['ine' => '000172181', 'name' => '000172181 · eSF 17 - Tabuleiro'],
-                ['ine' => '000172299', 'name' => '000172299 · eSF 18 - Cidade de Deus'],
-                ['ine' => '000172315', 'name' => '000172315 · eSF 19 - Olho D’Água'],
-            ],
+            'age_options' => $ageOptions,
             'races' => ['Parda', 'Branca', 'Preta', 'Amarela', 'Indígena'],
             'quarters' => [
                 ['value' => '1', 'label' => 'Q1 · Jan a Abr'],

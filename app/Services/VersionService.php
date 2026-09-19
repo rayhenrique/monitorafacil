@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.14.2';
+    public const CURRENT_VERSION = 'v1.15.0';
 
     public const CURRENT_RELEASE_DATE = '18/09/2026';
 
@@ -61,9 +61,23 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.14.2',
+                'version' => 'v1.15.0',
                 'date' => '18/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Refinamento da Busca Avançada C2 e Coorte de 0 a 24 Meses (7 Quadrimestres)',
+                'summary' => 'Remoção dos campos de Distrito e Unidade na Busca Avançada do C2, mantendo Equipe real e Microárea; novos seletores customizados de Mês (MM / YYYY) e Opção de Mês; novo seletor multiselect de Idade com chips (0-6, 7-12, 13-24) e seleção de meses de 0 a 24; e processamento de 6 quadrimestres futuros no e-SUS PEC para cobertura de toda a faixa etária infantil.',
+                'highlights' => [
+                    ['type' => 'melhoria', 'text' => 'Remoção dos filtros de Distrito e Unidade na Busca Avançada do C2, exibindo lista de Equipes reais homologadas.'],
+                    ['type' => 'novo', 'text' => 'Novo seletor de Mês (MM / YYYY) com busca em tempo real, botão de limpeza e 28 meses disponíveis.'],
+                    ['type' => 'novo', 'text' => 'Novo seletor de Opção de Mês com alternância entre "Mês Selecionado e Próximos Meses" e "Apenas Mês Selecionado".'],
+                    ['type' => 'novo', 'text' => 'Novo seletor de Idade (meses) com chips rápidos (0-6, 7-12, 13-24) e dropdown multiselect de 0 a 24 meses.'],
+                    ['type' => 'melhoria', 'text' => 'Processamento no e-SUS PEC expandido para 7 quadrimestres (atual + 6 futuros), garantindo base real para crianças de 0 a 24 meses.'],
+                ],
+            ],
+            [
+                'version' => 'v1.14.2',
+                'date' => '18/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Centralização do Processamento de Dados',
                 'summary' => 'Remoção do botão de sincronização pontual no detalhamento do indicador C2 e consolidação de todo o processamento de dados (incluindo a coorte e lista nominal do C2) centralizado no módulo de Processamento de Dados em Configurações.',
                 'highlights' => [

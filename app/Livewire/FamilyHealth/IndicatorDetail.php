@@ -54,10 +54,6 @@ class IndicatorDetail extends Component
     // Modal Busca Avançada
     public bool $showAdvancedModal = false;
 
-    public string $advDistrict = '';
-
-    public string $advFacility = '';
-
     public string $advTeam = '';
 
     public string $advMicroarea = '';
@@ -83,6 +79,9 @@ class IndicatorDetail extends Component
     public string $advRaceColor = '';
 
     public string $advAgeGroup = '';
+
+    /** @var list<int> */
+    public array $advAgeMonths = [];
 
     public ?string $advMici = null;
 
@@ -206,8 +205,6 @@ class IndicatorDetail extends Component
 
     public function clearAdvancedFilters(): void
     {
-        $this->advDistrict = '';
-        $this->advFacility = '';
         $this->advTeam = '';
         $this->advMicroarea = '';
         $this->advCitizenName = '';
@@ -221,6 +218,7 @@ class IndicatorDetail extends Component
         $this->advProfessionalName = '';
         $this->advRaceColor = '';
         $this->advAgeGroup = '';
+        $this->advAgeMonths = [];
         $this->advMici = null;
         $this->advMicdt = null;
         $this->advAccompanied = null;
@@ -234,8 +232,77 @@ class IndicatorDetail extends Component
 
     public function setAgeGroup(string $group): void
     {
-        $this->advAgeGroup = ($this->advAgeGroup === $group) ? '' : $group;
+        if ($this->advAgeGroup === $group) {
+            $this->advAgeGroup = '';
+            $this->advAgeMonths = [];
+        } else {
+            $this->advAgeGroup = $group;
+            $this->advAgeMonths = match ($group) {
+                '0-6' => range(0, 6),
+                '7-12' => range(7, 12),
+                '13-24' => range(13, 24),
+                default => [],
+            };
+        }
         $this->c2Page = 1;
+    }
+
+    public function toggleAgeMonth(int $month): void
+    {
+        if (in_array($month, $this->advAgeMonths, true)) {
+            $this->advAgeMonths = array_values(array_filter($this->advAgeMonths, fn ($m) => $m !== $month));
+        } else {
+            $this->advAgeMonths[] = $month;
+            sort($this->advAgeMonths);
+        }
+
+        $this->syncAgeGroupFromMonths();
+        $this->c2Page = 1;
+    }
+
+    public function toggleAllAgeMonths(): void
+    {
+        if (count($this->advAgeMonths) >= 25) {
+            $this->advAgeMonths = [];
+            $this->advAgeGroup = '';
+        } else {
+            $this->advAgeMonths = range(0, 24);
+            $this->advAgeGroup = '';
+        }
+        $this->c2Page = 1;
+    }
+
+    public function setMonthFilter(string $month): void
+    {
+        $this->advMonth = $month;
+        $this->c2Page = 1;
+    }
+
+    public function clearMonthFilter(): void
+    {
+        $this->advMonth = '';
+        $this->c2Page = 1;
+    }
+
+    public function setMonthOption(string $option): void
+    {
+        $this->advMonthOption = $option;
+        $this->c2Page = 1;
+    }
+
+    private function syncAgeGroupFromMonths(): void
+    {
+        $m = $this->advAgeMonths;
+        sort($m);
+        if ($m === range(0, 6)) {
+            $this->advAgeGroup = '0-6';
+        } elseif ($m === range(7, 12)) {
+            $this->advAgeGroup = '7-12';
+        } elseif ($m === range(13, 24)) {
+            $this->advAgeGroup = '13-24';
+        } else {
+            $this->advAgeGroup = '';
+        }
     }
 
     public function toggleBooleanFilter(string $key, string $value): void
@@ -352,8 +419,6 @@ class IndicatorDetail extends Component
                 'searchName' => $this->searchName,
                 'searchCnes' => $this->searchCnes,
                 'searchIne' => $this->searchIne,
-                'advDistrict' => $this->advDistrict,
-                'advFacility' => $this->advFacility,
                 'advTeam' => $this->advTeam,
                 'advMicroarea' => $this->advMicroarea,
                 'advCitizenName' => $this->advCitizenName,
@@ -367,6 +432,7 @@ class IndicatorDetail extends Component
                 'advProfessionalName' => $this->advProfessionalName,
                 'advRaceColor' => $this->advRaceColor,
                 'advAgeGroup' => $this->advAgeGroup,
+                'advAgeMonths' => $this->advAgeMonths,
                 'advMici' => $this->advMici,
                 'advMicdt' => $this->advMicdt,
                 'advAccompanied' => $this->advAccompanied,
@@ -378,14 +444,18 @@ class IndicatorDetail extends Component
             ];
 
             foreach ($filters as $k => $val) {
-                if ($val !== '' && $val !== null && $k !== 'advMonthOption') {
+                if ($k === 'advAgeMonths') {
+                    if (! empty($val) && empty($filters['advAgeGroup'])) {
+                        $activeFiltersCount++;
+                    }
+                } elseif ($val !== '' && $val !== null && $k !== 'advMonthOption') {
                     $activeFiltersCount++;
                 }
             }
 
             $c2FilteredCohort = $c2Service->filterCohort($c2BaseCohort, $filters);
             $c2SummaryKpis = $c2Service->getSummaryKpis($c2FilteredCohort, $this->year, $this->quarter, $this->selectedMonth);
-            $c2FilterOptions = $c2Service->getFilterOptions();
+            $c2FilterOptions = $c2Service->getFilterOptions($this->year, $this->quarter);
 
             $c2TotalItems = $c2FilteredCohort->count();
             $c2TotalPages = max(1, (int) ceil($c2TotalItems / max(1, $this->perPage)));

@@ -755,6 +755,26 @@ class FamilyHealthTest extends TestCase
         $component->assertSee('ADRIAN GAEL')
             ->assertDontSee('ABNER VALENTIM'); // Abner has practice A = 3 (sim)
 
+        // Clear previous boolean filter and test month filter (Image 1 & 2)
+        $component->call('clearAdvancedFilters')
+            ->call('setMonthFilter', '10/2026')
+            ->call('setMonthOption', 'only_selected')
+            ->assertSee('ADYLLA SOPHIA') // Month ref 10/2026
+            ->assertDontSee('ABNER VALENTIM'); // Month ref 01/2028
+
+        // Test age group chips (Image 3)
+        $component->call('clearAdvancedFilters')
+            ->call('setAgeGroup', '0-6')
+            ->assertSee('ÁDAN LAEL') // 6 months
+            ->assertSee('AGATHA ANTONELLA') // 1 month
+            ->assertDontSee('ADYLLA SOPHIA'); // 22 months
+
+        // Test age months multiselect (Image 4)
+        $component->call('clearAdvancedFilters')
+            ->call('toggleAgeMonth', 22)
+            ->assertSee('ADYLLA SOPHIA')
+            ->assertDontSee('ÁDAN LAEL');
+
         // Clear filters
         $component->call('clearAdvancedFilters')
             ->assertSee('ABNER VALENTIM')
@@ -834,5 +854,58 @@ class FamilyHealthTest extends TestCase
             ->assertSee('Base Real e-SUS PEC')
             ->assertSee('MARIA FLOR DA SILVA REAL')
             ->assertDontSee('ABNER VALENTIM'); // Quando a base real tem registros, os dados mockados deixam de aparecer
+    }
+
+    public function test_c2_seven_quarters_window_and_future_quarters_inclusion(): void
+    {
+        $this->authenticateUser();
+
+        $pairs = C2ActiveSearchService::getActiveSearchQuarterPairs(2026, 3);
+        $this->assertCount(7, $pairs);
+        $this->assertSame([
+            ['year' => 2026, 'quarter' => 3],
+            ['year' => 2027, 'quarter' => 1],
+            ['year' => 2027, 'quarter' => 2],
+            ['year' => 2027, 'quarter' => 3],
+            ['year' => 2028, 'quarter' => 1],
+            ['year' => 2028, 'quarter' => 2],
+            ['year' => 2028, 'quarter' => 3],
+        ], $pairs);
+
+        // Insere uma criança cujo 2º aniversário cai em 2027/Q2 (quadrimestre futuro +2)
+        C2NominalChild::query()->create([
+            'year' => 2027,
+            'quarter' => 2,
+            'cidadao_pec_id' => 887766,
+            'cns' => '709999999999999',
+            'cpf' => '999.888.777-66',
+            'name' => 'BEBE FUTURO DOIS ANOS REAL',
+            'mother_name' => 'MAE DO BEBE',
+            'birth_date' => '2025-06-15',
+            'age_months' => 15,
+            'race_color' => 'Branca',
+            'cnes' => '0111791',
+            'facility_name' => 'USF CENTRO DE SAUDE CENTRAL',
+            'district' => 'Centro',
+            'ine' => '0001715364',
+            'team_name' => 'eSF 01 · Centro',
+            'month_ref' => '06/2027',
+            'microarea' => '02',
+            'mici_updated' => true,
+            'micdt_updated' => true,
+            'is_accompanied' => true,
+            'practice_a' => 1,
+            'practice_b' => 9,
+            'practice_c' => 9,
+            'practice_d' => 2,
+            'practice_e' => 10,
+            'score_percent' => 100.0,
+            'calculation_version' => C2DwService::VERSION,
+        ]);
+
+        // Ao visualizar 2026/Q3, a criança do quadrimestre futuro deve ser carregada na busca ativa
+        Livewire::test(IndicatorDetail::class, ['indicator' => 'c2', 'year' => 2026, 'quarter' => 3])
+            ->set('activeTab', 'active_search')
+            ->assertSee('BEBE FUTURO DOIS ANOS REAL');
     }
 }

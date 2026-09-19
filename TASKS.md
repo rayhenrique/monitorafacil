@@ -147,4 +147,10 @@
   - [x] **Patch v1.14.1**: Detecção dinâmica via `information_schema` das colunas de `tb_acomp_cidadaos_vinculados`, eliminando `no_mae_cidadao` e prevenindo erro `SQLSTATE[42703]`.
   - [x] **Patch v1.14.2**: Remoção do botão isolado "Sincronizar PEC" da aba C2 e centralização unificada no módulo de Processamento de Dados com botão dedicado "Processar C2 & Lista Nominal".
 
-
+- [x] **Fase 19: Refinamento de Busca Avançada C2 & Coorte de 7 Quadrimestres (v1.15.0)**
+  - [x] Remoção dos campos mockados "Distrito" e "Unidade" na Busca Avançada do C2, preservando apenas "Equipe" (com lista real de equipes eSF homologadas) e "Microárea".
+  - [x] Dropdown customizado de seleção de Mês com busca em tempo real, botão de limpeza (`X`), indicador de seta e formatação `MM / YYYY`.
+  - [x] Dropdown de Opção de Mês com opções "Mês Selecionado e Próximos Meses" e "Apenas Mês Selecionado".
+  - [x] Filtro de Idade (meses) com chips rápidos (`0-6 meses`, `7-12 meses`, `13-24 meses`) e menu multiselect retrátil com seleção geral ("Selecionar todos"), busca e seleção de meses de 0 a 24.
+  - [x] Expansão do processamento no e-SUS PEC para 7 quadrimestres (atual + 6 futuros), cobrindo crianças de 0 a 24 meses de idade para funcionamento pleno do filtro etário.
+  - [x] Testes automatizados abrangentes cobrindo novos filtros, seletores e coorte de 7 quadrimestres.

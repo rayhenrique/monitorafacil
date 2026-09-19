@@ -505,7 +505,7 @@ class EsusDataProcessingService
             }
         } // Fim da ETAPA 3 (C1)
 
-        // ETAPA 3.5: Indicador C2 Desenvolvimento Infantil (Boas Práticas A a E e Mês a Mês)
+        // ETAPA 3.5: Indicador C2 Desenvolvimento Infantil (Boas Práticas A a E e Mês a Mês - 7 Quadrimestres)
         $c2FailureMessage = null;
         if ($scope === 'all' || $scope === 'c2') {
             $this->notifyProgress($progressCallback, 75, 'Processando Indicador C2 (Desenvolvimento Infantil e Boas Práticas)...', $tablesReport);
@@ -513,20 +513,53 @@ class EsusDataProcessingService
                 if (! $isLivePecConnected || ! $connection) {
                     throw new \RuntimeException('A leitura do C2 exige conexão com o DW do PEC. Nenhum resultado foi gerado.');
                 }
-                $c2Stats = app(C2SnapshotService::class)->process($connection, $year, $quarter, $eligibleTeamsByIne);
+
+                $totalCohort = 0;
+                $totalCompleted = 0;
+                $maxTeams = 0;
+                $quartersProcessed = [];
+                $baseIndex = ($year * 3) + ($quarter - 1);
+
+                for ($offset = 0; $offset <= 6; $offset++) {
+                    $targetIndex = $baseIndex + $offset;
+                    $targetYear = intdiv($targetIndex, 3);
+                    $targetQuarter = ($targetIndex % 3) + 1;
+                    $quarterLabel = sprintf('%d/Q%d', $targetYear, $targetQuarter);
+
+                    $stepPercent = 70 + (int) round(($offset / 7) * 14);
+                    $this->notifyProgress(
+                        $progressCallback,
+                        $stepPercent,
+                        sprintf('Processando Indicador C2 (%s - %d de 7 quadrimestres)...', $quarterLabel, $offset + 1),
+                        $tablesReport
+                    );
+
+                    $c2Stats = app(C2SnapshotService::class)->process($connection, $targetYear, $targetQuarter, $eligibleTeamsByIne);
+                    $totalCohort += $c2Stats['cohort_children'];
+                    $totalCompleted += $c2Stats['completed_children'];
+                    $maxTeams = max($maxTeams, $c2Stats['teams']);
+                    $quartersProcessed[] = $quarterLabel;
+                }
+
                 $tablesReport['c2_dw'] = [
                     'name' => 'C2 · DW PEC',
-                    'description' => 'Coorte de crianças de 2 anos, boas práticas A–E e lista nominal de busca ativa',
+                    'description' => 'Coorte de crianças de 0 a 24 meses (7 quadrimestres: atual + 6 futuros), boas práticas A–E e lista nominal',
                     'status' => 'success',
-                    'rows' => $c2Stats['cohort_children'],
-                    'message' => sprintf('%d crianças na coorte com lista nominal gravada; %d já completaram 2 anos; %d equipes e %d meses com coorte. Estimativa local sem RNDS.',
-                        $c2Stats['cohort_children'], $c2Stats['completed_children'], $c2Stats['teams'], $c2Stats['months']),
+                    'rows' => $totalCohort,
+                    'message' => sprintf(
+                        '%d crianças na coorte (0 a 24 meses) gravadas em 7 quadrimestres (%s a %s); %d completaram 2 anos; %d equipes com lista nominal pronta para busca ativa.',
+                        $totalCohort,
+                        $quartersProcessed[0],
+                        end($quartersProcessed),
+                        $totalCompleted,
+                        $maxTeams
+                    ),
                 ];
             } catch (Throwable $e) {
                 $message = 'C2 não processado: '.$e->getMessage();
                 $tablesReport['c2_dw'] = [
                     'name' => 'C2 · DW PEC',
-                    'description' => 'Coorte de crianças que completaram 2 anos e boas práticas A–E',
+                    'description' => 'Coorte de crianças de 0 a 24 meses e boas práticas A–E',
                     'status' => 'error',
                     'rows' => 0,
                     'message' => $message,

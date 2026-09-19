@@ -2454,41 +2454,15 @@
 
                             <!-- Form Grid -->
                             <div class="space-y-4 text-xs">
-                                <!-- Linha 1: Distrito, Unidade, Equipes, Microárea -->
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    <div class="space-y-1">
-                                        <label class="font-semibold text-slate-700 block">Distrito</label>
-                                        <select
-                                            wire:model.live="advDistrict"
-                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-2xs"
-                                        >
-                                            <option value="">Selecione a opção desejada</option>
-                                            @foreach ($c2FilterOptions['districts'] as $dist)
-                                                <option value="{{ $dist }}">{{ $dist }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div class="space-y-1">
-                                        <label class="font-semibold text-slate-700 block">Unidade</label>
-                                        <select
-                                            wire:model.live="advFacility"
-                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-2xs"
-                                        >
-                                            <option value="">Selecione a opção desejada</option>
-                                            @foreach ($c2FilterOptions['facilities'] as $fac)
-                                                <option value="{{ $fac['cnes'] }}">{{ $fac['name'] }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div class="space-y-1">
-                                        <label class="font-semibold text-slate-700 block">Equipes</label>
+                                <!-- Linha 1: Equipe e Microárea (Distrito e Unidade removidos conforme solicitado) -->
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div class="sm:col-span-2 space-y-1">
+                                        <label class="font-semibold text-slate-700 block">Equipe</label>
                                         <select
                                             wire:model.live="advTeam"
                                             class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-2xs"
                                         >
-                                            <option value="">Selecione a opção desejada</option>
+                                            <option value="">Todas as Equipes (ou selecione uma equipe)</option>
                                             @foreach ($c2FilterOptions['teams'] as $tm)
                                                 <option value="{{ $tm['ine'] }}">{{ $tm['name'] }}</option>
                                             @endforeach
@@ -2539,7 +2513,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Linha 3: Nome da Mãe, Mês, Opção Mês -->
+                                <!-- Linha 3: Nome da Mãe, Mês e Opção Mês (Conforme Imagens 1 e 2) -->
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                     <div class="space-y-1">
                                         <label class="font-semibold text-slate-700 block">Nome da Mãe</label>
@@ -2551,37 +2525,157 @@
                                         />
                                     </div>
 
-                                    <div class="space-y-1">
+                                    <!-- Dropdown Customizado de Mês (Imagem 1) -->
+                                    <div class="space-y-1 relative" x-data="{
+                                        open: false,
+                                        search: '',
+                                        months: @js($c2FilterOptions['months']),
+                                        get filtered() {
+                                            if (!this.search) return this.months;
+                                            return this.months.filter(m => m.label.toLowerCase().includes(this.search.toLowerCase()) || m.value.includes(this.search));
+                                        }
+                                    }" @click.outside="open = false">
                                         <label class="font-semibold text-slate-700 block">Mês</label>
-                                        <select
-                                            wire:model.live="advMonth"
-                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-2xs"
+                                        <div 
+                                            @click="open = !open" 
+                                            class="flex items-center justify-between w-full rounded-xl border bg-white px-3 py-2 text-xs text-slate-700 shadow-2xs cursor-pointer transition"
+                                            :class="open ? 'border-sky-500 ring-2 ring-sky-100' : 'border-slate-300 hover:border-sky-400'"
                                         >
-                                            <option value="">09 / 2026 (Padrão)</option>
-                                            <option value="1">01 / Jan</option>
-                                            <option value="2">02 / Fev</option>
-                                            <option value="3">03 / Mar</option>
-                                            <option value="4">04 / Abr</option>
-                                            <option value="5">05 / Mai</option>
-                                            <option value="6">06 / Jun</option>
-                                            <option value="7">07 / Jul</option>
-                                            <option value="8">08 / Ago</option>
-                                            <option value="9">09 / Set</option>
-                                            <option value="10">10 / Out</option>
-                                            <option value="11">11 / Nov</option>
-                                            <option value="12">12 / Dez</option>
-                                        </select>
+                                            <span class="truncate" x-text="$wire.advMonth ? ($wire.advMonth.replace('/', ' / ')) : '09 / 2026'"></span>
+                                            <div class="flex items-center gap-1.5 ml-2 shrink-0">
+                                                <button 
+                                                    x-show="$wire.advMonth" 
+                                                    type="button" 
+                                                    @click.stop="$wire.clearMonthFilter()" 
+                                                    class="text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100"
+                                                    title="Limpar mês"
+                                                >
+                                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                                <svg class="h-4 w-4 text-slate-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            </div>
+                                        </div>
+
+                                        <!-- Painel Dropdown de Mês -->
+                                        <div 
+                                            x-show="open" 
+                                            x-transition 
+                                            class="absolute left-0 right-0 z-50 mt-1 rounded-xl border border-slate-200 bg-white shadow-xl py-2 px-1 text-xs"
+                                            style="display: none;"
+                                        >
+                                            <div class="px-2 pb-2">
+                                                <div class="relative">
+                                                    <input 
+                                                        type="text" 
+                                                        x-model="search" 
+                                                        placeholder="Buscar mês..." 
+                                                        class="w-full rounded-lg border border-slate-200 py-1.5 pl-2.5 pr-8 text-xs text-slate-700 placeholder-slate-400 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400"
+                                                        @click.stop
+                                                    />
+                                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400">
+                                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="max-h-52 overflow-y-auto divide-y-0 py-1">
+                                                <template x-for="item in filtered" :key="item.value">
+                                                    <div 
+                                                        @click="$wire.setMonthFilter(item.value); open = false;" 
+                                                        class="px-3 py-2 cursor-pointer transition rounded-lg flex items-center justify-between"
+                                                        :class="$wire.advMonth === item.value ? 'bg-sky-50 text-sky-900 font-semibold' : 'text-slate-700 hover:bg-slate-50'"
+                                                    >
+                                                        <span x-text="item.label"></span>
+                                                    </div>
+                                                </template>
+                                                <div x-show="filtered.length === 0" class="px-3 py-2 text-slate-400 text-center text-xs">
+                                                    Nenhum mês encontrado
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div class="space-y-1">
+                                    <!-- Dropdown Customizado de Opção Mês (Imagem 2) -->
+                                    <div class="space-y-1 relative" x-data="{
+                                        open: false,
+                                        search: '',
+                                        options: @js($c2FilterOptions['month_options']),
+                                        get filtered() {
+                                            if (!this.search) return this.options;
+                                            return this.options.filter(o => o.label.toLowerCase().includes(this.search.toLowerCase()));
+                                        },
+                                        get currentLabel() {
+                                            let found = this.options.find(o => o.value === $wire.advMonthOption);
+                                            return found ? found.label : 'Mês Selecionado e Próximos Meses';
+                                        }
+                                    }" @click.outside="open = false">
                                         <label class="font-semibold text-slate-700 block">Opção Mês</label>
-                                        <select
-                                            wire:model.live="advMonthOption"
-                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-2xs"
+                                        <div 
+                                            @click="open = !open" 
+                                            class="flex items-center justify-between w-full rounded-xl border bg-white px-3 py-2 text-xs text-slate-700 shadow-2xs cursor-pointer transition"
+                                            :class="open ? 'border-sky-500 ring-2 ring-sky-100' : 'border-slate-300 hover:border-sky-400'"
                                         >
-                                            <option value="selected_and_next">Mês Selecionado e Próximos</option>
-                                            <option value="only_selected">Apenas Mês Selecionado</option>
-                                        </select>
+                                            <span class="truncate" x-text="currentLabel"></span>
+                                            <div class="flex items-center gap-1.5 ml-2 shrink-0">
+                                                <button 
+                                                    x-show="$wire.advMonthOption !== 'selected_and_next'" 
+                                                    type="button" 
+                                                    @click.stop="$wire.setMonthOption('selected_and_next')" 
+                                                    class="text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100"
+                                                    title="Restaurar padrão"
+                                                >
+                                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                                <svg class="h-4 w-4 text-slate-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            </div>
+                                        </div>
+
+                                        <!-- Painel Dropdown de Opção Mês -->
+                                        <div 
+                                            x-show="open" 
+                                            x-transition 
+                                            class="absolute left-0 right-0 z-50 mt-1 rounded-xl border border-slate-200 bg-white shadow-xl py-2 px-1 text-xs"
+                                            style="display: none;"
+                                        >
+                                            <div class="px-2 pb-2">
+                                                <div class="relative">
+                                                    <input 
+                                                        type="text" 
+                                                        x-model="search" 
+                                                        placeholder="Buscar opção..." 
+                                                        class="w-full rounded-lg border border-slate-200 py-1.5 pl-2.5 pr-8 text-xs text-slate-700 placeholder-slate-400 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400"
+                                                        @click.stop
+                                                    />
+                                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400">
+                                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="py-1">
+                                                <template x-for="item in filtered" :key="item.value">
+                                                    <div 
+                                                        @click="$wire.setMonthOption(item.value); open = false;" 
+                                                        class="px-3 py-2 cursor-pointer transition rounded-lg"
+                                                        :class="$wire.advMonthOption === item.value ? 'bg-sky-50 text-sky-900 font-semibold' : 'text-slate-700 hover:bg-slate-50'"
+                                                    >
+                                                        <span x-text="item.label"></span>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -2634,41 +2728,124 @@
                                     </div>
                                 </div>
 
-                                <!-- Linha 5: Idade (meses) com Chips de atalho e Seletor -->
+                                <!-- Linha 5: Idade (meses) com Chips de atalho e Multiselect (Conforme Imagens 3 e 4) -->
                                 <div class="space-y-2 border-t border-slate-150 pt-3">
                                     <label class="font-semibold text-slate-700 block">Idade (meses)</label>
-                                    <div class="flex flex-wrap items-center gap-2">
+                                    <div class="flex flex-wrap items-center gap-2.5">
+                                        <!-- Chips conforme Imagem 3 -->
                                         <button
                                             type="button"
                                             wire:click="setAgeGroup('0-6')"
-                                            class="px-3.5 py-1.5 rounded-xl font-semibold transition cursor-pointer {{ $advAgeGroup === '0-6' ? 'bg-sky-600 text-white shadow-2xs' : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50' }}"
+                                            class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer border {{ $advAgeGroup === '0-6' ? 'bg-sky-600 text-white border-sky-600 shadow-2xs' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50' }}"
                                         >
                                             0-6 meses
                                         </button>
                                         <button
                                             type="button"
                                             wire:click="setAgeGroup('7-12')"
-                                            class="px-3.5 py-1.5 rounded-xl font-semibold transition cursor-pointer {{ $advAgeGroup === '7-12' ? 'bg-sky-600 text-white shadow-2xs' : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50' }}"
+                                            class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer border {{ $advAgeGroup === '7-12' ? 'bg-sky-600 text-white border-sky-600 shadow-2xs' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50' }}"
                                         >
                                             7-12 meses
                                         </button>
                                         <button
                                             type="button"
                                             wire:click="setAgeGroup('13-24')"
-                                            class="px-3.5 py-1.5 rounded-xl font-semibold transition cursor-pointer {{ $advAgeGroup === '13-24' ? 'bg-sky-600 text-white shadow-2xs' : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50' }}"
+                                            class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer border {{ $advAgeGroup === '13-24' ? 'bg-sky-600 text-white border-sky-600 shadow-2xs' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50' }}"
                                         >
                                             13-24 meses
                                         </button>
 
-                                        <select
-                                            wire:model.live="advAgeGroup"
-                                            class="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-2xs"
-                                        >
-                                            <option value="">Selecione os meses</option>
-                                            @for ($m = 1; $m <= 24; $m++)
-                                                <option value="{{ $m }}">{{ $m }} {{ $m === 1 ? 'mês' : 'meses' }}</option>
-                                            @endfor
-                                        </select>
+                                        <!-- Dropdown Multiselect "Selecione os meses" conforme Imagem 4 -->
+                                        <div class="relative min-w-[220px]" x-data="{
+                                            open: false,
+                                            search: '',
+                                            ageOptions: @js($c2FilterOptions['age_options']),
+                                            get filtered() {
+                                                if (!this.search) return this.ageOptions;
+                                                return this.ageOptions.filter(a => a.label.toLowerCase().includes(this.search.toLowerCase()) || a.value.toString().includes(this.search));
+                                            },
+                                            get label() {
+                                                let count = $wire.advAgeMonths.length;
+                                                if (count === 0) return 'Selecione os meses';
+                                                if (count === 1) return $wire.advAgeMonths[0] === 1 ? '1 mês' : $wire.advAgeMonths[0] + ' meses';
+                                                if (count >= 25) return 'Todos os meses (0 a 24)';
+                                                return count + ' meses selecionados';
+                                            }
+                                        }" @click.outside="open = false">
+                                            <!-- Botão Disparador -->
+                                            <div 
+                                                @click="open = !open" 
+                                                class="flex items-center justify-between rounded-xl border bg-white px-3 py-1.5 text-xs text-slate-700 shadow-2xs cursor-pointer transition"
+                                                :class="open ? 'border-sky-500 ring-2 ring-sky-100' : 'border-slate-300 hover:border-sky-400'"
+                                            >
+                                                <span class="truncate" x-text="label"></span>
+                                                <div class="flex items-center gap-1.5 ml-2 shrink-0">
+                                                    <button 
+                                                        x-show="$wire.advAgeMonths.length > 0" 
+                                                        type="button" 
+                                                        @click.stop="$wire.set('advAgeMonths', []); $wire.set('advAgeGroup', '');" 
+                                                        class="text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100"
+                                                        title="Limpar seleção"
+                                                    >
+                                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
+                                                    <svg class="h-4 w-4 text-slate-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+
+                                            <!-- Menu Dropdown com Checkboxes -->
+                                            <div 
+                                                x-show="open" 
+                                                x-transition 
+                                                class="absolute left-0 z-50 mt-1 w-64 rounded-xl border border-slate-200 bg-white shadow-xl py-2 text-xs"
+                                                style="display: none;"
+                                            >
+                                                <!-- Topo: Checkbox Geral e Lupa Q -->
+                                                <div class="flex items-center gap-2 px-3 pb-2 border-b border-slate-100">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        @click="$wire.toggleAllAgeMonths()" 
+                                                        :checked="$wire.advAgeMonths.length === 25"
+                                                        class="rounded border-slate-300 text-sky-600 focus:ring-sky-500 cursor-pointer h-4 w-4"
+                                                        title="Selecionar / Desmarcar todos"
+                                                    />
+                                                    <div class="relative flex-1">
+                                                        <input 
+                                                            type="text" 
+                                                            x-model="search" 
+                                                            placeholder="Filtrar mês..." 
+                                                            class="w-full rounded-lg border border-slate-200 py-1 pl-2 pr-7 text-xs text-slate-700 placeholder-slate-400 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400"
+                                                            @click.stop
+                                                        />
+                                                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-slate-400">
+                                                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                                            </svg>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Lista Scrollável com Checkboxes (0 meses até 24 meses) -->
+                                                <div class="max-h-52 overflow-y-auto divide-y-0 py-1">
+                                                    <template x-for="opt in filtered" :key="opt.value">
+                                                        <label class="flex items-center gap-2.5 px-3 py-1.5 hover:bg-slate-50 cursor-pointer text-slate-700">
+                                                            <input 
+                                                                type="checkbox" 
+                                                                :value="opt.value" 
+                                                                :checked="$wire.advAgeMonths.includes(opt.value)"
+                                                                @change="$wire.toggleAgeMonth(opt.value)"
+                                                                class="rounded border-slate-300 text-sky-600 focus:ring-sky-500 cursor-pointer h-4 w-4"
+                                                            />
+                                                            <span x-text="opt.label"></span>
+                                                        </label>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 

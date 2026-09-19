@@ -94,7 +94,7 @@ class VersionControlTest extends TestCase
         $this->assertFalse(VersionService::shouldShowModal($user->fresh()));
 
         $allReleases = VersionService::getAllReleases();
-        $this->assertCount(17, $allReleases);
+        $this->assertCount(18, $allReleases);
         $this->assertSame(VersionService::CURRENT_VERSION, $allReleases[0]['version']);
         $this->assertSame('v1.0.0', end($allReleases)['version']);
     }

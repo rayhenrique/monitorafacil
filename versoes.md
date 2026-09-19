@@ -4,6 +4,22 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.15.0] - 18/09/2026
+
+### 👶 Refinamento da Busca Avançada C2 e Coorte de 0 a 24 Meses (7 Quadrimestres)
+- **Remoção de Filtros Mockados**: Removidos os campos "Distrito" e "Unidade" do Modal de Busca Avançada do Indicador C2, preservando apenas o filtro de "Equipe" (com lista real de equipes homologadas eSF) e "Microárea".
+- **Seletor de Mês Customizado (`MM / YYYY`)**: Novo dropdown interativo fiel ao padrão visual do sistema com busca textual em tempo real, botão de limpeza (`X`), indicador retrátil (`⌄`), rolagem estilizada e destaque de seleção com fundo azul claro.
+- **Seletor de Opção de Mês**: Dropdown customizado com busca rápida e opções "Mês Selecionado e Próximos Meses" (cumulativo) e "Apenas Mês Selecionado" (estrito).
+- **Filtro Avançado de Idade (Meses)**:
+  - **Chips Rápidos**: Botões de um clique para faixas `0-6 meses`, `7-12 meses` e `13-24 meses`.
+  - **Dropdown Multiselect ("Selecione os meses")**: Menu com checkbox de seleção geral ("Selecionar todos"), campo de pesquisa filtrável e checkboxes individuais para cada mês de `0 meses` até `24 meses`.
+- **Expansão para 7 Quadrimestres (Atual + 6 Futuros)**:
+  - Processamento no e-SUS PEC expandido para extrair tanto o quadrimestre vigente quanto os 6 quadrimestres futuros (horizonte de 24 meses).
+  - Como a coorte oficial C2 é definida por crianças que completam 2 anos de idade no quadrimestre, a busca em 7 quadrimestres cobre de forma completa e contínua todas as crianças de **0 a 24 meses de vida** do município.
+  - Persistência e consultas nominais atualizadas para agregar a coorte expandida com status clínico e métricas de boas práticas infantis.
+
+---
+
 ## [v1.14.2] - 18/09/2026
 
 ### 🎯 Centralização do Processamento de Dados
