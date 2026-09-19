@@ -68,7 +68,7 @@ class IndicatorDetail extends Component
 
     public string $advMonth = '';
 
-    public string $advMonthOption = 'selected_and_next';
+    public string $advMonthOption = '';
 
     public string $advQuarter = '';
 
@@ -212,7 +212,7 @@ class IndicatorDetail extends Component
         $this->advCitizenCns = '';
         $this->advMotherName = '';
         $this->advMonth = '';
-        $this->advMonthOption = 'selected_and_next';
+        $this->advMonthOption = '';
         $this->advQuarter = '';
         $this->advProfessionalCns = '';
         $this->advProfessionalName = '';
@@ -441,14 +441,19 @@ class IndicatorDetail extends Component
                 'advPracticeC' => $this->advPracticeC,
                 'advPracticeD' => $this->advPracticeD,
                 'advPracticeE' => $this->advPracticeE,
+                'baseYear' => $this->year,
+                'baseQuarter' => $this->quarter,
             ];
 
             foreach ($filters as $k => $val) {
+                if ($k === 'baseYear' || $k === 'baseQuarter' || $k === 'advMonthOption') {
+                    continue;
+                }
                 if ($k === 'advAgeMonths') {
                     if (! empty($val) && empty($filters['advAgeGroup'])) {
                         $activeFiltersCount++;
                     }
-                } elseif ($val !== '' && $val !== null && $k !== 'advMonthOption') {
+                } elseif ($val !== '' && $val !== null) {
                     $activeFiltersCount++;
                 }
             }

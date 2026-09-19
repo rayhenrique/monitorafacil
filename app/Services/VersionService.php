@@ -72,6 +72,7 @@ class VersionService
                     ['type' => 'novo', 'text' => 'Novo seletor de Opção de Mês com alternância entre "Mês Selecionado e Próximos Meses" e "Apenas Mês Selecionado".'],
                     ['type' => 'novo', 'text' => 'Novo seletor de Idade (meses) com chips rápidos (0-6, 7-12, 13-24) e dropdown multiselect de 0 a 24 meses.'],
                     ['type' => 'melhoria', 'text' => 'Processamento no e-SUS PEC expandido para 7 quadrimestres (atual + 6 futuros), garantindo base real para crianças de 0 a 24 meses.'],
+                    ['type' => 'melhoria', 'text' => 'Opção de deixar Mês e Opção Mês em branco na Busca Avançada para filtragem pura por Quadrimestre (incluindo Quadrimestre Atual).'],
                 ],
             ],
             [

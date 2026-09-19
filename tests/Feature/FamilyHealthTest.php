@@ -762,6 +762,18 @@ class FamilyHealthTest extends TestCase
             ->assertSee('ADYLLA SOPHIA') // Month ref 10/2026
             ->assertDontSee('ABNER VALENTIM'); // Month ref 01/2028
 
+        // Test blank month and filtering by current quarter alone
+        $component->call('clearMonthFilter')
+            ->call('setMonthOption', '')
+            ->set('advQuarter', 'current')
+            ->assertSee('ADYLLA SOPHIA') // Month ref 10/2026 -> 2026/Q3
+            ->assertDontSee('ABNER VALENTIM'); // Month ref 01/2028 -> 2028/Q1
+
+        // Test filtering by a future quarter alone (2028-1)
+        $component->set('advQuarter', '2028-1')
+            ->assertSee('ABNER VALENTIM') // Month ref 01/2028 -> 2028/Q1
+            ->assertDontSee('ADYLLA SOPHIA'); // Month ref 10/2026 -> 2026/Q3
+
         // Test age group chips (Image 3)
         $component->call('clearAdvancedFilters')
             ->call('setAgeGroup', '0-6')

@@ -8,8 +8,9 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ### 👶 Refinamento da Busca Avançada C2 e Coorte de 0 a 24 Meses (7 Quadrimestres)
 - **Remoção de Filtros Mockados**: Removidos os campos "Distrito" e "Unidade" do Modal de Busca Avançada do Indicador C2, preservando apenas o filtro de "Equipe" (com lista real de equipes homologadas eSF) e "Microárea".
-- **Seletor de Mês Customizado (`MM / YYYY`)**: Novo dropdown interativo fiel ao padrão visual do sistema com busca textual em tempo real, botão de limpeza (`X`), indicador retrátil (`⌄`), rolagem estilizada e destaque de seleção com fundo azul claro.
-- **Seletor de Opção de Mês**: Dropdown customizado com busca rápida e opções "Mês Selecionado e Próximos Meses" (cumulativo) e "Apenas Mês Selecionado" (estrito).
+- **Seletor de Mês Customizado (`MM / YYYY`)**: Novo dropdown interativo fiel ao padrão visual do sistema com busca textual em tempo real, botão de limpeza (`X`), indicador retrátil (`⌄`), rolagem estilizada, destaque de seleção com fundo azul claro e **opção explícita de deixar em branco / nenhum** para não filtrar por mês.
+- **Seletor de Opção de Mês**: Dropdown customizado com busca rápida, opções "Mês Selecionado e Próximos Meses" (cumulativo) e "Apenas Mês Selecionado" (estrito), e **opção de deixar em branco / nenhuma** com botão de limpeza.
+- **Filtragem Precisa por Quadrimestre**: Possibilidade de isolar apenas o "Quadrimestre Atual" ou qualquer um dos quadrimestres da janela sem imposição de filtro mensal, permitindo consultar todas as crianças que completam 2 anos naquele período.
 - **Filtro Avançado de Idade (Meses)**:
   - **Chips Rápidos**: Botões de um clique para faixas `0-6 meses`, `7-12 meses` e `13-24 meses`.
   - **Dropdown Multiselect ("Selecione os meses")**: Menu com checkbox de seleção geral ("Selecionar todos"), campo de pesquisa filtrável e checkboxes individuais para cada mês de `0 meses` até `24 meses`.

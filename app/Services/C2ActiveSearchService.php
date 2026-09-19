@@ -178,6 +178,8 @@ class C2ActiveSearchService
             return $records->map(function (C2NominalChild $child) {
                 return [
                     'id' => $child->id,
+                    'year' => (int) $child->year,
+                    'quarter' => (int) $child->quarter,
                     'cidadao_pec_id' => $child->cidadao_pec_id,
                     'cns' => $child->cns ?? '',
                     'cpf' => $child->cpf ?? '',
@@ -544,6 +546,21 @@ class C2ActiveSearchService
             ];
         }
 
+        foreach ($items as &$it) {
+            if (! isset($it['year']) || ! isset($it['quarter'])) {
+                $rawMonth = preg_replace('/\s+/', '', (string) ($it['month_ref'] ?? ''));
+                if (str_contains($rawMonth, '/')) {
+                    [$mStr, $yStr] = explode('/', $rawMonth, 2);
+                    $it['year'] = (int) $yStr;
+                    $it['quarter'] = (int) ceil((int) $mStr / 4);
+                } else {
+                    $it['year'] = $year;
+                    $it['quarter'] = $quarter;
+                }
+            }
+        }
+        unset($it);
+
         return collect($items);
     }
 
@@ -638,7 +655,7 @@ class C2ActiveSearchService
                 }
             }
 
-            // Filtro por Mês de Referência (MM / YYYY) e Opção de Mês
+            // Filtro por Mês de Referência (MM / YYYY) e Opção de Mês (opcionais; não filtram se vazios)
             if (! empty($filters['advMonth'])) {
                 $rawFilter = preg_replace('/\s+/', '', (string) $filters['advMonth']);
                 $rawItem = preg_replace('/\s+/', '', (string) ($item['month_ref'] ?? ''));
@@ -657,33 +674,57 @@ class C2ActiveSearchService
                         $rawItem = $twoYearsLater->format('m/Y');
                     }
 
-                    $monthOption = $filters['advMonthOption'] ?? 'selected_and_next';
+                    $monthOption = $filters['advMonthOption'] ?? '';
 
-                    if ($monthOption === 'only_selected') {
-                        if ($rawItem !== $rawFilter) {
+                    if ($monthOption === 'selected_and_next') {
+                        if ($itemIndex < $filterIndex) {
                             return false;
                         }
-                    } elseif ($monthOption === 'selected_and_next') {
-                        if ($itemIndex < $filterIndex) {
+                    } else {
+                        // 'only_selected' ou vazio (padrão estrito se um mês específico foi informado)
+                        if ($rawItem !== $rawFilter) {
                             return false;
                         }
                     }
                 }
             }
 
-            // Filtro por Quadrimestre (1, 2, 3)
+            // Filtro por Quadrimestre (current, YYYY-Q ou número 1, 2, 3)
             if (! empty($filters['advQuarter'])) {
-                $targetQuarter = (int) $filters['advQuarter'];
-                $rawItem = preg_replace('/\s+/', '', (string) ($item['month_ref'] ?? ''));
-                $m = 0;
-                if (str_contains($rawItem, '/')) {
-                    [$mStr] = explode('/', $rawItem, 2);
-                    $m = (int) $mStr;
-                } elseif (! empty($item['birth_date'])) {
-                    $m = Carbon::parse($item['birth_date'])->addYears(2)->month;
+                $qVal = (string) $filters['advQuarter'];
+                $itemYear = (int) ($item['year'] ?? 0);
+                $itemQuarter = (int) ($item['quarter'] ?? 0);
+
+                if ($itemQuarter === 0) {
+                    $rawItem = preg_replace('/\s+/', '', (string) ($item['month_ref'] ?? ''));
+                    if (str_contains($rawItem, '/')) {
+                        [$mStr, $yStr] = explode('/', $rawItem, 2);
+                        $itemQuarter = (int) ceil((int) $mStr / 4);
+                        $itemYear = (int) $yStr;
+                    } elseif (! empty($item['birth_date'])) {
+                        $bDate = Carbon::parse($item['birth_date'])->addYears(2);
+                        $itemQuarter = (int) ceil($bDate->month / 4);
+                        $itemYear = $bDate->year;
+                    }
                 }
-                if ($m > 0 && ceil($m / 4) != $targetQuarter) {
-                    return false;
+
+                $baseY = (int) ($filters['baseYear'] ?? 2026);
+                $baseQ = (int) ($filters['baseQuarter'] ?? 3);
+
+                if ($qVal === 'current') {
+                    if ($itemYear !== $baseY || $itemQuarter !== $baseQ) {
+                        return false;
+                    }
+                } elseif (str_contains($qVal, '-')) {
+                    [$targetYear, $targetQ] = explode('-', $qVal, 2);
+                    if ($itemYear !== (int) $targetYear || $itemQuarter !== (int) $targetQ) {
+                        return false;
+                    }
+                } elseif (is_numeric($qVal)) {
+                    $targetQ = (int) $qVal;
+                    if ($itemQuarter !== $targetQ) {
+                        return false;
+                    }
                 }
             }
 
@@ -933,6 +974,27 @@ class C2ActiveSearchService
             ];
         }
 
+        $quarterOptions = [
+            ['value' => 'current', 'label' => "Quadrimestre Atual ({$baseYear} / Q{$baseQuarter})"],
+        ];
+        foreach (self::getActiveSearchQuarterPairs($baseYear, $baseQuarter) as $pair) {
+            $y = $pair['year'];
+            $q = $pair['quarter'];
+            $qMonths = match ($q) {
+                1 => 'Jan a Abr',
+                2 => 'Mai a Ago',
+                3 => 'Set a Dez',
+            };
+            $isCurr = ($y === $baseYear && $q === $baseQuarter);
+            $quarterOptions[] = [
+                'value' => "{$y}-{$q}",
+                'label' => "{$y} · Q{$q} ({$qMonths})".($isCurr ? ' · Atual' : ''),
+            ];
+        }
+        $quarterOptions[] = ['value' => '1', 'label' => 'Todos os Q1 (Jan a Abr)'];
+        $quarterOptions[] = ['value' => '2', 'label' => 'Todos os Q2 (Mai a Ago)'];
+        $quarterOptions[] = ['value' => '3', 'label' => 'Todos os Q3 (Set a Dez)'];
+
         return [
             'teams' => array_values($teams),
             'months' => $months,
@@ -942,11 +1004,7 @@ class C2ActiveSearchService
             ],
             'age_options' => $ageOptions,
             'races' => ['Parda', 'Branca', 'Preta', 'Amarela', 'Indígena'],
-            'quarters' => [
-                ['value' => '1', 'label' => 'Q1 · Jan a Abr'],
-                ['value' => '2', 'label' => 'Q2 · Mai a Ago'],
-                ['value' => '3', 'label' => 'Q3 · Set a Dez'],
-            ],
+            'quarters' => $quarterOptions,
         ];
     }
 

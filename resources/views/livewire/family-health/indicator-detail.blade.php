@@ -2538,17 +2538,17 @@
                                         <label class="font-semibold text-slate-700 block">Mês</label>
                                         <div 
                                             @click="open = !open" 
-                                            class="flex items-center justify-between w-full rounded-xl border bg-white px-3 py-2 text-xs text-slate-700 shadow-2xs cursor-pointer transition"
+                                            class="flex items-center justify-between w-full rounded-xl border bg-white px-3 py-2 text-xs shadow-2xs cursor-pointer transition"
                                             :class="open ? 'border-sky-500 ring-2 ring-sky-100' : 'border-slate-300 hover:border-sky-400'"
                                         >
-                                            <span class="truncate" x-text="$wire.advMonth ? ($wire.advMonth.replace('/', ' / ')) : '09 / 2026'"></span>
+                                            <span class="truncate" :class="!$wire.advMonth ? 'text-slate-400' : 'text-slate-800 font-medium'" x-text="$wire.advMonth ? ($wire.advMonth.replace('/', ' / ')) : 'Selecione o mês (opcional)'"></span>
                                             <div class="flex items-center gap-1.5 ml-2 shrink-0">
                                                 <button 
                                                     x-show="$wire.advMonth" 
                                                     type="button" 
                                                     @click.stop="$wire.clearMonthFilter()" 
-                                                    class="text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100"
-                                                    title="Limpar mês"
+                                                    class="text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100 cursor-pointer"
+                                                    title="Limpar mês (deixar em branco)"
                                                 >
                                                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -2585,6 +2585,16 @@
                                             </div>
 
                                             <div class="max-h-52 overflow-y-auto divide-y-0 py-1">
+                                                <!-- Opção para deixar em branco / nenhum -->
+                                                <div 
+                                                    @click="$wire.clearMonthFilter(); open = false;" 
+                                                    class="px-3 py-2 cursor-pointer transition rounded-lg flex items-center justify-between border-b border-slate-100 mb-1"
+                                                    :class="!$wire.advMonth ? 'bg-sky-50 text-sky-900 font-semibold' : 'text-slate-500 hover:bg-slate-50 italic'"
+                                                >
+                                                    <span>Nenhum (Em branco / Não filtrar)</span>
+                                                    <span x-show="!$wire.advMonth" class="text-sky-600 text-xs font-bold">✓</span>
+                                                </div>
+
                                                 <template x-for="item in filtered" :key="item.value">
                                                     <div 
                                                         @click="$wire.setMonthFilter(item.value); open = false;" 
@@ -2592,6 +2602,7 @@
                                                         :class="$wire.advMonth === item.value ? 'bg-sky-50 text-sky-900 font-semibold' : 'text-slate-700 hover:bg-slate-50'"
                                                     >
                                                         <span x-text="item.label"></span>
+                                                        <span x-show="$wire.advMonth === item.value" class="text-sky-600 text-xs font-bold">✓</span>
                                                     </div>
                                                 </template>
                                                 <div x-show="filtered.length === 0" class="px-3 py-2 text-slate-400 text-center text-xs">
@@ -2611,24 +2622,25 @@
                                             return this.options.filter(o => o.label.toLowerCase().includes(this.search.toLowerCase()));
                                         },
                                         get currentLabel() {
+                                            if (!$wire.advMonthOption) return 'Nenhuma (Não filtrar)';
                                             let found = this.options.find(o => o.value === $wire.advMonthOption);
-                                            return found ? found.label : 'Mês Selecionado e Próximos Meses';
+                                            return found ? found.label : 'Nenhuma (Não filtrar)';
                                         }
                                     }" @click.outside="open = false">
                                         <label class="font-semibold text-slate-700 block">Opção Mês</label>
                                         <div 
                                             @click="open = !open" 
-                                            class="flex items-center justify-between w-full rounded-xl border bg-white px-3 py-2 text-xs text-slate-700 shadow-2xs cursor-pointer transition"
+                                            class="flex items-center justify-between w-full rounded-xl border bg-white px-3 py-2 text-xs shadow-2xs cursor-pointer transition"
                                             :class="open ? 'border-sky-500 ring-2 ring-sky-100' : 'border-slate-300 hover:border-sky-400'"
                                         >
-                                            <span class="truncate" x-text="currentLabel"></span>
+                                            <span class="truncate" :class="!$wire.advMonthOption ? 'text-slate-400' : 'text-slate-800 font-medium'" x-text="currentLabel"></span>
                                             <div class="flex items-center gap-1.5 ml-2 shrink-0">
                                                 <button 
-                                                    x-show="$wire.advMonthOption !== 'selected_and_next'" 
+                                                    x-show="$wire.advMonthOption" 
                                                     type="button" 
-                                                    @click.stop="$wire.setMonthOption('selected_and_next')" 
-                                                    class="text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100"
-                                                    title="Restaurar padrão"
+                                                    @click.stop="$wire.setMonthOption('')" 
+                                                    class="text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100 cursor-pointer"
+                                                    title="Limpar opção (deixar em branco)"
                                                 >
                                                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -2665,13 +2677,24 @@
                                             </div>
 
                                             <div class="py-1">
+                                                <!-- Opção para deixar em branco / nenhuma -->
+                                                <div 
+                                                    @click="$wire.setMonthOption(''); open = false;" 
+                                                    class="px-3 py-2 cursor-pointer transition rounded-lg flex items-center justify-between border-b border-slate-100 mb-1"
+                                                    :class="!$wire.advMonthOption ? 'bg-sky-50 text-sky-900 font-semibold' : 'text-slate-500 hover:bg-slate-50 italic'"
+                                                >
+                                                    <span>Nenhuma (Em branco / Não filtrar)</span>
+                                                    <span x-show="!$wire.advMonthOption" class="text-sky-600 text-xs font-bold">✓</span>
+                                                </div>
+
                                                 <template x-for="item in filtered" :key="item.value">
                                                     <div 
                                                         @click="$wire.setMonthOption(item.value); open = false;" 
-                                                        class="px-3 py-2 cursor-pointer transition rounded-lg"
+                                                        class="px-3 py-2 cursor-pointer transition rounded-lg flex items-center justify-between"
                                                         :class="$wire.advMonthOption === item.value ? 'bg-sky-50 text-sky-900 font-semibold' : 'text-slate-700 hover:bg-slate-50'"
                                                     >
                                                         <span x-text="item.label"></span>
+                                                        <span x-show="$wire.advMonthOption === item.value" class="text-sky-600 text-xs font-bold">✓</span>
                                                     </div>
                                                 </template>
                                             </div>
@@ -2687,7 +2710,7 @@
                                             wire:model.live="advQuarter"
                                             class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-2xs"
                                         >
-                                            <option value="">Selecione o Quadrimestre</option>
+                                            <option value="">Todos os Quadrimestres (ou selecione)</option>
                                             @foreach ($c2FilterOptions['quarters'] as $q)
                                                 <option value="{{ $q['value'] }}">{{ $q['label'] }}</option>
                                             @endforeach
