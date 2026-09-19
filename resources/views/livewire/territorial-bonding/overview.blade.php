@@ -34,19 +34,6 @@
                     </svg>
                     <span>Busca Avançada</span>
                 </button>
-
-                <!-- Botão Importação Opcional de CSV -->
-                <button
-                    type="button"
-                    wire:click="openImportModal"
-                    class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-3 py-2.5 text-xs font-bold text-slate-700 transition shadow-xs cursor-pointer"
-                    title="Importar arquivos CSV do Siaps diretamente no módulo"
-                >
-                    <svg class="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12l-3-3m0 0l-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                    </svg>
-                    <span>Importar CSV</span>
-                </button>
             </div>
         </div>
 
@@ -349,106 +336,110 @@
         </div>
     @endif
 
-    <!-- SEÇÃO: CADERNO METODOLÓGICO (ALINHADO À NOTA TÉCNICA Nº 30/2025 & PORTARIA SAPS/MS Nº 161/2024) -->
+    <!-- SEÇÃO: CADERNO METODOLÓGICO RESPONSIVO (ALINHADO À NOTA TÉCNICA Nº 30/2025 & PORTARIA SAPS/MS Nº 161/2024) -->
     @if ($activeTab === 'guide')
-        <div class="bg-white rounded-3xl border border-line shadow-panel p-6 sm:p-8 space-y-8">
-            <!-- Cabeçalho Oficial -->
-            <div class="border-b border-line pb-5">
-                <div class="flex flex-wrap items-center gap-2 text-xs font-bold text-teal-800 uppercase tracking-wider mb-1.5">
+        <div class="bg-white rounded-2xl sm:rounded-3xl border border-line shadow-panel p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
+            <!-- Cabeçalho Oficial Responsivo -->
+            <div class="border-b border-line pb-4 sm:pb-5">
+                <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-bold text-teal-800 uppercase tracking-wider mb-2">
                     <span class="bg-teal-50 px-2.5 py-0.5 rounded border border-teal-200">Nota Técnica nº 30/2025-CGESCO/DESCO/SAPS/MS</span>
-                    <span>·</span>
-                    <span>Processo SEI nº 25000.178857/2024-41</span>
-                    <span>·</span>
-                    <span>Portaria SAPS/MS nº 161/2024</span>
+                    <span class="hidden sm:inline text-slate-300">·</span>
+                    <span class="bg-slate-50 px-2 py-0.5 rounded border border-slate-200 text-slate-600">Processo SEI nº 25000.178857/2024-41</span>
+                    <span class="hidden sm:inline text-slate-300">·</span>
+                    <span class="bg-slate-50 px-2 py-0.5 rounded border border-slate-200 text-slate-600">Portaria SAPS/MS nº 161/2024</span>
                 </div>
-                <h3 class="text-2xl font-black text-ink tracking-tight">Caderno Metodológico · Componente Vínculo e Acompanhamento Territorial (CVAT)</h3>
-                <p class="text-xs text-muted mt-1 leading-relaxed">
+                <h3 class="text-xl sm:text-2xl font-black text-ink tracking-tight leading-tight">
+                    Caderno Metodológico · Componente Vínculo e Acompanhamento Territorial (CVAT)
+                </h3>
+                <p class="text-xs sm:text-sm text-muted mt-1.5 leading-relaxed">
                     Diretrizes oficiais, fórmulas matemáticas de cálculo dos índices ponderados, critérios de corte temporal, pontuação e faixas de repasse do incentivo financeiro federal na Atenção Primária à Saúde.
                 </p>
             </div>
 
             <!-- Parâmetro Populacional e Território -->
-            <div class="p-5 rounded-2xl bg-teal-50/60 border border-teal-200/80 space-y-3">
-                <div class="flex items-center gap-2.5">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-700 text-white font-black text-xs">
+            <div class="p-4 sm:p-5 rounded-2xl bg-teal-50/60 border border-teal-200/80 space-y-3">
+                <div class="flex items-start sm:items-center gap-2.5">
+                    <div class="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-xl bg-teal-700 text-white font-black text-xs">
                         1
                     </div>
-                    <h4 class="text-sm font-bold text-teal-950">1. Parâmetro Populacional Normativo e Território (Art. 4º da Portaria SAPS nº 161/2024)</h4>
+                    <h4 class="text-xs sm:text-sm font-bold text-teal-950 leading-snug">
+                        1. Parâmetro Populacional Normativo e Território (Art. 4º da Portaria SAPS nº 161/2024)
+                    </h4>
                 </div>
-                <p class="text-xs text-teal-900 leading-relaxed">
+                <p class="text-xs sm:text-sm text-teal-900 leading-relaxed">
                     O Ministério da Saúde estabelece o parâmetro populacional fixo por tipo de equipe para o cálculo do denominador dos índices de cadastro e acompanhamento:
                 </p>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                    <div class="bg-white p-3.5 rounded-xl border border-teal-200">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 text-xs">
+                    <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-teal-200 shadow-2xs">
                         <span class="text-slate-500 block text-[11px] font-semibold">Equipe de Saúde da Família (eSF)</span>
-                        <span class="text-lg font-black text-teal-900 tabular-nums">2.500 pessoas / equipe</span>
+                        <span class="text-base sm:text-lg font-black text-teal-900 tabular-nums">2.500 pessoas / equipe</span>
                     </div>
-                    <div class="bg-white p-3.5 rounded-xl border border-teal-200">
+                    <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-teal-200 shadow-2xs">
                         <span class="text-slate-500 block text-[11px] font-semibold">Equipe de Atenção Primária (eAP 30h)</span>
-                        <span class="text-lg font-black text-teal-900 tabular-nums">2.000 pessoas / equipe</span>
+                        <span class="text-base sm:text-lg font-black text-teal-900 tabular-nums">2.000 pessoas / equipe</span>
                     </div>
-                    <div class="bg-white p-3.5 rounded-xl border border-teal-200">
+                    <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-teal-200 shadow-2xs">
                         <span class="text-slate-500 block text-[11px] font-semibold">Equipe de Atenção Primária (eAP 20h)</span>
-                        <span class="text-lg font-black text-teal-900 tabular-nums">1.500 pessoas / equipe</span>
+                        <span class="text-base sm:text-lg font-black text-teal-900 tabular-nums">1.500 pessoas / equipe</span>
                     </div>
                 </div>
-                <p class="text-[11px] text-teal-800 italic">
+                <p class="text-[11px] sm:text-xs text-teal-800 italic leading-relaxed">
                     <strong>Parâmetro Municipal de Teotônio Vilela/AL:</strong> Com 19 equipes de Saúde da Família (eSF) credenciadas e homologadas no SCNES, a população alvo normativa do município é de <strong>47.500 munícipes</strong> (19 &times; 2.500).
                 </p>
             </div>
 
             <!-- Dimensão Cadastro (Índice X) -->
-            <div class="p-6 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-4">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-200 pb-3">
-                    <div class="flex items-center gap-2.5">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-800 text-white font-black text-xs">
+            <div class="p-4 sm:p-6 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
+                    <div class="flex items-start sm:items-center gap-2.5">
+                        <div class="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-xl bg-teal-800 text-white font-black text-xs">
                             2
                         </div>
                         <div>
-                            <h4 class="text-sm font-bold text-slate-800">2. Dimensão Cadastro (Índice X · Escore de até 3,00 pontos)</h4>
-                            <p class="text-[11px] text-slate-500">MICI e MICDT com atualização nos últimos 24 meses (contados da data final do quadrimestre)</p>
+                            <h4 class="text-xs sm:text-sm font-bold text-slate-800">2. Dimensão Cadastro (Índice X · Escore de até 3,00 pontos)</h4>
+                            <p class="text-[10px] sm:text-[11px] text-slate-500">MICI e MICDT com atualização nos últimos 24 meses (contados da data final do quadrimestre)</p>
                         </div>
                     </div>
                     <span class="px-3 py-1 rounded-xl bg-teal-100 text-teal-900 text-xs font-black self-start sm:self-auto">Peso 3,0</span>
                 </div>
 
-                <div class="text-xs text-slate-700 leading-relaxed space-y-2">
+                <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2">
                     <p>
                         A Dimensão Cadastro afere o grau de conhecimento e cadastramento territorial da população pela equipe de saúde. São elegíveis os cidadãos vinculados à equipe no e-SUS PEC com cadastro individual atualizado em até 24 meses.
                     </p>
-                    <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-amber-900 text-xs">
+                    <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-amber-900 text-xs leading-relaxed">
                         <strong>Critérios de Exclusão da Dimensão Cadastro (Item 3.4 da NT 30/2025):</strong> São desconsiderados cadastros marcados com <em>"Fora de Área (FA)"</em> ou <em>"Mudança de Território (Mudou-se)"</em>. Cadastros rápidos simplificados não pontuam (fator 0).
                     </div>
                 </div>
 
                 <!-- Ponderações e Fórmula -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-2">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 text-xs">
+                    <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 space-y-2">
                         <span class="font-bold text-slate-800 block uppercase tracking-wider text-[11px]">Ponderações do Cadastro</span>
                         <ul class="space-y-1.5 text-slate-600">
-                            <li class="flex items-center justify-between">
-                                <span>Pessoa apenas com MICI atualizado (sem domicílio):</span>
-                                <strong class="font-mono text-teal-800 bg-teal-50 px-2 py-0.5 rounded">&times; 0,75</strong>
+                            <li class="flex items-center justify-between gap-2">
+                                <span class="truncate">Pessoa apenas com MICI atualizado (sem domicílio):</span>
+                                <strong class="font-mono text-teal-800 bg-teal-50 px-2 py-0.5 rounded shrink-0">&times; 0,75</strong>
                             </li>
-                            <li class="flex items-center justify-between">
-                                <span>Pessoa com MICI e MICDT ambos atualizados:</span>
-                                <strong class="font-mono text-teal-800 bg-teal-50 px-2 py-0.5 rounded">&times; 1,50</strong>
+                            <li class="flex items-center justify-between gap-2">
+                                <span class="truncate">Pessoa com MICI e MICDT ambos atualizados:</span>
+                                <strong class="font-mono text-teal-800 bg-teal-50 px-2 py-0.5 rounded shrink-0">&times; 1,50</strong>
                             </li>
                         </ul>
                     </div>
 
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-2">
+                    <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 space-y-2">
                         <span class="font-bold text-slate-800 block uppercase tracking-wider text-[11px]">Fórmula Oficial do Índice X</span>
-                        <div class="p-2.5 rounded bg-slate-900 text-emerald-300 font-mono text-[11px] leading-relaxed">
+                        <div class="p-3 rounded-xl bg-slate-900 text-emerald-300 font-mono text-[11px] sm:text-xs leading-relaxed overflow-x-auto whitespace-nowrap">
                             X = [(MICI_apenas &times; 0,75) + (MICI_e_MICDT &times; 1,50)] / 47.500 &times; 100
                         </div>
-                        <p class="text-[10px] text-slate-500">O resultado percentual é confrontado com os cortes ministeriais para definir o Escore X.</p>
+                        <p class="text-[10px] sm:text-[11px] text-slate-500">O resultado percentual é confrontado com os cortes ministeriais para definir o Escore X.</p>
                     </div>
                 </div>
 
-                <!-- Tabela de Conversão do Escore X -->
+                <!-- Tabela de Conversão do Escore X Responsiva -->
                 <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white">
-                    <table class="w-full text-left text-xs">
+                    <table class="w-full text-left text-xs min-w-[550px]">
                         <thead>
                             <tr class="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] border-b border-slate-200">
                                 <th class="py-2.5 px-4">Intervalo do Índice X</th>
@@ -488,29 +479,29 @@
             </div>
 
             <!-- Dimensão Acompanhamento (Índice Y) -->
-            <div class="p-6 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-4">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-200 pb-3">
-                    <div class="flex items-center gap-2.5">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-800 text-white font-black text-xs">
+            <div class="p-4 sm:p-6 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
+                    <div class="flex items-start sm:items-center gap-2.5">
+                        <div class="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-xl bg-blue-800 text-white font-black text-xs">
                             3
                         </div>
                         <div>
-                            <h4 class="text-sm font-bold text-slate-800">3. Dimensão Acompanhamento (Índice Y · Escore de até 7,00 pontos)</h4>
-                            <p class="text-[11px] text-slate-500">Contatos assistenciais contínuos no território nos últimos 12 meses anteriores ao fim do quadrimestre</p>
+                            <h4 class="text-xs sm:text-sm font-bold text-slate-800">3. Dimensão Acompanhamento (Índice Y · Escore de até 7,00 pontos)</h4>
+                            <p class="text-[10px] sm:text-[11px] text-slate-500">Contatos assistenciais contínuos no território nos últimos 12 meses anteriores ao fim do quadrimestre</p>
                         </div>
                     </div>
                     <span class="px-3 py-1 rounded-xl bg-blue-100 text-blue-900 text-xs font-black self-start sm:self-auto">Peso 7,0</span>
                 </div>
 
                 <!-- Definição de Pessoa Acompanhada -->
-                <div class="bg-white p-4 rounded-xl border border-blue-200 space-y-2 text-xs">
+                <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-blue-200 space-y-2 text-xs">
                     <span class="font-bold text-blue-950 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
                         <svg class="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Definição Oficial de Pessoa Acompanhada (Item 2.6.4 da NT nº 30/2025)
                     </span>
-                    <p class="text-slate-700 leading-relaxed">
+                    <p class="text-slate-700 leading-relaxed text-xs sm:text-sm">
                         É considerada acompanhada a pessoa cadastrada e vinculada à equipe que tiver <strong>mais de um contato assistencial no período de um ano</strong> (12 meses anteriores à data final do quadrimestre avaliado), sendo <strong>obrigatório que ao menos um contato seja uma Prática de Cuidado</strong>:
                     </p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-[11px]">
@@ -535,41 +526,41 @@
                 </div>
 
                 <!-- Critérios de Vulnerabilidade e Ponderação Y -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-2">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 text-xs">
+                    <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 space-y-2">
                         <span class="font-bold text-slate-800 block uppercase tracking-wider text-[11px]">Ponderadores de Vulnerabilidade (Item 3.10)</span>
                         <ul class="space-y-1.5 text-slate-600">
-                            <li class="flex items-center justify-between">
-                                <span>Sem critério de vulnerabilidade:</span>
-                                <strong class="font-mono text-blue-800 bg-blue-50 px-2 py-0.5 rounded">&times; 1,00</strong>
+                            <li class="flex items-center justify-between gap-2">
+                                <span class="truncate">Sem critério de vulnerabilidade:</span>
+                                <strong class="font-mono text-blue-800 bg-blue-50 px-2 py-0.5 rounded shrink-0">&times; 1,00</strong>
                             </li>
-                            <li class="flex items-center justify-between">
-                                <span>Idoso (&ge;60a) OU Criança (&lt;5a incompletos):</span>
-                                <strong class="font-mono text-blue-800 bg-blue-50 px-2 py-0.5 rounded">&times; 1,20</strong>
+                            <li class="flex items-center justify-between gap-2">
+                                <span class="truncate">Idoso (&ge;60a) OU Criança (&lt;5a incompletos):</span>
+                                <strong class="font-mono text-blue-800 bg-blue-50 px-2 py-0.5 rounded shrink-0">&times; 1,20</strong>
                             </li>
-                            <li class="flex items-center justify-between">
-                                <span>Beneficiário BPC OU Bolsa Família (PBF):</span>
-                                <strong class="font-mono text-blue-800 bg-blue-50 px-2 py-0.5 rounded">&times; 1,30</strong>
+                            <li class="flex items-center justify-between gap-2">
+                                <span class="truncate">Beneficiário BPC OU Bolsa Família (PBF):</span>
+                                <strong class="font-mono text-blue-800 bg-blue-50 px-2 py-0.5 rounded shrink-0">&times; 1,30</strong>
                             </li>
-                            <li class="flex items-center justify-between">
-                                <span>Vulnerabilidade Dupla (Idoso/Criança + BPC/PBF):</span>
-                                <strong class="font-mono text-purple-800 bg-purple-50 px-2 py-0.5 rounded">&times; 2,50</strong>
+                            <li class="flex items-center justify-between gap-2">
+                                <span class="truncate">Vulnerabilidade Dupla (Idoso/Criança + BPC/PBF):</span>
+                                <strong class="font-mono text-purple-800 bg-purple-50 px-2 py-0.5 rounded shrink-0">&times; 2,50</strong>
                             </li>
                         </ul>
                     </div>
 
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-2">
+                    <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 space-y-2">
                         <span class="font-bold text-slate-800 block uppercase tracking-wider text-[11px]">Fórmula Oficial do Índice Y</span>
-                        <div class="p-2.5 rounded bg-slate-900 text-sky-300 font-mono text-[11px] leading-relaxed">
+                        <div class="p-3 rounded-xl bg-slate-900 text-sky-300 font-mono text-[11px] sm:text-xs leading-relaxed overflow-x-auto whitespace-nowrap">
                             Y = [(Acomp_sem &times; 1,0) + (Acomp_idade &times; 1,2) + (Acomp_benef &times; 1,3) + (Acomp_dupla &times; 2,5)] / 47.500 &times; 100
                         </div>
-                        <p class="text-[10px] text-slate-500">A meta ministerial para a pontuação máxima é atingir índice ponderado Y &ge; 50% da população parâmetro.</p>
+                        <p class="text-[10px] sm:text-[11px] text-slate-500">A meta ministerial para a pontuação máxima é atingir índice ponderado Y &ge; 50% da população parâmetro.</p>
                     </div>
                 </div>
 
-                <!-- Tabela de Conversão do Escore Y -->
+                <!-- Tabela de Conversão do Escore Y Responsiva -->
                 <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white">
-                    <table class="w-full text-left text-xs">
+                    <table class="w-full text-left text-xs min-w-[550px]">
                         <thead>
                             <tr class="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] border-b border-slate-200">
                                 <th class="py-2.5 px-4">Intervalo do Índice Y</th>
@@ -609,47 +600,49 @@
             </div>
 
             <!-- Bônus de Satisfação do Usuário (Item 3.12 da NT 30/2025) -->
-            <div class="p-5 rounded-2xl bg-indigo-50/60 border border-indigo-200 space-y-3">
-                <div class="flex items-center gap-2.5">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-700 text-white font-black text-xs">
+            <div class="p-4 sm:p-5 rounded-2xl bg-indigo-50/60 border border-indigo-200 space-y-3">
+                <div class="flex items-start sm:items-center gap-2.5">
+                    <div class="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-xl bg-indigo-700 text-white font-black text-xs">
                         4
                     </div>
-                    <h4 class="text-sm font-bold text-indigo-950">4. Bonificação por Satisfação do Usuário no Meu SUS Digital (Item 3.12)</h4>
+                    <h4 class="text-xs sm:text-sm font-bold text-indigo-950 leading-snug">
+                        4. Bonificação por Satisfação do Usuário no Meu SUS Digital (Item 3.12)
+                    </h4>
                 </div>
-                <p class="text-xs text-indigo-900 leading-relaxed">
+                <p class="text-xs sm:text-sm text-indigo-900 leading-relaxed">
                     O Ministério da Saúde introduziu uma bonificação adicional na Dimensão Acompanhamento para estimular a avaliação dos atendimentos pelos munícipes no aplicativo <strong>Meu SUS Digital</strong>:
                 </p>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                    <div class="bg-white p-3.5 rounded-xl border border-indigo-200">
+                    <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-indigo-200 shadow-2xs">
                         <span class="text-indigo-900 font-bold block mb-1">Avaliações &lt; 5% dos Atendimentos</span>
-                        <span class="text-lg font-black text-indigo-700">+0,15 ponto de bônus</span>
-                        <p class="text-[10px] text-slate-500 mt-1">Acrescido ao Escore Y da equipe no quadrimestre.</p>
+                        <span class="text-base sm:text-lg font-black text-indigo-700">+0,15 ponto de bônus</span>
+                        <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1">Acrescido ao Escore Y da equipe no quadrimestre.</p>
                     </div>
-                    <div class="bg-white p-3.5 rounded-xl border border-indigo-200">
+                    <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-indigo-200 shadow-2xs">
                         <span class="text-indigo-900 font-bold block mb-1">Avaliações &ge; 5% dos Atendimentos</span>
-                        <span class="text-lg font-black text-emerald-700">+0,30 ponto de bônus</span>
-                        <p class="text-[10px] text-slate-500 mt-1">Acrescido ao Escore Y da equipe no quadrimestre.</p>
+                        <span class="text-base sm:text-lg font-black text-emerald-700">+0,30 ponto de bônus</span>
+                        <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1">Acrescido ao Escore Y da equipe no quadrimestre.</p>
                     </div>
                 </div>
-                <p class="text-[11px] text-indigo-800 italic">
+                <p class="text-[11px] sm:text-xs text-indigo-800 italic">
                     <em>* Nota: A aplicação do bônus de satisfação não pode ultrapassar o teto máximo de 7,00 pontos na Dimensão Acompanhamento.</em>
                 </p>
             </div>
 
             <!-- Escore Final e Faixas de Repasse Financeiro -->
-            <div class="p-6 rounded-2xl border border-line bg-white space-y-4">
-                <div class="flex items-center gap-2.5">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-900 text-white font-black text-xs">
+            <div class="p-4 sm:p-6 rounded-2xl border border-line bg-white space-y-4">
+                <div class="flex items-start sm:items-center gap-2.5">
+                    <div class="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white font-black text-xs">
                         5
                     </div>
                     <div>
-                        <h4 class="text-sm font-bold text-ink">5. Escore Final do Componente II e Repasse Financeiro Federal (Art. 7º da Portaria SAPS nº 161/2024)</h4>
-                        <p class="text-[11px] text-muted">Soma dos escores das duas dimensões: Escore Final = Escore X + Escore Y (escala de 0,00 a 10,00 pontos)</p>
+                        <h4 class="text-xs sm:text-sm font-bold text-ink">5. Escore Final do Componente II e Repasse Financeiro Federal (Art. 7º da Portaria SAPS nº 161/2024)</h4>
+                        <p class="text-[10px] sm:text-[11px] text-muted">Soma dos escores das duas dimensões: Escore Final = Escore X + Escore Y (escala de 0,00 a 10,00 pontos)</p>
                     </div>
                 </div>
 
                 <div class="overflow-x-auto rounded-2xl border border-line">
-                    <table class="w-full text-left text-xs border-collapse">
+                    <table class="w-full text-left text-xs min-w-[580px] border-collapse">
                         <thead>
                             <tr class="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider text-[10px] border-b border-line">
                                 <th class="py-3 px-4">Faixa do Escore Final (X + Y)</th>
@@ -689,37 +682,37 @@
             </div>
 
             <!-- Regras de Desempate de Vinculação de Equipe (Item 3.15 da NT 30/2025) -->
-            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-                <div class="flex items-center gap-2.5">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-700 text-white font-black text-xs">
+            <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                <div class="flex items-start sm:items-center gap-2.5">
+                    <div class="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-xl bg-slate-700 text-white font-black text-xs">
                         6
                     </div>
-                    <h4 class="text-sm font-bold text-slate-900">6. Critérios Oficiais de Desempate de Vínculo de Cidadão (Item 3.15)</h4>
+                    <h4 class="text-xs sm:text-sm font-bold text-slate-900">6. Critérios Oficiais de Desempate de Vínculo de Cidadão (Item 3.15)</h4>
                 </div>
-                <p class="text-xs text-slate-700 leading-relaxed">
+                <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
                     Quando um mesmo cidadão possuir cadastros ou atendimentos associados a mais de uma equipe no período de apuração, o Ministério da Saúde aplica a seguinte ordem sucessiva e eliminatória para fixar a equipe titular de vínculo:
                 </p>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                    <div class="bg-white p-3.5 rounded-xl border border-slate-200">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 text-xs">
+                    <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 shadow-2xs">
                         <span class="text-teal-700 font-bold block mb-1">1º Critério (Volume)</span>
                         <strong class="text-slate-800 block text-xs">Maior Número de Atendimentos</strong>
-                        <p class="text-[10px] text-slate-500 mt-1">Equipe que prestou o maior número de atendimentos individuais no ano.</p>
+                        <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1">Equipe que prestou o maior número de atendimentos individuais no ano.</p>
                     </div>
-                    <div class="bg-white p-3.5 rounded-xl border border-slate-200">
+                    <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 shadow-2xs">
                         <span class="text-teal-700 font-bold block mb-1">2º Critério (Recência)</span>
                         <strong class="text-slate-800 block text-xs">Atendimento Mais Recente</strong>
-                        <p class="text-[10px] text-slate-500 mt-1">Equipe cujo último atendimento individual possui a data mais recente.</p>
+                        <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1">Equipe cujo último atendimento individual possui a data mais recente.</p>
                     </div>
-                    <div class="bg-white p-3.5 rounded-xl border border-slate-200">
+                    <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 shadow-2xs">
                         <span class="text-teal-700 font-bold block mb-1">3º Critério (Cadastro)</span>
                         <strong class="text-slate-800 block text-xs">Cadastro Mais Atualizado</strong>
-                        <p class="text-[10px] text-slate-500 mt-1">Equipe com o cadastro individual (MICI) atualizado mais recente.</p>
+                        <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1">Equipe com o cadastro individual (MICI) atualizado mais recente.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Rodapé e Referências Oficiais -->
-            <div class="pt-4 border-t border-line flex flex-wrap items-center justify-between gap-4 text-xs text-slate-500">
+            <!-- Rodapé e Referências Oficiais Responsivo -->
+            <div class="pt-4 border-t border-line flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-500">
                 <div class="space-y-1">
                     <p><strong>Base Oficial:</strong> Nota Técnica nº 30/2025-CGESCO/DESCO/SAPS/MS · Ministério da Saúde.</p>
                     <p><strong>Sistemas Envolvidos:</strong> e-SUS APS PEC (DW Local) &middot; Siaps (Sistema de Informação para a Atenção Primária à Saúde).</p>
@@ -729,7 +722,7 @@
                         href="https://sisaps.saude.gov.br"
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold transition"
+                        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold transition text-xs shadow-2xs"
                     >
                         <span>Portal Siaps Oficial</span>
                         <svg class="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -852,139 +845,6 @@
                         </button>
                     </div>
                 </div>
-            </div>
-        </div>
-    @endif
-
-    <!-- MODAL DE IMPORTAÇÃO OPCIONAL DE CSV DO SIAPS -->
-    @if ($showImportModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in" role="dialog" aria-modal="true" aria-labelledby="modal-siaps-title">
-            <div class="relative w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl border border-line space-y-5 animate-scale-up" @click.outside="$wire.closeImportModal()">
-                <!-- Cabeçalho do Modal -->
-                <div class="flex items-start justify-between border-b border-line pb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-100 text-teal-800">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12l-3-3m0 0l-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h2 id="modal-siaps-title" class="text-base font-bold text-ink">Importar Arquivo CSV do Siaps</h2>
-                            <p class="text-xs text-muted">Carregamento opcional de dados oficiais do Ministério da Saúde</p>
-                        </div>
-                    </div>
-                    <button
-                        type="button"
-                        wire:click="closeImportModal"
-                        class="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
-                        aria-label="Fechar"
-                    >
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-
-                <!-- Mensagem de Feedback -->
-                @if ($importMessage)
-                    <div class="rounded-2xl p-4 text-xs font-medium border shadow-xs flex items-start gap-3 {{ $importStatus === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-200 text-rose-900' }}">
-                        <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md {{ $importStatus === 'success' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700' }}">
-                            @if ($importStatus === 'success')
-                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                </svg>
-                            @else
-                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            @endif
-                        </span>
-                        <div class="leading-relaxed font-medium">{{ $importMessage }}</div>
-                    </div>
-                @endif
-
-                <!-- Explicação do Formato -->
-                <div class="rounded-2xl bg-slate-50 border border-slate-200/80 p-3.5 text-xs text-slate-600 leading-relaxed">
-                    <p class="font-bold text-slate-800 mb-1">Arquivos CSV Suportados:</p>
-                    <ul class="list-disc pl-4 space-y-0.5 text-[11px]">
-                        <li><strong>Desempenho Quadrimestral das Equipes</strong> (com colunas: Quadrimestre, CNES, INE, Equipe, Notas e Conceitos).</li>
-                        <li><strong>Distribuição das Dimensões</strong> (com colunas: Período, UF, IBGE, Cadastro, Acompanhamento, Faixas Ótimo/Bom/Suficiente/Regular).</li>
-                    </ul>
-                </div>
-
-                <!-- Formulário de Upload -->
-                <form wire:submit="uploadCsv" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Selecione o arquivo CSV do seu computador:</label>
-                        <div class="relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 hover:border-teal-500 bg-slate-50/50 p-6 text-center transition cursor-pointer">
-                            <svg class="h-8 w-8 text-slate-400 mb-2" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
-                            </svg>
-                            <input
-                                type="file"
-                                wire:model="csvFile"
-                                accept=".csv,.txt"
-                                class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                            />
-                            @if ($csvFile)
-                                <p class="text-xs font-bold text-teal-800">{{ $csvFile->getClientOriginalName() }}</p>
-                                <p class="text-[11px] text-slate-500 mt-0.5">Clique para trocar de arquivo</p>
-                            @else
-                                <p class="text-xs font-semibold text-slate-700">Clique ou arraste o arquivo CSV aqui</p>
-                                <p class="text-[10px] text-slate-400 mt-0.5">Tamanho máximo: 10 MB (.csv)</p>
-                            @endif
-                        </div>
-                        @error('csvFile')
-                            <p class="text-xs text-rose-600 mt-1 font-medium">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Indicador de Upload em Andamento -->
-                    <div wire:loading wire:target="csvFile, uploadCsv, importServerDefaults" class="w-full">
-                        <div class="flex items-center gap-2 text-xs font-semibold text-teal-700">
-                            <svg class="animate-spin h-4 w-4 text-teal-700" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span>Processando arquivo CSV...</span>
-                        </div>
-                    </div>
-
-                    <!-- Botões de Ação -->
-                    <div class="flex flex-col sm:flex-row items-center justify-between gap-2.5 pt-2 border-t border-line">
-                        <button
-                            type="button"
-                            wire:click="importServerDefaults"
-                            wire:loading.attr="disabled"
-                            class="text-xs font-semibold text-teal-800 hover:text-teal-950 underline underline-offset-2 transition cursor-pointer py-1"
-                            title="Carrega os arquivos CSV padrão salvos na pasta de importação do município"
-                        >
-                            Restaurar CSVs padrão do servidor
-                        </button>
-
-                        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-                            <button
-                                type="button"
-                                wire:click="closeImportModal"
-                                class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer"
-                            >
-                                Fechar
-                            </button>
-
-                            <button
-                                type="submit"
-                                wire:loading.attr="disabled"
-                                @if (!$csvFile) disabled @endif
-                                class="px-4 py-2 text-xs font-bold text-white bg-teal-700 hover:bg-teal-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-xs transition cursor-pointer flex items-center gap-2"
-                            >
-                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                                </svg>
-                                <span>Importar CSV</span>
-                            </button>
-                        </div>
-                    </div>
-                </form>
             </div>
         </div>
     @endif

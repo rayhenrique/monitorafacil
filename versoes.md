@@ -4,6 +4,23 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.23.2] - 19/09/2026
+
+### 📱 Caderno Metodológico Responsivo e Remoção de Importação Manual
+- **Caderno Metodológico 100% Responsivo**:
+  - Ajuste de todo o layout do Caderno Metodológico (`/vinculo-e-acompanhamento?aba=guide`) para dispositivos móveis, tablets e desktops:
+    - Espaçamentos e paddings adaptativos (`p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8`).
+    - Quebra harmônica dos badges normativos da Nota Técnica nº 30/2025 e Portaria SAPS nº 161/2024.
+    - Fórmulas matemáticas dos índices $X$ e $Y$ com contêiner `overflow-x-auto whitespace-nowrap`, evitando quebras indesejadas de largura em smartphones.
+    - Grids de parâmetros populacionais, ponderadores e critérios de desempate adaptáveis (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`).
+    - Tabelas analíticas de conversão de escores (Índice X, Índice Y e Escore Final/Repasse) encapsuladas com rolagem horizontal suave (`min-w-[550px]`).
+- **Remoção Definitiva da Importação Manual de CSV**:
+  - Eliminação do botão "Importar CSV" no cabeçalho de monitoramento de equipes.
+  - Remoção de todo o modal de upload de arquivos CSV do Siaps e código residual do Livewire (`WithFileUploads`, `$showImportModal`, `$csvFile`, etc.).
+  - Sistema consolidado para operar exclusivamente com os dados reais do município e extrações nativas do PostgreSQL do e-SUS PEC.
+
+---
+
 ## [v1.23.1] - 19/09/2026
 
 ### 📊 Monitoramento de Vínculo e Acompanhamento - Equipes (Mensal) com Dados Reais

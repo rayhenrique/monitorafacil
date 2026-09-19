@@ -272,4 +272,12 @@
   - [x] Modal interativo de Busca Avançada para filtragem por faixas de escores.
   - [x] Nova migration adicionando colunas métricas na tabela `cvat_team_evaluations`.
   - [x] Compilação de assets com Vite (`npm run build`) e atualização de testes automatizados.
-
+- [x] **Fase 34: Caderno Metodológico Responsivo e Remoção de Importação de Dados Oficiais (v1.23.2)**
+  - [x] Caderno Metodológico (aba `guide`) 100% responsivo para mobile, tablet e desktop.
+  - [x] Paddings, títulos e badges da Nota Técnica nº 30/2025 ajustados para quebra fluida em telas estreitas.
+  - [x] Fórmulas dos índices $X$ e $Y$ encapsuladas com proteção contra overflow (`overflow-x-auto whitespace-nowrap`).
+  - [x] Grids de parâmetros populacionais, ponderadores e critérios de desempate adaptáveis a múltiplas resoluções.
+  - [x] Tabelas analíticas de conversão de escores e repasse financeiro configuradas com rolagem horizontal fluida (`min-w-[550px]`).
+  - [x] Remoção definitiva do botão "Importar CSV" e modal de upload de CSV oficial Siaps, mantendo o sistema 100% integrado aos dados reais.
+  - [x] Limpeza completa de métodos e propriedades de upload no Livewire `TerritorialBondingOverview`.
+  - [x] Atualização da suíte de testes de funcionalidade e compilação de assets de produção com Vite.

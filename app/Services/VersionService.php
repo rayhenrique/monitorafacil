@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.23.1';
+    public const CURRENT_VERSION = 'v1.23.2';
 
     public const CURRENT_RELEASE_DATE = '19/09/2026';
 
@@ -61,9 +61,22 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.23.1',
+                'version' => 'v1.23.2',
                 'date' => '19/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Caderno Metodológico Responsivo e Remoção de Importação Manual',
+                'summary' => 'Aba Caderno Metodológico 100% responsiva para dispositivos móveis e tablets com visualização suave de tabelas e fórmulas, além da eliminação definitiva da importação manual de CSV oficial Siaps.',
+                'highlights' => [
+                    ['type' => 'interface', 'text' => 'Caderno Metodológico (aba guide) totalmente responsivo: paddings dinâmicos, quebra harmônica de títulos e badges da Portaria SAPS nº 161/2024 e NT nº 30/2025.'],
+                    ['type' => 'interface', 'text' => 'Fórmulas matemáticas dos índices X e Y com scroll horizontal protegido (overflow-x-auto whitespace-nowrap), impedindo estouro de layout em telas menores.'],
+                    ['type' => 'interface', 'text' => 'Tabelas analíticas de conversão de escores (Índice X, Índice Y e Escore Final/Repasse Financeiro) com rolagem fluida em container min-w adaptado.'],
+                    ['type' => 'limpeza', 'text' => 'Remoção completa do botão "Importar CSV" e de todo o fluxo de upload de arquivos oficiais, consolidando o módulo para trabalhar 100% integrado à base real do PEC e snapshots locais.'],
+                ],
+            ],
+            [
+                'version' => 'v1.23.1',
+                'date' => '19/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Monitoramento de Vínculo e Acompanhamento - Equipes (Mensal) com Dados Reais',
                 'summary' => 'Remoção das abas intermediárias de cadastro e acompanhamento, unificando a experiência no Monitoramento Mensal de Equipes com reprodução fidedigna dos dados oficiais do município (19 eSF de Teotônio Vilela/AL, 35.401 cadastros vinculados), síntese com totais por conceito e tabela analítica de 14 colunas com busca avançada.',
                 'highlights' => [
