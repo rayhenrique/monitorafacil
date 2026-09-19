@@ -42,9 +42,20 @@ class C2DwService
 
         $ines = array_keys($teams);
         $placeholders = implode(',', array_fill(0, count($ines), '?'));
+
         $children = $connection->select(<<<SQL
-            SELECT co_fat_cidadao_pec AS id, dt_nascimento_cidadao AS born,
-                   nu_ine_vinc_equipe AS ine
+            SELECT
+                co_fat_cidadao_pec AS id,
+                dt_nascimento_cidadao AS born,
+                nu_ine_vinc_equipe AS ine,
+                COALESCE(NULLIF(TRIM(no_cidadao::text), ''), 'Criança ' || co_fat_cidadao_pec) AS name,
+                COALESCE(no_mae_cidadao::text, '') AS mother_name,
+                COALESCE(nu_cpf_cidadao::text, '') AS cpf,
+                COALESCE(nu_cns_cidadao::text, '') AS cns,
+                COALESCE(nu_micro_area::text, '') AS microarea,
+                COALESCE(nu_cnes_vinc_unidade::text, '') AS cnes,
+                COALESCE(no_unidade_vinc::text, '') AS facility_name,
+                COALESCE(ds_raca_cor_cidadao::text, 'Não informada') AS race_color
             FROM tb_acomp_cidadaos_vinculados
             WHERE co_fat_cidadao_pec IS NOT NULL
               AND dt_nascimento_cidadao IS NOT NULL
@@ -64,9 +75,18 @@ class C2DwService
             $born = Carbon::parse($child->born)->startOfDay();
             $birthday = (clone $born)->addYearsNoOverflow(2);
             $allById[$id] = [
+                'id' => $id,
                 'ine' => $ine,
                 'born' => $born,
                 'birthday' => $birthday,
+                'name' => isset($child->name) && trim((string) $child->name) !== '' ? trim((string) $child->name) : ('Criança '.$id),
+                'mother_name' => isset($child->mother_name) ? trim((string) $child->mother_name) : '',
+                'cpf' => isset($child->cpf) ? trim((string) $child->cpf) : '',
+                'cns' => isset($child->cns) ? trim((string) $child->cns) : '',
+                'cnes' => isset($child->cnes) ? trim((string) $child->cnes) : ($teams[$ine]['cnes'] ?? ''),
+                'facility_name' => isset($child->facility_name) ? trim((string) $child->facility_name) : '',
+                'microarea' => isset($child->microarea) ? trim((string) $child->microarea) : '',
+                'race_color' => isset($child->race_color) ? trim((string) $child->race_color) : 'Não informada',
             ];
         }
 
@@ -89,7 +109,7 @@ class C2DwService
         }
 
         if ($byId === []) {
-            return ['scores' => [], 'cohort' => $cohort, 'completed' => $completed, 'as_of' => $asOf->toDateString()];
+            return ['scores' => [], 'cohort' => $cohort, 'completed' => $completed, 'as_of' => $asOf->toDateString(), 'children' => []];
         }
 
         foreach (array_chunk(array_keys($byId), 500) as $ids) {
@@ -231,6 +251,7 @@ class C2DwService
         }
 
         $result = [];
+        $nominalChildren = [];
         foreach ($byId as $child) {
             $month = (int) $child['birthday']->month;
             $ine = $child['ine'];
@@ -243,15 +264,63 @@ class C2DwService
             ];
             $practice = $this->scoreChild($child, $teams[$ine]['type']);
             $result[$ine][$month]['denominator']++;
+            $childScore = 0.0;
             foreach ($practice as $key => $met) {
                 if ($met) {
                     $result[$ine][$month]['practices'][$key]++;
                     $result[$ine][$month]['numerator'] += 20;
+                    $childScore += 20.0;
                 }
             }
             if (count(array_filter($practice)) < 5) {
                 $result[$ine][$month]['incomplete']++;
             }
+
+            // Métricas individuais das boas práticas
+            $born = $child['born'];
+            $birthday = $child['birthday'];
+            $first30 = (clone $born)->addDays(30);
+            $consultations = array_filter($child['consultations'], fn ($event) => $this->within((string) $event['date'], $born, $birthday));
+            $earlyConsultations = array_filter($consultations, fn ($event) => ! $event['remote'] && $this->within((string) $event['date'], $born, $first30));
+
+            $pairedDays = 0;
+            foreach ($child['measurements'] as $date => $measurement) {
+                if ($this->within((string) $date, $born, $birthday)
+                    && ($measurement['weight'] ?? false) && ($measurement['height'] ?? false)) {
+                    $pairedDays++;
+                }
+            }
+
+            $nominalChildren[] = [
+                'cidadao_pec_id' => $child['id'],
+                'cns' => $child['cns'],
+                'cpf' => $child['cpf'],
+                'name' => $child['name'],
+                'mother_name' => $child['mother_name'],
+                'birth_date' => $child['born']->toDateString(),
+                'age_months' => (int) $child['born']->diffInMonths($asOf),
+                'race_color' => $child['race_color'],
+                'cnes' => $child['cnes'],
+                'facility_name' => $child['facility_name'],
+                'ine' => $ine,
+                'team_name' => $teams[$ine]['name'] ?? ('eSF '.$ine),
+                'month_ref' => $child['birthday']->format('m/Y'),
+                'microarea' => $child['microarea'],
+                'mici_updated' => true,
+                'micdt_updated' => true,
+                'is_accompanied' => true,
+                'practice_a' => count($earlyConsultations),
+                'practice_b' => count($consultations),
+                'practice_c' => $pairedDays,
+                'practice_d' => count($child['visits']),
+                'practice_e' => count($child['vaccines']),
+                'practice_a_met' => $practice['A'],
+                'practice_b_met' => $practice['B'],
+                'practice_c_met' => $practice['C'],
+                'practice_d_met' => $practice['D'],
+                'practice_e_met' => $practice['E'],
+                'score_percent' => $childScore,
+            ];
         }
 
         foreach ($result as &$months) {
@@ -260,7 +329,13 @@ class C2DwService
             }
         }
 
-        return ['scores' => $result, 'cohort' => $cohort, 'completed' => $completed, 'as_of' => $asOf->toDateString()];
+        return [
+            'scores' => $result,
+            'cohort' => $cohort,
+            'completed' => $completed,
+            'as_of' => $asOf->toDateString(),
+            'children' => $nominalChildren,
+        ];
     }
 
     /**

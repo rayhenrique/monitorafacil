@@ -4,6 +4,18 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.14.0] - 18/09/2026
+
+### 👶 Conexão Nominal Real do C2 ao DW e-SUS PEC
+- Substituição da amostragem demonstrativa por integração de dados reais extraídos diretamente do banco e-SUS PEC (PostgreSQL).
+- **Tabela Local `c2_nominal_children`**: Armazenamento atômico dos registros nominais da coorte de crianças no MySQL, permitindo buscas instantâneas, filtros avançados e cálculos estatísticos sem onerar o banco de produção do PEC.
+- **Campos Nominais Reais Extraídos**: Nome completo do cidadão, Nome da Mãe, CPF, CNS, data de nascimento, idade em meses, raça/cor, microárea, CNES da Unidade, INE da equipe e profissional responsável.
+- **Sincronização Sob Demanda**: Novo botão "Sincronizar PEC" na aba Busca Ativa e integração com o processamento do indicador (`php artisan esus:process-data --scope=c2`), permitindo que gestores e coordenadores atualizem a base nominal com 1 clique.
+- **Identificação de Procedência dos Dados**: Badge explicativo no cabeçalho sinalizando se a lista nominal exibida é proveniente da **Base Real e-SUS PEC** (com total de registros carregados) ou se está em modo de **Demonstração**.
+- **Cálculo Real de KPIs**: O banner de síntese superior e os indicadores de cumprimento das 5 boas práticas (A, B, C, D, E) refletem os dados reais extraídos para o ano/quadrimestre selecionado.
+
+---
+
 ## [v1.13.0] - 18/09/2026
 
 ### 👶 Busca Ativa e Boas Práticas Infantis no Indicador C2

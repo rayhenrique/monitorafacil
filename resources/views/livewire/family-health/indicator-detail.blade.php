@@ -1729,15 +1729,46 @@
                 <!-- Cabeçalho da Seção com Título e Botão Busca Avançada -->
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
-                        <h3 class="text-base sm:text-lg font-bold text-slate-800 tracking-tight">
-                            Componente de Qualidade / Saúde da Família - C2 Cuidado no Desenvolvimento Infantil
-                        </h3>
+                        <div class="flex items-center gap-2.5 flex-wrap">
+                            <h3 class="text-base sm:text-lg font-bold text-slate-800 tracking-tight">
+                                Componente de Qualidade / Saúde da Família - C2 Cuidado no Desenvolvimento Infantil
+                            </h3>
+                            @if ($isRealDataAvailable)
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    Base Real e-SUS PEC ({{ number_format($realChildrenCount, 0, '', '.') }} na coorte)
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                                    Demonstração · Sincronize para carregar do PEC
+                                </span>
+                            @endif
+                        </div>
                         <p class="text-xs text-slate-500 mt-0.5">
                             Lista nominal e busca ativa das crianças de 0 a 24 meses da coorte vinculadas às Equipes de Saúde da Família
                         </p>
                     </div>
 
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button
+                            type="button"
+                            wire:click="syncC2FromPec"
+                            wire:loading.attr="disabled"
+                            class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold text-sky-800 bg-sky-50 border border-sky-200 hover:bg-sky-100 transition cursor-pointer shadow-2xs"
+                            title="Sincronizar a base nominal diretamente do banco PostgreSQL do e-SUS PEC"
+                        >
+                            <svg wire:loading.remove wire:target="syncC2FromPec" class="h-3.5 w-3.5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                            </svg>
+                            <svg wire:loading wire:target="syncC2FromPec" class="animate-spin h-3.5 w-3.5 text-sky-600" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span wire:loading.remove wire:target="syncC2FromPec">Sincronizar PEC</span>
+                            <span wire:loading wire:target="syncC2FromPec">Sincronizando...</span>
+                        </button>
+
                         @if ($activeFiltersCount > 0)
                             <button
                                 type="button"
@@ -1763,6 +1794,28 @@
                         </button>
                     </div>
                 </div>
+
+                @if (session()->has('c2_sync_message'))
+                    <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-3.5 text-xs font-semibold text-emerald-800 flex items-center justify-between shadow-2xs animate-fade-in">
+                        <div class="flex items-center gap-2">
+                            <svg class="h-4 w-4 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>{{ session('c2_sync_message') }}</span>
+                        </div>
+                    </div>
+                @endif
+
+                @if (session()->has('c2_sync_error'))
+                    <div class="rounded-2xl border border-rose-200 bg-rose-50 p-3.5 text-xs font-semibold text-rose-800 flex items-center justify-between shadow-2xs animate-fade-in">
+                        <div class="flex items-center gap-2">
+                            <svg class="h-4 w-4 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                            </svg>
+                            <span>{{ session('c2_sync_error') }}</span>
+                        </div>
+                    </div>
+                @endif
 
                 <!-- BANNER SUPERIOR: DADOS GERAIS (SÍNTESE DOS INDICADORES CONFORME IMAGEM 1) -->
                 @if ($c2SummaryKpis)

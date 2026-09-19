@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Livewire\Dashboard\FinancialSimulator;
+use App\Livewire\Dashboard\QualityOverview;
 use App\Livewire\Dashboard\QuarterSelector;
 use App\Livewire\Dashboard\RegistrationsOverview;
 use App\Livewire\Dashboard\TeamsOverview;
@@ -162,7 +163,7 @@ class AuthenticationTest extends TestCase
 
     public function test_quality_overview_renders_family_and_oral_health_indicators(): void
     {
-        Livewire::test(\App\Livewire\Dashboard\QualityOverview::class, ['year' => 2026, 'quarter' => 3])
+        Livewire::test(QualityOverview::class, ['year' => 2026, 'quarter' => 3])
             ->assertSee('Componente de Qualidade')
             ->assertSee('Mais Acesso')
             ->assertSee('Primeira Consulta Programada')

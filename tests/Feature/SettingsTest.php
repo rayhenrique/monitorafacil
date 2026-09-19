@@ -3,16 +3,10 @@
 namespace Tests\Feature;
 
 use App\Enums\SyncStatus;
-use App\Enums\TeamType;
 use App\Livewire\Settings\AuditLogs;
-use App\Livewire\Settings\CnesImport;
 use App\Livewire\Settings\DataProcessing;
-use App\Livewire\Settings\EsusConnection;
 use App\Livewire\Settings\MunicipalitySettings;
 use App\Livewire\Settings\UsersManager;
-use App\Models\ConsolidationRegistration;
-use App\Models\ConsolidationTeam;
-use App\Models\Setting;
 use App\Models\SyncLog;
 use App\Models\User;
 use App\Services\CnesXmlParserService;
@@ -322,11 +316,11 @@ class SettingsTest extends TestCase
 </DADOS_EXPORTADOS>
 XML;
 
-        $tempPath = tempnam(sys_get_temp_dir(), 'cnes_test_') . '.xml';
+        $tempPath = tempnam(sys_get_temp_dir(), 'cnes_test_').'.xml';
         file_put_contents($tempPath, $xmlContent);
 
         try {
-            $parser = new CnesXmlParserService();
+            $parser = new CnesXmlParserService;
             $result = $parser->parse($tempPath);
 
             $this->assertSame('2706401', $result['ibge']);

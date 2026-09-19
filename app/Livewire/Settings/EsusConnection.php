@@ -53,7 +53,7 @@ class EsusConnection extends Component
             foreach ($keyTables as $table) {
                 try {
                     $exists = $connection->selectOne(
-                        "SELECT to_regclass(?) IS NOT NULL AS exists",
+                        'SELECT to_regclass(?) IS NOT NULL AS exists',
                         [$table]
                     );
                     $this->tablesStatus[$table] = (bool) ($exists->exists ?? false);

@@ -58,6 +58,7 @@ class CnesImport extends Component
     {
         if ($this->xmlFile === null || $this->parsedPreview === null) {
             $this->addError('xmlFile', 'Nenhum arquivo XML válido foi analisado para importação.');
+
             return;
         }
 
@@ -68,7 +69,7 @@ class CnesImport extends Component
             }
 
             $originalName = $this->xmlFile->getClientOriginalName();
-            $targetPath = $dir . DIRECTORY_SEPARATOR . $originalName;
+            $targetPath = $dir.DIRECTORY_SEPARATOR.$originalName;
 
             // Move uploaded file to importacao
             File::copy($this->xmlFile->getRealPath(), $targetPath);
@@ -77,7 +78,7 @@ class CnesImport extends Component
             $this->xmlFile = null;
             $this->parsedPreview = null;
         } catch (Throwable $e) {
-            $this->previewError = 'Erro ao salvar o arquivo XML: ' . $e->getMessage();
+            $this->previewError = 'Erro ao salvar o arquivo XML: '.$e->getMessage();
         }
     }
 
@@ -105,7 +106,7 @@ class CnesImport extends Component
                 $currentXmlInfo = [
                     'path' => $currentXmlPath,
                     'full_path' => $resolved,
-                    'size_formatted' => round($fileSize / 1024, 1) . ' KB',
+                    'size_formatted' => round($fileSize / 1024, 1).' KB',
                     'last_modified' => date('d/m/Y H:i:s', $lastModified),
                     'parsed' => $parsedCurrent,
                 ];

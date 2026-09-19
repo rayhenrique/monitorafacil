@@ -2,12 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Console\Commands\EsusSyncSnapshot;
 use App\Enums\SyncStatus;
 use App\Enums\TeamType;
-use App\Models\ConsolidationRegistration;
-use App\Models\ConsolidationTeam;
 use App\Models\Setting;
-use App\Models\SyncLog;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Carbon;
@@ -321,7 +319,7 @@ class EsusSyncSnapshotTest extends TestCase
         $relative = 'importacao/XmlParaESUS31_270915.xml';
         config()->set('esus.homologated_xml_path', $relative);
 
-        $command = new \App\Console\Commands\EsusSyncSnapshot();
+        $command = new EsusSyncSnapshot;
         $reflection = new \ReflectionClass($command);
         $method = $reflection->getMethod('resolveXmlPath');
 

@@ -18,4 +18,3 @@ Schedule::command('esus:process-data --scope=all')
     ->dailyAt('03:30')
     ->timezone(config('esus.schedule_timezone'))
     ->withoutOverlapping();
-

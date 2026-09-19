@@ -23,7 +23,7 @@ class CnesXmlParserService
             throw new RuntimeException('O arquivo XML informado não foi encontrado ou não pode ser lido.');
         }
 
-        $reader = new XMLReader();
+        $reader = new XMLReader;
 
         if (! @$reader->open($filePath, null, LIBXML_NONET)) {
             throw new RuntimeException('Não foi possível abrir o arquivo XML informado.');
@@ -45,6 +45,7 @@ class CnesXmlParserService
 
                 if ($reader->nodeType === XMLReader::END_ELEMENT && $reader->name === 'DADOS_GERAIS_ESTABELECIMENTOS') {
                     $cnes = null;
+
                     continue;
                 }
 
@@ -54,11 +55,13 @@ class CnesXmlParserService
 
                 if ($reader->name === 'IDENTIFICACAO') {
                     $ibge = trim((string) $reader->getAttribute('CO_IBGE_MUN'));
+
                     continue;
                 }
 
                 if ($reader->name === 'DADOS_GERAIS_ESTABELECIMENTOS') {
                     $cnes = trim((string) $reader->getAttribute('CNES'));
+
                     continue;
                 }
 
@@ -205,7 +208,7 @@ class CnesXmlParserService
         // Procura por arquivos XML na pasta importacao/
         $importDir = base_path('importacao');
         if (is_dir($importDir)) {
-            $xmlFiles = glob($importDir . DIRECTORY_SEPARATOR . '*.xml');
+            $xmlFiles = glob($importDir.DIRECTORY_SEPARATOR.'*.xml');
             if (! empty($xmlFiles)) {
                 // Prioriza arquivos contendo "XmlParaESUS"
                 foreach ($xmlFiles as $file) {

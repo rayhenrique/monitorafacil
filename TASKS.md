@@ -136,3 +136,13 @@
   - [x] Modal de prontuário e auditoria clínica detalhada das cinco práticas para cada criança.
   - [x] Testes de integração cobrindo o fluxo completo da Busca Ativa C2.
 
+- [x] **Fase 18: Conexão Nominal Real do C2 ao DW e-SUS PEC (v1.14.0)**
+  - [x] Tabela `c2_nominal_children` no MySQL para armazenamento atômico e persistência da coorte nominal com proteção de chave única (`year`, `quarter`, `pec_child_id`).
+  - [x] Extração de colunas nominais reais (`no_cidadao`, `no_mae_cidadao`, `nu_cpf_cidadao`, `nu_cns_cidadao`, `nu_micro_area`, `nu_cnes_vinc_unidade`, `no_unidade_vinc`, `ds_raca_cor_cidadao`) de `tb_acomp_cidadaos_vinculados` no `C2DwService`.
+  - [x] Persistência chunked em lotes de 100 registros durante a extração pelo `C2SnapshotService`.
+  - [x] Consulta, filtros e paginação direta sobre a tabela real no `C2ActiveSearchService` com fallback seguro apenas quando a tabela estiver vazia e o PEC indisponível.
+  - [x] Sincronização sob demanda via botão "Sincronizar PEC" no componente Livewire `IndicatorDetail`.
+  - [x] Badges no topo identificando origem: "Base Real e-SUS PEC" vs "Demonstração".
+  - [x] Cobertura completa de testes automatizados unitários e de feature.
+
+

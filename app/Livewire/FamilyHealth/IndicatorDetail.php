@@ -267,6 +267,17 @@ class IndicatorDetail extends Component
         $this->selectedChild = null;
     }
 
+    public function syncC2FromPec(C2ActiveSearchService $c2Service): void
+    {
+        try {
+            $stats = $c2Service->syncFromPec($this->year, $this->quarter);
+            $this->c2Page = 1;
+            session()->flash('c2_sync_message', sprintf('Base nominal sincronizada com sucesso do e-SUS PEC! %d crianças na coorte.', $stats['cohort_children']));
+        } catch (\Throwable $e) {
+            session()->flash('c2_sync_error', 'Falha ao conectar ou sincronizar com o e-SUS PEC: '.$e->getMessage());
+        }
+    }
+
     public function setTab(string $tab): void
     {
         $this->activeTab = $tab;
@@ -412,6 +423,8 @@ class IndicatorDetail extends Component
             'c2TotalItems' => $c2TotalItems,
             'c2TotalPages' => $c2TotalPages,
             'activeFiltersCount' => $activeFiltersCount,
+            'isRealDataAvailable' => C2ActiveSearchService::isRealDataAvailable($this->year, $this->quarter),
+            'realChildrenCount' => C2ActiveSearchService::getRealChildrenCount($this->year, $this->quarter, $this->selectedIne),
         ]);
     }
 }

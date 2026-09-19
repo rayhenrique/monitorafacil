@@ -2,11 +2,47 @@
 
 namespace App\Services;
 
+use App\Models\C2NominalChild;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class C2ActiveSearchService
 {
+    /**
+     * Verifica se há registros reais na base local para a competência.
+     */
+    public static function isRealDataAvailable(int $year, int $quarter): bool
+    {
+        return C2NominalChild::query()->where('year', $year)->where('quarter', $quarter)->exists();
+    }
+
+    /**
+     * Retorna a quantidade de crianças reais na coorte gravada.
+     */
+    public static function getRealChildrenCount(int $year, int $quarter, ?string $ine = null): int
+    {
+        $q = C2NominalChild::query()->where('year', $year)->where('quarter', $quarter);
+        if ($ine) {
+            $q->where('ine', $ine);
+        }
+
+        return $q->count();
+    }
+
+    /**
+     * Executa a extração em tempo real da base e-SUS PEC para a base local MySQL.
+     *
+     * @return array{children:int,cohort_children:int,completed_children:int,teams:int,months:int}
+     */
+    public function syncFromPec(int $year, int $quarter): array
+    {
+        $pec = DB::connection('pgsql_esus');
+        $eligibleTeams = app(FamilyHealthService::class)->getEligibleTeams($year, $quarter);
+
+        return app(C2SnapshotService::class)->process($pec, $year, $quarter, $eligibleTeams);
+    }
+
     /**
      * Colunas padrão e disponíveis para a tabela de busca ativa.
      *
@@ -67,12 +103,62 @@ class C2ActiveSearchService
     }
 
     /**
-     * Lista base de crianças da coorte com dados enriquecidos e realistas para Teotônio Vilela/AL.
+     * Lista base de crianças da coorte. Consulta prioritariamente a base real c2_nominal_children.
      *
      * @return Collection<int, array<string, mixed>>
      */
     public function getBaseCohort(int $year, int $quarter, ?string $selectedIne = null): Collection
     {
+        // 1. Tenta carregar da base nominal real local
+        $dbQuery = C2NominalChild::query()
+            ->where('year', $year)
+            ->where('quarter', $quarter);
+
+        if ($selectedIne) {
+            $dbQuery->where('ine', $selectedIne);
+        }
+
+        $records = $dbQuery->get();
+
+        if ($records->isNotEmpty()) {
+            return $records->map(function (C2NominalChild $child) {
+                return [
+                    'id' => $child->id,
+                    'cidadao_pec_id' => $child->cidadao_pec_id,
+                    'cns' => $child->cns ?? '',
+                    'cpf' => $child->cpf ?? '',
+                    'name' => $child->name,
+                    'mother_name' => $child->mother_name ?? '',
+                    'birth_date' => $child->birth_date?->format('Y-m-d') ?? '',
+                    'age_months' => $child->age_months,
+                    'race_color' => $child->race_color ?? 'Não informada',
+                    'cnes' => $child->cnes ?? '',
+                    'facility_name' => $child->facility_name ?? '',
+                    'district' => $child->district ?? 'Centro',
+                    'ine' => $child->ine ?? '',
+                    'team_name' => $child->team_name ?? '',
+                    'professional_cns' => $child->professional_cns ?? '',
+                    'professional_name' => $child->professional_name ?? '',
+                    'month_ref' => $child->month_ref ?? '',
+                    'microarea' => $child->microarea ?? '',
+                    'mici_updated' => (bool) $child->mici_updated,
+                    'micdt_updated' => (bool) $child->micdt_updated,
+                    'is_accompanied' => (bool) $child->is_accompanied,
+                    'practice_a' => $child->practice_a,
+                    'practice_b' => $child->practice_b,
+                    'practice_c' => $child->practice_c,
+                    'practice_d' => $child->practice_d,
+                    'practice_e' => $child->practice_e,
+                    'practice_a_met' => (bool) $child->practice_a_met,
+                    'practice_b_met' => (bool) $child->practice_b_met,
+                    'practice_c_met' => (bool) $child->practice_c_met,
+                    'practice_d_met' => (bool) $child->practice_d_met,
+                    'practice_e_met' => (bool) $child->practice_e_met,
+                    'score_percent' => (float) $child->score_percent,
+                    'is_real_data' => true,
+                ];
+            });
+        }
         // Equipes e Unidades oficiais
         $facilities = [
             ['cnes' => '0111791', 'name' => 'USF CENTRO DE SAUDE CENTRAL', 'district' => 'Centro'],

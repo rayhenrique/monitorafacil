@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Livewire\FamilyHealth\FamilyHealthOverview;
 use App\Livewire\FamilyHealth\IndicatorDetail;
+use App\Models\C2NominalChild;
 use App\Models\FamilyHealthIndicatorSnapshot;
 use App\Models\User;
 use App\Services\C1DwService;
@@ -35,6 +36,7 @@ class FamilyHealthTest extends TestCase
         Schema::dropIfExists('consolidation_registrations');
         Schema::dropIfExists('family_health_indicator_snapshots');
         Schema::dropIfExists('c2_cohort_snapshots');
+        Schema::dropIfExists('c2_nominal_children');
 
         Schema::create('users', function (Blueprint $table): void {
             $table->id();
@@ -116,6 +118,45 @@ class FamilyHealthTest extends TestCase
             $table->json('monthly_counts');
             $table->date('as_of');
             $table->string('calculation_version', 40);
+            $table->timestamps();
+        });
+
+        Schema::create('c2_nominal_children', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedSmallInteger('year');
+            $table->unsignedTinyInteger('quarter');
+            $table->unsignedBigInteger('cidadao_pec_id')->nullable()->index();
+            $table->string('cns', 20)->nullable()->index();
+            $table->string('cpf', 20)->nullable()->index();
+            $table->string('name', 200)->index();
+            $table->string('mother_name', 200)->nullable();
+            $table->date('birth_date');
+            $table->unsignedSmallInteger('age_months')->default(0);
+            $table->string('race_color', 50)->nullable();
+            $table->string('cnes', 20)->nullable()->index();
+            $table->string('facility_name', 200)->nullable();
+            $table->string('district', 100)->nullable();
+            $table->string('ine', 20)->nullable()->index();
+            $table->string('team_name', 200)->nullable();
+            $table->string('professional_cns', 20)->nullable();
+            $table->string('professional_name', 200)->nullable();
+            $table->string('month_ref', 10)->nullable();
+            $table->string('microarea', 20)->nullable();
+            $table->boolean('mici_updated')->default(false);
+            $table->boolean('micdt_updated')->default(false);
+            $table->boolean('is_accompanied')->default(false);
+            $table->unsignedSmallInteger('practice_a')->default(0);
+            $table->unsignedSmallInteger('practice_b')->default(0);
+            $table->unsignedSmallInteger('practice_c')->default(0);
+            $table->unsignedSmallInteger('practice_d')->default(0);
+            $table->unsignedSmallInteger('practice_e')->default(0);
+            $table->boolean('practice_a_met')->default(false);
+            $table->boolean('practice_b_met')->default(false);
+            $table->boolean('practice_c_met')->default(false);
+            $table->boolean('practice_d_met')->default(false);
+            $table->boolean('practice_e_met')->default(false);
+            $table->decimal('score_percent', 5, 2)->default(0.00);
+            $table->string('calculation_version', 50);
             $table->timestamps();
         });
 
@@ -744,5 +785,54 @@ class FamilyHealthTest extends TestCase
             ->assertSee('(A) Consulta até 30º dia de vida')
             ->call('closeChildDetail')
             ->assertSet('showDetailModal', false);
+    }
+
+    public function test_c2_nominal_children_real_data_flow(): void
+    {
+        $this->authenticateUser();
+
+        // Insere registro real na tabela c2_nominal_children
+        C2NominalChild::query()->create([
+            'year' => 2026,
+            'quarter' => 3,
+            'cidadao_pec_id' => 998877,
+            'cns' => '701234567890123',
+            'cpf' => '123.456.789-00',
+            'name' => 'MARIA FLOR DA SILVA REAL',
+            'mother_name' => 'ANA CLARA DA SILVA',
+            'birth_date' => '2025-11-20',
+            'age_months' => 10,
+            'race_color' => 'Parda',
+            'cnes' => '0111791',
+            'facility_name' => 'USF CENTRO DE SAUDE CENTRAL',
+            'district' => 'Centro',
+            'ine' => '0001715364',
+            'team_name' => 'eSF 01 · Centro',
+            'professional_cns' => '700000000000001',
+            'professional_name' => 'ACS JOANA',
+            'month_ref' => '11/2027',
+            'microarea' => '01',
+            'mici_updated' => true,
+            'micdt_updated' => true,
+            'is_accompanied' => true,
+            'practice_a' => 1,
+            'practice_b' => 9,
+            'practice_c' => 9,
+            'practice_d' => 2,
+            'practice_e' => 10,
+            'practice_a_met' => true,
+            'practice_b_met' => true,
+            'practice_c_met' => true,
+            'practice_d_met' => true,
+            'practice_e_met' => true,
+            'score_percent' => 100.0,
+            'calculation_version' => C2DwService::VERSION,
+        ]);
+
+        $component = Livewire::test(IndicatorDetail::class, ['indicator' => 'c2', 'year' => 2026, 'quarter' => 3])
+            ->set('activeTab', 'active_search')
+            ->assertSee('Base Real e-SUS PEC')
+            ->assertSee('MARIA FLOR DA SILVA REAL')
+            ->assertDontSee('ABNER VALENTIM'); // Quando a base real tem registros, os dados mockados deixam de aparecer
     }
 }

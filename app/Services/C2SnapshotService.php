@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\C2CohortSnapshot;
+use App\Models\C2NominalChild;
 use App\Models\FamilyHealthIndicatorSnapshot;
 use App\Models\FamilyHealthMonthlySnapshot;
 use Illuminate\Database\ConnectionInterface;
@@ -26,10 +27,27 @@ class C2SnapshotService
 
         DB::transaction(function () use ($data, $cohort, $extraction, $teams, $year, $quarter, &$stats): void {
             C2CohortSnapshot::query()->where('year', $year)->where('quarter', $quarter)->delete();
+            C2NominalChild::query()->where('year', $year)->where('quarter', $quarter)->delete();
             FamilyHealthMonthlySnapshot::query()
                 ->where('year', $year)->where('quarter', $quarter)->where('indicator_code', 'c2')->delete();
             FamilyHealthIndicatorSnapshot::query()
                 ->where('year', $year)->where('quarter', $quarter)->where('indicator_code', 'c2')->delete();
+
+            $nominalChildren = $extraction['children'] ?? [];
+            if (! empty($nominalChildren)) {
+                foreach (array_chunk($nominalChildren, 100) as $chunk) {
+                    $records = array_map(function ($child) use ($year, $quarter) {
+                        return array_merge($child, [
+                            'year' => $year,
+                            'quarter' => $quarter,
+                            'calculation_version' => C2DwService::VERSION,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }, $chunk);
+                    C2NominalChild::query()->insert($records);
+                }
+            }
 
             $municipalCohort = [];
             $municipalEvaluated = 0;

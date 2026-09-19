@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.13.0';
+    public const CURRENT_VERSION = 'v1.14.0';
 
     public const CURRENT_RELEASE_DATE = '18/09/2026';
 
@@ -61,9 +61,23 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.13.0',
+                'version' => 'v1.14.0',
                 'date' => '18/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Conexão Nominal Real do C2 ao DW e-SUS PEC',
+                'summary' => 'Extração e persistência da coorte nominal real de crianças com 2 anos a partir do banco PostgreSQL e-SUS PEC no MySQL local, com sincronização em 1 clique e identificação visual de dados reais.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Tabela c2_nominal_children no MySQL para armazenamento atômico da coorte nominal de crianças e status clínico das 5 práticas.'],
+                    ['type' => 'novo', 'text' => 'Extração de dados nominais reais (Nome, Mãe, CPF, CNS, Idade, Raça/Cor, CNES, INE, Microárea, Profissional) do DW PEC.'],
+                    ['type' => 'novo', 'text' => 'Botão "Sincronizar PEC" sob demanda na aba de Busca Ativa para atualização imediata dos dados nominais.'],
+                    ['type' => 'melhoria', 'text' => 'Badge indicador no cabeçalho sinalizando status "Base Real e-SUS PEC" vs "Demonstração".'],
+                    ['type' => 'melhoria', 'text' => 'Cálculo de KPIs e percentuais do banner baseado nas crianças reais gravadas da coorte.'],
+                ],
+            ],
+            [
+                'version' => 'v1.13.0',
+                'date' => '18/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Busca Ativa e Boas Práticas Infantis no Indicador C2',
                 'summary' => 'Refinamento completo da aba de Busca Ativa do C2, com banner de dados gerais, lista nominal da coorte com máscara LGPD, colunas personalizáveis, modal de busca avançada e auditoria clínica das cinco práticas.',
                 'highlights' => [
