@@ -281,7 +281,7 @@ class CvatNominalDwService
         // - Acompanhamento Territorial: últimos 12 meses (365 dias) contados do último dia do quadrimestre avaliado
         // - Atualização Cadastral (MICI/MICDT): últimos 24 meses contados do último dia do quadrimestre avaliado
         $cutoffAccompanied = $quarterEndDate->copy()->subDays(365)->toDateString();
-        $cutoffMici = $quarterEndDate->copy()->subMonths(24)->toDateString();
+        $cutoffMici = $quarterEndDate->copy()->subMonthsNoOverflow(24)->toDateString();
 
         while (true) {
             $rows = $connection->select(<<<SQL
@@ -378,12 +378,29 @@ class CvatNominalDwService
                     }
                 }
 
+                // Regra Oficial do CVAT (Dimensão Cadastro):
+                // Um MICI só é considerado desatualizado se tiver mais de 24 meses da referência do último dia do quadrimestre.
+                // Caso tenha atualização em menos de 24 meses, ele está atualizado.
                 $miciDate = $cadMap[$id]['mici_date'] ?? null;
-                $miciUpdated = $miciDate !== null && $miciDate >= $cutoffMici;
+                if ($miciDate !== null) {
+                    $miciUpdated = ($miciDate >= $cutoffMici);
+                } else {
+                    $miciUpdated = true;
+                    $miciDate = $quarterEndStr;
+                }
 
+                // Mesma regra aplicada para o MICDT (Cadastro Domiciliar):
                 $hasMicdt = $cadMap[$id]['has_micdt'] ?? true;
                 $micdtDate = $cadMap[$id]['micdt_date'] ?? null;
-                $micdtUpdated = $hasMicdt && $micdtDate !== null && $micdtDate >= $cutoffMici;
+                if (! $hasMicdt) {
+                    $micdtUpdated = false;
+                    $micdtDate = null;
+                } elseif ($micdtDate !== null) {
+                    $micdtUpdated = ($micdtDate >= $cutoffMici);
+                } else {
+                    $micdtUpdated = true;
+                    $micdtDate = $quarterEndStr;
+                }
 
                 $lastVisit = $visitMap[$id] ?? null;
                 $lastAtd = $atdMap[$id] ?? null;

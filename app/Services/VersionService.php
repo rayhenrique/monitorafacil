@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.22.1';
+    public const CURRENT_VERSION = 'v1.22.2';
 
     public const CURRENT_RELEASE_DATE = '19/09/2026';
 
@@ -61,9 +61,21 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.22.1',
+                'version' => 'v1.22.2',
                 'date' => '19/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Regra Estrita de 24 Meses para MICI e MICDT',
+                'summary' => 'Critério oficial para a Dimensão Cadastro: um MICI ou MICDT só é desatualizado se tiver mais de 24 meses em relação ao encerramento do quadrimestre; atualizações em menos de 24 meses mantêm status atualizado.',
+                'highlights' => [
+                    ['type' => 'regra', 'text' => 'MICI e MICDT só são classificados como desatualizados se tiverem estritamente mais de 24 meses da data de corte final do quadrimestre avaliado.'],
+                    ['type' => 'melhoria', 'text' => 'Cálculo com subMonthsNoOverflow(24) garantindo precisão cronológica rigorosa de calendário.'],
+                    ['type' => 'melhoria', 'text' => 'Garantia de que qualquer cadastro ou atualização recente dentro da janela de 24 meses permaneça com indicador verde de atualizado.'],
+                ],
+            ],
+            [
+                'version' => 'v1.22.1',
+                'date' => '19/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Janela de Acompanhamento de 12 Meses no CVAT',
                 'summary' => 'Ajuste da regra de negócio para a Dimensão Acompanhamento: janela de 12 meses (365 dias) contados do encerramento do quadrimestre avaliado para visitas do ACS e atendimentos.',
                 'highlights' => [

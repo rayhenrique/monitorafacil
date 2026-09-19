@@ -234,4 +234,10 @@
   - [x] Filtragem temporal no PostgreSQL limitando registros até a data de encerramento do período quadrimestral.
   - [x] Cálculo de idade dos cidadãos com base na data final do quadrimestre para correta classificação etária.
 
+- [x] **Fase 29: Regra Estrita de 24 Meses para MICI e MICDT (v1.22.2)**
+  - [x] Implementação da regra estrita: MICI e MICDT só são classificados como desatualizados se tiverem mais de 24 meses da data de corte final do quadrimestre avaliado (`mici_date < $cutoffMici`).
+  - [x] Qualquer atualização realizada em menos de 24 meses classifica o cadastro como atualizado (`mici_updated = true`, `micdt_updated = true`).
+  - [x] Uso de `subMonthsNoOverflow(24)` para eliminar discrepâncias em meses de 31 dias.
+
+
 

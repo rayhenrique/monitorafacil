@@ -4,6 +4,18 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.22.2] - 19/09/2026
+
+### 📌 Regra Estrita de 24 Meses para MICI e MICDT (Dimensão Cadastro)
+- **Critério de Atualização Cadastral**:
+  - Um cadastro individual (**MICI**) ou domiciliar (**MICDT**) **SÓ é considerado desatualizado se tiver mais de 24 meses** contados a partir da data de encerramento do quadrimestre avaliado (`mici_date < $cutoffMici`).
+  - Caso o cidadão tenha cadastro ou atualização em menos de 24 meses (`mici_date >= $cutoffMici`), ele é rigorosamente classificado como **atualizado (`mici_updated = true`)**.
+  - A mesma regra se aplica ao **MICDT**: quando o domicílio vinculado foi cadastrado ou atualizado em menos de 24 meses do fim do período, recebe status **atualizado (`micdt_updated = true`)**; somente fichas com mais de 24 meses recebem status desatualizado.
+- **Precisão Temporal sem Transbordamento**:
+  - Utilização de `subMonthsNoOverflow(24)` garantindo que o cálculo de dois anos retroativos a partir de `30/04`, `31/08` ou `31/12` mantenha a data exata do mês sem distorções de dias.
+
+---
+
 ## [v1.22.1] - 19/09/2026
 
 ### ⏱️ Janela de Acompanhamento de 12 Meses no CVAT
