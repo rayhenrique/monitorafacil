@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.21.0';
+    public const CURRENT_VERSION = 'v1.21.1';
 
     public const CURRENT_RELEASE_DATE = '19/09/2026';
 
@@ -61,9 +61,21 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.21.0',
+                'version' => 'v1.21.1',
                 'date' => '19/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Processamento Exclusivo e Importação Opcional do Siaps',
+                'summary' => 'Botão exclusivo em Processar Dados para Vínculo e Acompanhamento Territorial, desacoplamento do deploy automático do Siaps e modal de upload de CSV diretamente no módulo CVAT.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Botão exclusivo "Processar Vínculo e Acompanhamento" em Configurações > Processar Dados com relatório de tabelas e progresso.'],
+                    ['type' => 'novo', 'text' => 'Modal de importação opcional de arquivos CSV do Siaps diretamente no módulo Vínculo e Acompanhamento.'],
+                    ['type' => 'melhoria', 'text' => 'Desacoplamento da importação de arquivos do Siaps no script de deploy, mantendo-a sob demanda e gerenciada no próprio módulo.'],
+                ],
+            ],
+            [
+                'version' => 'v1.21.0',
+                'date' => '19/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Submódulo Relação Nominal e Busca Ativa no PEC',
                 'summary' => 'Lançamento da Relação Nominal no módulo Vínculo e Acompanhamento, com extração do PEC, métricas oficiais da Dimensão Cadastro e Acompanhamento, filtros avançados e prontuário de vínculo.',
                 'highlights' => [

@@ -66,12 +66,36 @@
                 </div>
                 <h2 class="text-base sm:text-lg font-bold text-ink">Processar Dados do e-SUS PEC</h2>
                 <p class="text-xs text-muted leading-relaxed">
-                    Executa a rotina de leitura e consolidação analítica nas tabelas do e-SUS PEC. Você pode escolher processar apenas o que interessa ao <strong class="text-teal-900">Indicador C1 (Mais Acesso)</strong> ou ao <strong class="text-indigo-900">Indicador C2 (Desenvolvimento Infantil & Lista Nominal)</strong> para execução rápida e focada, ou rodar o <strong class="text-slate-800">Processamento Geral Completo</strong>.
+                    Executa a rotina de leitura e consolidação analítica nas tabelas do e-SUS PEC. Você pode escolher processar exclusivamente o <strong class="text-emerald-800">Vínculo e Acompanhamento Territorial (CVAT e Lista Nominal)</strong>, indicadores específicos de Saúde da Família (<strong class="text-teal-900">C1</strong>, <strong class="text-indigo-900">C2</strong>, <strong class="text-rose-900">C3</strong>) para execução rápida, ou rodar o <strong class="text-slate-800">Processamento Geral Completo</strong>.
                 </p>
             </div>
 
             <!-- Botões de Ação por Escopo -->
             <div class="flex flex-wrap items-center gap-3 shrink-0">
+                <!-- Botão Exclusivo: Vínculo e Acompanhamento Territorial -->
+                <button
+                    type="button"
+                    wire:click="processCvat"
+                    x-on:click="startProgress('o Vínculo e Acompanhamento Territorial (CVAT)')"
+                    wire:loading.attr="disabled"
+                    class="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 px-5 py-3.5 text-xs font-bold text-white shadow-md shadow-emerald-950/20 transition focus:outline-none focus:ring-2 focus:ring-emerald-500/30 cursor-pointer"
+                >
+                    <span wire:loading.remove wire:target="processCvat" class="inline-flex items-center gap-2">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                        </svg>
+                        <span>Processar Vínculo e Acompanhamento</span>
+                    </span>
+                    <span wire:loading wire:target="processCvat" class="inline-flex items-center gap-2">
+                        <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Processando Vínculo & Território...</span>
+                    </span>
+                </button>
+
                 <!-- Botão 1: Apenas C1 -->
                 <button
                     type="button"

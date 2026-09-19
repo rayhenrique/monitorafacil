@@ -4,6 +4,21 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.21.1] - 19/09/2026
+
+### ⚙️ Processamento Exclusivo e Importação Opcional do Siaps
+- **Botão Exclusivo em "Processar Dados"**:
+  - Nova ação dedicada **"Processar Vínculo e Acompanhamento"** na tela de *Configurações > Processar Dados*.
+  - Sincroniza sob demanda os indicadores da Dimensão Cadastro, Dimensão Acompanhamento e a Relação Nominal da busca ativa com feedback em tempo real e relatório de linhas auditadas.
+- **Importação do Siaps Opcional e Desacoplada do Deploy**:
+  - A importação automática do Siaps foi removida do script de deploy contínuo (`scripts/deploy.sh` e `deploy.sh`), tornando-a uma operação opcional e sob controle do gestor.
+- **Upload de Arquivo CSV Diretamente no Módulo**:
+  - Adicionado botão e modal interativo **"Importar CSV Siaps (Opcional)"** no painel do módulo *Vínculo e Acompanhamento*.
+  - Suporte ao upload de arquivos CSV exportados do Siaps (tanto de Desempenho Quadrimestral das Equipes quanto de Distribuições das Dimensões).
+  - Opção para restaurar os dados oficiais padrão do servidor diretamente pelo modal com um clique.
+
+---
+
 ## [v1.21.0] - 19/09/2026
 
 ### 📋 Submódulo Relação Nominal e Busca Ativa no PEC (Vínculo e Acompanhamento)

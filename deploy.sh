@@ -14,7 +14,6 @@ else
     composer install --no-dev --optimize-autoloader
     npm run build
     php8.5 artisan migrate --force
-    php8.5 artisan cvat:import-siaps
     php8.5 artisan cvat:sync-nominal
     php8.5 artisan livewire:publish --assets
     php8.5 artisan optimize:clear

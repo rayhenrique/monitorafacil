@@ -215,3 +215,9 @@
   - [x] Modais interativos de Busca Avançada multicritério e Prontuário de Vínculo com ficha completa do cidadão.
   - [x] Navegação integrada no sidebar desktop e gaveta mobile, abas do módulo CVAT e rota `/vinculo-e-acompanhamento/relacao-nominal`.
   - [x] Testes automatizados de rota, renderização, filtros e paginação da Relação Nominal.
+
+- [x] **Fase 26: Processamento Exclusivo e Importação Opcional do Siaps (v1.21.1)**
+  - [x] Criação do botão exclusivo "Processar Vínculo e Acompanhamento" no painel de *Configurações > Processar Dados* com sincronização sob demanda do DW PEC.
+  - [x] Remoção da importação automática e obrigatória do Siaps do script de deploy (`scripts/deploy.sh` e `deploy.sh`), tornando-a opcional.
+  - [x] Criação do modal de upload de arquivos CSV do Siaps diretamente no módulo *Vínculo e Acompanhamento* com detecção automática do formato (Equipes vs Dimensões) e restauração dos arquivos locais do servidor.
+  - [x] Testes automatizados para o novo escopo `cvat` em `DataProcessing` e para o modal de upload de CSV em `TerritorialBondingOverview`.

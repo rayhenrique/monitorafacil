@@ -126,4 +126,17 @@ class CvatNominalListTest extends TestCase
             ->call('closeAdvancedModal')
             ->assertSet('showAdvancedModal', false);
     }
+
+    public function test_data_processing_has_exclusive_cvat_action_and_executes(): void
+    {
+        $user = $this->createUser();
+        $this->actingAs($user);
+
+        Livewire::test(\App\Livewire\Settings\DataProcessing::class)
+            ->assertSee('Processar Vínculo e Acompanhamento')
+            ->call('processCvat')
+            ->assertSet('processStatus', 'success')
+            ->assertSet('selectedScope', 'cvat')
+            ->assertSee('Processamento do módulo Vínculo e Acompanhamento Territorial concluído com sucesso');
+    }
 }

@@ -29,9 +29,9 @@ class CvatService
     /**
      * Importa as distribuições históricas de dimensões (Q2/25, Q3/25, Q1/26).
      */
-    public function importDimensionDistributions(): int
+    public function importDimensionDistributions(?string $customPath = null): int
     {
-        $path = base_path('importacao/siaps/Vínculo_e_Acompanhamento_Territorial.csv');
+        $path = $customPath ?: base_path('importacao/siaps/Vínculo_e_Acompanhamento_Territorial.csv');
 
         if (! File::exists($path)) {
             // Tenta caminho relativo com fallback
@@ -106,9 +106,9 @@ class CvatService
     /**
      * Importa a avaliação nominal das equipes no quadrimestre.
      */
-    public function importTeamEvaluations(): int
+    public function importTeamEvaluations(?string $customPath = null): int
     {
-        $path = base_path('importacao/siaps/Desempenho Quadrimestral - Componente Vínculo e Acompanhamento Territorial.csv');
+        $path = $customPath ?: base_path('importacao/siaps/Desempenho Quadrimestral - Componente Vínculo e Acompanhamento Territorial.csv');
 
         if (! File::exists($path)) {
             return 0;
@@ -170,6 +170,69 @@ class CvatService
         }
 
         return $imported;
+    }
+
+    /**
+     * Importa um arquivo CSV arbitrário do Siaps enviado pelo usuário no módulo.
+     * Identifica automaticamente se é o arquivo de Desempenho de Equipes ou de Distribuição de Dimensões.
+     *
+     * @return array{type: string, count: int, message: string}
+     */
+    public function importUploadedCsv(string $realPath, string $originalName): array
+    {
+        if (! File::exists($realPath)) {
+            throw new \InvalidArgumentException('Arquivo não encontrado para importação.');
+        }
+
+        $lines = file($realPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        if (! $lines) {
+            throw new \InvalidArgumentException('O arquivo CSV enviado está vazio.');
+        }
+
+        $sample = mb_strtolower(implode("\n", array_slice($lines, 0, 8)));
+
+        if (str_contains($sample, 'desempenho') || str_contains($sample, 'nota final') || str_contains($sample, 'q1/26') || str_contains($sample, 'classificação') || str_contains($sample, 'classificacao') || str_contains($sample, 'ine')) {
+            $count = $this->importTeamEvaluations($realPath);
+            if ($count > 0) {
+                return [
+                    'type' => 'teams',
+                    'count' => $count,
+                    'message' => "Arquivo '{$originalName}' importado com sucesso: {$count} equipes avaliadas e cadastradas no CVAT.",
+                ];
+            }
+        }
+
+        if (str_contains($sample, 'dimensão') || str_contains($sample, 'dimensao') || str_contains($sample, 'cadastro') || str_contains($sample, 'acompanhamento') || str_contains($sample, '2025q2') || str_contains($sample, '2026q1')) {
+            $count = $this->importDimensionDistributions($realPath);
+            if ($count > 0) {
+                return [
+                    'type' => 'distributions',
+                    'count' => $count,
+                    'message' => "Arquivo '{$originalName}' importado com sucesso: {$count} distribuições dimensionais (Cadastro/Acompanhamento) atualizadas.",
+                ];
+            }
+        }
+
+        // Tentativas de fallback
+        $teamsCount = $this->importTeamEvaluations($realPath);
+        if ($teamsCount > 0) {
+            return [
+                'type' => 'teams',
+                'count' => $teamsCount,
+                'message' => "Arquivo '{$originalName}' importado com sucesso: {$teamsCount} avaliações de equipes atualizadas.",
+            ];
+        }
+
+        $distCount = $this->importDimensionDistributions($realPath);
+        if ($distCount > 0) {
+            return [
+                'type' => 'distributions',
+                'count' => $distCount,
+                'message' => "Arquivo '{$originalName}' importado com sucesso: {$distCount} distribuições dimensionais atualizadas.",
+            ];
+        }
+
+        throw new \RuntimeException("O formato do arquivo '{$originalName}' não foi reconhecido como um relatório oficial válido do Siaps para o componente CVAT.");
     }
 
     /**

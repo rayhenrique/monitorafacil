@@ -73,4 +73,28 @@ class TerritorialBondingTest extends TestCase
             ->assertSee('ESF MATAO DO ROBERTO')
             ->assertDontSee('01 06 CS MANUEL A DE SANTANA');
     }
+
+    public function test_import_modal_can_be_opened_and_closed(): void
+    {
+        $user = User::factory()->create();
+
+        Livewire::actingAs($user)
+            ->test(TerritorialBondingOverview::class)
+            ->assertSet('showImportModal', false)
+            ->call('openImportModal')
+            ->assertSet('showImportModal', true)
+            ->call('closeImportModal')
+            ->assertSet('showImportModal', false);
+    }
+
+    public function test_import_server_defaults_populates_data(): void
+    {
+        $user = User::factory()->create();
+
+        Livewire::actingAs($user)
+            ->test(TerritorialBondingOverview::class)
+            ->call('importServerDefaults')
+            ->assertSet('importStatus', 'success')
+            ->assertSee('Importação dos arquivos padrão concluída');
+    }
 }

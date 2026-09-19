@@ -6,6 +6,7 @@ use App\Enums\TeamType;
 use App\Models\ConsolidationRegistration;
 use App\Models\ConsolidationTeam;
 use App\Models\SyncLog;
+use App\Services\CvatNominalDwService;
 use App\Services\EsusDataProcessingService;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
@@ -28,13 +29,13 @@ class DataProcessing extends Component
     /** @var array<string, array{name: string, description: string, status: string, rows: int, message: string}> */
     public array $tablesReport = [];
 
-    public string $selectedScope = 'all'; // 'c1', 'c2', 'c3' ou 'all' (Geral Completo)
+    public string $selectedScope = 'all'; // 'c1', 'c2', 'c3', 'cvat' ou 'all' (Geral Completo)
 
     public ?float $executionTimeMs = null;
 
     public function setScope(string $scope): void
     {
-        $this->selectedScope = in_array($scope, ['c1', 'c2', 'c3', 'all'], true) ? $scope : 'all';
+        $this->selectedScope = in_array($scope, ['c1', 'c2', 'c3', 'cvat', 'all'], true) ? $scope : 'all';
     }
 
     public function processC1(EsusDataProcessingService $service): void
@@ -53,6 +54,72 @@ class DataProcessing extends Component
     {
         $this->selectedScope = 'c3';
         $this->executeProcessing($service, 'c3');
+    }
+
+    public function processCvat(CvatNominalDwService $service): void
+    {
+        $this->selectedScope = 'cvat';
+        $this->isProcessing = true;
+        $this->processMessage = null;
+        $this->processStatus = null;
+        $this->updateProgress(15, 'Conectando ao e-SUS PEC e verificando tabelas do Vínculo Territorial...');
+
+        try {
+            $startTime = microtime(true);
+            $this->updateProgress(35, 'Extraindo cadastros individuais (MICI) e fichas domiciliares (MICDT)...');
+
+            $result = $service->syncFromPec();
+
+            $this->updateProgress(75, 'Consolidando métricas e relações nominais para busca ativa...');
+
+            $executionTimeMs = round((microtime(true) - $startTime) * 1000, 2);
+            $this->executionTimeMs = $executionTimeMs;
+            $this->processStatus = 'success';
+
+            $totalMici = number_format($result['metrics']->mici_total, 0, ',', '.');
+            $miciAtualizados = number_format($result['metrics']->mici_updated, 0, ',', '.');
+            $comMicdt = number_format($result['metrics']->mici_with_micdt_total, 0, ',', '.');
+            $vinculados = number_format($result['metrics']->citizens_linked, 0, ',', '.');
+            $totalNominal = number_format($result['nominal_citizens_count'], 0, ',', '.');
+
+            $this->processMessage = "Processamento do módulo Vínculo e Acompanhamento Territorial concluído com sucesso!\n"
+                . "• Total Geral de MICI: {$totalMici} ({$miciAtualizados} atualizados)\n"
+                . "• Total com MICDT: {$comMicdt}\n"
+                . "• Cidadãos Vinculados: {$vinculados}\n"
+                . "• Relação Nominal da Busca Ativa: {$totalNominal} cidadãos sincronizados ({$executionTimeMs} ms).";
+
+            $this->tablesReport = [
+                'tb_fat_cad_individual' => [
+                    'name' => 'tb_fat_cad_individual',
+                    'description' => 'Fichas de Cadastro Individual (MICI)',
+                    'status' => 'Concluído',
+                    'rows' => (int) $result['metrics']->mici_total,
+                    'message' => "MICI atualizados: {$miciAtualizados}",
+                ],
+                'tb_fat_cad_domiciliar' => [
+                    'name' => 'tb_fat_cad_domiciliar',
+                    'description' => 'Fichas de Cadastro Domiciliar e Territorial (MICDT)',
+                    'status' => 'Concluído',
+                    'rows' => (int) $result['metrics']->mici_with_micdt_total,
+                    'message' => "Cadastros com domicílio: {$comMicdt}",
+                ],
+                'cvat_nominal_citizens' => [
+                    'name' => 'cvat_nominal_citizens',
+                    'description' => 'Relação Nominal e Busca Ativa (Monitora Fácil)',
+                    'status' => 'Atualizado',
+                    'rows' => (int) $result['nominal_citizens_count'],
+                    'message' => 'Base local sincronizada para busca e acompanhamento',
+                ],
+            ];
+
+            $this->updateProgress(100, 'Processamento do Vínculo Territorial concluído com sucesso!');
+        } catch (Throwable $e) {
+            $this->processStatus = 'error';
+            $this->processMessage = 'Exceção ao processar Vínculo e Acompanhamento: '.$e->getMessage();
+            $this->updateProgress(100, 'Falha durante o processamento do Vínculo e Acompanhamento.');
+        } finally {
+            $this->isProcessing = false;
+        }
     }
 
     public function processAll(EsusDataProcessingService $service): void
