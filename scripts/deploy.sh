@@ -1,48 +1,53 @@
 #!/usr/bin/env bash
-# ==============================================================================
-# Script de Deploy para Produção - Saúde Brasil 360 Monitor (MonitoraFácil)
-# ==============================================================================
 set -e
 
-APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$APP_DIR"
+# ==============================================================================
+# Script de Deploy e Atualização Contínua - Monitora Fácil
+# ==============================================================================
 
-echo "==> [1/7] Iniciando deploy em: $APP_DIR"
+PROJECT_DIR="/home/kltecnologia-monitorafacil/htdocs/monitorafacil.kltecnologia.com"
 
-# 1. Ativa modo de manutenção (se a aplicação já estiver rodando)
-echo "==> [2/7] Ativando modo de manutenção..."
-php artisan down --retry=60 || true
-
-# 2. Instalação e otimização das dependências PHP
-echo "==> [3/7] Instalando dependências de produção do Composer..."
-composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
-
-# 3. Execução de migrações
-echo "==> [4/7] Executando migrações no banco local (MySQL)..."
-php artisan migrate --force
-
-# 4. Build de assets frontend
-echo "==> [5/7] Compilando assets do frontend (Vite)..."
-if command -v npm &> /dev/null; then
-    npm ci --no-audit --prefer-offline || npm install --no-audit
-    npm run build
+if [ -d "$PROJECT_DIR" ]; then
+    cd "$PROJECT_DIR"
 else
-    echo "AVISO: npm não encontrado no PATH. Certifique-se de que os assets foram compilados previamente."
+    # Fallback caso executado a partir de outro diretório relativo
+    cd "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 fi
 
-# 5. Otimização de Caches do Laravel
-echo "==> [6/7] Otimizando caches (configurações, rotas e views)..."
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+echo "==> [1/9] Atualizando repositório a partir da branch main..."
+git pull origin main
 
-# 6. Ajuste de permissões de diretórios críticos
-echo "==> [7/7] Ajustando permissões de storage e bootstrap/cache..."
-chmod -R 775 storage bootstrap/cache || true
+echo "==> [2/9] Instalando dependências de produção do Composer..."
+composer install --no-dev --optimize-autoloader
 
-# 7. Finalização e desativação do modo de manutenção
-php artisan up
+echo "==> [3/9] Compilando assets do frontend (Vite)..."
+npm run build
+
+# Detecção do binário PHP (preferência para php8.5 do CloudPanel)
+if command -v php8.5 &> /dev/null; then
+    PHP_BIN="php8.5"
+else
+    PHP_BIN="php"
+fi
+
+echo "==> [4/9] Executando migrações do banco de dados..."
+$PHP_BIN artisan migrate --force
+
+echo "==> [5/9] Publicando assets do Livewire..."
+$PHP_BIN artisan livewire:publish --assets
+
+echo "==> [6/9] Limpando caches da aplicação..."
+$PHP_BIN artisan optimize:clear
+
+echo "==> [7/9] Otimizando cache de configuração..."
+$PHP_BIN artisan config:cache
+
+echo "==> [8/9] Otimizando cache de rotas..."
+$PHP_BIN artisan route:cache
+
+echo "==> [9/9] Otimizando cache de views..."
+$PHP_BIN artisan view:cache
 
 echo "=============================================================================="
-echo "✔ Deploy concluído com sucesso em $(date '+%d/%m/%Y %H:%M:%S')!"
+echo "✔ Deploy concluído com sucesso!"
 echo "=============================================================================="

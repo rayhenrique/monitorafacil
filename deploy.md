@@ -242,7 +242,14 @@ O Monitora Fácil executa a consolidação diária do e-SUS às **02:00**. Para 
 
 ## 🔄 Como Atualizar a Aplicação no Futuro (Deploy Contínuo)
 
-Sempre que fizer novas alterações e enviar para o GitHub (`git push`), basta rodar este comando simples no servidor:
+Sempre que fizer novas alterações e enviar para o GitHub (`git push`), basta executar o script de deploy automatizado no servidor:
+
+```bash
+cd /home/kltecnologia-monitorafacil/htdocs/monitorafacil.kltecnologia.com
+./deploy.sh
+```
+
+*(Ou executar manualmente os comandos equivalentes contidos no script):*
 
 ```bash
 cd /home/kltecnologia-monitorafacil/htdocs/monitorafacil.kltecnologia.com
