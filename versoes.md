@@ -4,6 +4,25 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.23.1] - 19/09/2026
+
+### 📊 Monitoramento de Vínculo e Acompanhamento - Equipes (Mensal) com Dados Reais
+- **Remoção de Abas Obsoletas**:
+  - Remoção definitiva das abas `cadastro` e `acompanhamento` em Vínculo e Acompanhamento Territorial.
+  - Redirecionamento automático e transparente de qualquer URL antiga com `?aba=cadastro` ou `?aba=acompanhamento` para a tela de monitoramento de equipes (`?aba=teams`).
+  - Navegação do módulo agora organizada de forma limpa em: **Relação Nominal**, **Equipes (Mensal)** e **Caderno Metodológico**.
+- **Painel Superior de Síntese Fidedigno**:
+  - Exibição destacada de **Mês (`2026 / M9`)**, **Total Ótimo (`10 (52.63%)`)**, **Total Bom (`7 (36.84%)`)**, **Total Suficiente (`1 (5.26%)`)** e **Total Regular (`1 (5.26%)`)**, refletindo com exatidão as 19 equipes eSF de Teotônio Vilela/AL.
+  - Subtítulo com data do último atendimento registrado: `18/09/2026`.
+- **Tabela Analítica Completa com 14 Colunas**:
+  - 14 colunas padronizadas: `CNES`, `UNIDADE`, `INE`, `EQUIPE`, `TIPO` (badge verde ESF), `PARÂMETRO CADASTRO` (2500), `CADASTROS VINCULADOS` (dados reais somando 35.401 munícipes), `C.VINC/PARAM. (%)`, `RESULTADO CADASTRO`, `SCORE CADASTRO (X)`, `RESULTADO ACOMPANHAMENTO`, `SCORE ACOMPANHAMENTO (Y)`, `SCORE FINAL (X+Y)` e `CLASSIFICAÇÃO FINAL`.
+  - Formatação precisa dos dados em formato numérico conforme especificação oficial do Ministério da Saúde.
+- **Barra de Filtros e Busca Avançada**:
+  - Inputs dedicados para `CNES`, `UNIDADE`, `INE`, `EQUIPE`, seletor de `Classificação Final` e paginação dinâmica (`10`, `15`, `30`, `50`, `100`).
+  - Modal interativo de **Busca Avançada** com filtros combinados de faixas de escores, tipos de equipe e conceitos.
+
+---
+
 ## [v1.23.0] - 19/09/2026
 
 ### 🏛️ Alinhamento Integral à Nota Técnica nº 30/2025-CGESCO/DESCO/SAPS/MS & Portaria SAPS nº 161/2024

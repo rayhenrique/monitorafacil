@@ -11,25 +11,15 @@
             'icon' => 'list',
             'badge' => 'Busca Ativa',
         ],
-        'cadastro' => [
-            'label' => 'Dimensão Cadastro',
-            'icon' => 'id-card',
-            'badge' => 'Peso 3',
-        ],
-        'acompanhamento' => [
-            'label' => 'Dimensão Acompanhamento',
-            'icon' => 'home-user',
-            'badge' => 'Peso 7',
-        ],
         'teams' => [
-            'label' => 'Desempenho das Equipes',
+            'label' => 'Equipes (Mensal)',
             'icon' => 'users',
             'badge' => '19 eSF',
         ],
         'guide' => [
             'label' => 'Caderno Metodológico',
             'icon' => 'book',
-            'badge' => 'NT 08/2026',
+            'badge' => 'NT 30/2025',
         ],
     ];
 @endphp

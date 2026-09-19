@@ -1,577 +1,350 @@
 <div class="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6">
 
-    <!-- Navegação em Abas do Módulo -->
+    <!-- Navegação em Abas do Módulo (Relação Nominal, Equipes (Mensal), Caderno Metodológico) -->
     <x-territorial-bonding-tabs
         title="Vínculo e Acompanhamento Territorial"
-        subtitle="Componente II · Avaliação Quadrimestral do Vínculo e Território na Atenção Primária"
+        subtitle="Componente II · Monitoramento Mensal e Quadrimestral do Vínculo na Atenção Primária"
         :activeTab="$activeTab"
     />
 
-    <!-- Alerta Oficial sobre Q2/2026 -->
-    <div class="rounded-2xl border border-amber-200/80 bg-amber-50/70 p-4 sm:p-5 flex items-start gap-3 shadow-xs">
-        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-800">
-            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-            </svg>
-        </span>
-        <div class="text-xs text-amber-900 leading-relaxed">
-            <p class="font-bold text-sm text-amber-950 mb-0.5">Nota sobre os Quadrimestres e Publicação Oficial do Ministério da Saúde</p>
-            <p>
-                Os resultados aqui apresentados correspondem às publicações oficiais preliminares do <strong>Siaps (Sistema de Informação para a Atenção Primária à Saúde)</strong> para os 3 últimos quadrimestres homologados: <strong>Q2/2025</strong>, <strong>Q3/2025</strong> e <strong>Q1/2026</strong>.
-                O resultado do <strong>2º Quadrimestre de 2026 (Q2/2026)</strong> ainda não foi divulgado pelo Ministério da Saúde.
-            </p>
+    @if ($activeTab === 'teams')
+        <!-- CABEÇALHO DO MONITORAMENTO DE EQUIPES (MENSAL) -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h1 class="text-xl sm:text-2xl font-black text-sky-950 tracking-tight flex items-center gap-2">
+                    <span>Monitoramento de Vínculo e Acompanhamento - Equipes (Mensal)</span>
+                </h1>
+                <div class="flex items-center gap-1.5 text-xs text-slate-500 mt-1 font-medium">
+                    <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5" />
+                    </svg>
+                    <span>Último atendimento registrado em {{ $monthlySummary['last_attendance_date'] }}</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2.5">
+                <!-- Botão Busca Avançada -->
+                <button
+                    type="button"
+                    wire:click="openAdvancedModal"
+                    class="inline-flex items-center gap-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 text-xs font-bold shadow-xs transition cursor-pointer"
+                >
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                    </svg>
+                    <span>Busca Avançada</span>
+                </button>
+
+                <!-- Botão Importação Opcional de CSV -->
+                <button
+                    type="button"
+                    wire:click="openImportModal"
+                    class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-3 py-2.5 text-xs font-bold text-slate-700 transition shadow-xs cursor-pointer"
+                    title="Importar arquivos CSV do Siaps diretamente no módulo"
+                >
+                    <svg class="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12l-3-3m0 0l-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                    </svg>
+                    <span>Importar CSV</span>
+                </button>
+            </div>
         </div>
-    </div>
 
-    <!-- Seletor de Quadrimestres Oficiais -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-line shadow-sm">
-        <div class="flex items-center gap-2">
-            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Quadrimestre Avaliado:</span>
-            <div class="flex flex-wrap items-center gap-1.5">
-                @foreach ($availableQuarters as $q)
-                    @php
-                        $isSelected = ($selectedYear === $q['year'] && $selectedQuarter === $q['quarter']);
-                    @endphp
-                    <button
-                        type="button"
-                        wire:click="selectPeriod({{ $q['year'] }}, {{ $q['quarter'] }})"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer {{ $isSelected ? 'bg-teal-700 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}"
-                    >
-                        <span>{{ $q['label'] }}</span>
-                        @if ($q['is_latest'])
-                            <span class="h-1.5 w-1.5 rounded-full {{ $isSelected ? 'bg-emerald-300' : 'bg-emerald-500' }}"></span>
-                        @endif
-                    </button>
-                @endforeach
+        <!-- PAINEL SUPERIOR DE SÍNTESE (REPRODUÇÃO FIEL DA IMAGEM OFICIAL) -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+            <div class="grid grid-cols-2 sm:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
+                <!-- Coluna 1: Mês -->
+                <div class="p-4 sm:p-5 flex flex-col items-center justify-center text-center col-span-2 sm:col-span-1 bg-slate-50/50">
+                    <span class="text-xs font-semibold text-slate-500 mb-1">Mês</span>
+                    <span class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">
+                        {{ $monthlySummary['month_label'] }}
+                    </span>
+                </div>
 
-                <!-- Botão informativo para Q2/2026 -->
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-slate-50 text-slate-400 border border-dashed border-slate-200 cursor-not-allowed" title="Aguardando publicação oficial do Ministério da Saúde">
-                    <span>Q2/26 (Em apuração)</span>
-                    <span class="text-[10px] font-mono uppercase text-amber-600 font-bold">Pendente</span>
-                </span>
+                <!-- Coluna 2: Total Ótimo -->
+                <div class="p-4 sm:p-5 flex flex-col items-center justify-center text-center">
+                    <span class="text-xs font-bold text-sky-600 mb-1">Total Ótimo</span>
+                    <div class="flex items-baseline gap-1.5">
+                        <span class="text-2xl sm:text-3xl font-black text-slate-900 tabular-nums">{{ $monthlySummary['optimal'] }}</span>
+                        <span class="text-xs sm:text-sm font-semibold text-slate-500 font-mono">({{ number_format($monthlySummary['optimal_pct'], 2, '.', '') }}%)</span>
+                    </div>
+                </div>
+
+                <!-- Coluna 3: Total Bom -->
+                <div class="p-4 sm:p-5 flex flex-col items-center justify-center text-center">
+                    <span class="text-xs font-bold text-emerald-600 mb-1">Total Bom</span>
+                    <div class="flex items-baseline gap-1.5">
+                        <span class="text-2xl sm:text-3xl font-black text-slate-900 tabular-nums">{{ $monthlySummary['good'] }}</span>
+                        <span class="text-xs sm:text-sm font-semibold text-slate-500 font-mono">({{ number_format($monthlySummary['good_pct'], 2, '.', '') }}%)</span>
+                    </div>
+                </div>
+
+                <!-- Coluna 4: Total Suficiente -->
+                <div class="p-4 sm:p-5 flex flex-col items-center justify-center text-center">
+                    <span class="text-xs font-bold text-amber-600 mb-1">Total Suficiente</span>
+                    <div class="flex items-baseline gap-1.5">
+                        <span class="text-2xl sm:text-3xl font-black text-slate-900 tabular-nums">{{ $monthlySummary['sufficient'] }}</span>
+                        <span class="text-xs sm:text-sm font-semibold text-slate-500 font-mono">({{ number_format($monthlySummary['sufficient_pct'], 2, '.', '') }}%)</span>
+                    </div>
+                </div>
+
+                <!-- Coluna 5: Total Regular -->
+                <div class="p-4 sm:p-5 flex flex-col items-center justify-center text-center">
+                    <span class="text-xs font-bold text-rose-600 mb-1">Total Regular</span>
+                    <div class="flex items-baseline gap-1.5">
+                        <span class="text-2xl sm:text-3xl font-black text-slate-900 tabular-nums">{{ $monthlySummary['regular'] }}</span>
+                        <span class="text-xs sm:text-sm font-semibold text-slate-500 font-mono">({{ number_format($monthlySummary['regular_pct'], 2, '.', '') }}%)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BARRA DE FILTROS (CNES, Unidade, INE, Equipe, Classificação Final, Paginação) -->
         <div class="flex flex-wrap items-center gap-2.5">
-            <div class="text-xs text-muted flex items-center gap-1.5">
-                <span>Período Ativo:</span>
-                <span class="font-bold text-teal-900 bg-teal-50 px-2.5 py-1 rounded-lg border border-teal-200">{{ $selectedQuarterLabel }}</span>
+            <!-- CNES -->
+            <div class="w-28 sm:w-32">
+                <input
+                    type="text"
+                    wire:model.live.debounce.300ms="filterCnes"
+                    placeholder="CNES"
+                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition shadow-2xs font-mono"
+                />
             </div>
 
-            <!-- Botão Importação Opcional de CSV no próprio módulo -->
-            <button
-                type="button"
-                wire:click="openImportModal"
-                class="inline-flex items-center gap-1.5 rounded-xl border border-teal-300 bg-teal-50/80 hover:bg-teal-100 px-3 py-1.5 text-xs font-bold text-teal-900 transition shadow-xs cursor-pointer"
-                title="Importar arquivos CSV do Siaps diretamente no módulo"
-            >
-                <svg class="h-4 w-4 text-teal-700" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12l-3-3m0 0l-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                </svg>
-                <span>Importar CSV Siaps (Opcional)</span>
-            </button>
+            <!-- Unidade -->
+            <div class="flex-1 min-w-[180px]">
+                <input
+                    type="text"
+                    wire:model.live.debounce.300ms="filterUnit"
+                    placeholder="Unidade"
+                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition shadow-2xs"
+                />
+            </div>
+
+            <!-- INE -->
+            <div class="w-32 sm:w-36">
+                <input
+                    type="text"
+                    wire:model.live.debounce.300ms="filterIne"
+                    placeholder="INE"
+                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition shadow-2xs font-mono"
+                />
+            </div>
+
+            <!-- Equipe -->
+            <div class="flex-1 min-w-[180px]">
+                <input
+                    type="text"
+                    wire:model.live.debounce.300ms="filterTeam"
+                    placeholder="Equipe"
+                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition shadow-2xs"
+                />
+            </div>
+
+            <!-- Classificação Final -->
+            <div class="w-44 sm:w-48">
+                <select
+                    wire:model.live="filterClassification"
+                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition shadow-2xs font-medium cursor-pointer"
+                >
+                    <option value="">Classificação Final</option>
+                    <option value="ÓTIMO">Ótimo</option>
+                    <option value="BOM">Bom</option>
+                    <option value="SUFICIENTE">Suficiente</option>
+                    <option value="REGULAR">Regular</option>
+                </select>
+            </div>
+
+            <!-- Paginação (10, 15, 30, 50, 100) -->
+            <div class="w-20">
+                <select
+                    wire:model.live="perPage"
+                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition shadow-2xs font-bold cursor-pointer"
+                >
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                    <option value="30">30</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+
+            <!-- Botão Limpar Filtros se houver algum ativo -->
+            @if ($filterCnes || $filterUnit || $filterIne || $filterTeam || $filterClassification || $advMinScore !== null || $advMaxScore !== null)
+                <button
+                    type="button"
+                    wire:click="resetFilters"
+                    class="rounded-xl px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 border border-rose-200 transition cursor-pointer"
+                    title="Limpar todos os filtros aplicados"
+                >
+                    Limpar
+                </button>
+            @endif
         </div>
-    </div>
 
-    <!-- CARDS DE SÍNTESE MUNICIPAL -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Card 1: Nota Média Final do Componente II -->
-        <div class="bg-white p-5 rounded-2xl border border-line shadow-panel flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-muted uppercase tracking-wider">Nota Média Componente II</span>
-                <span class="px-2 py-0.5 rounded-md text-[11px] font-extrabold uppercase {{ $summary['municipal_classification'] === 'ÓTIMO' ? 'bg-blue-100 text-blue-800' : ($summary['municipal_classification'] === 'BOM' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800') }}">
-                    {{ $summary['municipal_classification'] }}
-                </span>
-            </div>
-            <div class="mt-3">
-                <div class="flex items-baseline gap-2">
-                    <span class="text-3xl font-extrabold text-ink tabular-nums">{{ number_format($summary['average_final_score'], 2, ',', '.') }}</span>
-                    <span class="text-xs text-muted font-medium">/ 10,00 pts</span>
-                </div>
-                <p class="text-xs text-muted mt-1">Conforme Quadro 5 da NT 08/2026 (&gt; 8,5: Ótimo)</p>
-            </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span class="text-slate-500">Incentivo Financeiro:</span>
-                <span class="font-bold text-teal-800">100% Repasse</span>
-            </div>
-        </div>
-
-        <!-- Card 2: Dimensão Cadastro (Peso 3) -->
-        <div class="bg-white p-5 rounded-2xl border border-line shadow-panel flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-muted uppercase tracking-wider">Dimensão Cadastro</span>
-                <span class="px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-slate-100 text-slate-700">Peso 3</span>
-            </div>
-            <div class="mt-3">
-                <div class="flex items-baseline gap-2">
-                    <span class="text-3xl font-extrabold text-teal-900 tabular-nums">{{ number_format($summary['average_registration'], 2, ',', '.') }}</span>
-                    <span class="text-xs text-muted font-medium">/ 3,00 pts</span>
-                </div>
-                <p class="text-xs text-muted mt-1">Cadastros individuais (MICI) atualizados em 24 meses</p>
-            </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span class="text-slate-500">Aproveitamento Médio:</span>
-                <span class="font-bold text-emerald-700">{{ $summary['average_registration'] > 0 ? round(($summary['average_registration'] / 3) * 100, 1) : 0 }}%</span>
-            </div>
-        </div>
-
-        <!-- Card 3: Dimensão Acompanhamento (Peso 7) -->
-        <div class="bg-white p-5 rounded-2xl border border-line shadow-panel flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-muted uppercase tracking-wider">Dimensão Acompanhamento</span>
-                <span class="px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-slate-100 text-slate-700">Peso 7</span>
-            </div>
-            <div class="mt-3">
-                <div class="flex items-baseline gap-2">
-                    <span class="text-3xl font-extrabold text-blue-900 tabular-nums">{{ number_format($summary['average_monitoring'], 2, ',', '.') }}</span>
-                    <span class="text-xs text-muted font-medium">/ 7,00 pts</span>
-                </div>
-                <p class="text-xs text-muted mt-1">Visitas domiciliares e acompanhamento contínuo ACS</p>
-            </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span class="text-slate-500">Aproveitamento Médio:</span>
-                <span class="font-bold text-blue-700">{{ $summary['average_monitoring'] > 0 ? round(($summary['average_monitoring'] / 7) * 100, 1) : 0 }}%</span>
-            </div>
-        </div>
-
-        <!-- Card 4: Distribuição das 19 Equipes eSF -->
-        <div class="bg-white p-5 rounded-2xl border border-line shadow-panel flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-muted uppercase tracking-wider">Equipes por Conceito</span>
-                <span class="px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-teal-50 text-teal-800">19 eSF</span>
-            </div>
-            <div class="mt-2 grid grid-cols-4 gap-1 text-center bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                <div>
-                    <span class="block text-lg font-black text-blue-700 tabular-nums">{{ $summary['optimal_count'] }}</span>
-                    <span class="text-[9px] font-bold text-slate-500 uppercase">Ótimo</span>
-                </div>
-                <div class="border-l border-slate-200">
-                    <span class="block text-lg font-black text-emerald-700 tabular-nums">{{ $summary['good_count'] }}</span>
-                    <span class="text-[9px] font-bold text-slate-500 uppercase">Bom</span>
-                </div>
-                <div class="border-l border-slate-200">
-                    <span class="block text-lg font-black text-amber-700 tabular-nums">{{ $summary['sufficient_count'] }}</span>
-                    <span class="text-[9px] font-bold text-slate-500 uppercase">Sufic.</span>
-                </div>
-                <div class="border-l border-slate-200">
-                    <span class="block text-lg font-black text-orange-700 tabular-nums">{{ $summary['regular_count'] }}</span>
-                    <span class="text-[9px] font-bold text-slate-500 uppercase">Regul.</span>
-                </div>
-            </div>
-            <div class="mt-3 pt-2 text-center text-[11px] text-muted">
-                {{ $summary['optimal_count'] + $summary['good_count'] }} de 19 equipes nas faixas mais altas ({{ round((($summary['optimal_count'] + $summary['good_count']) / 19) * 100) }}%)
-            </div>
-        </div>
-    </div>
-
-    <!-- SEÇÃO: GRÁFICOS DO SIAPS (REPRODUÇÃO FIEL DA IMAGEM OFICIAL) -->
-    @if ($activeTab === 'overview' || $activeTab === 'cadastro' || $activeTab === 'acompanhamento')
-        <div class="space-y-4">
-            <div class="text-center sm:text-left">
-                <h2 class="text-lg font-bold text-ink">Vínculo e Acompanhamento Territorial</h2>
-                <p class="text-xs text-muted">Distribuição das equipes por Classificação da Dimensão (Série Histórica Siaps)</p>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-                <!-- GRÁFICO 1: DIMENSÃO CADASTRO (eSF) -->
-                @if ($activeTab === 'overview' || $activeTab === 'cadastro')
-                    <div class="bg-white p-6 rounded-3xl border border-line shadow-panel flex flex-col justify-between">
-                        <div>
-                            <!-- Título do Gráfico -->
-                            <div class="flex items-start justify-between gap-3 mb-6">
-                                <div class="flex items-center gap-2.5">
-                                    <span class="p-1.5 bg-blue-50 text-blue-700 rounded-lg">
-                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-                                        </svg>
-                                    </span>
-                                    <div>
-                                        <h3 class="text-sm font-bold text-ink flex items-center gap-1.5">
-                                            CVAT - Dimensão Cadastro - eSF
-                                        </h3>
-                                        <p class="text-xs text-muted">Q2/25, Q3/25, Q1/26</p>
-                                    </div>
-                                </div>
-                                <span class="px-2 py-0.5 text-[10px] font-bold bg-slate-100 text-slate-600 rounded">19 equipes</span>
-                            </div>
-
-                            <!-- Área das Barras Empilhadas -->
-                            <div class="space-y-4">
-                                @foreach ($chartsData['cadastro'] as $row)
-                                    @php
-                                        $total = $row['total'] ?: 19;
-                                        $pReg = ($row['regular'] / $total) * 100;
-                                        $pSuf = ($row['sufficient'] / $total) * 100;
-                                        $pGood = ($row['good'] / $total) * 100;
-                                        $pOpt = ($row['optimal'] / $total) * 100;
-                                    @endphp
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-12 shrink-0 text-xs font-semibold text-slate-600 text-right">
-                                            {{ $row['period'] }}
-                                        </div>
-                                        <div class="flex-1 h-9 flex bg-slate-100 rounded-sm overflow-hidden shadow-2xs">
-                                            <!-- Regular (Laranja Queimado #b85d19) -->
-                                            @if ($row['regular'] > 0)
-                                                <div style="width: {{ $pReg }}%;" class="bg-[#b85d19] h-full flex items-center justify-center text-white text-[11px] font-bold border-r border-white/20" title="Regular: {{ $row['regular'] }}">
-                                                    {{ $row['regular'] }}
-                                                </div>
-                                            @endif
-
-                                            <!-- Suficiente (Mostarda #c89211) -->
-                                            @if ($row['sufficient'] > 0)
-                                                <div style="width: {{ $pSuf }}%;" class="bg-[#c89211] h-full flex items-center justify-center text-white text-[11px] font-bold border-r border-white/20" title="Suficiente: {{ $row['sufficient'] }}">
-                                                    {{ $row['sufficient'] }}
-                                                </div>
-                                            @elseif ($row['period'] === 'Q1/26')
-                                                <!-- Espaço para demonstrar o zero conforme imagem original -->
-                                                <div style="width: 2px;" class="bg-[#c89211] h-full" title="Suficiente: 0"></div>
-                                                <span class="text-[10px] text-slate-400 font-bold px-0.5 self-center">0</span>
-                                            @endif
-
-                                            <!-- Bom (Verde #0d9488) -->
-                                            @if ($row['good'] > 0)
-                                                <div style="width: {{ $pGood }}%;" class="bg-[#059669] h-full flex items-center justify-center text-white text-[11px] font-bold border-r border-white/20" title="Bom: {{ $row['good'] }}">
-                                                    {{ $row['good'] }}
-                                                </div>
-                                            @endif
-
-                                            <!-- Ótimo (Azul #2563eb) -->
-                                            @if ($row['optimal'] > 0)
-                                                <div style="width: {{ $pOpt }}%;" class="bg-[#2563eb] h-full flex items-center justify-center text-white text-[11px] font-bold" title="Ótimo: {{ $row['optimal'] }}">
-                                                    {{ $row['optimal'] }}
-                                                </div>
-                                            @endif
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-
-                            <!-- Eixo X (0, 3, 6, 9, 12, 15, 18 19) -->
-                            <div class="mt-3 ml-15 flex justify-between text-[11px] text-slate-400 font-mono border-t border-slate-200 pt-1.5">
-                                <span>0</span>
-                                <span>3</span>
-                                <span>6</span>
-                                <span>9</span>
-                                <span>12</span>
-                                <span>15</span>
-                                <span>18</span>
-                                <span class="font-bold text-slate-600">19</span>
-                            </div>
-                        </div>
-
-                        <!-- Legenda Oficial -->
-                        <div class="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs">
-                            <span class="inline-flex items-center gap-1.5">
-                                <span class="h-3.5 w-3.5 rounded-xs bg-[#b85d19]"></span>
-                                <span class="text-slate-700 font-medium">Regular</span>
-                            </span>
-                            <span class="inline-flex items-center gap-1.5">
-                                <span class="h-3.5 w-3.5 rounded-xs bg-[#c89211]"></span>
-                                <span class="text-slate-700 font-medium">Suficiente</span>
-                            </span>
-                            <span class="inline-flex items-center gap-1.5">
-                                <span class="h-3.5 w-3.5 rounded-xs bg-[#059669]"></span>
-                                <span class="text-slate-700 font-medium">Bom</span>
-                            </span>
-                            <span class="inline-flex items-center gap-1.5">
-                                <span class="h-3.5 w-3.5 rounded-xs bg-[#2563eb]"></span>
-                                <span class="text-slate-700 font-medium">Ótimo</span>
-                            </span>
-                        </div>
-                    </div>
-                @endif
-
-                <!-- GRÁFICO 2: DIMENSÃO ACOMPANHAMENTO (eSF) -->
-                @if ($activeTab === 'overview' || $activeTab === 'acompanhamento')
-                    <div class="bg-white p-6 rounded-3xl border border-line shadow-panel flex flex-col justify-between">
-                        <div>
-                            <!-- Título do Gráfico -->
-                            <div class="flex items-start justify-between gap-3 mb-6">
-                                <div class="flex items-center gap-2.5">
-                                    <span class="p-1.5 bg-teal-50 text-teal-700 rounded-lg">
-                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-                                        </svg>
-                                    </span>
-                                    <div>
-                                        <h3 class="text-sm font-bold text-ink flex items-center gap-1.5">
-                                            CVAT - Dimensão Acompanhamento - eSF
-                                        </h3>
-                                        <p class="text-xs text-muted">Q2/25, Q3/25, Q1/26</p>
-                                    </div>
-                                </div>
-                                <span class="px-2 py-0.5 text-[10px] font-bold bg-slate-100 text-slate-600 rounded">19 equipes</span>
-                            </div>
-
-                            <!-- Área das Barras Empilhadas -->
-                            <div class="space-y-4">
-                                @foreach ($chartsData['acompanhamento'] as $row)
-                                    @php
-                                        $total = $row['total'] ?: 19;
-                                        $pReg = ($row['regular'] / $total) * 100;
-                                        $pSuf = ($row['sufficient'] / $total) * 100;
-                                        $pGood = ($row['good'] / $total) * 100;
-                                        $pOpt = ($row['optimal'] / $total) * 100;
-                                    @endphp
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-12 shrink-0 text-xs font-semibold text-slate-600 text-right">
-                                            {{ $row['period'] }}
-                                        </div>
-                                        <div class="flex-1 h-9 flex bg-slate-100 rounded-sm overflow-hidden shadow-2xs">
-                                            <!-- Regular (Laranja Queimado #b85d19) -->
-                                            @if ($row['regular'] > 0)
-                                                <div style="width: {{ $pReg }}%;" class="bg-[#b85d19] h-full flex items-center justify-center text-white text-[11px] font-bold border-r border-white/20" title="Regular: {{ $row['regular'] }}">
-                                                    {{ $row['regular'] }}
-                                                </div>
-                                            @endif
-
-                                            <!-- Suficiente (Mostarda #c89211) -->
-                                            @if ($row['sufficient'] > 0)
-                                                <div style="width: {{ $pSuf }}%;" class="bg-[#c89211] h-full flex items-center justify-center text-white text-[11px] font-bold border-r border-white/20" title="Suficiente: {{ $row['sufficient'] }}">
-                                                    {{ $row['sufficient'] }}
-                                                </div>
-                                            @endif
-
-                                            <!-- Bom (Verde #0d9488) -->
-                                            @if ($row['good'] > 0)
-                                                <div style="width: {{ $pGood }}%;" class="bg-[#059669] h-full flex items-center justify-center text-white text-[11px] font-bold border-r border-white/20" title="Bom: {{ $row['good'] }}">
-                                                    {{ $row['good'] }}
-                                                </div>
-                                            @endif
-
-                                            <!-- Ótimo (Azul #2563eb) -->
-                                            @if ($row['optimal'] > 0)
-                                                <div style="width: {{ $pOpt }}%;" class="bg-[#2563eb] h-full flex items-center justify-center text-white text-[11px] font-bold" title="Ótimo: {{ $row['optimal'] }}">
-                                                    {{ $row['optimal'] }}
-                                                </div>
-                                            @endif
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-
-                            <!-- Eixo X (0, 3, 6, 9, 12, 15, 18, 19) -->
-                            <div class="mt-3 ml-15 flex justify-between text-[11px] text-slate-400 font-mono border-t border-slate-200 pt-1.5">
-                                <span>0</span>
-                                <span>3</span>
-                                <span>6</span>
-                                <span>9</span>
-                                <span>12</span>
-                                <span>15</span>
-                                <span>18</span>
-                                <span class="font-bold text-slate-600">19</span>
-                            </div>
-                        </div>
-
-                        <!-- Legenda Oficial -->
-                        <div class="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs">
-                            <span class="inline-flex items-center gap-1.5">
-                                <span class="h-3.5 w-3.5 rounded-xs bg-[#b85d19]"></span>
-                                <span class="text-slate-700 font-medium">Regular</span>
-                            </span>
-                            <span class="inline-flex items-center gap-1.5">
-                                <span class="h-3.5 w-3.5 rounded-xs bg-[#c89211]"></span>
-                                <span class="text-slate-700 font-medium">Suficiente</span>
-                            </span>
-                            <span class="inline-flex items-center gap-1.5">
-                                <span class="h-3.5 w-3.5 rounded-xs bg-[#059669]"></span>
-                                <span class="text-slate-700 font-medium">Bom</span>
-                            </span>
-                            <span class="inline-flex items-center gap-1.5">
-                                <span class="h-3.5 w-3.5 rounded-xs bg-[#2563eb]"></span>
-                                <span class="text-slate-700 font-medium">Ótimo</span>
-                            </span>
-                        </div>
-                    </div>
-                @endif
-            </div>
-        </div>
-    @endif
-
-    <!-- SEÇÃO: TABELA DAS 19 EQUIPES DE SAÚDE DA FAMÍLIA -->
-    @if ($activeTab === 'overview' || $activeTab === 'teams')
-        <div class="bg-white rounded-3xl border border-line shadow-panel overflow-hidden">
-            <!-- Cabeçalho da Tabela e Filtros -->
-            <div class="p-5 border-b border-line flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h3 class="text-base font-bold text-ink flex items-center gap-2">
-                        <span>Desempenho Quadrimestral das Equipes (eSF)</span>
-                        <span class="rounded-lg bg-teal-50 px-2 py-0.5 text-xs font-extrabold text-teal-900 border border-teal-200">
-                            {{ $selectedQuarterLabel }}
-                        </span>
-                    </h3>
-                    <p class="text-xs text-muted mt-0.5">Detalhamento nominal das 19 equipes homologadas de Teotônio Vilela/AL</p>
-                </div>
-
-                <!-- Filtros e Busca Rápida -->
-                <div class="flex flex-wrap items-center gap-2.5">
-                    <!-- Campo de Busca -->
-                    <div class="relative min-w-[220px]">
-                        <input
-                            type="text"
-                            wire:model.live.debounce.300ms="search"
-                            placeholder="Buscar por equipe, UBS ou INE..."
-                            class="w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-8 pr-3 py-1.5 text-xs text-ink placeholder:text-slate-400 focus:bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition"
-                        />
-                        <svg class="h-4 w-4 text-slate-400 absolute left-2.5 top-2" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                        </svg>
-                    </div>
-
-                    <!-- Filtro por Classificação -->
-                    <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-semibold">
-                        <button
-                            type="button"
-                            wire:click="filterByClassification('ALL')"
-                            class="px-2.5 py-1 rounded-lg transition {{ $classificationFilter === 'ALL' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-ink' }}"
-                        >
-                            Todas ({{ $summary['total_teams'] }})
-                        </button>
-                        <button
-                            type="button"
-                            wire:click="filterByClassification('ÓTIMO')"
-                            class="px-2.5 py-1 rounded-lg transition {{ $classificationFilter === 'ÓTIMO' ? 'bg-blue-600 text-white shadow-xs' : 'text-blue-700 hover:bg-white/50' }}"
-                        >
-                            Ótimo ({{ $summary['optimal_count'] }})
-                        </button>
-                        <button
-                            type="button"
-                            wire:click="filterByClassification('BOM')"
-                            class="px-2.5 py-1 rounded-lg transition {{ $classificationFilter === 'BOM' ? 'bg-emerald-600 text-white shadow-xs' : 'text-emerald-700 hover:bg-white/50' }}"
-                        >
-                            Bom ({{ $summary['good_count'] }})
-                        </button>
-                        <button
-                            type="button"
-                            wire:click="filterByClassification('SUFICIENTE')"
-                            class="px-2.5 py-1 rounded-lg transition {{ $classificationFilter === 'SUFICIENTE' ? 'bg-amber-600 text-white shadow-xs' : 'text-amber-700 hover:bg-white/50' }}"
-                        >
-                            Sufic. ({{ $summary['sufficient_count'] }})
-                        </button>
-                        <button
-                            type="button"
-                            wire:click="filterByClassification('REGULAR')"
-                            class="px-2.5 py-1 rounded-lg transition {{ $classificationFilter === 'REGULAR' ? 'bg-orange-700 text-white shadow-xs' : 'text-orange-800 hover:bg-white/50' }}"
-                        >
-                            Regul. ({{ $summary['regular_count'] }})
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tabela de Dados -->
+        <!-- TABELA DE EQUIPES COM AS 14 COLUNAS EXATAS DA IMAGEM -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-xs">
+                <table class="w-full text-left border-collapse text-xs whitespace-nowrap">
                     <thead>
-                        <tr class="bg-slate-50/80 text-slate-600 font-bold border-b border-line uppercase tracking-wider text-[10px]">
-                            <th class="py-3 px-4">Equipe / Unidade de Saúde</th>
-                            <th class="py-3 px-3 text-center">INE</th>
-                            <th class="py-3 px-3 text-center">CNES</th>
-                            <th class="py-3 px-3 text-center">Tipo</th>
-                            <th class="py-3 px-3 text-right cursor-pointer hover:text-teal-700" wire:click="sortByField('registration_score')">
-                                <span class="inline-flex items-center gap-1">
-                                    Dim. Cadastro (Peso 3)
-                                    @if ($sortBy === 'registration_score')
-                                        <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
-                                    @endif
-                                </span>
+                        <tr class="bg-slate-50/90 text-slate-500 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200">
+                            <th class="py-3.5 px-3 text-center cursor-pointer hover:text-sky-700" wire:click="sortByField('cnes')">
+                                CNES
                             </th>
-                            <th class="py-3 px-3 text-right cursor-pointer hover:text-teal-700" wire:click="sortByField('monitoring_score')">
-                                <span class="inline-flex items-center gap-1">
-                                    Dim. Acompanhamento (Peso 7)
-                                    @if ($sortBy === 'monitoring_score')
-                                        <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
-                                    @endif
-                                </span>
+                            <th class="py-3.5 px-3 cursor-pointer hover:text-sky-700" wire:click="sortByField('facility_name')">
+                                UNIDADE
                             </th>
-                            <th class="py-3 px-3 text-right cursor-pointer hover:text-teal-700" wire:click="sortByField('final_score')">
-                                <span class="inline-flex items-center gap-1">
-                                    Nota Final (10 pts)
-                                    @if ($sortBy === 'final_score')
-                                        <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
-                                    @endif
-                                </span>
+                            <th class="py-3.5 px-3 text-center cursor-pointer hover:text-sky-700" wire:click="sortByField('ine')">
+                                INE
                             </th>
-                            <th class="py-3 px-4 text-center">Classificação Final</th>
+                            <th class="py-3.5 px-3 cursor-pointer hover:text-sky-700" wire:click="sortByField('team_name')">
+                                EQUIPE
+                            </th>
+                            <th class="py-3.5 px-2.5 text-center">
+                                TIPO
+                            </th>
+                            <th class="py-3.5 px-2.5 text-right font-medium">
+                                PARÂMETRO<br>CADASTRO
+                            </th>
+                            <th class="py-3.5 px-2.5 text-right font-medium cursor-pointer hover:text-sky-700" wire:click="sortByField('linked_registrations')">
+                                CADASTROS<br>VINCULADOS
+                            </th>
+                            <th class="py-3.5 px-2.5 text-center font-medium cursor-pointer hover:text-sky-700" wire:click="sortByField('linked_ratio')">
+                                C.VINC/PARAM.<br>(%)
+                            </th>
+                            <th class="py-3.5 px-2.5 text-right font-medium cursor-pointer hover:text-sky-700" wire:click="sortByField('registration_result')">
+                                RESULTADO<br>CADASTRO
+                            </th>
+                            <th class="py-3.5 px-2.5 text-center font-medium cursor-pointer hover:text-sky-700" wire:click="sortByField('registration_score')">
+                                SCORE<br>CADASTRO (X)
+                            </th>
+                            <th class="py-3.5 px-2.5 text-right font-medium cursor-pointer hover:text-sky-700" wire:click="sortByField('monitoring_result')">
+                                RESULTADO<br>ACOMPANHAMENTO
+                            </th>
+                            <th class="py-3.5 px-2.5 text-center font-medium cursor-pointer hover:text-sky-700" wire:click="sortByField('monitoring_score')">
+                                SCORE<br>ACOMPANHAMENTO (Y)
+                            </th>
+                            <th class="py-3.5 px-2.5 text-center font-medium cursor-pointer hover:text-sky-700" wire:click="sortByField('final_score')">
+                                SCORE<br>FINAL (X+Y)
+                            </th>
+                            <th class="py-3.5 px-3 text-center font-medium cursor-pointer hover:text-sky-700" wire:click="sortByField('final_classification')">
+                                CLASSIFICAÇÃO<br>FINAL
+                            </th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody class="divide-y divide-slate-100 font-medium">
                         @forelse ($teams as $team)
                             @php
                                 $clsUpper = mb_strtoupper($team->final_classification);
-                                $badgeClass = match ($clsUpper) {
-                                    'ÓTIMO', 'OTIMO' => 'bg-blue-100 text-blue-800 border-blue-200',
-                                    'BOM' => 'bg-emerald-100 text-emerald-800 border-emerald-200',
-                                    'SUFICIENTE' => 'bg-amber-100 text-amber-800 border-amber-200',
-                                    default => 'bg-orange-100 text-orange-900 border-orange-200',
+                                $badgeCls = match ($clsUpper) {
+                                    'ÓTIMO', 'OTIMO' => 'bg-sky-600 text-white',
+                                    'BOM' => 'bg-emerald-600 text-white',
+                                    'SUFICIENTE' => 'bg-amber-500 text-white',
+                                    default => 'bg-rose-600 text-white',
                                 };
                             @endphp
-                            <tr class="hover:bg-slate-50/70 transition">
-                                <td class="py-3 px-4">
-                                    <div class="font-semibold text-ink">{{ $team->team_name }}</div>
-                                    <div class="text-[11px] text-muted">{{ $team->facility_name }}</div>
-                                </td>
-                                <td class="py-3 px-3 text-center font-mono font-medium text-slate-600">
-                                    {{ $team->ine }}
-                                </td>
-                                <td class="py-3 px-3 text-center font-mono text-slate-500">
+                            <tr class="hover:bg-sky-50/40 transition">
+                                <!-- CNES -->
+                                <td class="py-3 px-3 text-center font-mono text-slate-600">
                                     {{ $team->cnes }}
                                 </td>
-                                <td class="py-3 px-3 text-center">
-                                    <span class="px-2 py-0.5 rounded bg-slate-100 text-[10px] font-bold text-slate-700">
-                                        {{ $team->team_type }}
+
+                                <!-- UNIDADE -->
+                                <td class="py-3 px-3 text-slate-800 font-semibold max-w-[220px] truncate" title="{{ $team->facility_name }}">
+                                    {{ $team->facility_name }}
+                                </td>
+
+                                <!-- INE -->
+                                <td class="py-3 px-3 text-center font-mono text-slate-600">
+                                    {{ $team->ine }}
+                                </td>
+
+                                <!-- EQUIPE -->
+                                <td class="py-3 px-3 text-slate-800 font-semibold max-w-[220px] truncate" title="{{ $team->team_name }}">
+                                    {{ $team->team_name }}
+                                </td>
+
+                                <!-- TIPO -->
+                                <td class="py-3 px-2.5 text-center">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-600 text-white">
+                                        {{ $team->team_type ?: 'ESF' }}
                                     </span>
                                 </td>
-                                <td class="py-3 px-3 text-right font-mono font-bold text-slate-700 tabular-nums">
-                                    {{ number_format($team->registration_score, 2, ',', '.') }}
+
+                                <!-- PARÂMETRO CADASTRO -->
+                                <td class="py-3 px-2.5 text-right font-mono text-slate-600">
+                                    {{ $team->parameter ?? 2500 }}
                                 </td>
-                                <td class="py-3 px-3 text-right font-mono font-bold text-slate-700 tabular-nums">
-                                    {{ number_format($team->monitoring_score, 2, ',', '.') }}
+
+                                <!-- CADASTROS VINCULADOS -->
+                                <td class="py-3 px-2.5 text-right font-mono font-bold text-slate-800 tabular-nums">
+                                    {{ $team->linked_registrations ?? 0 }}
                                 </td>
-                                <td class="py-3 px-3 text-right font-mono font-extrabold text-ink tabular-nums text-sm">
-                                    {{ number_format($team->final_score, 2, ',', '.') }}
+
+                                <!-- C.VINC/PARAM. (%) -->
+                                <td class="py-3 px-2.5 text-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-600 text-white font-mono tabular-nums">
+                                        {{ number_format($team->linked_ratio ?? 0, 2, '.', '') }}%
+                                    </span>
                                 </td>
-                                <td class="py-3 px-4 text-center">
-                                    <span class="inline-block px-2.5 py-1 rounded-lg text-[11px] font-black uppercase border {{ $badgeClass }}">
-                                        {{ $team->final_classification }}
+
+                                <!-- RESULTADO CADASTRO -->
+                                <td class="py-3 px-2.5 text-right font-mono font-semibold text-slate-700 tabular-nums">
+                                    {{ number_format($team->registration_result ?? 0, 2, '.', '') }}
+                                </td>
+
+                                <!-- SCORE CADASTRO (X) -->
+                                <td class="py-3 px-2.5 text-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-sky-500 text-white font-mono tabular-nums">
+                                        {{ number_format($team->registration_score, 2, '.', '') }}
+                                    </span>
+                                </td>
+
+                                <!-- RESULTADO ACOMPANHAMENTO -->
+                                <td class="py-3 px-2.5 text-right font-mono font-semibold text-slate-700 tabular-nums">
+                                    {{ number_format($team->monitoring_result ?? 0, 2, '.', '') }}
+                                </td>
+
+                                <!-- SCORE ACOMPANHAMENTO (Y) -->
+                                <td class="py-3 px-2.5 text-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-sky-500 text-white font-mono tabular-nums">
+                                        {{ number_format($team->monitoring_score, 2, '.', '') }}
+                                    </span>
+                                </td>
+
+                                <!-- SCORE FINAL (X+Y) -->
+                                <td class="py-3 px-2.5 text-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-sky-500 text-white font-mono tabular-nums">
+                                        {{ number_format($team->final_score, 2, '.', '') }}
+                                    </span>
+                                </td>
+
+                                <!-- CLASSIFICAÇÃO FINAL -->
+                                <td class="py-3 px-3 text-center">
+                                    <span class="inline-flex items-center px-3 py-0.5 rounded-full text-[11px] font-bold {{ $badgeCls }}">
+                                        {{ mb_convert_case($team->final_classification, MB_CASE_TITLE, 'UTF-8') }}
                                     </span>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="py-8 text-center text-muted">
-                                    @if ($selectedQuarter !== 1 || $selectedYear !== 2026)
-                                        <p class="font-medium">O detalhamento individual por equipe para este quadrimestre não consta no arquivo de importação.</p>
-                                        <p class="text-xs mt-1">Consulte os gráficos superiores para ver a distribuição agregada oficial das 19 equipes.</p>
-                                    @else
-                                        Nenhuma equipe encontrada com os filtros selecionados.
-                                    @endif
+                                <td colspan="14" class="py-10 text-center text-slate-400">
+                                    Nenhuma equipe encontrada para os filtros selecionados.
                                 </td>
                             </tr>
                         @endforelse
                     </tbody>
-                    @if ($teams->isNotEmpty())
-                        <tfoot>
-                            <tr class="bg-slate-100/80 font-bold text-slate-800 border-t-2 border-slate-200">
-                                <td class="py-3 px-4" colspan="4">
-                                    Média Municipal Consolidada ({{ $teams->count() }} equipes)
-                                </td>
-                                <td class="py-3 px-3 text-right font-mono text-teal-900">
-                                    {{ number_format($summary['average_registration'], 2, ',', '.') }}
-                                </td>
-                                <td class="py-3 px-3 text-right font-mono text-blue-900">
-                                    {{ number_format($summary['average_monitoring'], 2, ',', '.') }}
-                                </td>
-                                <td class="py-3 px-3 text-right font-mono text-ink text-sm">
-                                    {{ number_format($summary['average_final_score'], 2, ',', '.') }}
-                                </td>
-                                <td class="py-3 px-4 text-center">
-                                    <span class="px-2.5 py-1 rounded-lg text-[11px] font-black uppercase bg-blue-100 text-blue-900 border border-blue-200">
-                                        {{ $summary['municipal_classification'] }}
-                                    </span>
-                                </td>
-                            </tr>
-                        </tfoot>
-                    @endif
                 </table>
+            </div>
+
+            <!-- Rodapé informativo de totais -->
+            <div class="px-4 py-3 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs text-slate-500 gap-2">
+                <div>
+                    Exibindo <span class="font-bold text-slate-800">{{ $teams->count() }}</span> de <span class="font-bold text-slate-800">{{ $totalTeamsFound }}</span> equipes cadastradas
+                </div>
+                <div class="font-medium">
+                    Município de Teotônio Vilela/AL · 19 Equipes de Saúde da Família Homologadas
+                </div>
             </div>
         </div>
     @endif
@@ -963,6 +736,121 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
                         </svg>
                     </a>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- MODAL DE BUSCA AVANÇADA INTERATIVO -->
+    @if ($showAdvancedModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in" role="dialog" aria-modal="true" aria-labelledby="modal-advanced-title">
+            <div class="relative w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl border border-slate-200 space-y-5 animate-scale-up" @click.outside="$wire.closeAdvancedModal()">
+                <!-- Cabeçalho do Modal -->
+                <div class="flex items-start justify-between border-b border-slate-100 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-sky-100 text-sky-800">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 id="modal-advanced-title" class="text-base font-bold text-slate-900">Busca Avançada de Equipes</h2>
+                            <p class="text-xs text-slate-500">Refine o monitoramento com filtros combinados de notas e parâmetros</p>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        wire:click="closeAdvancedModal"
+                        class="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
+                        aria-label="Fechar"
+                    >
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Formulário de Filtros Avançados -->
+                <div class="space-y-4 text-xs">
+                    <!-- Faixa de Score Final -->
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1.5">Faixa de Score Final (0,00 a 10,00 pts):</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <span class="text-[11px] text-slate-500 block mb-0.5">Nota Mínima</span>
+                                <input
+                                    type="number"
+                                    step="0.1"
+                                    min="0"
+                                    max="10"
+                                    wire:model="advMinScore"
+                                    placeholder="Ex: 7.0"
+                                    class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono"
+                                />
+                            </div>
+                            <div>
+                                <span class="text-[11px] text-slate-500 block mb-0.5">Nota Máxima</span>
+                                <input
+                                    type="number"
+                                    step="0.1"
+                                    min="0"
+                                    max="10"
+                                    wire:model="advMaxScore"
+                                    placeholder="Ex: 10.0"
+                                    class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Classificação Final -->
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1.5">Classificação Final:</label>
+                        <select wire:model="advClassification" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium">
+                            <option value="">Todas as classificações</option>
+                            <option value="ÓTIMO">Ótimo (&gt; 8,5 pts)</option>
+                            <option value="BOM">Bom (7,0 a 8,5 pts)</option>
+                            <option value="SUFICIENTE">Suficiente (5,0 a 6,99 pts)</option>
+                            <option value="REGULAR">Regular (&lt; 5,0 pts)</option>
+                        </select>
+                    </div>
+
+                    <!-- Tipo de Equipe -->
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1.5">Tipo de Equipe:</label>
+                        <select wire:model="advTeamType" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium">
+                            <option value="">Todas (eSF, eAP)</option>
+                            <option value="ESF">Equipe de Saúde da Família (eSF)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Botões de Ação do Modal -->
+                <div class="flex items-center justify-between gap-2.5 pt-4 border-t border-slate-100">
+                    <button
+                        type="button"
+                        wire:click="resetFilters"
+                        class="text-xs font-semibold text-rose-600 hover:text-rose-800 transition cursor-pointer"
+                    >
+                        Limpar todos os filtros
+                    </button>
+
+                    <div class="flex items-center gap-2">
+                        <button
+                            type="button"
+                            wire:click="closeAdvancedModal"
+                            class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="button"
+                            wire:click="applyAdvancedSearch"
+                            class="px-5 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-xl shadow-xs transition cursor-pointer"
+                        >
+                            Aplicar Filtros
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

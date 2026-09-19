@@ -263,3 +263,13 @@
   - [x] Caderno Metodológico (aba guide) integralmente reformulado como réplica didática da Portaria SAPS/MS nº 161/2024 e NT 30/2025, incluindo bônus de satisfação do Meu SUS Digital e regras de desempate de vínculos.
   - [x] Atualização de testes automatizados e versionamento da plataforma.
 
+- [x] **Fase 33: Monitoramento de Equipes (Mensal) com Dados Reais e Remoção de Abas Obsoletas (v1.23.1)**
+  - [x] Remoção definitiva das abas obsoletas `cadastro` e `acompanhamento` no menu lateral, componente de abas e rotas, mantendo apenas Relação Nominal, Equipes (Mensal) e Caderno Metodológico.
+  - [x] Redirecionamento transparente de acessos legados com `?aba=cadastro` ou `?aba=acompanhamento` para a tela de monitoramento de equipes (`?aba=teams`).
+  - [x] Painel superior de síntese com totais reais do município: Mês (2026/M9), Total Ótimo (10 - 52.63%), Total Bom (7 - 36.84%), Total Suficiente (1 - 5.26%) e Total Regular (1 - 5.26%).
+  - [x] Tabela de monitoramento de equipes com as 14 colunas completas reproduzindo a exibição de dados da especificação: CNES, Unidade, INE, Equipe, Tipo ESF, Parâmetro (2500), Cadastros Vinculados (35.401 munícipes totais), % C.Vinc/Param, Resultado Cadastro, Score X (3.00), Resultado Acompanhamento, Score Y (7.00), Score Final e Classificação Final.
+  - [x] Barra de filtros com busca instantânea por CNES, Unidade, INE, Equipe, Classificação Final e paginação.
+  - [x] Modal interativo de Busca Avançada para filtragem por faixas de escores.
+  - [x] Nova migration adicionando colunas métricas na tabela `cvat_team_evaluations`.
+  - [x] Compilação de assets com Vite (`npm run build`) e atualização de testes automatizados.
+

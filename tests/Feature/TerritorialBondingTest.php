@@ -27,15 +27,16 @@ class TerritorialBondingTest extends TestCase
         $response->assertRedirect('/vinculo-e-acompanhamento/relacao-nominal');
     }
 
-    public function test_authenticated_user_can_access_territorial_bonding_dimensions(): void
+    public function test_authenticated_user_accessing_cadastro_or_acompanhamento_is_shown_teams_monitoring(): void
     {
         $user = User::factory()->create();
 
         $response = $this->actingAs($user)->get('/vinculo-e-acompanhamento?aba=cadastro');
 
         $response->assertOk();
-        $response->assertSee('Vínculo e Acompanhamento Territorial');
-        $response->assertSee('CVAT - Dimensão Cadastro - eSF');
+        $response->assertSee('Monitoramento de Vínculo e Acompanhamento - Equipes (Mensal)');
+        $response->assertSee('Total Ótimo');
+        $response->assertSee('BENEDITO DE LIRA');
     }
 
     public function test_cvat_service_imports_and_returns_correct_distributions_and_summary(): void
@@ -76,8 +77,7 @@ class TerritorialBondingTest extends TestCase
             ->assertSet('selectedYear', 2026)
             ->assertSet('selectedQuarter', 1)
             ->assertSee('01 06 CS MANUEL A DE SANTANA')
-            ->call('filterByClassification', 'REGULAR')
-            ->assertSet('classificationFilter', 'REGULAR')
+            ->set('filterClassification', 'REGULAR')
             ->assertSee('ESF MATAO DO ROBERTO')
             ->assertDontSee('01 06 CS MANUEL A DE SANTANA');
     }

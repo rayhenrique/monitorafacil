@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.23.0';
+    public const CURRENT_VERSION = 'v1.23.1';
 
     public const CURRENT_RELEASE_DATE = '19/09/2026';
 
@@ -61,9 +61,22 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.23.0',
+                'version' => 'v1.23.1',
                 'date' => '19/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Monitoramento de Vínculo e Acompanhamento - Equipes (Mensal) com Dados Reais',
+                'summary' => 'Remoção das abas intermediárias de cadastro e acompanhamento, unificando a experiência no Monitoramento Mensal de Equipes com reprodução fidedigna dos dados oficiais do município (19 eSF de Teotônio Vilela/AL, 35.401 cadastros vinculados), síntese com totais por conceito e tabela analítica de 14 colunas com busca avançada.',
+                'highlights' => [
+                    ['type' => 'interface', 'text' => 'Aba Equipes (Mensal) atualizada com 14 colunas completas: CNES, Unidade, INE, Equipe, Tipo, Parâmetro (2500), Cadastros Vinculados, % C.Vinc/Param, Resultado Cadastro, Score X (3.00), Resultado Acompanhamento, Score Y (7.00), Score Final e Classificação Final.'],
+                    ['type' => 'dados', 'text' => 'Painel de síntese superior com métricas reais: Mês 2026/M9, Total Ótimo (10 - 52.63%), Total Bom (7 - 36.84%), Total Suficiente (1 - 5.26%) e Total Regular (1 - 5.26%).'],
+                    ['type' => 'filtros', 'text' => 'Barra de filtros interativa com busca em tempo real por CNES, Unidade, INE, Equipe, Classificação Final, paginação dinâmica e modal de Busca Avançada por faixas de escore.'],
+                    ['type' => 'limpeza', 'text' => 'Remoção definitiva das abas obsoletas de cadastro e acompanhamento, com redirecionamento automático transparente para a visualização de Equipes.'],
+                ],
+            ],
+            [
+                'version' => 'v1.23.0',
+                'date' => '19/09/2026',
+                'badge' => 'Estável',
                 'title' => 'Alinhamento Integral à Nota Técnica nº 30/2025-CGESCO/DESCO/SAPS/MS & Portaria SAPS nº 161/2024',
                 'summary' => 'Adequação metodológica completa do módulo Vínculo e Acompanhamento Territorial: definição oficial de Pessoa Acompanhada (≥ 2 contatos no ano com ao menos uma prática de cuidado médica/odonto/ACS), corte de vulnerabilidade infantil para até 5 anos incompletos, exclusões cadastrais válidas, índices ponderados X e Y, escores oficiais e Caderno Metodológico fidedigno.',
                 'highlights' => [

@@ -125,16 +125,8 @@
                                                 <span>Relação Nominal</span>
                                                 <span class="rounded bg-sky-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-sky-300">PEC</span>
                                             </a>
-                                            <a href="{{ route('territorial-bonding.overview', ['aba' => 'cadastro']) }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->query('aba') === 'cadastro' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
-                                                <span>Dimensão Cadastro</span>
-                                                <span class="text-[10px] text-teal-400 font-mono">Peso 3</span>
-                                            </a>
-                                            <a href="{{ route('territorial-bonding.overview', ['aba' => 'acompanhamento']) }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->query('aba') === 'acompanhamento' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
-                                                <span>Dimensão Acomp.</span>
-                                                <span class="text-[10px] text-teal-400 font-mono">Peso 7</span>
-                                            </a>
                                             <a href="{{ route('territorial-bonding.overview', ['aba' => 'teams']) }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->query('aba') === 'teams' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
-                                                <span>Desempenho Equipes</span>
+                                                <span>Equipes (Mensal)</span>
                                                 <span class="text-[10px] text-teal-400 font-mono">19 eSF</span>
                                             </a>
                                             <a href="{{ route('territorial-bonding.overview', ['aba' => 'guide']) }}" @click="mobileMenuOpen = false" class="block rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->query('aba') === 'guide' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">Caderno Metodológico</a>
@@ -335,16 +327,8 @@
                                     <span>Relação Nominal</span>
                                     <span class="rounded bg-sky-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-sky-300">PEC</span>
                                 </a>
-                                <a href="{{ route('territorial-bonding.overview', ['aba' => 'cadastro']) }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->query('aba') === 'cadastro' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
-                                    <span>Dimensão Cadastro</span>
-                                    <span class="text-[10px] font-mono text-teal-400/80">Peso 3</span>
-                                </a>
-                                <a href="{{ route('territorial-bonding.overview', ['aba' => 'acompanhamento']) }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->query('aba') === 'acompanhamento' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
-                                    <span>Dimensão Acomp.</span>
-                                    <span class="text-[10px] font-mono text-teal-400/80">Peso 7</span>
-                                </a>
-                                <a href="{{ route('territorial-bonding.overview', ['aba' => 'teams']) }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->query('aba') === 'teams' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
-                                    <span>Desempenho Equipes</span>
+                                <a href="{{ route('territorial-bonding.overview', ['aba' => 'teams']) }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->query('aba') === 'teams' || !request()->query('aba') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                    <span>Equipes (Mensal)</span>
                                     <span class="text-[10px] font-mono text-teal-400/80">19 eSF</span>
                                 </a>
                                 <a href="{{ route('territorial-bonding.overview', ['aba' => 'guide']) }}" class="block rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->query('aba') === 'guide' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
