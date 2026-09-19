@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.12.0';
+    public const CURRENT_VERSION = 'v1.13.0';
 
     public const CURRENT_RELEASE_DATE = '18/09/2026';
 
@@ -61,9 +61,23 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.12.0',
+                'version' => 'v1.13.0',
                 'date' => '18/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Busca Ativa e Boas Práticas Infantis no Indicador C2',
+                'summary' => 'Refinamento completo da aba de Busca Ativa do C2, com banner de dados gerais, lista nominal da coorte com máscara LGPD, colunas personalizáveis, modal de busca avançada e auditoria clínica das cinco práticas.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Banner de dados gerais com Mês (2026/M9), Denominador da coorte (1.016) e percentuais das cinco boas práticas (A a E).'],
+                    ['type' => 'novo', 'text' => 'Lista nominal interativa com máscara de privacidade LGPD para CNS/CPF e cópia em 1 clique.'],
+                    ['type' => 'novo', 'text' => 'Customização de colunas visíveis com seletor interativo e filtros rápidos imediatos.'],
+                    ['type' => 'novo', 'text' => 'Modal de Busca Avançada com filtros territoriais, profissionais, chips de faixa etária e botões booleanos toggle.'],
+                    ['type' => 'novo', 'text' => 'Modal de Prontuário e Auditoria das Boas Práticas para avaliação individual detalhada de cada criança.'],
+                ],
+            ],
+            [
+                'version' => 'v1.12.0',
+                'date' => '18/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Inventário seguro do esquema DW PEC',
                 'summary' => 'Novo comando somente leitura inventaria tabelas, colunas, índices e estimativas do DW disponível na VPS antes da criação da camada analítica local no MySQL.',
                 'highlights' => [

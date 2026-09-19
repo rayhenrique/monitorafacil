@@ -2,6 +2,7 @@
 
 namespace App\Livewire\FamilyHealth;
 
+use App\Services\C2ActiveSearchService;
 use App\Services\DashboardSnapshotService;
 use App\Services\FamilyHealthService;
 use Illuminate\View\View;
@@ -31,6 +32,79 @@ class IndicatorDetail extends Component
 
     public string $activeTab = 'dashboard'; // 'dashboard', 'teams', 'active_search', 'rules'
 
+    // --- PROPRIEDADES DA ABA BUSCA ATIVA C2 ---
+    public string $searchCns = '';
+
+    public string $searchCpf = '';
+
+    public string $searchName = '';
+
+    public string $searchCnes = '';
+
+    public string $searchIne = '';
+
+    public int $perPage = 30;
+
+    public int $c2Page = 1;
+
+    public array $visibleColumns = [];
+
+    public bool $showColumnsDropdown = false;
+
+    // Modal Busca Avançada
+    public bool $showAdvancedModal = false;
+
+    public string $advDistrict = '';
+
+    public string $advFacility = '';
+
+    public string $advTeam = '';
+
+    public string $advMicroarea = '';
+
+    public string $advCitizenName = '';
+
+    public string $advCitizenCpf = '';
+
+    public string $advCitizenCns = '';
+
+    public string $advMotherName = '';
+
+    public string $advMonth = '';
+
+    public string $advMonthOption = 'selected_and_next';
+
+    public string $advQuarter = '';
+
+    public string $advProfessionalCns = '';
+
+    public string $advProfessionalName = '';
+
+    public string $advRaceColor = '';
+
+    public string $advAgeGroup = '';
+
+    public ?string $advMici = null;
+
+    public ?string $advMicdt = null;
+
+    public ?string $advAccompanied = null;
+
+    public ?string $advPracticeA = null;
+
+    public ?string $advPracticeB = null;
+
+    public ?string $advPracticeC = null;
+
+    public ?string $advPracticeD = null;
+
+    public ?string $advPracticeE = null;
+
+    // Modal Detalhes do Cuidado Infantil
+    public bool $showDetailModal = false;
+
+    public ?array $selectedChild = null;
+
     public function mount(string $indicator, DashboardSnapshotService $snapshots): void
     {
         $this->indicator = strtolower($indicator);
@@ -51,6 +125,146 @@ class IndicatorDetail extends Component
         if ($this->quarter < 1 || $this->quarter > 3) {
             $this->quarter = $latest['quarter'];
         }
+
+        $this->visibleColumns = C2ActiveSearchService::getDefaultVisibleColumns();
+    }
+
+    public function updatedSearchCns(): void
+    {
+        $this->c2Page = 1;
+    }
+
+    public function updatedSearchCpf(): void
+    {
+        $this->c2Page = 1;
+    }
+
+    public function updatedSearchName(): void
+    {
+        $this->c2Page = 1;
+    }
+
+    public function updatedSearchCnes(): void
+    {
+        $this->c2Page = 1;
+    }
+
+    public function updatedSearchIne(): void
+    {
+        $this->c2Page = 1;
+    }
+
+    public function updatedPerPage(): void
+    {
+        $this->c2Page = 1;
+    }
+
+    public function toggleColumn(string $column): void
+    {
+        if (in_array($column, $this->visibleColumns, true)) {
+            $this->visibleColumns = array_values(array_diff($this->visibleColumns, [$column]));
+        } else {
+            $this->visibleColumns[] = $column;
+        }
+    }
+
+    public function selectAllColumns(): void
+    {
+        $this->visibleColumns = array_keys(C2ActiveSearchService::getAvailableColumns());
+    }
+
+    public function resetDefaultColumns(): void
+    {
+        $this->visibleColumns = C2ActiveSearchService::getDefaultVisibleColumns();
+    }
+
+    public function toggleColumnsDropdown(): void
+    {
+        $this->showColumnsDropdown = ! $this->showColumnsDropdown;
+    }
+
+    public function closeColumnsDropdown(): void
+    {
+        $this->showColumnsDropdown = false;
+    }
+
+    public function openAdvancedSearch(): void
+    {
+        $this->showAdvancedModal = true;
+    }
+
+    public function closeAdvancedSearch(): void
+    {
+        $this->showAdvancedModal = false;
+    }
+
+    public function applyAdvancedSearch(): void
+    {
+        $this->c2Page = 1;
+        $this->showAdvancedModal = false;
+    }
+
+    public function clearAdvancedFilters(): void
+    {
+        $this->advDistrict = '';
+        $this->advFacility = '';
+        $this->advTeam = '';
+        $this->advMicroarea = '';
+        $this->advCitizenName = '';
+        $this->advCitizenCpf = '';
+        $this->advCitizenCns = '';
+        $this->advMotherName = '';
+        $this->advMonth = '';
+        $this->advMonthOption = 'selected_and_next';
+        $this->advQuarter = '';
+        $this->advProfessionalCns = '';
+        $this->advProfessionalName = '';
+        $this->advRaceColor = '';
+        $this->advAgeGroup = '';
+        $this->advMici = null;
+        $this->advMicdt = null;
+        $this->advAccompanied = null;
+        $this->advPracticeA = null;
+        $this->advPracticeB = null;
+        $this->advPracticeC = null;
+        $this->advPracticeD = null;
+        $this->advPracticeE = null;
+        $this->c2Page = 1;
+    }
+
+    public function setAgeGroup(string $group): void
+    {
+        $this->advAgeGroup = ($this->advAgeGroup === $group) ? '' : $group;
+        $this->c2Page = 1;
+    }
+
+    public function toggleBooleanFilter(string $key, string $value): void
+    {
+        $current = $this->{$key};
+        $this->{$key} = ($current === $value) ? null : $value;
+        $this->c2Page = 1;
+    }
+
+    public function gotoC2Page(int $page): void
+    {
+        $this->c2Page = max(1, $page);
+    }
+
+    public function openChildDetail(int $childId, C2ActiveSearchService $c2Service): void
+    {
+        $cohort = $c2Service->getBaseCohort($this->year, $this->quarter, $this->selectedIne);
+        $found = $cohort->firstWhere('id', $childId);
+
+        if ($found) {
+            $this->selectedChild = $found;
+            $this->showDetailModal = true;
+        }
+    }
+
+    public function closeChildDetail(): void
+    {
+        $this->showDetailModal = false;
+        $this->selectedChild = null;
     }
 
     public function setTab(string $tab): void
@@ -94,7 +308,7 @@ class IndicatorDetail extends Component
         $this->selectedClassification = null;
     }
 
-    public function render(FamilyHealthService $service, DashboardSnapshotService $snapshots): View
+    public function render(FamilyHealthService $service, DashboardSnapshotService $snapshots, C2ActiveSearchService $c2Service): View
     {
         $data = $service->getIndicatorDetail($this->indicator, $this->year, $this->quarter, $this->selectedIne);
         $periods = $snapshots->periods();
@@ -114,9 +328,70 @@ class IndicatorDetail extends Component
                     }
 
                     $level = $t->quarter_level ?? $t->performance_level;
+
                     return $level === $this->selectedClassification;
                 });
             }
+        }
+
+        // Processamento da coorte nominal C2
+        $c2NominalList = collect();
+        $c2SummaryKpis = null;
+        $c2FilterOptions = [];
+        $c2AvailableColumns = C2ActiveSearchService::getAvailableColumns();
+        $c2TotalItems = 0;
+        $c2TotalPages = 1;
+        $activeFiltersCount = 0;
+
+        if ($this->indicator === 'c2') {
+            $c2BaseCohort = $c2Service->getBaseCohort($this->year, $this->quarter, $this->selectedIne);
+
+            $filters = [
+                'searchCns' => $this->searchCns,
+                'searchCpf' => $this->searchCpf,
+                'searchName' => $this->searchName,
+                'searchCnes' => $this->searchCnes,
+                'searchIne' => $this->searchIne,
+                'advDistrict' => $this->advDistrict,
+                'advFacility' => $this->advFacility,
+                'advTeam' => $this->advTeam,
+                'advMicroarea' => $this->advMicroarea,
+                'advCitizenName' => $this->advCitizenName,
+                'advCitizenCpf' => $this->advCitizenCpf,
+                'advCitizenCns' => $this->advCitizenCns,
+                'advMotherName' => $this->advMotherName,
+                'advMonth' => $this->advMonth,
+                'advMonthOption' => $this->advMonthOption,
+                'advQuarter' => $this->advQuarter,
+                'advProfessionalCns' => $this->advProfessionalCns,
+                'advProfessionalName' => $this->advProfessionalName,
+                'advRaceColor' => $this->advRaceColor,
+                'advAgeGroup' => $this->advAgeGroup,
+                'advMici' => $this->advMici,
+                'advMicdt' => $this->advMicdt,
+                'advAccompanied' => $this->advAccompanied,
+                'advPracticeA' => $this->advPracticeA,
+                'advPracticeB' => $this->advPracticeB,
+                'advPracticeC' => $this->advPracticeC,
+                'advPracticeD' => $this->advPracticeD,
+                'advPracticeE' => $this->advPracticeE,
+            ];
+
+            foreach ($filters as $k => $val) {
+                if ($val !== '' && $val !== null && $k !== 'advMonthOption') {
+                    $activeFiltersCount++;
+                }
+            }
+
+            $c2FilteredCohort = $c2Service->filterCohort($c2BaseCohort, $filters);
+            $c2SummaryKpis = $c2Service->getSummaryKpis($c2FilteredCohort, $this->year, $this->quarter, $this->selectedMonth);
+            $c2FilterOptions = $c2Service->getFilterOptions();
+
+            $c2TotalItems = $c2FilteredCohort->count();
+            $c2TotalPages = max(1, (int) ceil($c2TotalItems / max(1, $this->perPage)));
+            $this->c2Page = min(max(1, $this->c2Page), $c2TotalPages);
+
+            $c2NominalList = $c2FilteredCohort->forPage($this->c2Page, $this->perPage);
         }
 
         return view('livewire.family-health.indicator-detail', [
@@ -130,6 +405,13 @@ class IndicatorDetail extends Component
             'filteredTeams' => $filteredTeams,
             'activeSearchList' => $data['active_search_list'],
             'periods' => $periods,
+            'c2NominalList' => $c2NominalList,
+            'c2SummaryKpis' => $c2SummaryKpis,
+            'c2FilterOptions' => $c2FilterOptions,
+            'c2AvailableColumns' => $c2AvailableColumns,
+            'c2TotalItems' => $c2TotalItems,
+            'c2TotalPages' => $c2TotalPages,
+            'activeFiltersCount' => $activeFiltersCount,
         ]);
     }
 }

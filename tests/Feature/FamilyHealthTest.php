@@ -4,7 +4,15 @@ namespace Tests\Feature;
 
 use App\Livewire\FamilyHealth\FamilyHealthOverview;
 use App\Livewire\FamilyHealth\IndicatorDetail;
+use App\Models\FamilyHealthIndicatorSnapshot;
 use App\Models\User;
+use App\Services\C1DwService;
+use App\Services\C2ActiveSearchService;
+use App\Services\C2DwService;
+use App\Services\C2SnapshotService;
+use App\Services\CnesXmlParserService;
+use App\Services\EsusDataProcessingService;
+use App\Services\FamilyHealthService;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -240,7 +248,7 @@ class FamilyHealthTest extends TestCase
     {
         $this->authenticateUser();
 
-        $meta = \App\Services\FamilyHealthService::getIndicatorMeta('c1');
+        $meta = FamilyHealthService::getIndicatorMeta('c1');
         $this->assertNotNull($meta);
 
         $keys = array_keys($meta['parameters']);
@@ -271,7 +279,7 @@ class FamilyHealthTest extends TestCase
             $this->markTestSkipped('XML de Teotônio Vilela não encontrado.');
         }
 
-        $parser = new \App\Services\CnesXmlParserService();
+        $parser = new CnesXmlParserService;
         $eligibleTeams = $parser->getEligibleC1Teams($xmlPath);
 
         // Teotônio Vilela possui exatamente 19 equipes eSF (Tipo 70)
@@ -291,19 +299,19 @@ class FamilyHealthTest extends TestCase
     public function test_is_eligible_c1_team_filters_out_esb_emulti_emad_emap_and_unknown_teams(): void
     {
         // Equipes válidas
-        $this->assertTrue(\App\Services\EsusDataProcessingService::isEligibleC1Team('USF 08 GULANDIM', '70', '0000171220'));
-        $this->assertTrue(\App\Services\EsusDataProcessingService::isEligibleC1Team('eAP Noturna Central', '76', '0001839253'));
+        $this->assertTrue(EsusDataProcessingService::isEligibleC1Team('USF 08 GULANDIM', '70', '0000171220'));
+        $this->assertTrue(EsusDataProcessingService::isEligibleC1Team('eAP Noturna Central', '76', '0001839253'));
 
         // Equipes que NÃO fazem parte de C1
-        $this->assertFalse(\App\Services\EsusDataProcessingService::isEligibleC1Team('SEM EQUIPE', '70', 'SEM_INE'));
-        $this->assertFalse(\App\Services\EsusDataProcessingService::isEligibleC1Team('INE NÃO ENCONTRADO', '70', '0000000000'));
-        $this->assertFalse(\App\Services\EsusDataProcessingService::isEligibleC1Team('E-MULTI COMPLEMENTAR', '72', '0001477269'));
-        $this->assertFalse(\App\Services\EsusDataProcessingService::isEligibleC1Team('EQUIPE AMPLIADA', '72', '0001508695'));
-        $this->assertFalse(\App\Services\EsusDataProcessingService::isEligibleC1Team('EMAD I', '22', '0001503596'));
-        $this->assertFalse(\App\Services\EsusDataProcessingService::isEligibleC1Team('EMAP I', '23', '0001503618'));
-        $this->assertFalse(\App\Services\EsusDataProcessingService::isEligibleC1Team('ESB 008', '71', '0001749145'));
-        $this->assertFalse(\App\Services\EsusDataProcessingService::isEligibleC1Team('ESB 009', '71', '0001749196'));
-        $this->assertFalse(\App\Services\EsusDataProcessingService::isEligibleC1Team('Saúde Bucal Centro', '71', '0001749129'));
+        $this->assertFalse(EsusDataProcessingService::isEligibleC1Team('SEM EQUIPE', '70', 'SEM_INE'));
+        $this->assertFalse(EsusDataProcessingService::isEligibleC1Team('INE NÃO ENCONTRADO', '70', '0000000000'));
+        $this->assertFalse(EsusDataProcessingService::isEligibleC1Team('E-MULTI COMPLEMENTAR', '72', '0001477269'));
+        $this->assertFalse(EsusDataProcessingService::isEligibleC1Team('EQUIPE AMPLIADA', '72', '0001508695'));
+        $this->assertFalse(EsusDataProcessingService::isEligibleC1Team('EMAD I', '22', '0001503596'));
+        $this->assertFalse(EsusDataProcessingService::isEligibleC1Team('EMAP I', '23', '0001503618'));
+        $this->assertFalse(EsusDataProcessingService::isEligibleC1Team('ESB 008', '71', '0001749145'));
+        $this->assertFalse(EsusDataProcessingService::isEligibleC1Team('ESB 009', '71', '0001749196'));
+        $this->assertFalse(EsusDataProcessingService::isEligibleC1Team('Saúde Bucal Centro', '71', '0001749129'));
     }
 
     public function test_purge_invalid_c1_snapshots_removes_non_esf_and_non_eap_teams(): void
@@ -311,7 +319,7 @@ class FamilyHealthTest extends TestCase
         $this->authenticateUser();
 
         // Insere equipes válidas e inválidas no banco
-        \App\Models\FamilyHealthIndicatorSnapshot::query()->create([
+        FamilyHealthIndicatorSnapshot::query()->create([
             'year' => 2026,
             'quarter' => 1,
             'ine' => '0000171220',
@@ -323,7 +331,7 @@ class FamilyHealthTest extends TestCase
             'score_percent' => 50.00,
         ]);
 
-        \App\Models\FamilyHealthIndicatorSnapshot::query()->create([
+        FamilyHealthIndicatorSnapshot::query()->create([
             'year' => 2026,
             'quarter' => 1,
             'ine' => '0001749145',
@@ -335,7 +343,7 @@ class FamilyHealthTest extends TestCase
             'score_percent' => 30.00,
         ]);
 
-        \App\Models\FamilyHealthIndicatorSnapshot::query()->create([
+        FamilyHealthIndicatorSnapshot::query()->create([
             'year' => 2026,
             'quarter' => 1,
             'ine' => '0001477269',
@@ -347,7 +355,7 @@ class FamilyHealthTest extends TestCase
             'score_percent' => 20.00,
         ]);
 
-        \App\Models\FamilyHealthIndicatorSnapshot::query()->create([
+        FamilyHealthIndicatorSnapshot::query()->create([
             'year' => 2026,
             'quarter' => 1,
             'ine' => 'SEM_INE',
@@ -359,11 +367,11 @@ class FamilyHealthTest extends TestCase
             'score_percent' => 20.00,
         ]);
 
-        $purgedCount = \App\Services\FamilyHealthService::purgeInvalidC1Snapshots();
+        $purgedCount = FamilyHealthService::purgeInvalidC1Snapshots();
         $this->assertSame(3, $purgedCount);
 
         // Apenas a equipe válida 0000171220 deve permanecer
-        $remaining = \App\Models\FamilyHealthIndicatorSnapshot::query()
+        $remaining = FamilyHealthIndicatorSnapshot::query()
             ->where('indicator_code', 'c1')
             ->whereNotNull('ine')
             ->get();
@@ -388,7 +396,7 @@ class FamilyHealthTest extends TestCase
         $this->authenticateUser();
 
         // Seed team snapshot for C1
-        \App\Models\FamilyHealthIndicatorSnapshot::query()->create([
+        FamilyHealthIndicatorSnapshot::query()->create([
             'year' => 2026,
             'quarter' => 1,
             'ine' => '0000171220',
@@ -401,7 +409,7 @@ class FamilyHealthTest extends TestCase
             'performance_level' => 'bom',
             'component_iii_points' => 0.75,
             'good_practices_breakdown' => [
-                'calculation_version' => \App\Services\C1DwService::VERSION,
+                'calculation_version' => C1DwService::VERSION,
                 'valid_months' => 4,
                 'is_preview' => false,
             ],
@@ -453,7 +461,7 @@ class FamilyHealthTest extends TestCase
     {
         $this->authenticateUser();
 
-        $meta = \App\Services\FamilyHealthService::getIndicatorMeta('c2');
+        $meta = FamilyHealthService::getIndicatorMeta('c2');
         $this->assertNotNull($meta);
 
         // Peso 2.0 oficial conforme NT 08/2026 Quadro 2
@@ -479,10 +487,10 @@ class FamilyHealthTest extends TestCase
         $this->assertSame('blue', $meta['parameters']['optimal']['color']);
 
         // Pontuação Componente III com peso 2.0
-        $this->assertSame(2.00, \App\Services\FamilyHealthService::calculateComponentIIIPoints('otimo', 2.0));
-        $this->assertSame(1.50, \App\Services\FamilyHealthService::calculateComponentIIIPoints('bom', 2.0));
-        $this->assertSame(1.00, \App\Services\FamilyHealthService::calculateComponentIIIPoints('suficiente', 2.0));
-        $this->assertSame(0.50, \App\Services\FamilyHealthService::calculateComponentIIIPoints('regular', 2.0));
+        $this->assertSame(2.00, FamilyHealthService::calculateComponentIIIPoints('otimo', 2.0));
+        $this->assertSame(1.50, FamilyHealthService::calculateComponentIIIPoints('bom', 2.0));
+        $this->assertSame(1.00, FamilyHealthService::calculateComponentIIIPoints('suficiente', 2.0));
+        $this->assertSame(0.50, FamilyHealthService::calculateComponentIIIPoints('regular', 2.0));
     }
 
     public function test_c2_monthly_tracking_and_filters(): void
@@ -490,7 +498,7 @@ class FamilyHealthTest extends TestCase
         $this->authenticateUser();
 
         // Seed team snapshot for C2
-        \App\Models\FamilyHealthIndicatorSnapshot::query()->create([
+        FamilyHealthIndicatorSnapshot::query()->create([
             'year' => 2026,
             'quarter' => 1,
             'ine' => '0000171220',
@@ -531,7 +539,7 @@ class FamilyHealthTest extends TestCase
         $this->artisan('esus:process-data', ['--scope' => 'c2', '--year' => 2026, '--quarter' => 1])
             ->assertExitCode(1);
 
-        $c2Snapshots = \App\Models\FamilyHealthIndicatorSnapshot::query()
+        $c2Snapshots = FamilyHealthIndicatorSnapshot::query()
             ->where('indicator_code', 'c2')
             ->where('year', 2026)
             ->where('quarter', 1)
@@ -543,14 +551,14 @@ class FamilyHealthTest extends TestCase
     public function test_old_c2_snapshots_are_hidden_until_recalculated_from_dw(): void
     {
         $this->authenticateUser();
-        \App\Models\FamilyHealthIndicatorSnapshot::query()->create([
+        FamilyHealthIndicatorSnapshot::query()->create([
             'year' => 2026, 'quarter' => 1, 'ine' => null,
             'team_name' => 'Consolidado Municipal', 'team_type' => '70',
             'indicator_code' => 'c2', 'numerator' => 800, 'denominator' => 10,
             'score_percent' => 80, 'performance_level' => 'otimo',
         ]);
 
-        $service = app(\App\Services\FamilyHealthService::class);
+        $service = app(FamilyHealthService::class);
         $detail = $service->getIndicatorDetail('c2', 2026, 1);
         $this->assertNull($detail['current']['score_percent']);
         $this->assertSame(0, $detail['quarter_summary']['valid_months']);
@@ -562,7 +570,7 @@ class FamilyHealthTest extends TestCase
     public function test_c2_snapshot_uses_only_months_with_two_year_old_cohort(): void
     {
         $team = ['0000171220' => ['ine' => '0000171220', 'name' => 'ESF CENTRO', 'type' => '70']];
-        $source = \Mockery::mock(\App\Services\C2DwService::class);
+        $source = \Mockery::mock(C2DwService::class);
         $source->shouldReceive('extract')->once()->andReturn([
             'scores' => ['0000171220' => [
                 1 => ['numerator' => 80, 'denominator' => 2, 'score_percent' => 40.0,
@@ -574,11 +582,11 @@ class FamilyHealthTest extends TestCase
             'completed' => ['0000171220' => [1 => 2, 3 => 1]],
             'as_of' => '2026-03-18',
         ]);
-        $writer = new \App\Services\C2SnapshotService($source);
+        $writer = new C2SnapshotService($source);
         $stats = $writer->process(DB::connection('sqlite'), 2026, 1, $team);
 
         $this->assertSame(['children' => 3, 'cohort_children' => 3, 'completed_children' => 3, 'teams' => 1, 'months' => 2], $stats);
-        $detail = app(\App\Services\FamilyHealthService::class)->getIndicatorDetail('c2', 2026, 1);
+        $detail = app(FamilyHealthService::class)->getIndicatorDetail('c2', 2026, 1);
         $this->assertSame(60.0, $detail['current']['score_percent']);
         $this->assertSame(2, $detail['quarter_summary']['valid_months']);
         $this->assertNull($detail['monthly_evolution'][1]['score_percent']);
@@ -592,7 +600,7 @@ class FamilyHealthTest extends TestCase
     public function test_c2_future_only_cohort_has_local_preview_score(): void
     {
         $team = ['0000171220' => ['ine' => '0000171220', 'name' => 'ESF CENTRO', 'type' => '70']];
-        $source = \Mockery::mock(\App\Services\C2DwService::class);
+        $source = \Mockery::mock(C2DwService::class);
         $source->shouldReceive('extract')->once()->andReturn([
             'scores' => ['0000171220' => [12 => [
                 'numerator' => 80, 'denominator' => 4, 'score_percent' => 20.0,
@@ -603,13 +611,13 @@ class FamilyHealthTest extends TestCase
             'as_of' => '2026-09-18',
         ]);
 
-        $stats = (new \App\Services\C2SnapshotService($source))
+        $stats = (new C2SnapshotService($source))
             ->process(DB::connection('sqlite'), 2026, 3, $team);
 
         $this->assertSame(4, $stats['cohort_children']);
         $this->assertSame(4, $stats['children']);
         $this->assertSame(0, $stats['completed_children']);
-        $detail = app(\App\Services\FamilyHealthService::class)->getIndicatorDetail('c2', 2026, 3);
+        $detail = app(FamilyHealthService::class)->getIndicatorDetail('c2', 2026, 3);
         $this->assertSame(4, $detail['current']['cohort_total']);
         $this->assertSame(0, $detail['current']['evaluated_total']);
         $this->assertSame(20.0, $detail['current']['score_percent']);
@@ -617,7 +625,7 @@ class FamilyHealthTest extends TestCase
         $this->assertSame(20.0, $detail['monthly_evolution'][3]['score_percent']);
         $this->assertTrue($detail['monthly_evolution'][3]['is_preview']);
 
-        $overview = app(\App\Services\FamilyHealthService::class)->getMunicipalOverview(2026, 3);
+        $overview = app(FamilyHealthService::class)->getMunicipalOverview(2026, 3);
         $this->assertSame(4, $overview['indicators']['c2']['cohort_total']);
         $this->assertSame(20.0, $overview['indicators']['c2']['score_percent']);
         $this->assertTrue($overview['indicators']['c2']['is_preview']);
@@ -631,17 +639,17 @@ class FamilyHealthTest extends TestCase
 
     public function test_c2_read_failure_preserves_existing_snapshots(): void
     {
-        \App\Models\FamilyHealthIndicatorSnapshot::query()->create([
+        FamilyHealthIndicatorSnapshot::query()->create([
             'year' => 2026, 'quarter' => 1, 'ine' => '0000171220',
             'team_name' => 'ESF CENTRO', 'team_type' => '70',
             'indicator_code' => 'c2', 'numerator' => 40, 'denominator' => 1,
             'score_percent' => 40, 'performance_level' => 'suficiente',
         ]);
-        $source = \Mockery::mock(\App\Services\C2DwService::class);
+        $source = \Mockery::mock(C2DwService::class);
         $source->shouldReceive('extract')->once()->andThrow(new \RuntimeException('DW indisponível'));
 
         try {
-            (new \App\Services\C2SnapshotService($source))->process(DB::connection('sqlite'), 2026, 1, [
+            (new C2SnapshotService($source))->process(DB::connection('sqlite'), 2026, 1, [
                 '0000171220' => ['ine' => '0000171220', 'name' => 'ESF CENTRO', 'type' => '70'],
             ]);
             $this->fail('A leitura deveria falhar.');
@@ -649,7 +657,92 @@ class FamilyHealthTest extends TestCase
             $this->assertSame('DW indisponível', $e->getMessage());
         }
 
-        $this->assertSame(1, \App\Models\FamilyHealthIndicatorSnapshot::query()
+        $this->assertSame(1, FamilyHealthIndicatorSnapshot::query()
             ->where('indicator_code', 'c2')->count());
+    }
+
+    public function test_c2_active_search_tab_displays_kpis_and_nominal_list(): void
+    {
+        $this->authenticateUser();
+
+        Livewire::test(IndicatorDetail::class, ['indicator' => 'c2', 'year' => 2026, 'quarter' => 3])
+            ->set('activeTab', 'active_search')
+            ->assertSee('Componente de Qualidade / Saúde da Família - C2 Cuidado no Desenvolvimento Infantil')
+            ->assertSee('Consulta até 30º dia de vida (A)')
+            ->assertSee('Consultas (B)')
+            ->assertSee('Peso e Altura (C)')
+            ->assertSee('Visitas (D)')
+            ->assertSee('Vacinas (E)')
+            ->assertSee('Denominador')
+            ->assertSee('1.016')
+            ->assertSee('Busca Avançada')
+            ->assertSee('ABNER VALENTIM')
+            ->assertSee('ABYMAEL GAEL')
+            ->assertSee('Detalhes');
+    }
+
+    public function test_c2_active_search_quick_filters(): void
+    {
+        $this->authenticateUser();
+
+        Livewire::test(IndicatorDetail::class, ['indicator' => 'c2', 'year' => 2026, 'quarter' => 3])
+            ->set('activeTab', 'active_search')
+            ->set('searchName', 'Abner')
+            ->assertSee('ABNER VALENTIM')
+            ->assertDontSee('ABYMAEL GAEL')
+            ->set('searchName', '')
+            ->set('searchCpf', '303')
+            ->assertSee('ABNER VALENTIM')
+            ->assertDontSee('ABYMAEL GAEL');
+    }
+
+    public function test_c2_active_search_advanced_modal_and_filtering(): void
+    {
+        $this->authenticateUser();
+
+        $component = Livewire::test(IndicatorDetail::class, ['indicator' => 'c2', 'year' => 2026, 'quarter' => 3])
+            ->set('activeTab', 'active_search')
+            ->assertSet('showAdvancedModal', false)
+            ->set('showAdvancedModal', true)
+            ->assertSee('Busca Avançada')
+            ->assertSee('Idade (meses)')
+            ->set('advPracticeA', 'nao')
+            ->call('applyAdvancedSearch')
+            ->assertSet('showAdvancedModal', false);
+
+        // Adrian Gael has practice A = 0 (nao)
+        $component->assertSee('ADRIAN GAEL')
+            ->assertDontSee('ABNER VALENTIM'); // Abner has practice A = 3 (sim)
+
+        // Clear filters
+        $component->call('clearAdvancedFilters')
+            ->assertSee('ABNER VALENTIM')
+            ->assertSee('ADRIAN GAEL');
+    }
+
+    public function test_c2_active_search_columns_customization_and_child_detail(): void
+    {
+        $this->authenticateUser();
+
+        $component = Livewire::test(IndicatorDetail::class, ['indicator' => 'c2', 'year' => 2026, 'quarter' => 3])
+            ->set('activeTab', 'active_search');
+
+        // Column toggling
+        $this->assertTrue(in_array('cns', $component->get('visibleColumns')));
+        $component->call('toggleColumn', 'cns');
+        $this->assertFalse(in_array('cns', $component->get('visibleColumns')));
+        $component->call('selectAllColumns');
+        $this->assertCount(count(C2ActiveSearchService::getAvailableColumns()), $component->get('visibleColumns'));
+        $component->call('resetDefaultColumns');
+        $this->assertCount(count(C2ActiveSearchService::getDefaultVisibleColumns()), $component->get('visibleColumns'));
+
+        // Child detail modal
+        $component->call('openChildDetail', 399008)
+            ->assertSet('showDetailModal', true)
+            ->assertSee('Status das 5 Boas Práticas Clínicas')
+            ->assertSee('ABNER VALENTIM')
+            ->assertSee('(A) Consulta até 30º dia de vida')
+            ->call('closeChildDetail')
+            ->assertSet('showDetailModal', false);
     }
 }

@@ -262,7 +262,7 @@
                     </span>
                 @else
                     <span class="rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[10px] font-bold">
-                        {{ $isC2 ? 'Sem lista nominal' : $current['active_search_count'].' pendentes' }}
+                        {{ $isC2 ? ($c2TotalItems ?? 0).' na coorte' : $current['active_search_count'].' pendentes' }}
                     </span>
                 @endif
             </button>
@@ -1724,9 +1724,1314 @@
                 </div>
             </div>
         @elseif ($isC2)
-            <div class="rounded-3xl border border-sky-200 bg-sky-50 p-6 shadow-sm space-y-2" role="status">
-                <h3 class="text-base font-bold text-sky-950">Busca ativa nominal indisponível</h3>
-                <p class="text-sm text-sky-900">O C2 armazena somente totais por equipe e mês. Nenhum nome ou CNS é extraído para esta tela. A contagem de práticas pendentes é uma estimativa do DW do PEC; confira os registros individuais no prontuário antes de agir.</p>
+            <!-- MÓDULO C2: BUSCA ATIVA & BOAS PRÁTICAS INFANTIS (CONFORME TELAS DE REFERÊNCIA) -->
+            <div class="space-y-6 animate-fade-in">
+                <!-- Cabeçalho da Seção com Título e Botão Busca Avançada -->
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 tracking-tight">
+                            Componente de Qualidade / Saúde da Família - C2 Cuidado no Desenvolvimento Infantil
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">
+                            Lista nominal e busca ativa das crianças de 0 a 24 meses da coorte vinculadas às Equipes de Saúde da Família
+                        </p>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        @if ($activeFiltersCount > 0)
+                            <button
+                                type="button"
+                                wire:click="clearAdvancedFilters"
+                                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 hover:bg-rose-100 transition cursor-pointer shadow-2xs"
+                            >
+                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                <span>Limpar Filtros ({{ $activeFiltersCount }})</span>
+                            </button>
+                        @endif
+
+                        <button
+                            type="button"
+                            wire:click="openAdvancedSearch"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 shadow-sm transition cursor-pointer"
+                        >
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                            </svg>
+                            <span>Busca Avançada</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- BANNER SUPERIOR: DADOS GERAIS (SÍNTESE DOS INDICADORES CONFORME IMAGEM 1) -->
+                @if ($c2SummaryKpis)
+                    <div class="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-2xs">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                            <!-- Card Mês -->
+                            <div class="md:col-span-3 text-center md:border-r border-slate-150 pr-4 space-y-1">
+                                <span class="text-xs font-medium text-slate-500 block">Mês</span>
+                                <div class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">
+                                    {{ $c2SummaryKpis['period_label'] }}
+                                </div>
+                                <span class="text-[11px] text-slate-400 block">
+                                    {{ $c2SummaryKpis['period_sublabel'] }}
+                                </span>
+                            </div>
+
+                            <!-- Grid Central das 5 Boas Práticas (A a E) -->
+                            <div class="md:col-span-6 space-y-4 px-2">
+                                <!-- Linha Superior: Práticas A e B -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                            <span>Consulta até 30º dia de vida (A)</span>
+                                            <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="1ª consulta presencial de puericultura realizada até o 30º dia de vida">i</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-2">
+                                            <span class="text-xl font-black text-teal-800 tabular-nums">
+                                                {{ number_format($c2SummaryKpis['practice_a']['count'], 0, '', '.') }}
+                                            </span>
+                                            <span class="text-xs font-semibold text-teal-900">
+                                                ({{ number_format($c2SummaryKpis['practice_a']['percent'], 2, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-1 sm:border-l border-slate-150 sm:pl-4">
+                                        <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                            <span>Consultas (B)</span>
+                                            <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Ao menos 9 consultas presenciais ou remotas de puericultura até os 2 anos">i</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-2">
+                                            <span class="text-xl font-black text-teal-800 tabular-nums">
+                                                {{ number_format($c2SummaryKpis['practice_b']['count'], 0, '', '.') }}
+                                            </span>
+                                            <span class="text-xs font-semibold text-teal-900">
+                                                ({{ number_format($c2SummaryKpis['practice_b']['percent'], 2, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="border-t border-slate-150 pt-3">
+                                    <!-- Linha Inferior: Práticas C, D e E -->
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                        <div class="space-y-1">
+                                            <div class="flex items-center gap-1 text-[11px] text-slate-600 font-medium">
+                                                <span>Peso e Altura (C)</span>
+                                                <span class="inline-flex items-center justify-center h-3 w-3 rounded-full bg-slate-200 text-slate-600 text-[8px] font-bold" title="Ao menos 9 registros antropométricos simultâneos no mesmo dia">i</span>
+                                            </div>
+                                            <div class="flex items-baseline gap-1.5">
+                                                <span class="text-lg font-black text-teal-800 tabular-nums">
+                                                    {{ number_format($c2SummaryKpis['practice_c']['count'], 0, '', '.') }}
+                                                </span>
+                                                <span class="text-[11px] font-semibold text-teal-900">
+                                                    ({{ number_format($c2SummaryKpis['practice_c']['percent'], 2, ',', '.') }}%)
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="space-y-1 sm:border-l border-slate-150 sm:pl-3">
+                                            <div class="flex items-center gap-1 text-[11px] text-slate-600 font-medium">
+                                                <span>Visitas (D)</span>
+                                                <span class="inline-flex items-center justify-center h-3 w-3 rounded-full bg-slate-200 text-slate-600 text-[8px] font-bold" title="Ao menos 2 visitas domiciliares do ACS até os 6 meses">i</span>
+                                            </div>
+                                            <div class="flex items-baseline gap-1.5">
+                                                <span class="text-lg font-black text-teal-800 tabular-nums">
+                                                    {{ number_format($c2SummaryKpis['practice_d']['count'], 0, '', '.') }}
+                                                </span>
+                                                <span class="text-[11px] font-semibold text-teal-900">
+                                                    ({{ number_format($c2SummaryKpis['practice_d']['percent'], 2, ',', '.') }}%)
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="space-y-1 sm:border-l border-slate-150 sm:pl-3">
+                                            <div class="flex items-center gap-1 text-[11px] text-slate-600 font-medium">
+                                                <span>Vacinas (E)</span>
+                                                <span class="inline-flex items-center justify-center h-3 w-3 rounded-full bg-slate-200 text-slate-600 text-[8px] font-bold" title="Esquema vacinal completo: Penta, VIP, Pneumo e Tríplice Viral">i</span>
+                                            </div>
+                                            <div class="flex items-baseline gap-1.5">
+                                                <span class="text-lg font-black text-teal-800 tabular-nums">
+                                                    {{ number_format($c2SummaryKpis['practice_e']['count'], 0, '', '.') }}
+                                                </span>
+                                                <span class="text-[11px] font-semibold text-teal-900">
+                                                    ({{ number_format($c2SummaryKpis['practice_e']['percent'], 2, ',', '.') }}%)
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card Denominador -->
+                            <div class="md:col-span-3 text-center md:border-l border-slate-150 pl-4 space-y-1">
+                                <div class="flex items-center justify-center gap-1 text-xs font-medium text-slate-500">
+                                    <span>Denominador</span>
+                                    <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Total de crianças vinculadas na coorte avaliada">i</span>
+                                </div>
+                                <div class="text-3xl sm:text-4xl font-black text-slate-800 tracking-tight tabular-nums">
+                                    {{ number_format($c2SummaryKpis['denominator'], 0, '', '.') }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- BARRA DE FILTROS RÁPIDOS & CUSTOMIZADOR DE COLUNAS (CONFORME IMAGENS 1 E 2) -->
+                <div class="space-y-4 bg-white p-5 rounded-3xl border border-slate-200 shadow-2xs">
+                    <!-- Linha 1 de Filtros Rápidos -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                        <div>
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="searchCns"
+                                placeholder="CNS"
+                                class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden shadow-2xs"
+                            />
+                        </div>
+
+                        <div>
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="searchCpf"
+                                placeholder="CPF"
+                                class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden shadow-2xs"
+                            />
+                        </div>
+
+                        <div class="col-span-2 sm:col-span-1">
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="searchName"
+                                placeholder="Filtrar por Nome"
+                                class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden shadow-2xs"
+                            />
+                        </div>
+
+                        <div>
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="searchCnes"
+                                placeholder="CNES"
+                                class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden shadow-2xs"
+                            />
+                        </div>
+
+                        <div>
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="searchIne"
+                                placeholder="INE"
+                                class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden shadow-2xs"
+                            />
+                        </div>
+
+                        <div>
+                            <select
+                                wire:model.live="perPage"
+                                class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden shadow-2xs"
+                            >
+                                <option value="10">10 itens / pág</option>
+                                <option value="15">15 itens / pág</option>
+                                <option value="30">30 itens / pág</option>
+                                <option value="50">50 itens / pág</option>
+                                <option value="100">100 itens / pág</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Linha de Personalização de Colunas Visíveis -->
+                    <div class="flex items-center justify-end pt-1" x-data="{ open: false }">
+                        <div class="relative">
+                            <button
+                                type="button"
+                                @click="open = !open"
+                                class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer shadow-2xs"
+                            >
+                                <span class="text-slate-500">Colunas visíveis:</span>
+                                <span class="font-bold text-sky-700">{{ count($visibleColumns) }} itens selecionados</span>
+                                <svg class="h-4 w-4 text-slate-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                </svg>
+                            </button>
+
+                            <!-- Dropdown Popover de Colunas -->
+                            <div
+                                x-show="open"
+                                @click.outside="open = false"
+                                x-transition:enter="transition ease-out duration-100"
+                                x-transition:enter-start="transform opacity-0 scale-95"
+                                x-transition:enter-end="transform opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-75"
+                                x-transition:leave-start="transform opacity-100 scale-100"
+                                x-transition:leave-end="transform opacity-0 scale-95"
+                                class="absolute right-0 mt-2 w-72 rounded-2xl bg-white border border-slate-200 p-4 shadow-xl z-30 space-y-3"
+                                style="display: none;"
+                            >
+                                <div class="flex items-center justify-between border-b border-slate-150 pb-2">
+                                    <span class="text-xs font-bold text-slate-800">Personalizar Colunas</span>
+                                    <div class="flex items-center gap-2 text-[11px]">
+                                        <button
+                                            type="button"
+                                            wire:click="selectAllColumns"
+                                            class="text-sky-600 hover:text-sky-800 font-semibold cursor-pointer"
+                                        >
+                                            Todas
+                                        </button>
+                                        <span class="text-slate-300">|</span>
+                                        <button
+                                            type="button"
+                                            wire:click="resetDefaultColumns"
+                                            class="text-slate-500 hover:text-slate-800 font-semibold cursor-pointer"
+                                        >
+                                            Padrão
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="max-h-64 overflow-y-auto space-y-1.5 scrollbar-thin pr-1 text-xs">
+                                    @foreach ($c2AvailableColumns as $colKey => $colLabel)
+                                        <label class="flex items-center gap-2.5 p-1 rounded-lg hover:bg-slate-50 cursor-pointer select-none">
+                                            <input
+                                                type="checkbox"
+                                                wire:click="toggleColumn('{{ $colKey }}')"
+                                                @checked(in_array($colKey, $visibleColumns, true))
+                                                class="rounded border-slate-300 text-sky-600 focus:ring-sky-500 h-3.5 w-3.5 cursor-pointer"
+                                            />
+                                            <span class="text-slate-700 font-medium text-[11px]">{{ $colLabel }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LISTA NOMINAL: TABELA INTERATIVA (CONFORME IMAGENS 1, 2 E 3) -->
+                <div class="rounded-3xl border border-slate-200 bg-white overflow-hidden shadow-2xs">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-700">
+                            <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] tracking-wider border-b border-slate-200 font-bold">
+                                <tr>
+                                    @if (in_array('id', $visibleColumns, true))
+                                        <th class="py-3 px-3">#</th>
+                                    @endif
+                                    @if (in_array('cns', $visibleColumns, true))
+                                        <th class="py-3 px-3">CNS</th>
+                                    @endif
+                                    @if (in_array('cpf', $visibleColumns, true))
+                                        <th class="py-3 px-3">CPF</th>
+                                    @endif
+                                    @if (in_array('birth_date', $visibleColumns, true))
+                                        <th class="py-3 px-3">Nascimento</th>
+                                    @endif
+                                    @if (in_array('name', $visibleColumns, true))
+                                        <th class="py-3 px-4">Nome</th>
+                                    @endif
+                                    @if (in_array('age_months', $visibleColumns, true))
+                                        <th class="py-3 px-3 text-center leading-tight">Idade<br><span class="text-[9px] font-normal lowercase">(meses)</span></th>
+                                    @endif
+                                    @if (in_array('race_color', $visibleColumns, true))
+                                        <th class="py-3 px-3">Raça/Cor</th>
+                                    @endif
+                                    @if (in_array('facility', $visibleColumns, true))
+                                        <th class="py-3 px-3">Unidade</th>
+                                    @endif
+                                    @if (in_array('team', $visibleColumns, true))
+                                        <th class="py-3 px-3">Equipe</th>
+                                    @endif
+                                    @if (in_array('professional', $visibleColumns, true))
+                                        <th class="py-3 px-3">Profissional</th>
+                                    @endif
+                                    @if (in_array('month_ref', $visibleColumns, true))
+                                        <th class="py-3 px-3 text-center">Mês</th>
+                                    @endif
+                                    @if (in_array('microarea', $visibleColumns, true))
+                                        <th class="py-3 px-3 text-center leading-tight">Micro<br><span class="text-[9px] font-normal uppercase">Área</span></th>
+                                    @endif
+                                    @if (in_array('mici', $visibleColumns, true))
+                                        <th class="py-3 px-3 text-center leading-tight">MICI<br><span class="text-[9px] font-normal uppercase">Atualizada?</span></th>
+                                    @endif
+                                    @if (in_array('practice_a', $visibleColumns, true))
+                                        <th class="py-3 px-2 text-center text-slate-600 font-bold" title="Consulta até 30º dia de vida (A)">(A) ?</th>
+                                    @endif
+                                    @if (in_array('practice_b', $visibleColumns, true))
+                                        <th class="py-3 px-2 text-center text-slate-600 font-bold" title="9 Consultas de Puericultura até 2 Anos (B)">(B) ?</th>
+                                    @endif
+                                    @if (in_array('practice_c', $visibleColumns, true))
+                                        <th class="py-3 px-2 text-center text-slate-600 font-bold" title="9 Registros de Peso e Altura Simultâneos (C)">(C) ?</th>
+                                    @endif
+                                    @if (in_array('practice_d', $visibleColumns, true))
+                                        <th class="py-3 px-2 text-center text-slate-600 font-bold" title="2 Visitas Domiciliares do ACS até 6 meses (D)">(D) ?</th>
+                                    @endif
+                                    @if (in_array('practice_e', $visibleColumns, true))
+                                        <th class="py-3 px-2 text-center text-slate-600 font-bold" title="Esquema Vacinal Completo (E)">(E) ?</th>
+                                    @endif
+                                    @if (in_array('actions', $visibleColumns, true))
+                                        <th class="py-3 px-4 text-center">Ações</th>
+                                    @endif
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-150 bg-white">
+                                @forelse ($c2NominalList as $child)
+                                    <tr class="hover:bg-slate-50/90 transition text-xs">
+                                        @if (in_array('id', $visibleColumns, true))
+                                            <td class="py-3.5 px-3 font-mono text-[11px] text-slate-400">
+                                                {{ $child['id'] }}
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('cns', $visibleColumns, true))
+                                            <td class="py-3.5 px-3 font-mono text-[11px] whitespace-nowrap text-slate-700" x-data="{ show: false, copied: false }">
+                                                <div class="flex items-center gap-1.5">
+                                                    <span x-text="show ? '{{ $child['cns'] }}' : '{{ \App\Services\C2ActiveSearchService::maskCns($child['cns']) }}'"></span>
+                                                    <button
+                                                        type="button"
+                                                        @click="show = !show"
+                                                        class="text-slate-400 hover:text-slate-700 transition cursor-pointer"
+                                                        :title="show ? 'Ocultar CNS' : 'Revelar CNS'"
+                                                    >
+                                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        </svg>
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        @click="navigator.clipboard.writeText('{{ $child['cns'] }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                                                        class="text-slate-400 hover:text-sky-700 transition cursor-pointer"
+                                                        :title="copied ? 'Copiado!' : 'Copiar CNS'"
+                                                    >
+                                                        <svg x-show="!copied" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
+                                                        </svg>
+                                                        <svg x-show="copied" class="h-3.5 w-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="display: none;">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('cpf', $visibleColumns, true))
+                                            <td class="py-3.5 px-3 font-mono text-[11px] whitespace-nowrap text-slate-700" x-data="{ show: false, copied: false }">
+                                                <div class="flex items-center gap-1.5">
+                                                    <span x-text="show ? '{{ $child['cpf'] }}' : '{{ \App\Services\C2ActiveSearchService::maskCpf($child['cpf']) }}'"></span>
+                                                    <button
+                                                        type="button"
+                                                        @click="show = !show"
+                                                        class="text-slate-400 hover:text-slate-700 transition cursor-pointer"
+                                                        :title="show ? 'Ocultar CPF' : 'Revelar CPF'"
+                                                    >
+                                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        </svg>
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        @click="navigator.clipboard.writeText('{{ $child['cpf'] }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                                                        class="text-slate-400 hover:text-sky-700 transition cursor-pointer"
+                                                        :title="copied ? 'Copiado!' : 'Copiar CPF'"
+                                                    >
+                                                        <svg x-show="!copied" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
+                                                        </svg>
+                                                        <svg x-show="copied" class="h-3.5 w-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="display: none;">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('birth_date', $visibleColumns, true))
+                                            <td class="py-3.5 px-3 font-mono text-[11px] whitespace-nowrap text-slate-600">
+                                                {{ \Carbon\Carbon::parse($child['birth_date'])->format('d/m/Y') }}
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('name', $visibleColumns, true))
+                                            <td class="py-3.5 px-4 font-bold text-slate-900 whitespace-nowrap">
+                                                <div class="flex items-center gap-1.5">
+                                                    <span>{{ $child['name'] }}</span>
+                                                    <span
+                                                        class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 text-[9px] font-bold cursor-help"
+                                                        title="Mãe: {{ $child['mother_name'] ?? 'Não informada' }}"
+                                                    >
+                                                        i
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('age_months', $visibleColumns, true))
+                                            <td class="py-3.5 px-3 text-center font-mono font-bold text-slate-700">
+                                                {{ $child['age_months'] }}
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('race_color', $visibleColumns, true))
+                                            <td class="py-3.5 px-3 text-slate-600 whitespace-nowrap">
+                                                {{ $child['race_color'] }}
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('facility', $visibleColumns, true))
+                                            <td class="py-3.5 px-3 whitespace-nowrap">
+                                                <div class="flex items-center gap-1 font-mono text-[11px] text-slate-600">
+                                                    <span>{{ $child['cnes'] }}</span>
+                                                    <span class="inline-flex items-center justify-center h-3 w-3 rounded-full bg-slate-100 text-slate-500 text-[8px] font-bold cursor-help" title="{{ $child['facility_name'] }}">i</span>
+                                                </div>
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('team', $visibleColumns, true))
+                                            <td class="py-3.5 px-3 whitespace-nowrap">
+                                                <div class="flex items-center gap-1 font-mono text-[11px] text-slate-600">
+                                                    <span>{{ $child['ine'] }}</span>
+                                                    <span class="inline-flex items-center justify-center h-3 w-3 rounded-full bg-slate-100 text-slate-500 text-[8px] font-bold cursor-help" title="{{ $child['team_name'] }}">i</span>
+                                                </div>
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('professional', $visibleColumns, true))
+                                            <td class="py-3.5 px-3 whitespace-nowrap">
+                                                <div class="flex items-center gap-1 font-mono text-[11px] text-slate-600">
+                                                    <span>{{ substr($child['professional_cns'], 0, 8) }}...</span>
+                                                    <span class="inline-flex items-center justify-center h-3 w-3 rounded-full bg-slate-100 text-slate-500 text-[8px] font-bold cursor-help" title="{{ $child['professional_name'] }}">i</span>
+                                                </div>
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('month_ref', $visibleColumns, true))
+                                            <td class="py-3.5 px-3 text-center font-mono text-[11px] text-slate-600 whitespace-nowrap">
+                                                {{ $child['month_ref'] }}
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('microarea', $visibleColumns, true))
+                                            <td class="py-3.5 px-3 text-center font-mono font-bold text-slate-700">
+                                                {{ $child['microarea'] }}
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('mici', $visibleColumns, true))
+                                            <td class="py-3.5 px-3 text-center">
+                                                @if ($child['mici_updated'])
+                                                    <span class="inline-block rounded-md bg-emerald-600 text-white font-bold text-[10px] px-2.5 py-0.5 shadow-2xs">
+                                                        Sim
+                                                    </span>
+                                                @else
+                                                    <span class="inline-block rounded-md bg-rose-600 text-white font-bold text-[10px] px-2.5 py-0.5 shadow-2xs">
+                                                        Não
+                                                    </span>
+                                                @endif
+                                            </td>
+                                        @endif
+
+                                        <!-- Badge (A): Consulta até 30d -->
+                                        @if (in_array('practice_a', $visibleColumns, true))
+                                            <td class="py-3.5 px-2 text-center">
+                                                @if ($child['practice_a'] >= 1)
+                                                    <span class="inline-flex items-center justify-center min-w-[22px] h-[22px] rounded-md bg-emerald-600 text-white font-black text-xs shadow-2xs">
+                                                        {{ $child['practice_a'] }}
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex items-center justify-center min-w-[22px] h-[22px] rounded-md bg-rose-600 text-white font-black text-xs shadow-2xs">
+                                                        0
+                                                    </span>
+                                                @endif
+                                            </td>
+                                        @endif
+
+                                        <!-- Badge (B): 9 Consultas Puericultura -->
+                                        @if (in_array('practice_b', $visibleColumns, true))
+                                            <td class="py-3.5 px-2 text-center">
+                                                @if ($child['practice_b'] >= 9)
+                                                    <span class="inline-flex items-center justify-center min-w-[22px] h-[22px] rounded-md bg-emerald-600 text-white font-black text-xs shadow-2xs">
+                                                        {{ $child['practice_b'] }}
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex items-center justify-center min-w-[22px] h-[22px] rounded-md bg-rose-600 text-white font-black text-xs shadow-2xs">
+                                                        {{ $child['practice_b'] }}
+                                                    </span>
+                                                @endif
+                                            </td>
+                                        @endif
+
+                                        <!-- Badge (C): 9 Registros Peso e Altura -->
+                                        @if (in_array('practice_c', $visibleColumns, true))
+                                            <td class="py-3.5 px-2 text-center">
+                                                @if ($child['practice_c'] >= 9)
+                                                    <span class="inline-flex items-center justify-center min-w-[22px] h-[22px] rounded-md bg-emerald-600 text-white font-black text-xs shadow-2xs">
+                                                        {{ $child['practice_c'] }}
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex items-center justify-center min-w-[22px] h-[22px] rounded-md bg-rose-600 text-white font-black text-xs shadow-2xs">
+                                                        {{ $child['practice_c'] }}
+                                                    </span>
+                                                @endif
+                                            </td>
+                                        @endif
+
+                                        <!-- Badge (D): 2 Visitas Domiciliares ACS -->
+                                        @if (in_array('practice_d', $visibleColumns, true))
+                                            <td class="py-3.5 px-2 text-center">
+                                                @if ($child['practice_d'] >= 2)
+                                                    <span class="inline-flex items-center justify-center min-w-[22px] h-[22px] rounded-md bg-emerald-600 text-white font-black text-xs shadow-2xs">
+                                                        {{ $child['practice_d'] }}
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex items-center justify-center min-w-[22px] h-[22px] rounded-md bg-rose-600 text-white font-black text-xs shadow-2xs">
+                                                        {{ $child['practice_d'] }}
+                                                    </span>
+                                                @endif
+                                            </td>
+                                        @endif
+
+                                        <!-- Badge (E): Vacinas Completas -->
+                                        @if (in_array('practice_e', $visibleColumns, true))
+                                            <td class="py-3.5 px-2 text-center">
+                                                @if ($child['practice_e'] >= 10)
+                                                    <span class="inline-flex items-center justify-center min-w-[22px] h-[22px] rounded-md bg-emerald-600 text-white font-black text-xs shadow-2xs">
+                                                        {{ $child['practice_e'] }}
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex items-center justify-center min-w-[22px] h-[22px] rounded-md bg-rose-600 text-white font-black text-xs shadow-2xs">
+                                                        {{ $child['practice_e'] }}
+                                                    </span>
+                                                @endif
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('actions', $visibleColumns, true))
+                                            <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                                <button
+                                                    type="button"
+                                                    wire:click="openChildDetail({{ $child['id'] }})"
+                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-sky-700 hover:bg-sky-800 shadow-2xs transition cursor-pointer"
+                                                >
+                                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    </svg>
+                                                    <span>Detalhes</span>
+                                                </button>
+                                            </td>
+                                        @endif
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="{{ count($visibleColumns) }}" class="py-12 text-center text-slate-500">
+                                            <div class="space-y-2">
+                                                <p class="text-sm font-semibold">Nenhuma criança encontrada para os filtros aplicados.</p>
+                                                <button
+                                                    type="button"
+                                                    wire:click="clearAdvancedFilters"
+                                                    class="text-xs font-bold text-sky-700 hover:text-sky-900 underline cursor-pointer"
+                                                >
+                                                    Limpar filtros de busca
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginação Interativa -->
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border-t border-slate-150 bg-slate-50/50 text-xs text-slate-600">
+                        <div>
+                            Mostrando
+                            <span class="font-bold text-slate-800">{{ min($c2TotalItems, ($c2Page - 1) * $perPage + 1) }}</span>
+                            a
+                            <span class="font-bold text-slate-800">{{ min($c2TotalItems, $c2Page * $perPage) }}</span>
+                            de
+                            <span class="font-bold text-slate-800">{{ $c2TotalItems }}</span>
+                            crianças na coorte
+                        </div>
+
+                        @if ($c2TotalPages > 1)
+                            <div class="flex items-center gap-1">
+                                <button
+                                    type="button"
+                                    wire:click="gotoC2Page({{ $c2Page - 1 }})"
+                                    @disabled($c2Page <= 1)
+                                    class="px-2.5 py-1 rounded-lg border border-slate-300 bg-white font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-2xs"
+                                >
+                                    &larr; Anterior
+                                </button>
+
+                                @for ($p = max(1, $c2Page - 2); $p <= min($c2TotalPages, $c2Page + 2); $p++)
+                                    <button
+                                        type="button"
+                                        wire:click="gotoC2Page({{ $p }})"
+                                        class="px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer {{ $p === $c2Page ? 'bg-sky-600 text-white shadow-2xs' : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs' }}"
+                                    >
+                                        {{ $p }}
+                                    </button>
+                                @endfor
+
+                                <button
+                                    type="button"
+                                    wire:click="gotoC2Page({{ $c2Page + 1 }})"
+                                    @disabled($c2Page >= $c2TotalPages)
+                                    class="px-2.5 py-1 rounded-lg border border-slate-300 bg-white font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-2xs"
+                                >
+                                    Próximo &rarr;
+                                </button>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- MODAL DE BUSCA AVANÇADA (EXATAMENTE CONFORME AS IMAGENS 4 E 5) -->
+                @if ($showAdvancedModal)
+                    <div
+                        class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in"
+                        role="dialog"
+                        aria-modal="true"
+                    >
+                        <div
+                            class="relative w-full max-w-4xl rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 my-8"
+                            @click.outside="$wire.closeAdvancedSearch()"
+                        >
+                            <!-- Modal Header -->
+                            <div class="flex items-center justify-between border-b border-slate-150 pb-4">
+                                <h3 class="text-lg sm:text-xl font-bold text-slate-800 tracking-tight">
+                                    Busca Avançada
+                                </h3>
+                                <button
+                                    type="button"
+                                    wire:click="closeAdvancedSearch"
+                                    class="rounded-xl p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                                >
+                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Form Grid -->
+                            <div class="space-y-4 text-xs">
+                                <!-- Linha 1: Distrito, Unidade, Equipes, Microárea -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <div class="space-y-1">
+                                        <label class="font-semibold text-slate-700 block">Distrito</label>
+                                        <select
+                                            wire:model.live="advDistrict"
+                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-2xs"
+                                        >
+                                            <option value="">Selecione a opção desejada</option>
+                                            @foreach ($c2FilterOptions['districts'] as $dist)
+                                                <option value="{{ $dist }}">{{ $dist }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="space-y-1">
+                                        <label class="font-semibold text-slate-700 block">Unidade</label>
+                                        <select
+                                            wire:model.live="advFacility"
+                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-2xs"
+                                        >
+                                            <option value="">Selecione a opção desejada</option>
+                                            @foreach ($c2FilterOptions['facilities'] as $fac)
+                                                <option value="{{ $fac['cnes'] }}">{{ $fac['name'] }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="space-y-1">
+                                        <label class="font-semibold text-slate-700 block">Equipes</label>
+                                        <select
+                                            wire:model.live="advTeam"
+                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-2xs"
+                                        >
+                                            <option value="">Selecione a opção desejada</option>
+                                            @foreach ($c2FilterOptions['teams'] as $tm)
+                                                <option value="{{ $tm['ine'] }}">{{ $tm['name'] }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="space-y-1">
+                                        <label class="font-semibold text-slate-700 block">Microárea</label>
+                                        <input
+                                            type="text"
+                                            wire:model.live="advMicroarea"
+                                            placeholder="Ex: 01, 02..."
+                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-2xs"
+                                        />
+                                    </div>
+                                </div>
+
+                                <!-- Linha 2: Nome do Cidadão, CPF Cidadão, CNS Cidadão -->
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div class="space-y-1">
+                                        <label class="font-semibold text-slate-700 block">Nome do Cidadão</label>
+                                        <input
+                                            type="text"
+                                            wire:model.live="advCitizenName"
+                                            placeholder="Digite o nome da criança"
+                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-2xs"
+                                        />
+                                    </div>
+
+                                    <div class="space-y-1">
+                                        <label class="font-semibold text-slate-700 block">CPF Cidadão</label>
+                                        <input
+                                            type="text"
+                                            wire:model.live="advCitizenCpf"
+                                            placeholder="000.000.000-00"
+                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-2xs"
+                                        />
+                                    </div>
+
+                                    <div class="space-y-1">
+                                        <label class="font-semibold text-slate-700 block">CNS Cidadão</label>
+                                        <input
+                                            type="text"
+                                            wire:model.live="advCitizenCns"
+                                            placeholder="Cartão SUS"
+                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-2xs"
+                                        />
+                                    </div>
+                                </div>
+
+                                <!-- Linha 3: Nome da Mãe, Mês, Opção Mês -->
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div class="space-y-1">
+                                        <label class="font-semibold text-slate-700 block">Nome da Mãe</label>
+                                        <input
+                                            type="text"
+                                            wire:model.live="advMotherName"
+                                            placeholder="Digite o nome da mãe"
+                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-2xs"
+                                        />
+                                    </div>
+
+                                    <div class="space-y-1">
+                                        <label class="font-semibold text-slate-700 block">Mês</label>
+                                        <select
+                                            wire:model.live="advMonth"
+                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-2xs"
+                                        >
+                                            <option value="">09 / 2026 (Padrão)</option>
+                                            <option value="1">01 / Jan</option>
+                                            <option value="2">02 / Fev</option>
+                                            <option value="3">03 / Mar</option>
+                                            <option value="4">04 / Abr</option>
+                                            <option value="5">05 / Mai</option>
+                                            <option value="6">06 / Jun</option>
+                                            <option value="7">07 / Jul</option>
+                                            <option value="8">08 / Ago</option>
+                                            <option value="9">09 / Set</option>
+                                            <option value="10">10 / Out</option>
+                                            <option value="11">11 / Nov</option>
+                                            <option value="12">12 / Dez</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="space-y-1">
+                                        <label class="font-semibold text-slate-700 block">Opção Mês</label>
+                                        <select
+                                            wire:model.live="advMonthOption"
+                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-2xs"
+                                        >
+                                            <option value="selected_and_next">Mês Selecionado e Próximos</option>
+                                            <option value="only_selected">Apenas Mês Selecionado</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Linha 4: Quadrimestre, CNS Profissional, Nome Profissional, Raça/Cor -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <div class="space-y-1">
+                                        <label class="font-semibold text-slate-700 block">Quadrimestre</label>
+                                        <select
+                                            wire:model.live="advQuarter"
+                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-2xs"
+                                        >
+                                            <option value="">Selecione o Quadrimestre</option>
+                                            @foreach ($c2FilterOptions['quarters'] as $q)
+                                                <option value="{{ $q['value'] }}">{{ $q['label'] }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="space-y-1">
+                                        <label class="font-semibold text-slate-700 block">CNS Profissional (ACS/TACS)</label>
+                                        <input
+                                            type="text"
+                                            wire:model.live="advProfessionalCns"
+                                            placeholder="Cartão SUS do profissional"
+                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-2xs"
+                                        />
+                                    </div>
+
+                                    <div class="space-y-1">
+                                        <label class="font-semibold text-slate-700 block">Nome do Profissional (ACS/TACS)</label>
+                                        <input
+                                            type="text"
+                                            wire:model.live="advProfessionalName"
+                                            placeholder="Nome do profissional"
+                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-2xs"
+                                        />
+                                    </div>
+
+                                    <div class="space-y-1">
+                                        <label class="font-semibold text-slate-700 block">Raça/Cor</label>
+                                        <select
+                                            wire:model.live="advRaceColor"
+                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-2xs"
+                                        >
+                                            <option value="">Selecione as opções desejadas</option>
+                                            @foreach ($c2FilterOptions['races'] as $r)
+                                                <option value="{{ $r }}">{{ $r }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Linha 5: Idade (meses) com Chips de atalho e Seletor -->
+                                <div class="space-y-2 border-t border-slate-150 pt-3">
+                                    <label class="font-semibold text-slate-700 block">Idade (meses)</label>
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <button
+                                            type="button"
+                                            wire:click="setAgeGroup('0-6')"
+                                            class="px-3.5 py-1.5 rounded-xl font-semibold transition cursor-pointer {{ $advAgeGroup === '0-6' ? 'bg-sky-600 text-white shadow-2xs' : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50' }}"
+                                        >
+                                            0-6 meses
+                                        </button>
+                                        <button
+                                            type="button"
+                                            wire:click="setAgeGroup('7-12')"
+                                            class="px-3.5 py-1.5 rounded-xl font-semibold transition cursor-pointer {{ $advAgeGroup === '7-12' ? 'bg-sky-600 text-white shadow-2xs' : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50' }}"
+                                        >
+                                            7-12 meses
+                                        </button>
+                                        <button
+                                            type="button"
+                                            wire:click="setAgeGroup('13-24')"
+                                            class="px-3.5 py-1.5 rounded-xl font-semibold transition cursor-pointer {{ $advAgeGroup === '13-24' ? 'bg-sky-600 text-white shadow-2xs' : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50' }}"
+                                        >
+                                            13-24 meses
+                                        </button>
+
+                                        <select
+                                            wire:model.live="advAgeGroup"
+                                            class="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-2xs"
+                                        >
+                                            <option value="">Selecione os meses</option>
+                                            @for ($m = 1; $m <= 24; $m++)
+                                                <option value="{{ $m }}">{{ $m }} {{ $m === 1 ? 'mês' : 'meses' }}</option>
+                                            @endfor
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Linha 6: Filtros Booleanos com Botões Toggle SIM / NÃO (Imagens 4 e 5) -->
+                                <div class="border-t border-slate-150 pt-3 space-y-4">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                        <!-- MICI Atualizada? -->
+                                        <div class="space-y-1.5">
+                                            <div class="flex items-center gap-1 font-semibold text-slate-700">
+                                                <span>MICI Atualizada?</span>
+                                                <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold cursor-help" title="Cadastro Individual atualizado há menos de 24 meses">i</span>
+                                            </div>
+                                            <div class="flex items-center rounded-xl border border-slate-300 p-0.5 bg-slate-50 w-full">
+                                                <button
+                                                    type="button"
+                                                    wire:click="toggleBooleanFilter('advMici', 'sim')"
+                                                    class="flex-1 py-1 rounded-lg font-bold text-center transition cursor-pointer {{ $advMici === 'sim' ? 'bg-sky-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                                                >
+                                                    SIM
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    wire:click="toggleBooleanFilter('advMici', 'nao')"
+                                                    class="flex-1 py-1 rounded-lg font-bold text-center transition cursor-pointer {{ $advMici === 'nao' ? 'bg-rose-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                                                >
+                                                    NÃO
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- MICDT Atualizada? -->
+                                        <div class="space-y-1.5">
+                                            <div class="flex items-center gap-1 font-semibold text-slate-700">
+                                                <span>MICDT Atualizada?</span>
+                                                <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Cadastro Domiciliar e Territorial atualizado há menos de 24 meses">i</span>
+                                            </div>
+                                            <div class="flex items-center rounded-xl border border-slate-300 p-0.5 bg-slate-50 w-full">
+                                                <button
+                                                    type="button"
+                                                    wire:click="toggleBooleanFilter('advMicdt', 'sim')"
+                                                    class="flex-1 py-1 rounded-lg font-bold text-center transition cursor-pointer {{ $advMicdt === 'sim' ? 'bg-sky-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                                                >
+                                                    SIM
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    wire:click="toggleBooleanFilter('advMicdt', 'nao')"
+                                                    class="flex-1 py-1 rounded-lg font-bold text-center transition cursor-pointer {{ $advMicdt === 'nao' ? 'bg-rose-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                                                >
+                                                    NÃO
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Pessoa Acompanhada? -->
+                                        <div class="space-y-1.5">
+                                            <div class="flex items-center gap-1 font-semibold text-slate-700">
+                                                <span>Pessoa Acompanhada?</span>
+                                                <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Cidadão com acompanhamento ativo no território">i</span>
+                                            </div>
+                                            <div class="flex items-center rounded-xl border border-slate-300 p-0.5 bg-slate-50 w-full">
+                                                <button
+                                                    type="button"
+                                                    wire:click="toggleBooleanFilter('advAccompanied', 'sim')"
+                                                    class="flex-1 py-1 rounded-lg font-bold text-center transition cursor-pointer {{ $advAccompanied === 'sim' ? 'bg-sky-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                                                >
+                                                    SIM
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    wire:click="toggleBooleanFilter('advAccompanied', 'nao')"
+                                                    class="flex-1 py-1 rounded-lg font-bold text-center transition cursor-pointer {{ $advAccompanied === 'nao' ? 'bg-rose-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                                                >
+                                                    NÃO
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Consulta até 30º dia de vida (A) -->
+                                        <div class="space-y-1.5">
+                                            <div class="flex items-center gap-1 font-semibold text-slate-700">
+                                                <span>Consulta até 30º dia de vida (A)</span>
+                                            </div>
+                                            <div class="flex items-center rounded-xl border border-slate-300 p-0.5 bg-slate-50 w-full">
+                                                <button
+                                                    type="button"
+                                                    wire:click="toggleBooleanFilter('advPracticeA', 'sim')"
+                                                    class="flex-1 py-1 rounded-lg font-bold text-center transition cursor-pointer {{ $advPracticeA === 'sim' ? 'bg-emerald-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                                                >
+                                                    SIM
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    wire:click="toggleBooleanFilter('advPracticeA', 'nao')"
+                                                    class="flex-1 py-1 rounded-lg font-bold text-center transition cursor-pointer {{ $advPracticeA === 'nao' ? 'bg-rose-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                                                >
+                                                    NÃO
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                        <!-- Consultas (B) -->
+                                        <div class="space-y-1.5">
+                                            <div class="flex items-center gap-1 font-semibold text-slate-700">
+                                                <span>Consultas (B)</span>
+                                            </div>
+                                            <div class="flex items-center rounded-xl border border-slate-300 p-0.5 bg-slate-50 w-full">
+                                                <button
+                                                    type="button"
+                                                    wire:click="toggleBooleanFilter('advPracticeB', 'sim')"
+                                                    class="flex-1 py-1 rounded-lg font-bold text-center transition cursor-pointer {{ $advPracticeB === 'sim' ? 'bg-emerald-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                                                >
+                                                    SIM
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    wire:click="toggleBooleanFilter('advPracticeB', 'nao')"
+                                                    class="flex-1 py-1 rounded-lg font-bold text-center transition cursor-pointer {{ $advPracticeB === 'nao' ? 'bg-rose-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                                                >
+                                                    NÃO
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Peso e Altura (C) -->
+                                        <div class="space-y-1.5">
+                                            <div class="flex items-center gap-1 font-semibold text-slate-700">
+                                                <span>Peso e Altura (C)</span>
+                                            </div>
+                                            <div class="flex items-center rounded-xl border border-slate-300 p-0.5 bg-slate-50 w-full">
+                                                <button
+                                                    type="button"
+                                                    wire:click="toggleBooleanFilter('advPracticeC', 'sim')"
+                                                    class="flex-1 py-1 rounded-lg font-bold text-center transition cursor-pointer {{ $advPracticeC === 'sim' ? 'bg-emerald-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                                                >
+                                                    SIM
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    wire:click="toggleBooleanFilter('advPracticeC', 'nao')"
+                                                    class="flex-1 py-1 rounded-lg font-bold text-center transition cursor-pointer {{ $advPracticeC === 'nao' ? 'bg-rose-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                                                >
+                                                    NÃO
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Visitas (D) -->
+                                        <div class="space-y-1.5">
+                                            <div class="flex items-center gap-1 font-semibold text-slate-700">
+                                                <span>Visitas (D)</span>
+                                            </div>
+                                            <div class="flex items-center rounded-xl border border-slate-300 p-0.5 bg-slate-50 w-full">
+                                                <button
+                                                    type="button"
+                                                    wire:click="toggleBooleanFilter('advPracticeD', 'sim')"
+                                                    class="flex-1 py-1 rounded-lg font-bold text-center transition cursor-pointer {{ $advPracticeD === 'sim' ? 'bg-emerald-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                                                >
+                                                    SIM
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    wire:click="toggleBooleanFilter('advPracticeD', 'nao')"
+                                                    class="flex-1 py-1 rounded-lg font-bold text-center transition cursor-pointer {{ $advPracticeD === 'nao' ? 'bg-rose-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                                                >
+                                                    NÃO
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Vacinas (E) -->
+                                        <div class="space-y-1.5">
+                                            <div class="flex items-center gap-1 font-semibold text-slate-700">
+                                                <span>Vacinas (E)</span>
+                                            </div>
+                                            <div class="flex items-center rounded-xl border border-slate-300 p-0.5 bg-slate-50 w-full">
+                                                <button
+                                                    type="button"
+                                                    wire:click="toggleBooleanFilter('advPracticeE', 'sim')"
+                                                    class="flex-1 py-1 rounded-lg font-bold text-center transition cursor-pointer {{ $advPracticeE === 'sim' ? 'bg-emerald-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                                                >
+                                                    SIM
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    wire:click="toggleBooleanFilter('advPracticeE', 'nao')"
+                                                    class="flex-1 py-1 rounded-lg font-bold text-center transition cursor-pointer {{ $advPracticeE === 'nao' ? 'bg-rose-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                                                >
+                                                    NÃO
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Modal Footer -->
+                            <div class="flex items-center justify-end gap-3 border-t border-slate-150 pt-4">
+                                <button
+                                    type="button"
+                                    wire:click="closeAdvancedSearch"
+                                    class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 transition cursor-pointer shadow-2xs"
+                                >
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    <span>Fechar</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    wire:click="clearAdvancedFilters"
+                                    class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition cursor-pointer"
+                                >
+                                    <span>Limpar</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    wire:click="applyAdvancedSearch"
+                                    class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition cursor-pointer"
+                                >
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                    <span>Enviar</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- MODAL DE DETALHES CLÍNICOS DA CRIANÇA / BUSCA ATIVA -->
+                @if ($showDetailModal && $selectedChild)
+                    <div
+                        class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in"
+                        role="dialog"
+                        aria-modal="true"
+                    >
+                        <div
+                            class="relative w-full max-w-3xl rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 my-8"
+                            @click.outside="$wire.closeChildDetail()"
+                        >
+                            <!-- Header -->
+                            <div class="flex items-start justify-between border-b border-slate-150 pb-4">
+                                <div class="space-y-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="rounded-xl bg-sky-100 text-sky-800 border border-sky-200 px-2.5 py-0.5 text-[10px] font-bold font-mono">
+                                            ID #{{ $selectedChild['id'] }}
+                                        </span>
+                                        <span class="rounded-full bg-slate-100 text-slate-700 px-2.5 py-0.5 text-[10px] font-bold">
+                                            {{ $selectedChild['age_months'] }} meses de vida
+                                        </span>
+                                    </div>
+                                    <h3 class="text-xl font-black text-slate-900 tracking-tight">
+                                        {{ $selectedChild['name'] }}
+                                    </h3>
+                                    <p class="text-xs text-slate-500">
+                                        Mãe / Responsável: <strong class="text-slate-700">{{ $selectedChild['mother_name'] }}</strong>
+                                    </p>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    wire:click="closeChildDetail"
+                                    class="rounded-xl p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                                >
+                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Cartões de Identificação e Vínculo -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                                <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 space-y-2">
+                                    <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Dados do Cidadão</h4>
+                                    <div class="space-y-1.5 text-slate-700">
+                                        <div><span class="font-semibold text-slate-500">Data de Nascimento:</span> {{ \Carbon\Carbon::parse($selectedChild['birth_date'])->format('d/m/Y') }}</div>
+                                        <div><span class="font-semibold text-slate-500">CNS:</span> <span class="font-mono">{{ $selectedChild['cns'] }}</span></div>
+                                        <div><span class="font-semibold text-slate-500">CPF:</span> <span class="font-mono">{{ $selectedChild['cpf'] }}</span></div>
+                                        <div><span class="font-semibold text-slate-500">Raça / Cor:</span> {{ $selectedChild['race_color'] }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 space-y-2">
+                                    <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Vínculo Territorial</h4>
+                                    <div class="space-y-1.5 text-slate-700">
+                                        <div><span class="font-semibold text-slate-500">Unidade (CNES):</span> {{ $selectedChild['facility_name'] }} ({{ $selectedChild['cnes'] }})</div>
+                                        <div><span class="font-semibold text-slate-500">Equipe (INE):</span> {{ $selectedChild['team_name'] }} ({{ $selectedChild['ine'] }})</div>
+                                        <div><span class="font-semibold text-slate-500">Microárea:</span> Microárea {{ $selectedChild['microarea'] }} ({{ $selectedChild['district'] }})</div>
+                                        <div><span class="font-semibold text-slate-500">ACS Responsável:</span> {{ $selectedChild['professional_name'] }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Auditoria das 5 Boas Práticas Clínicas (A a E) -->
+                            <div class="space-y-3">
+                                <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                                    Status das 5 Boas Práticas Clínicas (Nota Metodológica C2 · Portaria 3.493/2024)
+                                </h4>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                    <!-- Prática A -->
+                                    <div class="rounded-2xl border p-3.5 {{ $selectedChild['practice_a'] >= 1 ? 'border-emerald-200 bg-emerald-50/60' : 'border-rose-200 bg-rose-50/60' }} space-y-1">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-bold {{ $selectedChild['practice_a'] >= 1 ? 'text-emerald-950' : 'text-rose-950' }}">
+                                                (A) Consulta até 30º dia de vida
+                                            </span>
+                                            <span class="font-black px-2 py-0.5 rounded-md text-[11px] {{ $selectedChild['practice_a'] >= 1 ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white' }}">
+                                                {{ $selectedChild['practice_a'] }} {{ $selectedChild['practice_a'] == 1 ? 'consulta' : 'consultas' }}
+                                            </span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-600 leading-relaxed">
+                                            {{ $selectedChild['practice_a'] >= 1 ? 'Prática cumprida. Primeira consulta de puericultura realizada dentro da janela preconizada de 30 dias.' : 'Pendente. Necessário verificar o registro da consulta neonatal no prontuário eletrônico e-SUS PEC.' }}
+                                        </p>
+                                    </div>
+
+                                    <!-- Prática B -->
+                                    <div class="rounded-2xl border p-3.5 {{ $selectedChild['practice_b'] >= 9 ? 'border-emerald-200 bg-emerald-50/60' : 'border-rose-200 bg-rose-50/60' }} space-y-1">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-bold {{ $selectedChild['practice_b'] >= 9 ? 'text-emerald-950' : 'text-rose-950' }}">
+                                                (B) Ao menos 9 Consultas Puericultura
+                                            </span>
+                                            <span class="font-black px-2 py-0.5 rounded-md text-[11px] {{ $selectedChild['practice_b'] >= 9 ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white' }}">
+                                                {{ $selectedChild['practice_b'] }} / 9 consultas
+                                            </span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-600 leading-relaxed">
+                                            {{ $selectedChild['practice_b'] >= 9 ? 'Meta atingida. A criança possui 9 ou mais consultas médicas/enfermagem de puericultura.' : 'Acompanhamento em curso: agendar próximas consultas programadas conforme o calendário oficial.' }}
+                                        </p>
+                                    </div>
+
+                                    <!-- Prática C -->
+                                    <div class="rounded-2xl border p-3.5 {{ $selectedChild['practice_c'] >= 9 ? 'border-emerald-200 bg-emerald-50/60' : 'border-rose-200 bg-rose-50/60' }} space-y-1">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-bold {{ $selectedChild['practice_c'] >= 9 ? 'text-emerald-950' : 'text-rose-950' }}">
+                                                (C) 9 Registros de Peso e Altura Simultâneos
+                                            </span>
+                                            <span class="font-black px-2 py-0.5 rounded-md text-[11px] {{ $selectedChild['practice_c'] >= 9 ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white' }}">
+                                                {{ $selectedChild['practice_c'] }} / 9 medições
+                                            </span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-600 leading-relaxed">
+                                            {{ $selectedChild['practice_c'] >= 9 ? 'Meta atingida. Peso e altura aferidos no mesmo dia nas consultas de puericultura.' : 'Atenção: sempre registrar peso e altura juntos na mesma data para pontuar na curva da OMS.' }}
+                                        </p>
+                                    </div>
+
+                                    <!-- Prática D -->
+                                    <div class="rounded-2xl border p-3.5 {{ $selectedChild['practice_d'] >= 2 ? 'border-emerald-200 bg-emerald-50/60' : 'border-rose-200 bg-rose-50/60' }} space-y-1">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-bold {{ $selectedChild['practice_d'] >= 2 ? 'text-emerald-950' : 'text-rose-950' }}">
+                                                (D) 2 Visitas Domiciliares do ACS
+                                            </span>
+                                            <span class="font-black px-2 py-0.5 rounded-md text-[11px] {{ $selectedChild['practice_d'] >= 2 ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white' }}">
+                                                {{ $selectedChild['practice_d'] }} / 2 visitas
+                                            </span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-600 leading-relaxed">
+                                            {{ $selectedChild['practice_d'] >= 2 ? 'Meta atingida. O ACS realizou as visitas domiciliares recomendadas até os 6 meses.' : 'Pendente: acionar o ACS do microterritório para realizar visita domiciliar presencial.' }}
+                                        </p>
+                                    </div>
+
+                                    <!-- Prática E -->
+                                    <div class="sm:col-span-2 rounded-2xl border p-3.5 {{ $selectedChild['practice_e'] >= 10 ? 'border-emerald-200 bg-emerald-50/60' : 'border-rose-200 bg-rose-50/60' }} space-y-1">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-bold {{ $selectedChild['practice_e'] >= 10 ? 'text-emerald-950' : 'text-rose-950' }}">
+                                                (E) Esquema Vacinal Recomendado (Penta, VIP, Pneumo 10v e Tríplice Viral)
+                                            </span>
+                                            <span class="font-black px-2.5 py-0.5 rounded-md text-[11px] {{ $selectedChild['practice_e'] >= 10 ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white' }}">
+                                                {{ $selectedChild['practice_e'] }} doses administradas
+                                            </span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-600 leading-relaxed">
+                                            {{ $selectedChild['practice_e'] >= 10 ? 'Calendário vacinal completo com todos os imunobiológicos administrados e registrados na RNDS/PEC.' : 'Atenção vacinal: convocar os responsáveis à sala de vacina da UBS para atualização imediata da caderneta de vacinação.' }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Footer do Modal -->
+                            <div class="flex items-center justify-between border-t border-slate-150 pt-4">
+                                <span class="text-[11px] text-slate-400">
+                                    Mês de conclusão da coorte: <strong class="text-slate-600">{{ $selectedChild['month_ref'] }}</strong>
+                                </span>
+
+                                <button
+                                    type="button"
+                                    wire:click="closeChildDetail"
+                                    class="px-5 py-2 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition cursor-pointer"
+                                >
+                                    Fechar Ficha
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                @endif
             </div>
         @else
             <!-- BUSCA ATIVA PADRÃO PARA OS DEMAIS INDICADORES (C3 A C7) -->

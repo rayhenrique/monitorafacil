@@ -4,6 +4,19 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.13.0] - 18/09/2026
+
+### 👶 Busca Ativa e Boas Práticas Infantis no Indicador C2
+- Refinamento completo da aba de Busca Ativa do Indicador C2 (Desenvolvimento Infantil), com banner de dados gerais, lista nominal da coorte com proteção LGPD, colunas personalizáveis, modal de busca avançada e auditoria clínica individual.
+- **Banner de Síntese**: Card do mês (`2026 / M9`), indicador do denominador da coorte (`1.016` crianças) e acompanhamento das 5 boas práticas clínicas: (A) Consulta até 30º dia de vida: `775 (76.28%)`, (B) 9 Consultas de Puericultura: `610 (60.04%)`, (C) Peso e Altura Simultâneos: `477 (46.95%)`, (D) Visitas Domiciliares do ACS: `772 (75.98%)`, (E) Esquema Vacinal Completo: `374 (36.81%)`.
+- **Filtros Rápidos no Topo**: Busca imediata por CNS, CPF, Nome da Criança, CNES da Unidade, INE da Equipe e seletor de paginação (10, 15, 30, 50 ou 100 itens).
+- **Personalização de Colunas**: Dropdown interativo `Colunas visíveis: X itens selecionados ⌄` com seleção por checkbox de 19 colunas e botões para selecionar todas ou restaurar padrão.
+- **Privacidade e LGPD**: Mascaramento visual de CNS e CPF com botões Alpine.js para desmascaramento instantâneo e cópia de 1 clique para a área de transferência.
+- **Modal de Busca Avançada**: Filtros territoriais (Distrito, UBS, eSF, Microárea), do cidadão (Nome, CPF, CNS, Nome da Mãe), profissional ACS (CNS e Nome), Raça/Cor, Faixa etária em meses (com chips 0-6m, 7-12m, 13-24m) e botões toggle SIM/NÃO para MICI, MICDT, Acompanhada e Práticas A a E.
+- **Prontuário e Auditoria Clínica**: Modal de detalhes com perfil completo da criança, vínculo da UBS/eSF/ACS e avaliação de cumprimento das metas preconizadas pela Portaria 3.493/2024.
+
+---
+
 ## [v1.12.0] - 18/09/2026
 
 ### 🧭 Inventário seguro do DW PEC

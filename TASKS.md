@@ -126,3 +126,13 @@
   - [ ] Implementar produtos de vínculo, Saúde Bucal, e-Multi, vigilância e vacinação infantil.
   - [ ] Validar desempenho, idempotência, correções tardias e preservação do último lote válido.
   - [ ] Comparar amostras por equipe e período com Siaps antes de classificar qualquer resultado como homologado.
+
+- [x] **Fase 17: Refinamento do Módulo C2 - Busca Ativa & Boas Práticas Infantis**
+  - [x] Banner de dados gerais com Mês (`2026 / M9`), 5 Boas Práticas Clínicas (A a E) com percentuais e Denominador oficial (`1.016`).
+  - [x] Barra de filtros rápidos imediatos (CNS, CPF, Nome, CNES, INE) e seletor de paginação.
+  - [x] Personalização de colunas visíveis por checkbox (`Colunas visíveis: X itens selecionados ⌄`).
+  - [x] Lista nominal da coorte com máscara LGPD para CNS/CPF e cópia instantânea em 1 clique.
+  - [x] Modal de Busca Avançada completo com filtros territoriais, faixas etárias (chips) e toggles booleanos SIM/NÃO.
+  - [x] Modal de prontuário e auditoria clínica detalhada das cinco práticas para cada criança.
+  - [x] Testes de integração cobrindo o fluxo completo da Busca Ativa C2.
+
