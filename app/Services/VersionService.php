@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.22.0';
+    public const CURRENT_VERSION = 'v1.22.1';
 
     public const CURRENT_RELEASE_DATE = '19/09/2026';
 
@@ -61,9 +61,21 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.22.0',
+                'version' => 'v1.22.1',
                 'date' => '19/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Janela de Acompanhamento de 12 Meses no CVAT',
+                'summary' => 'Ajuste da regra de negócio para a Dimensão Acompanhamento: janela de 12 meses (365 dias) contados do encerramento do quadrimestre avaliado para visitas do ACS e atendimentos.',
+                'highlights' => [
+                    ['type' => 'regra', 'text' => 'Acompanhamento territorial parametrizado para janela de 12 meses (365 dias) contados do último dia do quadrimestre avaliado (30/04, 31/08 ou 31/12).'],
+                    ['type' => 'melhoria', 'text' => 'Filtro temporal estrito de visitas e consultas no PostgreSQL até o encerramento do quadrimestre avaliado.'],
+                    ['type' => 'melhoria', 'text' => 'Cálculo de idade no último dia do quadrimestre para classificação precisa dos grupos de vulnerabilidade.'],
+                ],
+            ],
+            [
+                'version' => 'v1.22.0',
+                'date' => '19/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Extração Real Completa do DW e-SUS PEC (Relação Nominal e Métricas)',
                 'summary' => 'Motor de extração massiva e direta do PostgreSQL do e-SUS PEC com cursor seek, cruzamento de fichas individuais (MICI), domiciliares (MICDT), visitas de ACS e atendimentos clínicos.',
                 'highlights' => [

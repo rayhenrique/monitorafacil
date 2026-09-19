@@ -270,8 +270,18 @@ class CvatNominalDwService
         $lastId = 0;
         $batchSize = 1500;
         $totalProcessed = 0;
-        $cutoffAccompanied = now()->subDays(120)->toDateString();
-        $cutoffMici = now()->subMonths(24)->toDateString();
+
+        // Define o encerramento oficial do quadrimestre avaliado (Q1: 30/04, Q2: 31/08, Q3: 31/12)
+        $quarter = (int) ceil(max(1, min(12, $month)) / 4);
+        $quarterEndMonth = $quarter * 4;
+        $quarterEndDate = Carbon::create($year, $quarterEndMonth, 1)->endOfMonth()->startOfDay();
+        $quarterEndStr = $quarterEndDate->toDateString();
+
+        // Regra Oficial do CVAT:
+        // - Acompanhamento Territorial: últimos 12 meses (365 dias) contados do último dia do quadrimestre avaliado
+        // - Atualização Cadastral (MICI/MICDT): últimos 24 meses contados do último dia do quadrimestre avaliado
+        $cutoffAccompanied = $quarterEndDate->copy()->subDays(365)->toDateString();
+        $cutoffMici = $quarterEndDate->copy()->subMonths(24)->toDateString();
 
         while (true) {
             $rows = $connection->select(<<<SQL
@@ -294,7 +304,7 @@ class CvatNominalDwService
 
             $marks = implode(',', array_fill(0, count($batchIds), '?'));
 
-            // 1. Informações de Cadastro Individual (MICI) e Domiciliar (MICDT)
+            // 1. Informações de Cadastro Individual (MICI) e Domiciliar (MICDT) até o fim do período avaliado
             $cadMap = [];
             $cadRows = $this->selectOptional($connection, <<<SQL
                 SELECT
@@ -306,8 +316,9 @@ class CvatNominalDwService
                 FROM tb_fat_cad_individual fci
                 JOIN tb_dim_tempo dt ON dt.co_seq_dim_tempo = fci.co_dim_tempo
                 WHERE fci.co_fat_cidadao_pec IN ({$marks})
+                  AND dt.dt_registro <= ?
                 GROUP BY fci.co_fat_cidadao_pec
-            SQL, $batchIds);
+            SQL, [...$batchIds, $quarterEndStr]);
 
             foreach ($cadRows as $cRow) {
                 $cadMap[(int) $cRow->id] = [
@@ -318,7 +329,7 @@ class CvatNominalDwService
                 ];
             }
 
-            // 2. Última Visita Domiciliar do ACS
+            // 2. Última Visita Domiciliar do ACS até o fim do período avaliado
             $visitMap = [];
             $visitRows = $this->selectOptional($connection, <<<SQL
                 SELECT
@@ -327,14 +338,15 @@ class CvatNominalDwService
                 FROM tb_fat_visita_domiciliar vd
                 JOIN tb_dim_tempo dt ON dt.co_seq_dim_tempo = vd.co_dim_tempo
                 WHERE vd.co_fat_cidadao_pec IN ({$marks})
+                  AND dt.dt_registro <= ?
                 GROUP BY vd.co_fat_cidadao_pec
-            SQL, $batchIds);
+            SQL, [...$batchIds, $quarterEndStr]);
 
             foreach ($visitRows as $vRow) {
                 $visitMap[(int) $vRow->id] = (string) $vRow->last_visit_date;
             }
 
-            // 3. Último Atendimento Individual (Consulta)
+            // 3. Último Atendimento Individual (Consulta) até o fim do período avaliado
             $atdMap = [];
             $atdRows = $this->selectOptional($connection, <<<SQL
                 SELECT
@@ -343,8 +355,9 @@ class CvatNominalDwService
                 FROM tb_fat_atendimento_individual ai
                 JOIN tb_dim_tempo dt ON dt.co_seq_dim_tempo = ai.co_dim_tempo
                 WHERE ai.co_fat_cidadao_pec IN ({$marks})
+                  AND dt.dt_registro <= ?
                 GROUP BY ai.co_fat_cidadao_pec
-            SQL, $batchIds);
+            SQL, [...$batchIds, $quarterEndStr]);
 
             foreach ($atdRows as $aRow) {
                 $atdMap[(int) $aRow->id] = (string) $aRow->last_atd_date;
@@ -359,7 +372,7 @@ class CvatNominalDwService
                 $age = 0;
                 if ($birthDate) {
                     try {
-                        $age = Carbon::parse($birthDate)->age;
+                        $age = Carbon::parse($birthDate)->diffInYears($quarterEndDate);
                     } catch (Throwable) {
                         $age = 0;
                     }
@@ -375,7 +388,9 @@ class CvatNominalDwService
                 $lastVisit = $visitMap[$id] ?? null;
                 $lastAtd = $atdMap[$id] ?? null;
                 $lastContact = $lastVisit && $lastAtd ? max($lastVisit, $lastAtd) : ($lastVisit ?? $lastAtd);
-                $isAccompanied = $lastContact !== null && $lastContact >= $cutoffAccompanied;
+                
+                // Acompanhado: visita ou consulta nos últimos 12 meses (365 dias) até o fim do quadrimestre
+                $isAccompanied = $lastContact !== null && $lastContact >= $cutoffAccompanied && $lastContact <= $quarterEndStr;
 
                 $ine = trim((string) ($row->ine ?? ''));
                 $isLinked = $ine !== '';

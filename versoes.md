@@ -4,6 +4,19 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.22.1] - 19/09/2026
+
+### ⏱️ Janela de Acompanhamento de 12 Meses no CVAT
+- **Ajuste da Regra de Acompanhamento Territorial (Dimensão Acompanhamento)**:
+  - Parametrizada a janela móvel para **12 meses (365 dias)** contados regressivamente a partir do último dia do quadrimestre avaliado (30/04 para Q1, 31/08 para Q2 e 31/12 para Q3).
+  - Qualquer cidadão com registro de visita domiciliar de ACS (`tb_fat_visita_domiciliar`) ou atendimento clínico individual (`tb_fat_atendimento_individual`) dentro dessa janela de 365 dias é classificado como acompanhado (`is_accompanied = true`).
+- **Filtro Temporal Estrito no PostgreSQL**:
+  - As consultas em lote no PostgreSQL do PEC filtram explicitamente eventos até a data final do quadrimestre avaliado (`dt_registro <= $quarterEndDate`), impedindo que registros futuros distorçam o cálculo quadrimestral.
+- **Idade Referenciada ao Fim do Período**:
+  - A idade de cada cidadão é calculada com base na data final do quadrimestre avaliado (`diffInYears($quarterEndDate)`), assegurando o correto enquadramento nos critérios de vulnerabilidade de crianças ($< 6$ anos) e idosos ($\ge 60$ anos).
+
+---
+
 ## [v1.22.0] - 19/09/2026
 
 ### 🚀 Extração Real Completa do DW e-SUS PEC (Relação Nominal e Métricas)

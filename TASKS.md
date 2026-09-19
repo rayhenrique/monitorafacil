@@ -229,3 +229,9 @@
   - [x] Comando `php artisan cvat:sync-nominal` e botão "Processar Vínculo e Acompanhamento" com relatório e progresso em tempo real.
   - [x] Diagnóstico resiliente de conectividade com fallback explicativo para execução fora da rede do PEC.
 
+- [x] **Fase 28: Janela de 12 Meses no Acompanhamento Territorial (v1.22.1)**
+  - [x] Ajuste da regra de negócio para a Dimensão Acompanhamento: janela de 12 meses (365 dias) contados regressivamente do último dia do quadrimestre avaliado (30/04, 31/08 ou 31/12).
+  - [x] Filtragem temporal no PostgreSQL limitando registros até a data de encerramento do período quadrimestral.
+  - [x] Cálculo de idade dos cidadãos com base na data final do quadrimestre para correta classificação etária.
+
+
