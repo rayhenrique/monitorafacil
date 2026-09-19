@@ -164,5 +164,5 @@
   - [x] Integração Centralizada no Processamento de Dados (`EsusDataProcessingService`, `DataProcessing`): Escopo `--scope=c3` e botão "Processar C3 & Lista Gestantes".
   - [x] Frontend Livewire (`IndicatorDetail`): Cabeçalho C3, decomposição das 11 práticas, evolução M1 a M4, desempenho por equipe, tabela interativa com seletor de colunas, modal de busca avançada e modal de auditoria clínica.
   - [x] Testes de Feature completos (`tests/Feature/FamilyHealthC3Test.php`) com 100% de aprovação.
-  - [x] **Patch v1.16.1**: Correção do erro `SQLSTATE[42P01] tb_dim_cid10 does not exist` via detecção dinâmica (`information_schema`) da tabela CID-10 (`tb_dim_cid` ou `tb_dim_cid10`), PK, coluna de código e FK em `tb_fat_atd_ind_problemas`. Fallback seguro omitindo JOIN CID quando a tabela não existir.
+  - [x] **Patch v1.16.1**: Detecção dinâmica (`information_schema`) de todas as tabelas/colunas que variam entre versões do DW PEC: `tb_dim_cid`/`tb_dim_cid10`, `nu_idade_gestacional`/`nu_idade_gestacional_semanas`, `dt_ultima_menstruacao`/`co_dim_tempo_dum`, `nu_pressao_sistolica`/`nu_medicao_pressao_sistolica`. Corrige `SQLSTATE[42P01]` e `SQLSTATE[42703]` em produção.
 

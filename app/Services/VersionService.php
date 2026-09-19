@@ -64,12 +64,13 @@ class VersionService
                 'version' => 'v1.16.1',
                 'date' => '19/09/2026',
                 'badge' => 'Versão Atual',
-                'title' => 'Compatibilidade Dinâmica com tb_dim_cid no DW e-SUS PEC',
-                'summary' => 'Correção crítica na extração do C3: a tabela de dimensão CID-10 no DW oficial do PEC é tb_dim_cid (PK co_seq_dim_cid, coluna nu_cid), e não tb_dim_cid10. Implementada detecção dinâmica via information_schema para garantir compatibilidade com qualquer versão do PEC.',
+                'title' => 'Compatibilidade Dinâmica com DW e-SUS PEC (Colunas e Tabelas)',
+                'summary' => 'Correção crítica na extração do C3: detecção dinâmica via information_schema de todas as tabelas e colunas que variam entre versões do DW PEC — tb_dim_cid/tb_dim_cid10, nu_idade_gestacional/nu_idade_gestacional_semanas, dt_ultima_menstruacao/co_dim_tempo_dum, nu_pressao_sistolica/nu_medicao_pressao_sistolica.',
                 'highlights' => [
-                    ['type' => 'correcao', 'text' => 'Correção do erro SQLSTATE[42P01] "relation tb_dim_cid10 does not exist" na extração do C3 via DW PEC.'],
-                    ['type' => 'correcao', 'text' => 'Detecção dinâmica via information_schema da tabela (tb_dim_cid ou tb_dim_cid10), PK (co_seq_dim_cid), coluna de código (nu_cid) e FK (co_dim_cid) para compatibilidade com múltiplas versões do DW e-SUS PEC.'],
-                    ['type' => 'melhoria', 'text' => 'Fallback seguro: se nenhuma tabela CID existir no PEC, a query omite o JOIN e filtra gestantes apenas por CIAP, DUM e idade gestacional.'],
+                    ['type' => 'correcao', 'text' => 'Correção do erro SQLSTATE[42P01] "relation tb_dim_cid10 does not exist" — tabela oficial é tb_dim_cid (PK co_seq_dim_cid, coluna nu_cid).'],
+                    ['type' => 'correcao', 'text' => 'Correção do erro SQLSTATE[42703] "column a.nu_idade_gestacional does not exist" — coluna oficial é nu_idade_gestacional_semanas.'],
+                    ['type' => 'correcao', 'text' => 'Detecção dinâmica de DUM: dt_ultima_menstruacao (legado) vs co_dim_tempo_dum (FK v8.7+) e de PA: nu_pressao_sistolica vs nu_medicao_pressao_sistolica.'],
+                    ['type' => 'melhoria', 'text' => 'Fallback seguro para todas as colunas: se não existirem no PEC, a query omite os campos/JOINs e filtra gestantes pelos critérios disponíveis.'],
                 ],
             ],
             [

@@ -96,6 +96,80 @@ class C3DwService
     }
 
     /**
+     * Detecta dinamicamente as colunas de tb_fat_atendimento_individual no DW do PEC.
+     *
+     * Colunas que variam entre versões do DW:
+     * - Idade gestacional: `nu_idade_gestacional` (legado) vs `nu_idade_gestacional_semanas` (v8.7+)
+     * - DUM: `dt_ultima_menstruacao` (legado) vs `co_dim_tempo_dum` (v8.7+ - FK para tb_dim_tempo)
+     * - PA sistólica: `nu_pressao_sistolica` (legado) vs `nu_medicao_pressao_sistolica` (v8.7+)
+     * - PA diastólica: `nu_pressao_diastolica` (legado) vs `nu_medicao_pressao_diastolica` (v8.7+)
+     *
+     * @return array{gest_age:string|null,dum:string|null,dum_is_fk:bool,pas:string|null,pad:string|null}
+     */
+    private function resolveAtdIndSchema(ConnectionInterface $connection): array
+    {
+        $defaults = ['gest_age' => null, 'dum' => null, 'dum_is_fk' => false, 'pas' => null, 'pad' => null];
+
+        if ($connection instanceof MockInterface) {
+            return $defaults;
+        }
+
+        try {
+            $rawCols = $connection->select(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'tb_fat_atendimento_individual' AND table_schema = 'public'"
+            );
+
+            $colSet = [];
+            foreach ($rawCols as $c) {
+                $colSet[strtolower((string) $c->column_name)] = true;
+            }
+
+            // Idade gestacional: prioriza nome oficial v8.7+
+            $gestAge = null;
+            if (isset($colSet['nu_idade_gestacional_semanas'])) {
+                $gestAge = 'nu_idade_gestacional_semanas';
+            } elseif (isset($colSet['nu_idade_gestacional'])) {
+                $gestAge = 'nu_idade_gestacional';
+            }
+
+            // DUM: pode ser coluna direta ou FK para tb_dim_tempo
+            $dum = null;
+            $dumIsFk = false;
+            if (isset($colSet['dt_ultima_menstruacao'])) {
+                $dum = 'dt_ultima_menstruacao';
+            } elseif (isset($colSet['co_dim_tempo_dum'])) {
+                $dum = 'co_dim_tempo_dum';
+                $dumIsFk = true;
+            }
+
+            // Pressão arterial: prioriza nome oficial v8.7+
+            $pas = null;
+            if (isset($colSet['nu_medicao_pressao_sistolica'])) {
+                $pas = 'nu_medicao_pressao_sistolica';
+            } elseif (isset($colSet['nu_pressao_sistolica'])) {
+                $pas = 'nu_pressao_sistolica';
+            }
+
+            $pad = null;
+            if (isset($colSet['nu_medicao_pressao_diastolica'])) {
+                $pad = 'nu_medicao_pressao_diastolica';
+            } elseif (isset($colSet['nu_pressao_diastolica'])) {
+                $pad = 'nu_pressao_diastolica';
+            }
+
+            return [
+                'gest_age' => $gestAge,
+                'dum' => $dum,
+                'dum_is_fk' => $dumIsFk,
+                'pas' => $pas,
+                'pad' => $pad,
+            ];
+        } catch (\Throwable) {
+            return $defaults;
+        }
+    }
+
+    /**
      * @param  array<string, array{ine:string,name:string,type:string}>  $teams
      * @return array{
      *     scores: array<string, array<int, array{numerator:int,denominator:int,score_percent:float,practices:array<string,int>,incomplete:int}>>,
@@ -247,6 +321,9 @@ class C3DwService
         // Resolve dinamicamente a tabela/colunas de CID-10 no DW do PEC
         $cidSchema = $this->resolveCidSchema($connection);
 
+        // Resolve dinamicamente colunas de tb_fat_atendimento_individual
+        $atdSchema = $this->resolveAtdIndSchema($connection);
+
         // 1. Busca atendimentos individuais com condições de gestação ou puerpério
         foreach (array_chunk($allIds, 500) as $ids) {
             $marks = implode(',', array_fill(0, count($ids), '?'));
@@ -263,12 +340,34 @@ class C3DwService
                 $cidFilter = '';
             }
 
+            // Monta SELECT/WHERE dinâmico para idade gestacional e DUM
+            $gestAgeSelect = $atdSchema['gest_age']
+                ? "COALESCE(a.{$atdSchema['gest_age']}, 0) AS gest_age"
+                : '0 AS gest_age';
+
+            $dumJoin = '';
+            if ($atdSchema['dum'] && $atdSchema['dum_is_fk']) {
+                $dumSelect = 'tdum.dt_registro AS dum_date';
+                $dumJoin = "LEFT JOIN tb_dim_tempo tdum ON tdum.co_seq_dim_tempo = a.{$atdSchema['dum']}";
+                $dumFilter = 'OR tdum.dt_registro IS NOT NULL';
+            } elseif ($atdSchema['dum']) {
+                $dumSelect = "a.{$atdSchema['dum']} AS dum_date";
+                $dumFilter = "OR a.{$atdSchema['dum']} IS NOT NULL";
+            } else {
+                $dumSelect = 'NULL AS dum_date';
+                $dumFilter = '';
+            }
+
+            $gestAgeFilter = $atdSchema['gest_age']
+                ? "OR a.{$atdSchema['gest_age']} > 0"
+                : '';
+
             $atendimentos = $connection->select(<<<SQL
                 SELECT a.co_fat_cidadao_pec AS id, a.co_seq_fat_atd_ind AS event_id,
                        t.dt_registro AS event_date,
                        LEFT(REPLACE(c.nu_cbo::text, '-', ''), 4) AS cbo4,
-                       COALESCE(a.nu_idade_gestacional, 0) AS gest_age,
-                       a.dt_ultima_menstruacao AS dum_date,
+                       {$gestAgeSelect},
+                       {$dumSelect},
                        UPPER(ci.nu_ciap::text) AS ciap,
                        {$cidSelect},
                        COALESCE(l.ds_local_atendimento, '') AS location,
@@ -285,6 +384,7 @@ class C3DwService
                 JOIN tb_fat_atd_ind_problemas p ON p.co_fat_atd_ind = a.co_seq_fat_atd_ind
                 LEFT JOIN tb_dim_ciap ci ON ci.co_seq_dim_ciap = p.co_dim_ciap
                 {$cidJoin}
+                {$dumJoin}
                 LEFT JOIN tb_dim_local_atendimento l ON l.co_seq_dim_local_atendimento = a.co_dim_local_atendimento
                 WHERE a.co_fat_cidadao_pec IN ({$marks})
                   AND t.dt_registro <= ?
@@ -292,8 +392,8 @@ class C3DwService
                   AND (
                       UPPER(ci.nu_ciap::text) IN ('W03','W78','W79','W81','W84','W85','48','49','P29','W18','W19','W70','W90','W91','W92','W93','W94','W95','W96')
                       {$cidFilter}
-                      OR a.dt_ultima_menstruacao IS NOT NULL
-                      OR a.nu_idade_gestacional > 0
+                      {$dumFilter}
+                      {$gestAgeFilter}
                   )
             SQL, [...$ids, $eventCutoff]);
 
@@ -368,10 +468,13 @@ class C3DwService
             $marks = implode(',', array_fill(0, count($ids), '?'));
 
             // Pressão Arterial e Peso/Altura no Atendimento Individual
+            $pasCol = $atdSchema['pas'] ? "a.{$atdSchema['pas']} AS pas" : 'NULL AS pas';
+            $padCol = $atdSchema['pad'] ? "a.{$atdSchema['pad']} AS pad" : 'NULL AS pad';
+
             $measures = $connection->select(<<<SQL
                 SELECT a.co_fat_cidadao_pec AS id, t.dt_registro AS event_date,
                        a.nu_peso AS weight, a.nu_altura AS height,
-                       a.nu_pressao_sistolica AS pas, a.nu_pressao_diastolica AS pad
+                       {$pasCol}, {$padCol}
                 FROM tb_fat_atendimento_individual a
                 JOIN tb_dim_tempo t ON t.co_seq_dim_tempo = a.co_dim_tempo
                 WHERE a.co_fat_cidadao_pec IN ({$marks}) AND t.dt_registro <= ?
