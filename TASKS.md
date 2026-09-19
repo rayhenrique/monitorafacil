@@ -176,3 +176,4 @@
   - [x] MICI/MICDT deixam de ser marcados como atualizados sem evidência no DW e o distrito fictício foi removido.
   - [x] Busca ativa C3 alinhada às colunas reais da tabela e dados simulados bloqueados no ambiente de produção.
   - [x] Testes unitários de pontuação, janelas clínicas, exceção eAP e regressão da consulta PostgreSQL.
+  - [x] **Patch v1.17.1**: resolução adaptativa de `co_dim_tempo_dum` para `tb_dim_tempo_dum` nas versões atuais ou `tb_dim_tempo` nas instalações legadas do DW PEC.

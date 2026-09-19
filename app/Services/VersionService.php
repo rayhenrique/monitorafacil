@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.17.0';
+    public const CURRENT_VERSION = 'v1.17.1';
 
     public const CURRENT_RELEASE_DATE = '19/09/2026';
 
@@ -61,9 +61,21 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.17.0',
+                'version' => 'v1.17.1',
                 'date' => '19/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Compatibilidade da DUM no C3',
+                'summary' => 'O C3 agora identifica a dimensão associada a co_dim_tempo_dum nas versões atuais e legadas do DW PEC, permitindo processar a coorte na instalação de produção.',
+                'highlights' => [
+                    ['type' => 'correcao', 'text' => 'Mantido o uso de tb_dim_tempo_dum nas versões atuais do DW PEC.'],
+                    ['type' => 'correcao', 'text' => 'Adicionado suporte a instalações em que co_dim_tempo_dum referencia a dimensão geral tb_dim_tempo.'],
+                    ['type' => 'melhoria', 'text' => 'A falha agora informa explicitamente as duas dimensões aceitas quando nenhuma estrutura compatível está disponível.'],
+                ],
+            ],
+            [
+                'version' => 'v1.17.0',
+                'date' => '19/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Revisão Normativa e de Desempenho do C3',
                 'summary' => 'Revisão do C3 conforme a Nota Metodológica e o DW PEC 8.7: coorte pelo 42º dia do puerpério, janelas clínicas por evento, exames reais nas práticas G/H, consulta puerperal efetiva e consultas PostgreSQL limitadas por período e lotes menores.',
                 'highlights' => [

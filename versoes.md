@@ -4,6 +4,15 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.17.1] - 19/09/2026
+
+### 🔧 Compatibilidade da Dimensão da DUM no C3
+- **DW atual**: `co_dim_tempo_dum` continua sendo resolvida por `tb_dim_tempo_dum.co_seq_dim_tempo_dum` quando essa dimensão está disponível.
+- **DW legado**: instalações em que a mesma coluna referencia `tb_dim_tempo.co_seq_dim_tempo` passam a ser reconhecidas automaticamente.
+- **Diagnóstico**: a extração só é interrompida quando nenhuma das duas dimensões contém chave e data compatíveis.
+
+---
+
 ## [v1.17.0] - 19/09/2026
 
 ### 🤰 Revisão Normativa e de Desempenho do C3

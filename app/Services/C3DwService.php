@@ -15,7 +15,7 @@ use Throwable;
  */
 class C3DwService
 {
-    public const VERSION = 'dw-c3-2026-09-normative-v2';
+    public const VERSION = 'dw-c3-2026-09-normative-v2.1';
 
     private const CHUNK_SIZE = 100;
 
@@ -201,7 +201,13 @@ class C3DwService
                 $schema['dum_table'] = 'tb_dim_tempo_dum';
                 $schema['dum_pk'] = 'co_seq_dim_tempo_dum';
             } else {
-                throw new RuntimeException('C3: co_dim_tempo_dum existe, mas a dimensão oficial tb_dim_tempo_dum não foi localizada.');
+                $legacyTimeColumns = $this->tableColumns($connection, 'tb_dim_tempo');
+                if (isset($legacyTimeColumns['co_seq_dim_tempo'], $legacyTimeColumns['dt_registro'])) {
+                    $schema['dum_table'] = 'tb_dim_tempo';
+                    $schema['dum_pk'] = 'co_seq_dim_tempo';
+                } else {
+                    throw new RuntimeException('C3: co_dim_tempo_dum existe, mas nenhuma dimensão de tempo compatível foi localizada (tb_dim_tempo_dum ou tb_dim_tempo).');
+                }
             }
         }
 
