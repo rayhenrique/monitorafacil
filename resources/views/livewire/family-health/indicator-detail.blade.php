@@ -10,6 +10,7 @@
         $score = $current['score_percent'];
         $isC1 = $indicator === 'c1';
         $isC2 = $indicator === 'c2';
+        $hasValidatedResult = ! ($isC1 || $isC2) || $score !== null;
         $hasC2Result = ! $isC2 || $score !== null;
 
         $badgeStyles = match ($level) {
@@ -96,10 +97,10 @@
                 <!-- Card de Pontuação -->
                 <div class="rounded-3xl bg-white/10 border border-white/15 p-5 text-center min-w-[190px] backdrop-blur-xs">
                     <span class="text-[11px] font-semibold text-teal-300 uppercase tracking-wider block">
-                        {{ $isC2 ? ($current['is_preview'] ? 'Prévia quadrimestral' : 'Média quadrimestral local') : ($isC1 ? 'Média Quadrimestral' : 'Resultado Atual') }}
+                        {{ ($isC1 || $isC2) && $current['is_preview'] ? 'Prévia quadrimestral' : (($isC1 || $isC2) ? 'Média quadrimestral local' : 'Resultado Atual') }}
                     </span>
                     <div class="text-3xl sm:text-4xl font-black text-white tabular-nums my-1">
-                        {{ $hasC2Result ? number_format($score, 1, ',', '.').'%' : '—' }}
+                        {{ $hasValidatedResult ? number_format($score, 1, ',', '.').'%' : '—' }}
                     </div>
                     <div class="flex items-center justify-center gap-1.5 mt-1">
                         <span class="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold border {{ $badgeStyles }}">
@@ -284,6 +285,17 @@
         @if ($isC1)
             <!-- MÓDULO C1: ACOMPANHAMENTO MENSAL E AVALIAÇÃO QUADRIMESTRAL (NT 08/2026) -->
             <div class="space-y-6 animate-fade-in">
+                @if (! $hasValidatedResult)
+                    <div class="rounded-3xl border border-amber-300 bg-amber-50 p-5 text-amber-950 shadow-sm">
+                        <p class="text-sm font-bold">Sem resultado C1 validado para este período.</p>
+                        <p class="mt-1 text-xs leading-relaxed">Execute o processamento do DW PEC. O painel não gera valores simulados e não converte competências ausentes em zero.</p>
+                    </div>
+                @elseif ($current['is_preview'])
+                    <div class="rounded-3xl border border-sky-300 bg-sky-50 p-5 text-sky-950 shadow-sm">
+                        <p class="text-sm font-bold">Prévia local com {{ $c1Summary['valid_months'] ?? 0 }} de 4 competências monitoradas.</p>
+                        <p class="mt-1 text-xs leading-relaxed">A avaliação quadrimestral definitiva exige M1, M2, M3 e M4. O resultado oficial é publicado pelo Siaps.</p>
+                    </div>
+                @endif
                 <!-- Card Síntese: Avaliação do Quadrimestre -->
                 <div class="rounded-3xl border border-line bg-white p-6 sm:p-7 shadow-sm space-y-5">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-4">
@@ -304,7 +316,7 @@
                             <div class="rounded-2xl bg-slate-50 border border-slate-200 px-4 py-2.5 text-right">
                                 <span class="text-[10px] uppercase font-bold text-slate-400 block">Pontuação Componente III</span>
                                 <span class="text-base font-black text-emerald-700 font-mono">
-                                    {{ number_format($c1Summary['component_iii_points'] ?? 0, 2, ',', '.') }} / 1,00 pt
+                                    {{ ($c1Summary['component_iii_points'] ?? null) !== null ? number_format($c1Summary['component_iii_points'], 2, ',', '.').' / 1,00 pt' : '—' }}
                                 </span>
                             </div>
                             <div class="rounded-2xl bg-teal-50 border border-teal-200 px-4 py-2.5 text-right">
@@ -324,25 +336,25 @@
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                            <div class="rounded-2xl p-3.5 border text-center transition {{ ($score <= 10.0 || $score > 70.0) ? 'bg-rose-600 text-white ring-4 ring-rose-100 shadow-sm font-bold' : 'bg-rose-50 text-rose-900 border-rose-200' }}">
+                            <div class="rounded-2xl p-3.5 border text-center transition {{ ($score !== null && ($score <= 10.0 || $score > 70.0)) ? 'bg-rose-600 text-white ring-4 ring-rose-100 shadow-sm font-bold' : 'bg-rose-50 text-rose-900 border-rose-200' }}">
                                 <span class="text-[10px] font-bold uppercase tracking-wider block opacity-80">Regular · 0,25 pt</span>
                                 <span class="text-sm font-black">≤ 10% ou &gt; 70%</span>
                                 <span class="text-[10px] block mt-0.5 opacity-90">Agenda Desbalanceada</span>
                             </div>
 
-                            <div class="rounded-2xl p-3.5 border text-center transition {{ ($score > 10.0 && $score <= 30.0) ? 'bg-amber-500 text-white ring-4 ring-amber-100 shadow-sm font-bold' : 'bg-amber-50 text-amber-900 border-amber-200' }}">
+                            <div class="rounded-2xl p-3.5 border text-center transition {{ ($score !== null && $score > 10.0 && $score <= 30.0) ? 'bg-amber-500 text-white ring-4 ring-amber-100 shadow-sm font-bold' : 'bg-amber-50 text-amber-900 border-amber-200' }}">
                                 <span class="text-[10px] font-bold uppercase tracking-wider block opacity-80">Suficiente · 0,50 pt</span>
                                 <span class="text-sm font-black">&gt; 10% e ≤ 30%</span>
                                 <span class="text-[10px] block mt-0.5 opacity-90">Predomínio Espontânea</span>
                             </div>
 
-                            <div class="rounded-2xl p-3.5 border text-center transition {{ ($score > 30.0 && $score <= 50.0) ? 'bg-emerald-600 text-white ring-4 ring-emerald-100 shadow-sm font-bold' : 'bg-emerald-50 text-emerald-900 border-emerald-200' }}">
+                            <div class="rounded-2xl p-3.5 border text-center transition {{ ($score !== null && $score > 30.0 && $score <= 50.0) ? 'bg-emerald-600 text-white ring-4 ring-emerald-100 shadow-sm font-bold' : 'bg-emerald-50 text-emerald-900 border-emerald-200' }}">
                                 <span class="text-[10px] font-bold uppercase tracking-wider block opacity-80">Bom · 0,75 pt</span>
                                 <span class="text-sm font-black">&gt; 30% e ≤ 50%</span>
                                 <span class="text-[10px] block mt-0.5 opacity-90">Boa Oferta Programada</span>
                             </div>
 
-                            <div class="rounded-2xl p-3.5 border text-center transition {{ ($score > 50.0 && $score <= 70.0) ? 'bg-sky-600 text-white ring-4 ring-sky-100 shadow-sm font-bold' : 'bg-sky-50 text-sky-900 border-sky-200' }}">
+                            <div class="rounded-2xl p-3.5 border text-center transition {{ ($score !== null && $score > 50.0 && $score <= 70.0) ? 'bg-sky-600 text-white ring-4 ring-sky-100 shadow-sm font-bold' : 'bg-sky-50 text-sky-900 border-sky-200' }}">
                                 <span class="text-[10px] font-bold uppercase tracking-wider block opacity-80">Ótimo · 1,00 pt</span>
                                 <span class="text-sm font-black">&gt; 50% e ≤ 70%</span>
                                 <span class="text-[10px] block mt-0.5 opacity-90">Equilíbrio Perfeito de Agenda</span>
@@ -373,18 +385,20 @@
                             @php
                                 $mLevel = $m['performance_level'];
                                 $mBadge = match ($mLevel) {
+                                    null => 'bg-slate-100 text-slate-700 border-slate-300',
                                     'otimo' => 'bg-sky-100 text-sky-800 border-sky-300',
                                     'bom' => 'bg-emerald-100 text-emerald-800 border-emerald-300',
                                     'suficiente' => 'bg-amber-100 text-amber-800 border-amber-300',
                                     default => 'bg-rose-100 text-rose-800 border-rose-300',
                                 };
                                 $mBar = match ($mLevel) {
+                                    null => 'bg-slate-300',
                                     'otimo' => 'bg-sky-500',
                                     'bom' => 'bg-emerald-500',
                                     'suficiente' => 'bg-amber-500',
                                     default => 'bg-rose-500',
                                 };
-                                $espontanea = max(0, $m['denominator'] - $m['numerator']);
+                                $espontanea = $m['score_percent'] !== null ? max(0, $m['denominator'] - $m['numerator']) : null;
                             @endphp
                             <div 
                                 wire:click="setMonth({{ $selectedMonth === $m['month_in_quarter'] ? 'null' : $m['month_in_quarter'] }})"
@@ -401,21 +415,21 @@
                                         @endif
                                     </div>
                                     <span class="rounded-full px-2 py-0.5 text-[10px] font-bold border {{ $mBadge }}">
-                                        {{ ucfirst($mLevel) }}
+                                        {{ $mLevel ? ucfirst($mLevel) : 'Sem dados' }}
                                     </span>
                                 </div>
 
                                 <div>
                                     <div class="flex items-baseline justify-between">
                                         <span class="text-2xl font-black text-ink font-mono">
-                                            {{ number_format($m['score_percent'], 1, ',', '.') }}%
+                                            {{ $m['score_percent'] !== null ? number_format($m['score_percent'], 1, ',', '.').'%' : '—' }}
                                         </span>
                                         <span class="text-[11px] font-mono font-semibold text-emerald-700">
-                                            {{ number_format($m['component_iii_points'], 2, ',', '.') }} pt
+                                            {{ $m['component_iii_points'] !== null ? number_format($m['component_iii_points'], 2, ',', '.').' pt' : '—' }}
                                         </span>
                                     </div>
                                     <div class="w-full bg-slate-200 rounded-full h-2 mt-1.5 overflow-hidden">
-                                        <div class="{{ $mBar }} h-2 rounded-full transition-all duration-500" style="width: {{ min(100, $m['score_percent']) }}%"></div>
+                                        <div class="{{ $mBar }} h-2 rounded-full transition-all duration-500" style="width: {{ $m['score_percent'] !== null ? min(100, $m['score_percent']) : 0 }}%"></div>
                                     </div>
                                 </div>
 
@@ -610,28 +624,31 @@
                                     <tbody class="divide-y divide-slate-100 bg-white">
                                         @foreach ($c1Teams as $team)
                                             @php
-                                                $tScores = $team->monthly_scores ?? [1 => 0.0, 2 => 0.0, 3 => 0.0, 4 => 0.0];
+                                                $tScores = $team->monthly_scores ?? [1 => null, 2 => null, 3 => null, 4 => null];
                                                 $tDetails = $team->monthly_details ?? [];
                                                 $mDetail = $selectedMonth ? ($tDetails[$selectedMonth] ?? null) : null;
-                                                $tLevel = $selectedMonth ? ($mDetail['performance_level'] ?? 'regular') : ($team->quarter_level ?? $team->performance_level);
-                                                $tPoints = $selectedMonth ? ($mDetail['component_iii_points'] ?? 0.25) : ($team->component_iii_points ?? 0.25);
+                                                $tLevel = $selectedMonth ? ($mDetail['performance_level'] ?? null) : ($team->quarter_level ?? $team->performance_level);
+                                                $tPoints = $selectedMonth ? ($mDetail['component_iii_points'] ?? null) : ($team->component_iii_points ?? null);
 
                                                 $tBadge = match ($tLevel) {
+                                                    null => 'bg-slate-100 text-slate-700 border-slate-300',
                                                     'otimo' => 'bg-sky-100 text-sky-800 border-sky-300',
                                                     'bom' => 'bg-emerald-100 text-emerald-800 border-emerald-300',
                                                     'suficiente' => 'bg-amber-100 text-amber-800 border-amber-300',
                                                     default => 'bg-rose-100 text-rose-800 border-rose-300',
                                                 };
 
-                                                $currScore = $selectedMonth ? ($mDetail['score_percent'] ?? 0.0) : ($team->quarter_average ?? $team->score_percent);
+                                                $currScore = $selectedMonth ? ($mDetail['score_percent'] ?? null) : ($team->quarter_average ?? $team->score_percent);
 
                                                 $statusText = match (true) {
+                                                    $currScore === null => 'Sem dados',
                                                     $currScore > 70.0 => 'Fechada (>70%)',
                                                     $currScore < 30.0 => 'Espontânea (<30%)',
                                                     default => 'Equilibrada',
                                                 };
 
                                                 $statusBadge = match (true) {
+                                                    $currScore === null => 'bg-slate-50 text-slate-700 border-slate-200',
                                                     $currScore > 70.0 => 'bg-rose-50 text-rose-800 border-rose-200',
                                                     $currScore < 30.0 => 'bg-amber-50 text-amber-800 border-amber-200',
                                                     default => 'bg-emerald-50 text-emerald-800 border-emerald-200',
@@ -652,27 +669,27 @@
 
                                                 @if ($selectedMonth === null)
                                                     <td class="py-3 px-3 text-center font-mono text-slate-600">
-                                                        {{ number_format($tScores[1] ?? 0, 1, ',', '.') }}%
+                                                        {{ ($tScores[1] ?? null) !== null ? number_format($tScores[1], 1, ',', '.').'%' : '—' }}
                                                     </td>
                                                     <td class="py-3 px-3 text-center font-mono text-slate-600">
-                                                        {{ number_format($tScores[2] ?? 0, 1, ',', '.') }}%
+                                                        {{ ($tScores[2] ?? null) !== null ? number_format($tScores[2], 1, ',', '.').'%' : '—' }}
                                                     </td>
                                                     <td class="py-3 px-3 text-center font-mono text-slate-600">
-                                                        {{ number_format($tScores[3] ?? 0, 1, ',', '.') }}%
+                                                        {{ ($tScores[3] ?? null) !== null ? number_format($tScores[3], 1, ',', '.').'%' : '—' }}
                                                     </td>
                                                     <td class="py-3 px-3 text-center font-mono text-slate-600">
-                                                        {{ number_format($tScores[4] ?? 0, 1, ',', '.') }}%
+                                                        {{ ($tScores[4] ?? null) !== null ? number_format($tScores[4], 1, ',', '.').'%' : '—' }}
                                                     </td>
                                                     <td class="py-3 px-4 text-center font-mono font-black text-sm text-ink bg-slate-50/50">
                                                         {{ number_format($team->quarter_average ?? $team->score_percent, 1, ',', '.') }}%
                                                     </td>
                                                     <td class="py-3 px-3 text-center">
                                                         <span class="rounded-full px-2 py-0.5 text-[10px] font-bold border {{ $tBadge }}">
-                                                            {{ ucfirst($tLevel) }}
+                                                            {{ $tLevel ? ucfirst($tLevel) : 'Sem dados' }}
                                                         </span>
                                                     </td>
                                                     <td class="py-3 px-3 text-center font-mono font-bold text-emerald-700">
-                                                        {{ number_format($team->component_iii_points ?? 0.25, 2, ',', '.') }} pt
+                                                        {{ ($team->component_iii_points ?? null) !== null ? number_format($team->component_iii_points, 2, ',', '.').' pt' : '—' }}
                                                     </td>
                                                     <td class="py-3 px-3 text-center">
                                                         <span class="rounded-lg px-2 py-0.5 text-[10px] font-bold border {{ $statusBadge }}">
@@ -690,15 +707,15 @@
                                                         {{ number_format($mDetail['denominator'] ?? 0, 0, '', '.') }}
                                                     </td>
                                                     <td class="py-3 px-4 text-center font-mono font-black text-sm text-ink bg-slate-50/50">
-                                                        {{ number_format($mDetail['score_percent'] ?? 0, 1, ',', '.') }}%
+                                                        {{ ($mDetail['score_percent'] ?? null) !== null ? number_format($mDetail['score_percent'], 1, ',', '.').'%' : '—' }}
                                                     </td>
                                                     <td class="py-3 px-3 text-center">
                                                         <span class="rounded-full px-2 py-0.5 text-[10px] font-bold border {{ $tBadge }}">
-                                                            {{ ucfirst($tLevel) }}
+                                                            {{ $tLevel ? ucfirst($tLevel) : 'Sem dados' }}
                                                         </span>
                                                     </td>
                                                     <td class="py-3 px-3 text-center font-mono font-bold text-emerald-700">
-                                                        {{ number_format($tPoints, 2, ',', '.') }} pt
+                                                        {{ $tPoints !== null ? number_format($tPoints, 2, ',', '.').' pt' : '—' }}
                                                     </td>
                                                     <td class="py-3 px-3 text-center">
                                                         <span class="rounded-lg px-2 py-0.5 text-[10px] font-bold border {{ $statusBadge }}">

@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.10.0';
+    public const CURRENT_VERSION = 'v1.11.0';
 
     public const CURRENT_RELEASE_DATE = '18/09/2026';
 
@@ -61,9 +61,22 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.10.0',
+                'version' => 'v1.11.0',
                 'date' => '18/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Revisão normativa do C1 pelo DW PEC',
+                'summary' => 'O C1 passa a aplicar os identificadores oficiais de demanda, os sete CBOs exatos e os requisitos mínimos de identificação do atendimento. Meses sem extração deixam de aparecer como zero e resultados antigos sem versão validada ficam ocultos.',
+                'highlights' => [
+                    ['type' => 'correcao', 'text' => 'Numerador restrito aos tipos 1 e 2; denominador restrito aos tipos 1, 2, 4, 5 e 6 do domínio TipoDeAtendimento.'],
+                    ['type' => 'correcao', 'text' => 'Remoção do filtro amplo por prefixo e do fallback que processava atendimentos sem validar os sete CBOs oficiais.'],
+                    ['type' => 'correcao', 'text' => 'Exigência de CNS do profissional, data de nascimento e CPF ou CNS válido do cidadão na extração.'],
+                    ['type' => 'melhoria', 'text' => 'Prévia usa apenas competências já monitoradas; falhas preservam o último snapshot válido e o painel não gera baseline C1 fictício.'],
+                ],
+            ],
+            [
+                'version' => 'v1.10.0',
+                'date' => '18/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Prévia C2 para todas as crianças dos meses M1–M4',
                 'summary' => 'O C2 agora calcula uma prévia para a coorte completa, inclusive crianças que completarão dois anos nos meses futuros. A tela distingue a prévia local da avaliação oficial do Siaps.',
                 'highlights' => [

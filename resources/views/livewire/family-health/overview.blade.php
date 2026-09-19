@@ -125,17 +125,25 @@
                                     {{ $score !== null ? number_format($score, 1, ',', '.').'%' : '—' }}
                                 </span>
                                 <span class="text-xs text-muted block">
-                                    @if ($slug === 'c2')
+                                    @if ($slug === 'c1')
+                                        {{ $score !== null ? ($item['is_preview'] ? 'Prévia das competências disponíveis' : 'Estimativa quadrimestral local') : 'Aguardando extração validada do C1' }}
+                                    @elseif ($slug === 'c2')
                                         {{ $score !== null ? ($item['is_preview'] ? 'Prévia do DW PEC · M1–M4' : 'Estimativa local do DW PEC') : 'Aguardando nova extração do C2' }}
                                     @else
-                                        {{ number_format($item['numerator'], 0, '', '.') }} de {{ number_format($item['denominator'], 0, '', '.') }}
+                                        {{ $slug === 'c1' && ! $item['has_data'] ? 'Sem dados validados' : number_format($item['numerator'], 0, '', '.').' de '.number_format($item['denominator'], 0, '', '.') }}
                                     @endif
                                 </span>
                             </div>
                             <div class="text-right">
                                 <span class="text-[11px] text-slate-500 block">{{ $slug === 'c2' ? 'Completam 2 anos no quadrimestre' : 'Público Elegível' }}</span>
                                 <span class="text-xs font-semibold text-slate-700">
-                                    {{ $slug === 'c2' ? ($item['cohort_total'] !== null ? number_format($item['cohort_total'], 0, '', '.').' crianças' : '—') : number_format($item['denominator'], 0, '', '.').' pessoas' }}
+                                    @if ($slug === 'c2')
+                                        {{ $item['cohort_total'] !== null ? number_format($item['cohort_total'], 0, '', '.').' crianças' : '—' }}
+                                    @elseif ($slug === 'c1' && ! $item['has_data'])
+                                        —
+                                    @else
+                                        {{ number_format($item['denominator'], 0, '', '.').' pessoas' }}
+                                    @endif
                                 </span>
                                 @if ($slug === 'c2' && $item['cohort_total'] !== null)
                                     <span class="text-[10px] text-slate-500 block">{{ number_format($item['evaluated_total'], 0, '', '.') }} já completaram 2 anos{{ $item['cohort_as_of'] ? ' até '.$item['cohort_as_of'] : '' }}</span>
@@ -149,7 +157,7 @@
                         </div>
 
                         <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1">
-                            <span>Meta Ótimo: > 75%</span>
+                            <span>{{ $slug === 'c1' ? 'Ótimo: > 50% e ≤ 70%' : 'Meta Ótimo: > 75%' }}</span>
                             @if ($slug === 'c2' && $score !== null)
                                 <span class="text-sky-700 font-semibold">Resultado preliminar</span>
                             @elseif ($item['active_search_count'] > 0)

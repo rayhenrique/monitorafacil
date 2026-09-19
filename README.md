@@ -106,6 +106,14 @@ graph TD
 - Iconografia executiva contextual dedicada para cada indicador.
 - Ausência de resultado C2 exibida como **sem dados**, sem converter falta de coorte em zero.
 
+#### C1 · Mais Acesso pelo DW PEC
+
+O C1 lê somente snapshots produzidos pela rotina CLI. O numerador usa os tipos `1` e `2`; o denominador usa os tipos `1`, `2`, `4`, `5` e `6`. A população elegível fica restrita às equipes eSF/eAP, aos sete CBOs definidos na nota metodológica e aos atendimentos com CNS do profissional, data de nascimento e CPF ou CNS válido do cidadão.
+
+Durante o quadrimestre, o painel mostra uma prévia com as competências já monitoradas. Meses futuros ou ausentes aparecem como **sem dados**, sem serem convertidos em zero. Depois das quatro competências, a média simples de M1 a M4 produz a estimativa quadrimestral local. O resultado oficial continua sendo o publicado pelo Siaps.
+
+Uma falha de schema ou leitura interrompe o C1 e preserva o último snapshot válido. Snapshots antigos sem a versão de cálculo atual ficam ocultos. A confirmação do nome do cidadão ainda depende da validação de uma fonte estável no esquema disponível na VPS, pois esse campo não está presente na tabela fato documentada publicamente.
+
 #### C2 · estimativa local do DW PEC
 
 O processamento C2 faz somente consultas de leitura no PostgreSQL do PEC e grava agregados no MySQL local; a tela do indicador consulta apenas esses snapshots. A coorte do quadrimestre inclui todas as crianças vinculadas a eSF/eAP que completam dois anos entre o primeiro e o último dia dos quatro meses. Todas recebem uma prévia calculada com as práticas registradas até a data da extração, inclusive as dos meses futuros M1–M4; a tela informa separadamente quantas já completaram dois anos. Cada prática A–E vale 20 pontos. A média quadrimestral local usa os meses com crianças na coorte, inclusive futuros. Essa antecipação é uma ferramenta de acompanhamento e não é a nota oficial prevista na Nota Técnica nº 8/2026.

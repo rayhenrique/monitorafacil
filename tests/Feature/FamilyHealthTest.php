@@ -400,6 +400,11 @@ class FamilyHealthTest extends TestCase
             'score_percent' => 45.00,
             'performance_level' => 'bom',
             'component_iii_points' => 0.75,
+            'good_practices_breakdown' => [
+                'calculation_version' => \App\Services\C1DwService::VERSION,
+                'valid_months' => 4,
+                'is_preview' => false,
+            ],
         ]);
 
         Livewire::test(IndicatorDetail::class, ['indicator' => 'c1', 'year' => 2026, 'quarter' => 1])
@@ -422,6 +427,26 @@ class FamilyHealthTest extends TestCase
             ->assertSet('selectedIne', null)
             ->assertSet('selectedMonth', null)
             ->assertSet('selectedClassification', null);
+    }
+
+    public function test_c1_without_a_valid_dw_snapshot_shows_no_result_and_creates_no_baseline(): void
+    {
+        $this->authenticateUser();
+
+        Livewire::test(IndicatorDetail::class, ['indicator' => 'c1', 'year' => 2026, 'quarter' => 3])
+            ->assertSee('Sem resultado C1 validado para este período.')
+            ->assertSee('não gera valores simulados');
+
+        $this->assertDatabaseMissing('family_health_indicator_snapshots', [
+            'year' => 2026,
+            'quarter' => 3,
+            'indicator_code' => 'c1',
+        ]);
+        $this->assertDatabaseMissing('family_health_monthly_snapshots', [
+            'year' => 2026,
+            'quarter' => 3,
+            'indicator_code' => 'c1',
+        ]);
     }
 
     public function test_c2_metadata_has_weight_two_and_five_good_practices_of_twenty_points(): void

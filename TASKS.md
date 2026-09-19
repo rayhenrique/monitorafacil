@@ -99,3 +99,13 @@
   - [x] Exibir prévia de pontuação para todas as crianças dos meses M1–M4 com registros disponíveis até a extração, inclusive meses futuros, identificando que não é nota oficial.
   - [ ] Validar o esquema e a execução somente de leitura no PEC acessível pela VPS.
   - [ ] Comparar amostra de resultados por equipe/mês com o Siaps e investigar diferenças por RNDS, ações coletivas e vínculo histórico.
+
+- [ ] **Fase 15: Revisão normativa do indicador C1 pelo DW PEC**
+  - [x] Restringir o numerador aos tipos 1/2 e o denominador aos tipos 1/2/4/5/6 do domínio oficial.
+  - [x] Aplicar somente os sete CBOs oficiais, sem filtro por prefixo nem fallback sem CBO.
+  - [x] Exigir CNS do profissional, data de nascimento e CPF ou CNS válido do cidadão.
+  - [x] Impedir baseline fictício, ocultar snapshots antigos e preservar o último resultado em falha de leitura.
+  - [x] Exibir competências ausentes como sem dados e identificar prévias com menos de quatro meses.
+  - [x] Cobrir a consulta estrita e a ausência de resultado com testes automatizados locais.
+  - [ ] Confirmar na VPS a disponibilidade e o conteúdo das colunas usadas pela consulta, incluindo uma fonte estável para o nome do cidadão.
+  - [ ] Comparar amostra por equipe e competência com o resultado preliminar publicado no Siaps.

@@ -4,6 +4,18 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.11.0] - 18/09/2026
+
+### 🧭 Revisão normativa do C1 pelo DW PEC
+- O numerador considera exclusivamente os tipos de atendimento `1` (consulta agendada programada/cuidado continuado) e `2` (consulta agendada).
+- O denominador considera somente `1`, `2`, `4` (escuta inicial/orientação), `5` (consulta no dia) e `6` (urgência).
+- A extração exige um dos sete CBOs oficiais, CNS do profissional, data de nascimento e CPF ou CNS válido do cidadão. O filtro amplo por prefixo e o fallback sem CBO foram removidos.
+- Competências ainda não monitoradas aparecem como **sem dados**. A prévia local usa apenas os meses disponíveis; a avaliação quadrimestral definitiva continua sendo a média de M1 a M4.
+- Falhas na leitura preservam o último snapshot válido. Resultados simulados ou calculados por versões anteriores ficam ocultos até uma extração C1 válida.
+- Limitação conhecida: a tabela fato pública expõe data de nascimento e CPF/CNS, mas não o nome do cidadão; a validação do nome depende de confirmar uma fonte estável no esquema da VPS.
+
+---
+
 ## [v1.10.0] - 18/09/2026
 
 ### 🚀 Prévia C2 dos quatro meses

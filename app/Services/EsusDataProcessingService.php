@@ -9,9 +9,6 @@ use App\Models\ConsolidationTeam;
 use App\Models\FamilyHealthIndicatorSnapshot;
 use App\Models\FamilyHealthMonthlySnapshot;
 use App\Models\SyncLog;
-use App\Services\CnesXmlParserService;
-use App\Services\FamilyHealthService;
-use App\Services\SettingsService;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +20,7 @@ class EsusDataProcessingService
      * Executa o processamento dos dados do e-SUS PEC com relatório de etapas e tabelas.
      * Suporta escopo 'all' (geral completo) ou 'c1' (focado no Indicador C1).
      *
-     * @param (callable(int $percent, string $step, array $tables): void)|null $progressCallback
+     * @param  (callable(int $percent, string $step, array $tables): void)|null  $progressCallback
      * @return array{
      *     success: bool,
      *     message: string,
@@ -46,6 +43,15 @@ class EsusDataProcessingService
             2 => [5, 6, 7, 8],
             default => [9, 10, 11, 12],
         };
+        $quarterEnd = Carbon::create($year, end($monthsInQuarter), 1)->endOfMonth();
+        $monitoredMonths = array_values(array_filter(
+            $monthsInQuarter,
+            static fn (int $month): bool => Carbon::create($year, $month, 1)->startOfMonth()->lte($now->copy()->startOfMonth())
+        ));
+
+        if ($now->gte($quarterEnd)) {
+            $monitoredMonths = $monthsInQuarter;
+        }
 
         $tablesReport = [
             'tb_dim_equipe' => [
@@ -225,8 +231,8 @@ class EsusDataProcessingService
         $tablesReport['tb_dim_cbo']['message'] = '7 CBOs habilitados validados (Médicos 2251-42/70/30/25, 2252-50 e Enfermeiros 2235-65/05).';
 
         $tablesReport['tb_dim_tipo_atendimento']['status'] = 'success';
-        $tablesReport['tb_dim_tipo_atendimento']['rows'] = 6;
-        $tablesReport['tb_dim_tipo_atendimento']['message'] = 'Classificadores mapeados: 3 programados (agendada/cuidado continuado) e 3 espontâneos (escuta/dia/urgência).';
+        $tablesReport['tb_dim_tipo_atendimento']['rows'] = 5;
+        $tablesReport['tb_dim_tipo_atendimento']['message'] = '5 identificadores oficiais: programados 1/2 e espontâneos 4/5/6.';
 
         // Mapeia equipes elegíveis extraídas para filtragem estrita da produção clínica
         $eligibleInes = array_column($teamsExtracted, 'ine');
@@ -243,262 +249,260 @@ class EsusDataProcessingService
             $monthlyC1Data = [];
             $totalAtendimentosProcessados = 0;
 
-        if ($isLivePecConnected && $connection) {
-            try {
-                // Filtro dos 7 CBOs habilitados para C1 (Médicos 2251-*, 2252-* e Enfermeiros 2235-*)
-                $cboFilterSql = "
-                    AND (
-                        REPLACE(COALESCE(c.nu_cbo::text, ''), '-', '') IN ('225142', '225170', '225130', '225125', '225250', '223565', '223505')
-                        OR COALESCE(c.nu_cbo::text, '') LIKE '2251%'
-                        OR COALESCE(c.nu_cbo::text, '') LIKE '2252%'
-                        OR COALESCE(c.nu_cbo::text, '') LIKE '2235%'
-                    )
-                ";
-
-                $ineFilterSql = '';
-                $params = [$year, $monthsInQuarter[0], $monthsInQuarter[1], $monthsInQuarter[2], $monthsInQuarter[3]];
-                if (! empty($eligibleInes)) {
-                    $placeholders = implode(',', array_fill(0, count($eligibleInes), '?'));
-                    $ineFilterSql = " AND e.nu_ine::text IN ({$placeholders}) ";
-                    $params = array_merge($params, $eligibleInes);
-                }
-
-                $querySql = "
-                    SELECT 
-                        t.nu_mes,
-                        e.nu_ine,
-                        SUM(CASE WHEN LOWER(COALESCE(ta.ds_tipo_atendimento, '')) LIKE '%agendad%' 
-                                   OR LOWER(COALESCE(ta.ds_tipo_atendimento, '')) LIKE '%programad%' 
-                                   OR LOWER(COALESCE(ta.ds_tipo_atendimento, '')) LIKE '%continuad%' 
-                                 THEN 1 ELSE 0 END) AS num_programada,
-                        COUNT(*) AS den_total
-                    FROM tb_fat_atendimento_individual fai
-                    JOIN tb_dim_tempo t ON fai.co_dim_tempo = t.co_seq_dim_tempo
-                    JOIN tb_dim_equipe e ON fai.co_dim_equipe_1 = e.co_seq_dim_equipe
-                    JOIN tb_dim_cbo c ON fai.co_dim_cbo_1 = c.co_seq_dim_cbo
-                    LEFT JOIN tb_dim_tipo_atendimento ta ON fai.co_dim_tipo_atendimento = ta.co_seq_dim_tipo_atendimento
-                    WHERE t.nu_ano = ?
-                      AND t.nu_mes IN (?, ?, ?, ?)
-                      {$cboFilterSql}
-                      {$ineFilterSql}
-                    GROUP BY t.nu_mes, e.nu_ine
-                ";
-
+            if ($isLivePecConnected && $connection) {
                 try {
-                    $rows = $connection->select($querySql, $params);
-                } catch (Throwable) {
-                    // Fallback adaptativo caso a foreign key ou coluna da tb_dim_cbo tenha outro identificador
-                    $fallbackSql = "
-                        SELECT 
-                            t.nu_mes,
-                            e.nu_ine,
-                            SUM(CASE WHEN LOWER(COALESCE(ta.ds_tipo_atendimento, '')) LIKE '%agendad%' 
-                                       OR LOWER(COALESCE(ta.ds_tipo_atendimento, '')) LIKE '%programad%' 
-                                       OR LOWER(COALESCE(ta.ds_tipo_atendimento, '')) LIKE '%continuad%' 
-                                     THEN 1 ELSE 0 END) AS num_programada,
-                            COUNT(*) AS den_total
-                        FROM tb_fat_atendimento_individual fai
-                        JOIN tb_dim_tempo t ON fai.co_dim_tempo = t.co_seq_dim_tempo
-                        JOIN tb_dim_equipe e ON fai.co_dim_equipe_1 = e.co_seq_dim_equipe
-                        LEFT JOIN tb_dim_tipo_atendimento ta ON fai.co_dim_tipo_atendimento = ta.co_seq_dim_tipo_atendimento
-                        WHERE t.nu_ano = ?
-                          AND t.nu_mes IN (?, ?, ?, ?)
-                          {$ineFilterSql}
-                        GROUP BY t.nu_mes, e.nu_ine
-                    ";
-                    $rows = $connection->select($fallbackSql, $params);
-                }
+                    if ($eligibleInes === []) {
+                        throw new \RuntimeException('Nenhuma equipe eSF/eAP elegível foi identificada; a extração foi cancelada.');
+                    }
+                    if ($monitoredMonths === []) {
+                        throw new \RuntimeException('O período selecionado ainda não possui competência monitorável.');
+                    }
 
-                foreach ($rows as $r) {
-                    $ineKey = trim((string) $r->nu_ine);
-                    $mesKey = (int) $r->nu_mes;
-                    // Descarta qualquer registro que não pertença às equipes eSF/eAP elegíveis
-                    if (! isset($eligibleTeamsByIne[$ineKey])) {
+                    $monthlyC1Data = app(C1DwService::class)->extract(
+                        $connection,
+                        $year,
+                        $monitoredMonths,
+                        $eligibleInes
+                    );
+                    $totalAtendimentosProcessados = collect($monthlyC1Data)
+                        ->flatten(1)
+                        ->sum('denominator');
+
+                    $tablesReport['tb_fat_atendimento_individual']['status'] = 'success';
+                    $tablesReport['tb_fat_atendimento_individual']['rows'] = $totalAtendimentosProcessados;
+                    $tablesReport['tb_fat_atendimento_individual']['message'] = sprintf(
+                        '%d atendimentos elegíveis processados em %d competência(s), com CBO, tipo de atendimento e identificação validados.',
+                        $totalAtendimentosProcessados,
+                        count($monitoredMonths)
+                    );
+                } catch (Throwable $e) {
+                    $message = 'C1 não processado; o último snapshot válido foi preservado. '.$e->getMessage();
+                    $tablesReport['tb_fat_atendimento_individual']['status'] = 'error';
+                    $tablesReport['tb_fat_atendimento_individual']['message'] = $message;
+                    $syncLog->update([
+                        'status' => SyncStatus::Failed,
+                        'finished_at' => now(),
+                        'error_message' => $message,
+                    ]);
+                    $this->notifyProgress($progressCallback, 100, $message, $tablesReport);
+
+                    return [
+                        'success' => false,
+                        'message' => $message,
+                        'progress' => 100,
+                        'tables' => $tablesReport,
+                        'execution_time_ms' => round((microtime(true) - $startTime) * 1000, 2),
+                    ];
+                }
+            } elseif (app()->environment('testing')) {
+                $tablesReport['tb_fat_atendimento_individual']['status'] = 'success';
+                $tablesReport['tb_fat_atendimento_individual']['rows'] = 120;
+                $tablesReport['tb_fat_atendimento_individual']['message'] = '120 atendimentos de teste processados.';
+                $monitoredMonths = $monthsInQuarter;
+                foreach ($teamsExtracted as $team) {
+                    foreach ($monitoredMonths as $m) {
+                        $monthlyC1Data[$team['ine']][$m] = [
+                            'numerator' => 60,
+                            'denominator' => 100,
+                        ];
+                    }
+                }
+            }
+
+            // Limpa snapshots C1 anteriores do mesmo período e expurga registros inválidos
+            FamilyHealthIndicatorSnapshot::query()
+                ->where('year', $year)
+                ->where('quarter', $quarter)
+                ->where('indicator_code', 'c1')
+                ->delete();
+
+            FamilyHealthMonthlySnapshot::query()
+                ->where('year', $year)
+                ->where('quarter', $quarter)
+                ->where('indicator_code', 'c1')
+                ->delete();
+
+            FamilyHealthService::purgeInvalidC1Snapshots();
+
+            // Salva os dados mensais por equipe em family_health_monthly_snapshots
+            $teamQuarterlyAverages = [];
+
+            foreach ($teamsExtracted as $team) {
+                $ine = $team['ine'];
+                $teamMonthlyScores = [];
+
+                foreach ($monthsInQuarter as $idx => $m) {
+                    $monthIndex = $idx + 1; // 1, 2, 3 ou 4
+
+                    if (! in_array($m, $monitoredMonths, true)) {
                         continue;
                     }
 
-                    $monthlyC1Data[$ineKey][$mesKey] = [
-                        'numerator' => (int) $r->num_programada,
-                        'denominator' => (int) $r->den_total,
-                    ];
-                    $totalAtendimentosProcessados += (int) $r->den_total;
-                }
+                    if (! isset($monthlyC1Data[$ine][$m])) {
+                        continue;
+                    }
 
-                $tablesReport['tb_fat_atendimento_individual']['status'] = 'success';
-                $tablesReport['tb_fat_atendimento_individual']['rows'] = $totalAtendimentosProcessados;
-                $tablesReport['tb_fat_atendimento_individual']['message'] = sprintf('%d atendimentos individuais elegíveis processados e classificados.', $totalAtendimentosProcessados);
-            } catch (Throwable $e) {
-                $tablesReport['tb_fat_atendimento_individual']['status'] = 'warning';
-                $tablesReport['tb_fat_atendimento_individual']['message'] = 'Leitura concluída com adaptação: '.$e->getMessage();
-            }
-        } elseif (app()->environment('testing')) {
-            $tablesReport['tb_fat_atendimento_individual']['status'] = 'success';
-            $tablesReport['tb_fat_atendimento_individual']['rows'] = 120;
-            $tablesReport['tb_fat_atendimento_individual']['message'] = '120 atendimentos de teste processados.';
-            foreach ($teamsExtracted as $team) {
-                foreach ($monthsInQuarter as $m) {
-                    $monthlyC1Data[$team['ine']][$m] = [
-                        'numerator' => 60,
-                        'denominator' => 100,
-                    ];
-                }
-            }
-        }
-
-        // Limpa snapshots C1 anteriores do mesmo período e expurga registros inválidos
-        FamilyHealthIndicatorSnapshot::query()
-            ->where('year', $year)
-            ->where('quarter', $quarter)
-            ->where('indicator_code', 'c1')
-            ->delete();
-
-        FamilyHealthMonthlySnapshot::query()
-            ->where('year', $year)
-            ->where('quarter', $quarter)
-            ->where('indicator_code', 'c1')
-            ->delete();
-
-        FamilyHealthService::purgeInvalidC1Snapshots();
-
-        // Salva os dados mensais por equipe em family_health_monthly_snapshots
-        $teamQuarterlyAverages = [];
-
-        foreach ($teamsExtracted as $team) {
-            $ine = $team['ine'];
-            $teamMonthlyScores = [];
-
-            foreach ($monthsInQuarter as $idx => $m) {
-                $monthIndex = $idx + 1; // 1, 2, 3 ou 4
-
-                if (isset($monthlyC1Data[$ine][$m])) {
                     $num = $monthlyC1Data[$ine][$m]['numerator'];
-                    $den = max(1, $monthlyC1Data[$ine][$m]['denominator']);
-                } else {
-                    $num = 0;
-                    $den = 0;
+                    $den = $monthlyC1Data[$ine][$m]['denominator'];
+                    if ($den <= 0) {
+                        continue;
+                    }
+
+                    $score = round(($num / $den) * 100, 2);
+                    $level = FamilyHealthService::calculatePerformanceLevel('c1', $score);
+                    $teamMonthlyScores[$m] = $score;
+
+                    FamilyHealthMonthlySnapshot::query()->updateOrCreate(
+                        [
+                            'year' => $year,
+                            'month' => $m,
+                            'ine' => $ine,
+                            'indicator_code' => 'c1',
+                        ],
+                        [
+                            'quarter' => $quarter,
+                            'month_in_quarter' => $monthIndex,
+                            'team_name' => $team['name'],
+                            'team_type' => $team['type'],
+                            'numerator' => $num,
+                            'denominator' => $den,
+                            'score_percent' => $score,
+                            'performance_level' => $level,
+                        ]
+                    );
                 }
 
-                $score = $den > 0 ? round(($num / $den) * 100, 2) : 0.00;
-                $level = FamilyHealthService::calculatePerformanceLevel('c1', $score);
-                $teamMonthlyScores[] = $score;
+                // Média dos 4 meses do quadrimestre conforme NT 08/2026
+                if ($teamMonthlyScores === []) {
+                    continue;
+                }
+
+                $quarterAvg = round(array_sum($teamMonthlyScores) / count($teamMonthlyScores), 2);
+                $quarterLevel = FamilyHealthService::calculatePerformanceLevel('c1', $quarterAvg);
+                $teamNumerator = (int) collect($monitoredMonths)->sum(fn (int $month): int => $monthlyC1Data[$ine][$month]['numerator'] ?? 0);
+                $teamDenominator = (int) collect($monitoredMonths)->sum(fn (int $month): int => $monthlyC1Data[$ine][$month]['denominator'] ?? 0);
+
+                $teamQuarterlyAverages[$ine] = [
+                    'score' => $quarterAvg,
+                    'level' => $quarterLevel,
+                    'team' => $team,
+                ];
+
+                // Persiste o snapshot quadrimestral da equipe
+                FamilyHealthIndicatorSnapshot::query()->updateOrCreate(
+                    [
+                        'year' => $year,
+                        'quarter' => $quarter,
+                        'ine' => $ine,
+                        'indicator_code' => 'c1',
+                    ],
+                    [
+                        'team_name' => $team['name'],
+                        'team_type' => $team['type'],
+                        'numerator' => $teamNumerator,
+                        'denominator' => $teamDenominator,
+                        'score_percent' => $quarterAvg,
+                        'performance_level' => $quarterLevel,
+                        'good_practices_breakdown' => [
+                            'months' => $teamMonthlyScores,
+                            'quarter_average' => $quarterAvg,
+                            'valid_months' => count($teamMonthlyScores),
+                            'is_preview' => count($teamMonthlyScores) < 4,
+                            'calculation_version' => C1DwService::VERSION,
+                            'source' => 'DW PEC',
+                        ],
+                        'active_search_count' => ($quarterAvg < 30.0 || $quarterAvg > 70.0) ? 1 : 0,
+                    ]
+                );
+            }
+
+            // Consolida os snapshots mensais municipais (ine = null) para cada mês do quadrimestre
+            $validMunicipalMonths = 0;
+            foreach ($monthsInQuarter as $idx => $m) {
+                if (! in_array($m, $monitoredMonths, true)) {
+                    continue;
+                }
+                $monthIndex = $idx + 1;
+                $monthSnaps = FamilyHealthMonthlySnapshot::query()
+                    ->where('year', $year)
+                    ->where('month', $m)
+                    ->where('indicator_code', 'c1')
+                    ->whereNotNull('ine')
+                    ->get();
+
+                if ($monthSnaps->isEmpty()) {
+                    continue;
+                }
+                $validMunicipalMonths++;
+
+                $monthNumTotal = (int) $monthSnaps->sum('numerator');
+                $monthDenTotal = (int) $monthSnaps->sum('denominator');
+                $monthAvgScore = $monthSnaps->count() > 0
+                    ? round($monthSnaps->avg('score_percent'), 2)
+                    : 0.0;
+                $monthLevel = FamilyHealthService::calculatePerformanceLevel('c1', $monthAvgScore);
 
                 FamilyHealthMonthlySnapshot::query()->updateOrCreate(
                     [
                         'year' => $year,
                         'month' => $m,
-                        'ine' => $ine,
+                        'ine' => null,
                         'indicator_code' => 'c1',
                     ],
                     [
                         'quarter' => $quarter,
                         'month_in_quarter' => $monthIndex,
-                        'team_name' => $team['name'],
-                        'team_type' => $team['type'],
-                        'numerator' => $num,
-                        'denominator' => $den,
-                        'score_percent' => $score,
-                        'performance_level' => $level,
+                        'team_name' => 'Consolidado Municipal',
+                        'team_type' => '70',
+                        'numerator' => $monthNumTotal,
+                        'denominator' => $monthDenTotal,
+                        'score_percent' => $monthAvgScore,
+                        'performance_level' => $monthLevel,
                     ]
                 );
             }
 
-            // Média dos 4 meses do quadrimestre conforme NT 08/2026
-            $quarterAvg = count($teamMonthlyScores) > 0 ? round(array_sum($teamMonthlyScores) / count($teamMonthlyScores), 2) : 0.0;
-            $quarterLevel = FamilyHealthService::calculatePerformanceLevel('c1', $quarterAvg);
+            // Consolida a média municipal do quadrimestre
+            $municipalScores = array_column($teamQuarterlyAverages, 'score');
+            if ($municipalScores === []) {
+                $tablesReport['tb_fat_atendimento_individual']['message'] .= ' Nenhuma equipe teve resultado no período; nenhum snapshot C1 foi criado.';
+            } else {
+                $municipalQuarterAvg = round(array_sum($municipalScores) / count($municipalScores), 2);
+                $municipalLevel = FamilyHealthService::calculatePerformanceLevel('c1', $municipalQuarterAvg);
+                $municipalNumerator = (int) FamilyHealthMonthlySnapshot::query()
+                    ->where('year', $year)->where('quarter', $quarter)->where('indicator_code', 'c1')
+                    ->whereNull('ine')->sum('numerator');
+                $municipalDenominator = (int) FamilyHealthMonthlySnapshot::query()
+                    ->where('year', $year)->where('quarter', $quarter)->where('indicator_code', 'c1')
+                    ->whereNull('ine')->sum('denominator');
 
-            $teamQuarterlyAverages[$ine] = [
-                'score' => $quarterAvg,
-                'level' => $quarterLevel,
-                'team' => $team,
-            ];
-
-            // Persiste o snapshot quadrimestral da equipe
-            FamilyHealthIndicatorSnapshot::query()->updateOrCreate(
-                [
-                    'year' => $year,
-                    'quarter' => $quarter,
-                    'ine' => $ine,
-                    'indicator_code' => 'c1',
-                ],
-                [
-                    'team_name' => $team['name'],
-                    'team_type' => $team['type'],
-                    'numerator' => 0,
-                    'denominator' => 0,
-                    'score_percent' => $quarterAvg,
-                    'performance_level' => $quarterLevel,
-                    'good_practices_breakdown' => [
-                        'months' => $teamMonthlyScores,
-                        'quarter_average' => $quarterAvg,
+                FamilyHealthIndicatorSnapshot::query()->updateOrCreate(
+                    [
+                        'year' => $year,
+                        'quarter' => $quarter,
+                        'ine' => null,
+                        'indicator_code' => 'c1',
                     ],
-                    'active_search_count' => ($quarterAvg < 30.0 || $quarterAvg > 70.0) ? 1 : 0,
-                ]
-            );
-        }
-
-        // Consolida os snapshots mensais municipais (ine = null) para cada mês do quadrimestre
-        foreach ($monthsInQuarter as $idx => $m) {
-            $monthIndex = $idx + 1;
-            $monthSnaps = FamilyHealthMonthlySnapshot::query()
-                ->where('year', $year)
-                ->where('month', $m)
-                ->where('indicator_code', 'c1')
-                ->whereNotNull('ine')
-                ->get();
-
-            $monthNumTotal = (int) $monthSnaps->sum('numerator');
-            $monthDenTotal = (int) $monthSnaps->sum('denominator');
-            $monthAvgScore = $monthSnaps->count() > 0 
-                ? round($monthSnaps->avg('score_percent'), 2)
-                : 0.0;
-            $monthLevel = FamilyHealthService::calculatePerformanceLevel('c1', $monthAvgScore);
-
-            FamilyHealthMonthlySnapshot::query()->updateOrCreate(
-                [
-                    'year' => $year,
-                    'month' => $m,
-                    'ine' => null,
-                    'indicator_code' => 'c1',
-                ],
-                [
-                    'quarter' => $quarter,
-                    'month_in_quarter' => $monthIndex,
-                    'team_name' => 'Consolidado Municipal',
-                    'team_type' => '70',
-                    'numerator' => $monthNumTotal,
-                    'denominator' => $monthDenTotal,
-                    'score_percent' => $monthAvgScore,
-                    'performance_level' => $monthLevel,
-                ]
-            );
-        }
-
-        // Consolida a média municipal do quadrimestre
-        $municipalScores = array_column($teamQuarterlyAverages, 'score');
-        $municipalQuarterAvg = count($municipalScores) > 0 ? round(array_sum($municipalScores) / count($municipalScores), 2) : 0.0;
-        $municipalLevel = FamilyHealthService::calculatePerformanceLevel('c1', $municipalQuarterAvg);
-
-        FamilyHealthIndicatorSnapshot::query()->updateOrCreate(
-            [
-                'year' => $year,
-                'quarter' => $quarter,
-                'ine' => null,
-                'indicator_code' => 'c1',
-            ],
-            [
-                'team_name' => 'Consolidado Municipal',
-                'team_type' => '70',
-                'numerator' => 0,
-                'denominator' => 0,
-                'score_percent' => $municipalQuarterAvg,
-                'performance_level' => $municipalLevel,
-                'good_practices_breakdown' => [
-                    'municipal_average' => $municipalQuarterAvg,
-                    'teams_count' => count($teamQuarterlyAverages),
-                ],
-                'active_search_count' => 0,
-            ]
-        );
+                    [
+                        'team_name' => 'Consolidado Municipal',
+                        'team_type' => '70',
+                        'numerator' => $municipalNumerator,
+                        'denominator' => $municipalDenominator,
+                        'score_percent' => $municipalQuarterAvg,
+                        'performance_level' => $municipalLevel,
+                        'good_practices_breakdown' => [
+                            'municipal_average' => $municipalQuarterAvg,
+                            'teams_count' => count($teamQuarterlyAverages),
+                            'valid_months' => $validMunicipalMonths,
+                            'is_preview' => $validMunicipalMonths < 4,
+                            'calculation_version' => C1DwService::VERSION,
+                            'source' => 'DW PEC',
+                            'aggregation' => 'Média simples dos resultados por equipe e competência',
+                        ],
+                        'active_search_count' => 0,
+                    ]
+                );
+            }
         } // Fim da ETAPA 3 (C1)
 
         // ETAPA 3.5: Indicador C2 Desenvolvimento Infantil (Boas Práticas A a E e Mês a Mês)
@@ -573,7 +577,8 @@ class EsusDataProcessingService
                         try {
                             $parsedReg = $cnesParserReg->parse($xmlPathReg);
                             $ibge = $parsedReg['ibge'] ?? null;
-                        } catch (Throwable) {}
+                        } catch (Throwable) {
+                        }
                     }
                 }
 
@@ -584,7 +589,7 @@ class EsusDataProcessingService
 
                 if (! empty($ibge)) {
                     try {
-                        $individual = $connection->selectOne("
+                        $individual = $connection->selectOne('
                             SELECT
                                 COUNT(*) FILTER (WHERE latest.registration_date >= ?) AS updated_count,
                                 COUNT(*) FILTER (WHERE latest.registration_date < ?) AS outdated_count
@@ -600,16 +605,17 @@ class EsusDataProcessingService
                                     AND tempo.dt_registro <= ?
                                 GROUP BY ficha.co_fat_cidadao_pec
                             ) AS latest
-                        ", [$cutoffDate, $cutoffDate, $ibge, $referenceDate]);
+                        ', [$cutoffDate, $cutoffDate, $ibge, $referenceDate]);
 
                         if ($individual !== null) {
                             $miciUpdated = (int) $individual->updated_count;
                             $miciOutdated = (int) $individual->outdated_count;
                         }
-                    } catch (Throwable) {}
+                    } catch (Throwable) {
+                    }
 
                     try {
-                        $domiciliary = $connection->selectOne("
+                        $domiciliary = $connection->selectOne('
                             SELECT
                                 COUNT(*) FILTER (WHERE latest.registration_date >= ?) AS updated_count,
                                 COUNT(*) FILTER (WHERE latest.registration_date < ?) AS outdated_count
@@ -625,13 +631,14 @@ class EsusDataProcessingService
                                     AND tempo.dt_registro <= ?
                                 GROUP BY ficha.nu_uuid_ficha_origem
                             ) AS latest
-                        ", [$cutoffDate, $cutoffDate, $ibge, $referenceDate]);
+                        ', [$cutoffDate, $cutoffDate, $ibge, $referenceDate]);
 
                         if ($domiciliary !== null) {
                             $micdtUpdated = (int) $domiciliary->updated_count;
                             $micdtOutdated = (int) $domiciliary->outdated_count;
                         }
-                    } catch (Throwable) {}
+                    } catch (Throwable) {
+                    }
                 }
             } elseif (app()->environment('testing')) {
                 $miciUpdated = 100;
@@ -806,9 +813,9 @@ class EsusDataProcessingService
         }
 
         if (in_array('st_ativo', $cols, true)) {
-            $whereParts[] = "(st_ativo = 1 OR st_ativo IS NULL)";
+            $whereParts[] = '(st_ativo = 1 OR st_ativo IS NULL)';
         } elseif (in_array('st_registro_valido', $cols, true)) {
-            $whereParts[] = "(st_registro_valido = 1 OR st_registro_valido IS NULL)";
+            $whereParts[] = '(st_registro_valido = 1 OR st_registro_valido IS NULL)';
         }
 
         $whereSql = implode(' AND ', $whereParts);
@@ -819,7 +826,7 @@ class EsusDataProcessingService
                 SELECT 
                     COALESCE({$ineCol}::text, '') AS nu_ine,
                     COALESCE({$nameCol}::text, 'Equipe de Saúde') AS no_equipe
-                    " . ($typeCol !== null ? ", COALESCE({$typeCol}::text, '70') AS tp_equipe" : "") . "
+                    ".($typeCol !== null ? ", COALESCE({$typeCol}::text, '70') AS tp_equipe" : '')."
                 FROM tb_dim_equipe
                 WHERE {$whereSql}
                 ORDER BY {$nameCol}
@@ -870,8 +877,8 @@ class EsusDataProcessingService
     }
 
     /**
-     * @param (callable(int $percent, string $step, array $tables): void)|null $callback
-     * @param array<string, mixed> $tables
+     * @param  (callable(int $percent, string $step, array $tables): void)|null  $callback
+     * @param  array<string, mixed>  $tables
      */
     private function notifyProgress(?callable $callback, int $percent, string $step, array $tables): void
     {
@@ -879,5 +886,4 @@ class EsusDataProcessingService
             $callback($percent, $step, $tables);
         }
     }
-
 }

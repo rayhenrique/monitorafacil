@@ -7,9 +7,7 @@ use App\Models\C2CohortSnapshot;
 use App\Models\ConsolidationTeam;
 use App\Models\FamilyHealthIndicatorSnapshot;
 use App\Models\FamilyHealthMonthlySnapshot;
-use App\Models\Setting;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
 
 class FamilyHealthService
 {
@@ -44,10 +42,10 @@ class FamilyHealthService
                     'optimal' => ['min' => 50.01, 'max' => 70.0, 'label' => 'Ótimo (> 50% e ≤ 70%)', 'points' => '1,00 pt', 'color' => 'blue', 'badge' => 'bg-sky-100 text-sky-800 border-sky-300'],
                 ],
                 'cbos' => ['2251-42 (Médico ESF)', '2251-70 (Médico Generalista)', '2251-30 (Médico MFC)', '2251-25 (Médico Clínico)', '2252-50 (Médico Ginecologista/Obstetra)', '2235-65 (Enfermeiro ESF)', '2235-05 (Enfermeiro)'],
-                'good_practices' => [
-                    ['letter' => 'A', 'title' => 'Atendimento em Consulta Agendada Programada', 'desc' => 'Consultas individuais direcionadas aos ciclos de vida e doenças crônicas prioritárias.', 'weight' => '100%'],
-                    ['letter' => 'B', 'title' => 'Atendimento em Cuidado Continuado', 'desc' => 'Consultas sequenciais para acompanhamento longitudinal de pacientes com plano terapêutico.', 'weight' => '100%'],
-                    ['letter' => 'C', 'title' => 'Atendimento em Consulta Agendada no Dia', 'desc' => 'Atendimentos agendados previamente conforme rotina estabelecida da UBS.', 'weight' => '100%'],
+                'good_practices' => [],
+                'demand_categories' => [
+                    'programmed' => ['1' => 'Consulta agendada programada / cuidado continuado', '2' => 'Consulta agendada'],
+                    'spontaneous' => ['4' => 'Escuta inicial / orientação', '5' => 'Consulta no dia', '6' => 'Atendimento de urgência'],
                 ],
             ],
 
@@ -341,10 +339,13 @@ class FamilyHealthService
 
         foreach ($indicatorsMeta as $slug => $meta) {
             $snap = $snapshots->get($slug);
+            if ($slug === 'c1' && ($snap?->good_practices_breakdown['calculation_version'] ?? null) !== C1DwService::VERSION) {
+                $snap = null;
+            }
             if ($slug === 'c2' && ($snap?->good_practices_breakdown['calculation_version'] ?? null) !== C2DwService::VERSION) {
                 $snap = null;
             }
-            $score = $snap ? (float) $snap->score_percent : ($slug === 'c2' ? null : 0.0);
+            $score = $snap ? (float) $snap->score_percent : (in_array($slug, ['c1', 'c2'], true) ? null : 0.0);
             $level = $score !== null ? self::calculatePerformanceLevel($slug, $score) : null;
 
             $cards[$slug] = [
@@ -358,7 +359,9 @@ class FamilyHealthService
                 'cohort_total' => $slug === 'c2' ? $c2Cohort?->cohort_total : null,
                 'evaluated_total' => $slug === 'c2' ? $c2Cohort?->evaluated_total : null,
                 'cohort_as_of' => $slug === 'c2' ? $c2Cohort?->as_of?->format('d/m/Y') : null,
-                'is_preview' => $slug === 'c2' && $c2Cohort?->as_of?->lt(Carbon::create($year, $quarter * 4, 1)->endOfMonth()),
+                'is_preview' => $slug === 'c1'
+                    ? (bool) ($snap?->good_practices_breakdown['is_preview'] ?? false)
+                    : ($slug === 'c2' && $c2Cohort?->as_of?->lt(Carbon::create($year, $quarter * 4, 1)->endOfMonth())),
             ];
 
             if ($score !== null) {
@@ -381,6 +384,8 @@ class FamilyHealthService
                 ->where('quarter', $quarter)
                 ->whereNotNull('ine')
                 ->where('indicator_code', 'c1')
+                ->get()
+                ->filter(fn ($snapshot) => ($snapshot->good_practices_breakdown['calculation_version'] ?? null) === C1DwService::VERSION)
                 ->count();
         }
 
@@ -430,7 +435,7 @@ class FamilyHealthService
     public function getIndicatorDetail(string $code, int $year, int $quarter, ?string $selectedIne = null): array
     {
         $code = strtolower($code);
-        if ($code !== 'c2') {
+        if (! in_array($code, ['c1', 'c2'], true)) {
             $this->ensureBaselineSnapshots($year, $quarter);
         }
 
@@ -446,6 +451,9 @@ class FamilyHealthService
             ->where('indicator_code', $code)
             ->whereNull('ine')
             ->first();
+        if ($code === 'c1' && ($municipalSnap?->good_practices_breakdown['calculation_version'] ?? null) !== C1DwService::VERSION) {
+            $municipalSnap = null;
+        }
         if ($code === 'c2' && ($municipalSnap?->good_practices_breakdown['calculation_version'] ?? null) !== C2DwService::VERSION) {
             $municipalSnap = null;
         }
@@ -460,24 +468,26 @@ class FamilyHealthService
         if (in_array($code, ['c1', 'c2'])) {
             $teamsQuery->where(function ($q) {
                 $q->whereIn('team_type', ['70', '76'])
-                  ->orWhereNull('team_type');
+                    ->orWhereNull('team_type');
             })
-            ->where('team_name', 'not like', 'ESB%')
-            ->where('team_name', 'not like', 'esb%')
-            ->where('team_name', 'not like', '%E-MULTI%')
-            ->where('team_name', 'not like', '%e-multi%')
-            ->where('team_name', 'not like', '%EQUIPE AMPLIADA%')
-            ->where('team_name', 'not like', '%equipe ampliada%')
-            ->where('team_name', 'not like', '%EMAD%')
-            ->where('team_name', 'not like', '%EMAP%')
-            ->where('team_name', 'not like', '%SEM EQUIPE%')
-            ->where('team_name', 'not like', '%INE N%O ENCONTRADO%');
+                ->where('team_name', 'not like', 'ESB%')
+                ->where('team_name', 'not like', 'esb%')
+                ->where('team_name', 'not like', '%E-MULTI%')
+                ->where('team_name', 'not like', '%e-multi%')
+                ->where('team_name', 'not like', '%EQUIPE AMPLIADA%')
+                ->where('team_name', 'not like', '%equipe ampliada%')
+                ->where('team_name', 'not like', '%EMAD%')
+                ->where('team_name', 'not like', '%EMAP%')
+                ->where('team_name', 'not like', '%SEM EQUIPE%')
+                ->where('team_name', 'not like', '%INE N%O ENCONTRADO%');
         }
 
         $teams = $teamsQuery->orderByDesc('score_percent')->get();
         if ($code === 'c2') {
-            $teams = $teams->filter(fn ($team) =>
-                ($team->good_practices_breakdown['calculation_version'] ?? null) === C2DwService::VERSION);
+            $teams = $teams->filter(fn ($team) => ($team->good_practices_breakdown['calculation_version'] ?? null) === C2DwService::VERSION);
+        }
+        if ($code === 'c1') {
+            $teams = $teams->filter(fn ($team) => ($team->good_practices_breakdown['calculation_version'] ?? null) === C1DwService::VERSION);
         }
 
         // Se uma equipe foi filtrada
@@ -497,20 +507,22 @@ class FamilyHealthService
 
         $detail = [
             'meta' => $meta,
-            'municipal_score' => $municipalSnap ? (float) $municipalSnap->score_percent : ($code === 'c2' ? null : 0.0),
-            'municipal_level' => $municipalSnap ? $municipalSnap->performance_level : ($code === 'c2' ? null : 'regular'),
+            'municipal_score' => $municipalSnap ? (float) $municipalSnap->score_percent : (in_array($code, ['c1', 'c2'], true) ? null : 0.0),
+            'municipal_level' => $municipalSnap ? $municipalSnap->performance_level : (in_array($code, ['c1', 'c2'], true) ? null : 'regular'),
             'current' => [
                 'numerator' => $activeSnap ? $activeSnap->numerator : 0,
                 'denominator' => $activeSnap ? $activeSnap->denominator : 0,
-                'score_percent' => $activeSnap ? (float) $activeSnap->score_percent : ($code === 'c2' ? null : 0.0),
-                'performance_level' => $activeSnap ? $activeSnap->performance_level : ($code === 'c2' ? null : 'regular'),
+                'score_percent' => $activeSnap ? (float) $activeSnap->score_percent : (in_array($code, ['c1', 'c2'], true) ? null : 0.0),
+                'performance_level' => $activeSnap ? $activeSnap->performance_level : (in_array($code, ['c1', 'c2'], true) ? null : 'regular'),
                 'active_search_count' => $activeSnap ? $activeSnap->active_search_count : 0,
                 'good_practices_breakdown' => $activeSnap ? $activeSnap->good_practices_breakdown : [],
                 'has_data' => $activeSnap !== null,
                 'cohort_total' => $c2Cohort?->cohort_total,
                 'evaluated_total' => $c2Cohort?->evaluated_total,
                 'cohort_as_of' => $c2Cohort?->as_of?->format('d/m/Y'),
-                'is_preview' => $code === 'c2' && $c2Cohort?->as_of?->lt(Carbon::create($year, $quarter * 4, 1)->endOfMonth()),
+                'is_preview' => $code === 'c1'
+                    ? (bool) ($activeSnap?->good_practices_breakdown['is_preview'] ?? false)
+                    : ($code === 'c2' && $c2Cohort?->as_of?->lt(Carbon::create($year, $quarter * 4, 1)->endOfMonth())),
                 'monthly_cohort' => $c2Cohort?->monthly_counts ?? [],
             ],
             'teams' => $teams,
@@ -531,7 +543,7 @@ class FamilyHealthService
                 ->when($selectedIne, fn ($q) => $q->where('ine', $selectedIne), fn ($q) => $q->whereNull('ine'))
                 ->get()
                 ->keyBy('month');
-            if ($code === 'c2' && ! $activeSnap) {
+            if (in_array($code, ['c1', 'c2'], true) && ! $activeSnap) {
                 $monthlySnapshots = collect();
             }
 
@@ -541,8 +553,8 @@ class FamilyHealthService
 
             foreach ($monthsConfig as $mNum => $cfg) {
                 $snap = $monthlySnapshots->get($mNum);
-                $mScore = $snap ? (float) $snap->score_percent : ($code === 'c2' ? null : 0.0);
-                $mLevel = $snap ? $snap->performance_level : ($code === 'c2' ? null : self::calculatePerformanceLevel($code, $mScore));
+                $mScore = $snap ? (float) $snap->score_percent : (in_array($code, ['c1', 'c2'], true) ? null : 0.0);
+                $mLevel = $snap ? $snap->performance_level : (in_array($code, ['c1', 'c2'], true) ? null : self::calculatePerformanceLevel($code, $mScore));
                 $mPoints = $mLevel ? self::calculateComponentIIIPoints($mLevel, $weight) : null;
 
                 $monthlyEvolution[] = [
@@ -566,7 +578,7 @@ class FamilyHealthService
             }
 
             // Média aritmética simples dos 4 meses conforme NT 08/2026: (M1 + M2 + M3 + M4) / 4
-            $quarterAvgScore = $countedMonths > 0 ? round($sumScores / $countedMonths, 2) : ($code === 'c2' ? null : ($activeSnap ? (float) $activeSnap->score_percent : 0.0));
+            $quarterAvgScore = $countedMonths > 0 ? round($sumScores / $countedMonths, 2) : (in_array($code, ['c1', 'c2'], true) ? null : ($activeSnap ? (float) $activeSnap->score_percent : 0.0));
             $quarterLevel = $quarterAvgScore !== null ? self::calculatePerformanceLevel($code, $quarterAvgScore) : null;
             $quarterPoints = $quarterLevel ? self::calculateComponentIIIPoints($quarterLevel, $weight) : null;
 
@@ -580,7 +592,11 @@ class FamilyHealthService
                 'component_iii_points' => $quarterPoints,
                 'weight' => $weight,
                 'weighted_score' => $quarterPoints,
-                'formula' => $code === 'c2' ? 'Prévia: média dos meses com crianças que completarão 2 anos' : 'Média Aritmética: (Mês 1 + Mês 2 + Mês 3 + Mês 4) / 4',
+                'formula' => $code === 'c2'
+                    ? 'Prévia: média dos meses com crianças que completarão 2 anos'
+                    : ($countedMonths < 4
+                        ? sprintf('Prévia local: média de %d competência(s) monitorada(s)', $countedMonths)
+                        : 'Média Aritmética: (Mês 1 + Mês 2 + Mês 3 + Mês 4) / 4'),
                 'valid_months' => $countedMonths,
                 'is_preview' => $detail['current']['is_preview'],
                 'cohort_total' => $code === 'c2' ? $c2Cohort?->cohort_total : null,
@@ -622,8 +638,8 @@ class FamilyHealthService
                 $monthIdx = 1;
                 foreach ($monthsConfig as $mNum => $cfg) {
                     $found = $tSnaps->firstWhere('month', $mNum);
-                    $mScore = $found ? (float) $found->score_percent : ($code === 'c2' ? null : 0.0);
-                    $mLevel = $found ? $found->performance_level : ($code === 'c2' ? null : self::calculatePerformanceLevel($code, $mScore));
+                    $mScore = $found ? (float) $found->score_percent : (in_array($code, ['c1', 'c2'], true) ? null : 0.0);
+                    $mLevel = $found ? $found->performance_level : (in_array($code, ['c1', 'c2'], true) ? null : self::calculatePerformanceLevel($code, $mScore));
                     $mNumAtend = $found ? (int) $found->numerator : 0;
                     $mDenAtend = $found ? (int) $found->denominator : 0;
 
@@ -644,9 +660,9 @@ class FamilyHealthService
                 }
 
                 $validScores = array_values(array_filter($scoresByMonth, fn ($score) => $score !== null));
-                $tAvg = count($validScores) > 0 ? round(array_sum($validScores) / count($validScores), 2) : (float) $team->score_percent;
-                $tLevel = self::calculatePerformanceLevel($code, $tAvg);
-                $tPoints = self::calculateComponentIIIPoints($tLevel, $weight);
+                $tAvg = count($validScores) > 0 ? round(array_sum($validScores) / count($validScores), 2) : null;
+                $tLevel = $tAvg !== null ? self::calculatePerformanceLevel($code, $tAvg) : null;
+                $tPoints = $tLevel ? self::calculateComponentIIIPoints($tLevel, $weight) : null;
 
                 $team->monthly_scores = $scoresByMonth;
                 $team->monthly_details = $detailsByMonth;
@@ -654,7 +670,7 @@ class FamilyHealthService
                 $team->quarter_level = $tLevel;
                 $team->component_iii_points = $tPoints;
 
-                if ($code === 'c1') {
+                if ($code === 'c1' && $tAvg !== null) {
                     if ($tAvg > 70.0) {
                         $team->agenda_status = 'excess_programmatic';
                         $agendaAlerts[] = [
@@ -739,7 +755,7 @@ class FamilyHealthService
 
         for ($i = 0; $i < $limit; $i++) {
             $name = $sampleNames[$i % count($sampleNames)];
-            $cnsPrefix = '7' . str_pad((string) (10000000000000 + ($i * 73921)), 14, '0', STR_PAD_LEFT);
+            $cnsPrefix = '7'.str_pad((string) (10000000000000 + ($i * 73921)), 14, '0', STR_PAD_LEFT);
             $cpf = sprintf('%03d.%03d.%03d-**', 120 + $i, 450 + $i, 780 + $i);
             $age = match ($code) {
                 'c2' => sprintf('%d meses', max(1, min(23, 1 + ($i * 2)))),
@@ -756,7 +772,7 @@ class FamilyHealthService
 
             $items[] = [
                 'name' => $name,
-                'cns' => substr($cnsPrefix, 0, 7) . '****' . substr($cnsPrefix, -4),
+                'cns' => substr($cnsPrefix, 0, 7).'****'.substr($cnsPrefix, -4),
                 'cpf' => $cpf,
                 'age' => $age,
                 'ine' => $ine ?? sprintf('0001%04d', 201 + ($i % 4)),
@@ -784,18 +800,8 @@ class FamilyHealthService
             ['ine' => '0001839253', 'name' => 'eAP 01 · Atenção Primária Noturna', 'type' => '76'],
         ];
 
-        // 1. Garante que os snapshots mensais dos Indicadores C1 e C2 existam (Acompanhamento Mensal)
-        $monthlyCountC1 = FamilyHealthMonthlySnapshot::query()
-            ->where('year', $year)
-            ->where('quarter', $quarter)
-            ->where('indicator_code', 'c1')
-            ->count();
-
-        if ($monthlyCountC1 === 0) {
-            $this->ensureBaselineMonthlyC1($year, $quarter, $teams);
-        }
-
-        // 2. Garante os snapshots quadrimestrais consolidados de C1 a C7
+        // Gera apenas demonstrações dos indicadores ainda não integrados ao DW.
+        // C1 e C2 nunca recebem baseline: seus resultados dependem de extração válida.
         $existingCount = FamilyHealthIndicatorSnapshot::query()
             ->where('year', $year)
             ->where('quarter', $quarter)
@@ -809,7 +815,6 @@ class FamilyHealthService
 
         // Valores base de referência coerentes com as metas ministeriais
         $baselineData = [
-            'c1' => ['num' => 1420, 'den' => 2450, 'pct' => 57.96, 'practices' => ['A' => 650, 'B' => 480, 'C' => 290]],
             'c3' => ['num' => 95, 'den' => 120, 'pct' => 79.17, 'practices' => ['A' => 88, 'B' => 75, 'C' => 85, 'D' => 80, 'E' => 70, 'F' => 78, 'G' => 82, 'H' => 74, 'I' => 68, 'J' => 65, 'K' => 72]],
             'c4' => ['num' => 310, 'den' => 420, 'pct' => 73.81, 'practices' => ['A' => 80, 'B' => 78, 'C' => 72, 'D' => 68, 'E' => 75, 'F' => 65]],
             'c5' => ['num' => 740, 'den' => 950, 'pct' => 77.89, 'practices' => ['A' => 82, 'B' => 85, 'C' => 74, 'D' => 70]],
@@ -818,7 +823,7 @@ class FamilyHealthService
         ];
 
         foreach ($indicators as $slug => $meta) {
-            if ($slug === 'c2') {
+            if (in_array($slug, ['c1', 'c2'], true)) {
                 continue;
             }
             $base = $baselineData[$slug];
@@ -867,97 +872,6 @@ class FamilyHealthService
         }
     }
 
-    /**
-     * Gera snapshots mensais de baseline para o indicador C1 nos 4 meses do quadrimestre.
-     *
-     * @param list<array{ine: string, name: string, type: string}> $teams
-     */
-    public function ensureBaselineMonthlyC1(int $year, int $quarter, array $teams): void
-    {
-        $monthsConfig = self::getMonthsForQuarter($quarter);
-
-        $monthBaseScores = [
-            1 => 54.20,
-            2 => 58.60,
-            3 => 62.40,
-            4 => 59.80,
-        ];
-
-        /** @var array<int, array{num: int, den: int, scores: list<float>}> $teamMonthlySum */
-        $teamMonthlySum = [];
-
-        foreach ($teams as $tIdx => $team) {
-            $ine = $team['ine'];
-            $teamVariance = [-3.5, 2.8, 5.2, -6.0, 1.4][$tIdx % 5];
-
-            $mIndex = 1;
-            foreach ($monthsConfig as $monthNum => $cfg) {
-                $basePct = $monthBaseScores[$mIndex] + $teamVariance;
-                $pct = min(92.0, max(18.0, round($basePct, 2)));
-                $den = 280 + ($mIndex * 15) + ($tIdx * 20);
-                $num = (int) round(($pct / 100) * $den);
-                $level = self::calculatePerformanceLevel('c1', $pct);
-
-                FamilyHealthMonthlySnapshot::query()->updateOrCreate(
-                    [
-                        'year' => $year,
-                        'month' => $monthNum,
-                        'ine' => $ine,
-                        'indicator_code' => 'c1',
-                    ],
-                    [
-                        'quarter' => $quarter,
-                        'month_in_quarter' => $mIndex,
-                        'team_name' => $team['name'],
-                        'team_type' => $team['type'],
-                        'numerator' => $num,
-                        'denominator' => $den,
-                        'score_percent' => $pct,
-                        'performance_level' => $level,
-                    ]
-                );
-
-                if (! isset($teamMonthlySum[$monthNum])) {
-                    $teamMonthlySum[$monthNum] = ['num' => 0, 'den' => 0, 'scores' => []];
-                }
-                $teamMonthlySum[$monthNum]['num'] += $num;
-                $teamMonthlySum[$monthNum]['den'] += $den;
-                $teamMonthlySum[$monthNum]['scores'][] = $pct;
-
-                $mIndex++;
-            }
-        }
-
-        // Snapshots municipais consolidados para cada mês
-        $mIndex = 1;
-        foreach ($monthsConfig as $monthNum => $cfg) {
-            $data = $teamMonthlySum[$monthNum];
-            $mAvgScore = count($data['scores']) > 0 ? round(array_sum($data['scores']) / count($data['scores']), 2) : 0.0;
-            $mLevel = self::calculatePerformanceLevel('c1', $mAvgScore);
-
-            FamilyHealthMonthlySnapshot::query()->updateOrCreate(
-                [
-                    'year' => $year,
-                    'month' => $monthNum,
-                    'ine' => null,
-                    'indicator_code' => 'c1',
-                ],
-                [
-                    'quarter' => $quarter,
-                    'month_in_quarter' => $mIndex,
-                    'team_name' => 'Consolidado Municipal',
-                    'team_type' => '70',
-                    'numerator' => $data['num'],
-                    'denominator' => $data['den'],
-                    'score_percent' => $mAvgScore,
-                    'performance_level' => $mLevel,
-                ]
-            );
-
-            $mIndex++;
-        }
-    }
-
     /** Remove snapshots inválidos do indicador C1. */
     public static function purgeInvalidC1Snapshots(): int
     {
@@ -984,20 +898,20 @@ class FamilyHealthService
             ->whereNotNull('ine')
             ->where(function ($q) {
                 $q->whereNotIn('team_type', ['70', '76'])
-                  ->orWhere('team_name', 'like', 'ESB%')
-                  ->orWhere('team_name', 'like', 'esb%')
-                  ->orWhere('team_name', 'like', '%E-MULTI%')
-                  ->orWhere('team_name', 'like', '%e-multi%')
-                  ->orWhere('team_name', 'like', '%EQUIPE AMPLIADA%')
-                  ->orWhere('team_name', 'like', '%equipe ampliada%')
-                  ->orWhere('team_name', 'like', '%EMAD%')
-                  ->orWhere('team_name', 'like', '%EMAP%')
-                  ->orWhere('team_name', 'like', '%SEM EQUIPE%')
-                  ->orWhere('team_name', 'like', '%sem equipe%')
-                  ->orWhere('team_name', 'like', '%INE N%O ENCONTRADO%')
-                  ->orWhere('ine', 'SEM_INE')
-                  ->orWhere('ine', '0')
-                  ->orWhereRaw('LENGTH(ine) != 10');
+                    ->orWhere('team_name', 'like', 'ESB%')
+                    ->orWhere('team_name', 'like', 'esb%')
+                    ->orWhere('team_name', 'like', '%E-MULTI%')
+                    ->orWhere('team_name', 'like', '%e-multi%')
+                    ->orWhere('team_name', 'like', '%EQUIPE AMPLIADA%')
+                    ->orWhere('team_name', 'like', '%equipe ampliada%')
+                    ->orWhere('team_name', 'like', '%EMAD%')
+                    ->orWhere('team_name', 'like', '%EMAP%')
+                    ->orWhere('team_name', 'like', '%SEM EQUIPE%')
+                    ->orWhere('team_name', 'like', '%sem equipe%')
+                    ->orWhere('team_name', 'like', '%INE N%O ENCONTRADO%')
+                    ->orWhere('ine', 'SEM_INE')
+                    ->orWhere('ine', '0')
+                    ->orWhereRaw('LENGTH(ine) != 10');
             });
 
         $deleted += $query->delete();
@@ -1007,9 +921,9 @@ class FamilyHealthService
             ->whereNotNull('ine')
             ->where(function ($q) {
                 $q->where('ine', 'like', 'ESB%')
-                  ->orWhere('ine', 'SEM_INE')
-                  ->orWhere('ine', '0')
-                  ->orWhereRaw('LENGTH(ine) != 10');
+                    ->orWhere('ine', 'SEM_INE')
+                    ->orWhere('ine', '0')
+                    ->orWhereRaw('LENGTH(ine) != 10');
             });
 
         $deleted += $monthlyQuery->delete();
