@@ -66,15 +66,20 @@ class DataProcessing extends Component
 
         try {
             $startTime = microtime(true);
-            $this->updateProgress(35, 'Extraindo cadastros individuais (MICI) e fichas domiciliares (MICDT)...');
+            $this->updateProgress(20, 'Conectando ao banco PostgreSQL e-SUS PEC e verificando esquema...');
 
-            $result = $service->syncFromPec();
-
-            $this->updateProgress(75, 'Consolidando métricas e relações nominais para busca ativa...');
+            $result = $service->syncFromPec(
+                null,
+                (int) now()->year,
+                min(12, (int) now()->month),
+                function (int $percent, string $step): void {
+                    $this->updateProgress($percent, $step);
+                }
+            );
 
             $executionTimeMs = round((microtime(true) - $startTime) * 1000, 2);
             $this->executionTimeMs = $executionTimeMs;
-            $this->processStatus = 'success';
+            $this->processStatus = $result['success'] ? 'success' : 'error';
 
             $totalMici = number_format($result['metrics']->mici_total, 0, ',', '.');
             $miciAtualizados = number_format($result['metrics']->mici_updated, 0, ',', '.');
@@ -82,13 +87,28 @@ class DataProcessing extends Component
             $vinculados = number_format($result['metrics']->citizens_linked, 0, ',', '.');
             $totalNominal = number_format($result['nominal_citizens_count'], 0, ',', '.');
 
-            $this->processMessage = "Processamento do módulo Vínculo e Acompanhamento Territorial concluído com sucesso!\n"
+            $sourceBadge = ($result['is_live'] ?? false)
+                ? 'Base Oficial e-SUS PEC (Extração Real)'
+                : 'Ambiente Local (Aguardando Deploy na VPS para Extração do PEC)';
+
+            $this->processMessage = "Processamento do módulo Vínculo e Acompanhamento Territorial concluído!\n"
+                . "• Origem dos Dados: {$sourceBadge}\n"
                 . "• Total Geral de MICI: {$totalMici} ({$miciAtualizados} atualizados)\n"
                 . "• Total com MICDT: {$comMicdt}\n"
                 . "• Cidadãos Vinculados: {$vinculados}\n"
-                . "• Relação Nominal da Busca Ativa: {$totalNominal} cidadãos sincronizados ({$executionTimeMs} ms).";
+                . "• Relação Nominal da Busca Ativa: {$totalNominal} cidadãos sincronizados ({$executionTimeMs} ms).\n\n"
+                . $result['message'];
 
             $this->tablesReport = [
+                'tb_acomp_cidadaos_vinculados' => [
+                    'name' => 'tb_acomp_cidadaos_vinculados',
+                    'description' => 'Cidadãos Vinculados e Território (DW e-SUS PEC)',
+                    'status' => ($result['is_live'] ?? false) ? 'Concluído' : 'Simulado Local',
+                    'rows' => (int) $result['nominal_citizens_count'],
+                    'message' => ($result['is_live'] ?? false)
+                        ? "Extração real de {$totalNominal} cidadãos realizada com sucesso."
+                        : 'Acesso ao PostgreSQL restrito à rede de produção.',
+                ],
                 'tb_fat_cad_individual' => [
                     'name' => 'tb_fat_cad_individual',
                     'description' => 'Fichas de Cadastro Individual (MICI)',
@@ -108,7 +128,7 @@ class DataProcessing extends Component
                     'description' => 'Relação Nominal e Busca Ativa (Monitora Fácil)',
                     'status' => 'Atualizado',
                     'rows' => (int) $result['nominal_citizens_count'],
-                    'message' => 'Base local sincronizada para busca e acompanhamento',
+                    'message' => 'Base local sincronizada para busca e acompanhamento territorial',
                 ],
             ];
 

@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.21.1';
+    public const CURRENT_VERSION = 'v1.22.0';
 
     public const CURRENT_RELEASE_DATE = '19/09/2026';
 
@@ -61,9 +61,22 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.21.1',
+                'version' => 'v1.22.0',
                 'date' => '19/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Extração Real Completa do DW e-SUS PEC (Relação Nominal e Métricas)',
+                'summary' => 'Motor de extração massiva e direta do PostgreSQL do e-SUS PEC com cursor seek, cruzamento de fichas individuais (MICI), domiciliares (MICDT), visitas de ACS e atendimentos clínicos.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Extração massiva e paginada por cursor (O(1)) da visão tb_acomp_cidadaos_vinculados conectada diretamente ao PostgreSQL do e-SUS PEC.'],
+                    ['type' => 'novo', 'text' => 'Cruzamento em lote de datas de cadastro (MICI/MICDT), visitas do ACS (tb_fat_visita_domiciliar) e atendimentos (tb_fat_atendimento_individual) para acompanhamento territorial.'],
+                    ['type' => 'melhoria', 'text' => 'Eliminação de dados estáticos/amostrais na sincronização em produção, com consolidação matemática exata das métricas das Dimensões Cadastro e Acompanhamento.'],
+                    ['type' => 'melhoria', 'text' => 'Comando cvat:sync-nominal e botão de processamento com relatório em tempo real do progresso da extração na VPS.'],
+                ],
+            ],
+            [
+                'version' => 'v1.21.1',
+                'date' => '19/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Processamento Exclusivo e Importação Opcional do Siaps',
                 'summary' => 'Botão exclusivo em Processar Dados para Vínculo e Acompanhamento Territorial, desacoplamento do deploy automático do Siaps e modal de upload de CSV diretamente no módulo CVAT.',
                 'highlights' => [

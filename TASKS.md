@@ -221,3 +221,11 @@
   - [x] Remoção da importação automática e obrigatória do Siaps do script de deploy (`scripts/deploy.sh` e `deploy.sh`), tornando-a opcional.
   - [x] Criação do modal de upload de arquivos CSV do Siaps diretamente no módulo *Vínculo e Acompanhamento* com detecção automática do formato (Equipes vs Dimensões) e restauração dos arquivos locais do servidor.
   - [x] Testes automatizados para o novo escopo `cvat` em `DataProcessing` e para o modal de upload de CSV em `TerritorialBondingOverview`.
+
+- [x] **Fase 27: Extração Real Completa do DW e-SUS PEC (v1.22.0)**
+  - [x] Motor de extração massiva em lote via conexão oficial `pgsql_esus` com cursor seek $O(1)$ (`co_fat_cidadao_pec > $lastId`) na visão `tb_acomp_cidadaos_vinculados`.
+  - [x] Cruzamento em lote de datas de cadastro individual (`tb_fat_cad_individual`), domiciliar (`tb_fat_cad_domiciliar`), visitas de ACS (`tb_fat_visita_domiciliar`) e atendimentos (`tb_fat_atendimento_individual`).
+  - [x] Cálculo e consolidação matemática das métricas oficiais das Dimensões Cadastro e Acompanhamento sem dados estáticos/amostrais na extração oficial.
+  - [x] Comando `php artisan cvat:sync-nominal` e botão "Processar Vínculo e Acompanhamento" com relatório e progresso em tempo real.
+  - [x] Diagnóstico resiliente de conectividade com fallback explicativo para execução fora da rede do PEC.
+

@@ -142,68 +142,551 @@ class CvatNominalDwService
      *
      * @return array{success: bool, message: string, metrics: CvatNominalMetric, nominal_citizens_count: int, rows: int}
      */
-    public function syncFromPec(?ConnectionInterface $connection = null, int $year = 2026, int $month = 12): array
+    /**
+     * Sincroniza do banco PostgreSQL e-SUS PEC real caso disponível, com fallback automático.
+     *
+     * @param  ConnectionInterface|null  $connection
+     * @param  int  $year
+     * @param  int  $month
+     * @param  callable|null  $progressCallback Callback no formato fn(int $percent, string $step)
+     * @return array{success: bool, is_live: bool, message: string, metrics: CvatNominalMetric, nominal_citizens_count: int, rows: int}
+     */
+    public function syncFromPec(?ConnectionInterface $connection = null, int $year = 2026, int $month = 12, ?callable $progressCallback = null): array
     {
-        $metric = $this->getMetrics($year, $month);
+        $isLive = false;
+        $conn = null;
 
-        if (! $connection) {
+        if ($connection) {
+            $conn = $connection;
+            $isLive = true;
+        } else {
             try {
-                $connection = DB::connection('pgsql_esus');
-                $connection->statement("SET statement_timeout TO '30s'");
+                $conn = DB::connection('pgsql_esus');
+                $conn->statement("SET statement_timeout TO '180s'");
+                $conn->select('SELECT 1');
+                $isLive = true;
             } catch (Throwable $e) {
-                // Fallback gracioso para dados locais oficiais
-                $this->seedInitialCitizens();
-                $count = CvatNominalCitizen::count();
-
-                return [
-                    'success' => true,
-                    'message' => 'Conexão e-SUS PEC local simulada/fallback: ' . $e->getMessage(),
-                    'metrics' => $metric,
-                    'nominal_citizens_count' => $count,
-                    'rows' => $count,
-                ];
+                $isLive = false;
             }
         }
 
-        // Verifica existência de tb_acomp_cidadaos_vinculados
-        try {
-            $exists = $connection->selectOne("SELECT to_regclass('tb_acomp_cidadaos_vinculados') IS NOT NULL AS tbl_exists");
-            if (! ($exists->tbl_exists ?? false)) {
+        // Se a conexão com o PEC não estiver acessível (ex: ambiente local de desenvolvimento)
+        if (! $isLive || ! $conn) {
+            $count = CvatNominalCitizen::count();
+            if ($count === 0) {
                 $this->seedInitialCitizens();
                 $count = CvatNominalCitizen::count();
-
-                return [
-                    'success' => true,
-                    'message' => 'Tabela tb_acomp_cidadaos_vinculados não localizada no DW. Base municipal inicializada.',
-                    'metrics' => $metric,
-                    'nominal_citizens_count' => $count,
-                    'rows' => $count,
-                ];
             }
-        } catch (Throwable $e) {
-            $this->seedInitialCitizens();
-            $count = CvatNominalCitizen::count();
+            $metric = $this->getMetrics($year, $month);
 
             return [
                 'success' => true,
-                'message' => 'Consulta ao catálogo do PEC indisponível: ' . $e->getMessage() . '. Base municipal mantida.',
+                'is_live' => false,
+                'message' => 'Aviso: Banco e-SUS PEC inacessível neste ambiente local. Base existente mantida. Em produção na VPS, a conexão direta ao PostgreSQL extrairá os dados completos.',
                 'metrics' => $metric,
                 'nominal_citizens_count' => $count,
                 'rows' => $count,
             ];
         }
 
-        // Executa extração de cidadãos reais
-        $this->seedInitialCitizens();
-        $count = CvatNominalCitizen::count();
+        // Executa a extração real completa do PostgreSQL do e-SUS PEC
+        try {
+            return $this->extractFromLivePec($conn, $year, $month, $progressCallback);
+        } catch (Throwable $e) {
+            $count = CvatNominalCitizen::count();
+            $metric = $this->getMetrics($year, $month);
+
+            return [
+                'success' => false,
+                'is_live' => true,
+                'message' => 'Erro durante a extração real do PEC: ' . $e->getMessage(),
+                'metrics' => $metric,
+                'nominal_citizens_count' => $count,
+                'rows' => $count,
+            ];
+        }
+    }
+
+    /**
+     * Extrai a relação nominal e métricas reais completas diretamente das tabelas do e-SUS PEC.
+     *
+     * @return array{success: bool, is_live: bool, message: string, metrics: CvatNominalMetric, nominal_citizens_count: int, rows: int}
+     */
+    public function extractFromLivePec(ConnectionInterface $connection, int $year = 2026, int $month = 12, ?callable $progressCallback = null): array
+    {
+        if ($progressCallback) {
+            $progressCallback(10, 'Inspecionando catálogo de tabelas do e-SUS PEC...');
+        }
+
+        $exists = $connection->selectOne("SELECT to_regclass('tb_acomp_cidadaos_vinculados') IS NOT NULL AS tbl_exists");
+        $hasAcompTable = (bool) ($exists->tbl_exists ?? false);
+
+        if (! $hasAcompTable) {
+            throw new \RuntimeException('A tabela/visão tb_acomp_cidadaos_vinculados não foi encontrada no schema public do e-SUS PEC.');
+        }
+
+        $acompCols = $this->tableColumns($connection, 'tb_acomp_cidadaos_vinculados');
+        $selectCols = $this->buildAcompSelect($acompCols);
+
+        if ($progressCallback) {
+            $progressCallback(25, 'Iniciando extração e cruzamento dos cidadãos do município em lotes...');
+        }
+
+        $totalCitizens = $this->syncCitizensInBatches($connection, $selectCols, $year, $month, $progressCallback);
+
+        if ($progressCallback) {
+            $progressCallback(85, 'Consolidando métricas oficiais das Dimensões Cadastro e Acompanhamento...');
+        }
+
+        $metrics = $this->consolidateMetricsFromLocal($year, $month);
+
+        if ($progressCallback) {
+            $progressCallback(100, 'Sincronização do PEC concluída com sucesso!');
+        }
 
         return [
             'success' => true,
-            'message' => 'Sincronização executada com sucesso do DW e-SUS PEC.',
-            'metrics' => $metric,
-            'nominal_citizens_count' => $count,
-            'rows' => $count,
+            'is_live' => true,
+            'message' => sprintf(
+                'Extração real completa do e-SUS PEC concluída com sucesso: %d cidadãos sincronizados.',
+                $totalCitizens
+            ),
+            'metrics' => $metrics,
+            'nominal_citizens_count' => $totalCitizens,
+            'rows' => $totalCitizens,
         ];
+    }
+
+    /**
+     * Sincroniza em lotes paginados os cidadãos do PostgreSQL PEC para a tabela local.
+     */
+    protected function syncCitizensInBatches(
+        ConnectionInterface $connection,
+        string $selectColumns,
+        int $year,
+        int $month,
+        ?callable $progressCallback = null
+    ): int {
+        $lastId = 0;
+        $batchSize = 1500;
+        $totalProcessed = 0;
+        $cutoffAccompanied = now()->subDays(120)->toDateString();
+        $cutoffMici = now()->subMonths(24)->toDateString();
+
+        while (true) {
+            $rows = $connection->select(<<<SQL
+                SELECT {$selectColumns}
+                FROM tb_acomp_cidadaos_vinculados
+                WHERE co_fat_cidadao_pec > ?
+                ORDER BY co_fat_cidadao_pec ASC
+                LIMIT {$batchSize}
+            SQL, [$lastId]);
+
+            if (empty($rows)) {
+                break;
+            }
+
+            $batchIds = [];
+            foreach ($rows as $row) {
+                $batchIds[] = (int) $row->id;
+            }
+            $lastId = end($batchIds);
+
+            $marks = implode(',', array_fill(0, count($batchIds), '?'));
+
+            // 1. Informações de Cadastro Individual (MICI) e Domiciliar (MICDT)
+            $cadMap = [];
+            $cadRows = $this->selectOptional($connection, <<<SQL
+                SELECT
+                    fci.co_fat_cidadao_pec AS id,
+                    MAX(dt.dt_registro) AS mici_date,
+                    MAX(CASE WHEN fci.co_fat_cad_domiciliar IS NOT NULL THEN dt.dt_registro ELSE NULL END) AS micdt_date,
+                    MAX(CASE WHEN fci.co_fat_cad_domiciliar IS NOT NULL THEN 1 ELSE 0 END) AS has_micdt,
+                    MAX(CASE WHEN COALESCE(fci.st_beneficiario_bolsa_familia::text, '0') IN ('1', 't', 'true') THEN 1 ELSE 0 END) AS has_pbf
+                FROM tb_fat_cad_individual fci
+                JOIN tb_dim_tempo dt ON dt.co_seq_dim_tempo = fci.co_dim_tempo
+                WHERE fci.co_fat_cidadao_pec IN ({$marks})
+                GROUP BY fci.co_fat_cidadao_pec
+            SQL, $batchIds);
+
+            foreach ($cadRows as $cRow) {
+                $cadMap[(int) $cRow->id] = [
+                    'mici_date' => $cRow->mici_date ? (string) $cRow->mici_date : null,
+                    'micdt_date' => $cRow->micdt_date ? (string) $cRow->micdt_date : null,
+                    'has_micdt' => (int) $cRow->has_micdt === 1,
+                    'has_pbf' => (int) $cRow->has_pbf === 1,
+                ];
+            }
+
+            // 2. Última Visita Domiciliar do ACS
+            $visitMap = [];
+            $visitRows = $this->selectOptional($connection, <<<SQL
+                SELECT
+                    vd.co_fat_cidadao_pec AS id,
+                    MAX(dt.dt_registro) AS last_visit_date
+                FROM tb_fat_visita_domiciliar vd
+                JOIN tb_dim_tempo dt ON dt.co_seq_dim_tempo = vd.co_dim_tempo
+                WHERE vd.co_fat_cidadao_pec IN ({$marks})
+                GROUP BY vd.co_fat_cidadao_pec
+            SQL, $batchIds);
+
+            foreach ($visitRows as $vRow) {
+                $visitMap[(int) $vRow->id] = (string) $vRow->last_visit_date;
+            }
+
+            // 3. Último Atendimento Individual (Consulta)
+            $atdMap = [];
+            $atdRows = $this->selectOptional($connection, <<<SQL
+                SELECT
+                    ai.co_fat_cidadao_pec AS id,
+                    MAX(dt.dt_registro) AS last_atd_date
+                FROM tb_fat_atendimento_individual ai
+                JOIN tb_dim_tempo dt ON dt.co_seq_dim_tempo = ai.co_dim_tempo
+                WHERE ai.co_fat_cidadao_pec IN ({$marks})
+                GROUP BY ai.co_fat_cidadao_pec
+            SQL, $batchIds);
+
+            foreach ($atdRows as $aRow) {
+                $atdMap[(int) $aRow->id] = (string) $aRow->last_atd_date;
+            }
+
+            // 4. Monta os registros locais
+            $records = [];
+            $now = now();
+            foreach ($rows as $row) {
+                $id = (int) $row->id;
+                $birthDate = ! empty($row->birth_date) ? (string) $row->birth_date : null;
+                $age = 0;
+                if ($birthDate) {
+                    try {
+                        $age = Carbon::parse($birthDate)->age;
+                    } catch (Throwable) {
+                        $age = 0;
+                    }
+                }
+
+                $miciDate = $cadMap[$id]['mici_date'] ?? null;
+                $miciUpdated = $miciDate !== null && $miciDate >= $cutoffMici;
+
+                $hasMicdt = $cadMap[$id]['has_micdt'] ?? true;
+                $micdtDate = $cadMap[$id]['micdt_date'] ?? null;
+                $micdtUpdated = $hasMicdt && $micdtDate !== null && $micdtDate >= $cutoffMici;
+
+                $lastVisit = $visitMap[$id] ?? null;
+                $lastAtd = $atdMap[$id] ?? null;
+                $lastContact = $lastVisit && $lastAtd ? max($lastVisit, $lastAtd) : ($lastVisit ?? $lastAtd);
+                $isAccompanied = $lastContact !== null && $lastContact >= $cutoffAccompanied;
+
+                $ine = trim((string) ($row->ine ?? ''));
+                $isLinked = $ine !== '';
+
+                $hasPbf = $cadMap[$id]['has_pbf'] ?? false;
+                $isElderly = ($age >= 60);
+                $isChild = ($age < 6);
+
+                $vuln = $isElderly ? 'idoso' : ($isChild ? 'crianca' : 'sem_criterio');
+                $benefit = $hasPbf ? 'pbf' : 'nenhum';
+
+                $records[] = [
+                    'cidadao_pec_id' => $id,
+                    'cns' => trim((string) ($row->cns ?? '')),
+                    'cpf' => trim((string) ($row->cpf ?? '')),
+                    'responsible_cns_cpf' => null,
+                    'birth_date' => $birthDate,
+                    'name' => mb_strtoupper(trim((string) ($row->name ?? 'Cidadão ' . $id))),
+                    'age' => $age,
+                    'race_color' => trim((string) ($row->race_color ?? 'Não informada')),
+                    'gender' => strtoupper(substr(trim((string) ($row->gender ?? 'O')), 0, 1)),
+                    'cnes' => trim((string) ($row->cnes ?? '')),
+                    'facility_name' => trim((string) ($row->facility_name ?? '')),
+                    'ine' => $ine,
+                    'team_name' => trim((string) ($row->team_name ?? '')),
+                    'professional_cns' => trim((string) ($row->professional_cns ?? '')),
+                    'professional_name' => trim((string) ($row->professional_name ?? '')),
+                    'microarea' => trim((string) ($row->microarea ?? '00')),
+                    'mici_updated' => $miciUpdated,
+                    'mici_date' => $miciDate,
+                    'micdt_updated' => $micdtUpdated,
+                    'micdt_date' => $micdtDate,
+                    'has_micdt' => $hasMicdt,
+                    'is_linked' => $isLinked,
+                    'vulnerability_type' => $vuln,
+                    'social_benefit' => $benefit,
+                    'is_accompanied' => $isAccompanied,
+                    'last_visit_date' => $lastContact,
+                    'address' => 'Teotônio Vilela / AL',
+                    'year' => $year,
+                    'month' => $month,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+
+            // Persiste no banco MySQL local via upsert em blocos de 500
+            foreach (array_chunk($records, 500) as $chunk) {
+                CvatNominalCitizen::upsert($chunk, ['cidadao_pec_id'], [
+                    'cns', 'cpf', 'birth_date', 'name', 'age', 'race_color', 'gender',
+                    'cnes', 'facility_name', 'ine', 'team_name', 'professional_cns', 'professional_name',
+                    'microarea', 'mici_updated', 'mici_date', 'micdt_updated', 'micdt_date', 'has_micdt',
+                    'is_linked', 'vulnerability_type', 'social_benefit', 'is_accompanied', 'last_visit_date',
+                    'year', 'month', 'updated_at'
+                ]);
+            }
+
+            $totalProcessed += count($records);
+
+            if ($progressCallback && $totalProcessed % 3000 === 0) {
+                $progressCallback(
+                    min(80, 25 + (int) ($totalProcessed / 600)),
+                    "Processados {$totalProcessed} cidadãos reais do e-SUS PEC..."
+                );
+            }
+        }
+
+        return $totalProcessed;
+    }
+
+    /**
+     * Consolida as métricas oficiais com exatidão matemática a partir dos dados locais reais.
+     */
+    public function consolidateMetricsFromLocal(int $year = 2026, int $month = 12): CvatNominalMetric
+    {
+        $base = CvatNominalCitizen::where('year', $year)->where('month', $month);
+        if ($base->count() === 0) {
+            $base = CvatNominalCitizen::query();
+        }
+
+        // Dimensão Cadastro
+        $totalMici = (clone $base)->count();
+        $miciUpdated = (clone $base)->where('mici_updated', true)->count();
+        $miciOutdated = max(0, $totalMici - $miciUpdated);
+
+        $withoutMicdtTotal = (clone $base)->where('has_micdt', false)->count();
+        $withMicdtTotal = (clone $base)->where('has_micdt', true)->count();
+
+        $miciUpdatedMicdtOutdatedOrNone = (clone $base)->where('mici_updated', true)
+            ->where(function ($q) {
+                $q->where('has_micdt', false)->orWhere('micdt_updated', false);
+            })->count();
+
+        $miciUpdatedWithoutMicdt = (clone $base)->where('mici_updated', true)->where('has_micdt', false)->count();
+
+        $miciAndMicdtUpdated = (clone $base)->where('mici_updated', true)->where('has_micdt', true)->where('micdt_updated', true)->count();
+        $miciAndMicdtOutdated = (clone $base)->where('mici_updated', false)->where('has_micdt', true)->where('micdt_updated', false)->count();
+
+        $citizensLinked = (clone $base)->where('is_linked', true)->count();
+        $citizensNotLinked = max(0, $totalMici - $citizensLinked);
+
+        // Dimensão Acompanhamento (4 Quadrantes)
+        // 1. Sem Critério
+        $q1Query = (clone $base)->where('vulnerability_type', 'sem_criterio')->where('social_benefit', 'nenhum');
+        $noCriteriaTotal = $q1Query->count();
+        $noCriteriaAccompanied = (clone $q1Query)->where('is_accompanied', true)->count();
+        $noCriteriaNotAccompanied = max(0, $noCriteriaTotal - $noCriteriaAccompanied);
+
+        // 2. Idoso ou Criança
+        $q2Query = (clone $base)->whereIn('vulnerability_type', ['idoso', 'crianca'])->where('social_benefit', 'nenhum');
+        $elderlyChildTotal = $q2Query->count();
+        $elderlyChildAccompanied = (clone $q2Query)->where('is_accompanied', true)->count();
+        $elderlyChildNotAccompanied = max(0, $elderlyChildTotal - $elderlyChildAccompanied);
+
+        // 3. Benefício (BPC ou PBF)
+        $q3Query = (clone $base)->where('vulnerability_type', 'sem_criterio')->whereIn('social_benefit', ['bpc', 'pbf', 'bpc_pbf']);
+        $benefitTotal = $q3Query->count();
+        $benefitAccompanied = (clone $q3Query)->where('is_accompanied', true)->count();
+        $benefitNotAccompanied = max(0, $benefitTotal - $benefitAccompanied);
+
+        // 4. Idoso/Criança E Benefício
+        $q4Query = (clone $base)->whereIn('vulnerability_type', ['idoso', 'crianca'])->whereIn('social_benefit', ['bpc', 'pbf', 'bpc_pbf']);
+        $bothTotal = $q4Query->count();
+        $bothAccompanied = (clone $q4Query)->where('is_accompanied', true)->count();
+        $bothNotAccompanied = max(0, $bothTotal - $bothAccompanied);
+
+        $lastRecordDate = (clone $base)->max('last_visit_date') ?? now()->toDateString();
+
+        return CvatNominalMetric::updateOrCreate(
+            ['year' => $year, 'month' => $month],
+            [
+                'last_record_date' => $lastRecordDate,
+                'mici_total' => $totalMici,
+                'mici_updated' => $miciUpdated,
+                'mici_outdated' => $miciOutdated,
+                'mici_without_micdt_total' => $withoutMicdtTotal,
+                'mici_updated_micdt_outdated_or_none' => $miciUpdatedMicdtOutdatedOrNone,
+                'mici_updated_without_micdt' => $miciUpdatedWithoutMicdt,
+                'mici_with_micdt_total' => $withMicdtTotal,
+                'mici_and_micdt_updated' => $miciAndMicdtUpdated,
+                'mici_and_micdt_outdated' => $miciAndMicdtOutdated,
+                'citizens_linked' => $citizensLinked,
+                'citizens_not_linked' => $citizensNotLinked,
+
+                'no_criteria_total' => $noCriteriaTotal,
+                'no_criteria_accompanied' => $noCriteriaAccompanied,
+                'no_criteria_not_accompanied' => $noCriteriaNotAccompanied,
+
+                'elderly_or_child_total' => $elderlyChildTotal,
+                'elderly_or_child_accompanied' => $elderlyChildAccompanied,
+                'elderly_or_child_not_accompanied' => $elderlyChildNotAccompanied,
+
+                'bpc_or_pbf_total' => $benefitTotal,
+                'bpc_or_pbf_accompanied' => $benefitAccompanied,
+                'bpc_or_pbf_not_accompanied' => $benefitNotAccompanied,
+
+                'elderly_child_and_benefit_total' => $bothTotal,
+                'elderly_child_and_benefit_accompanied' => $bothAccompanied,
+                'elderly_child_and_benefit_not_accompanied' => $bothNotAccompanied,
+            ]
+        );
+    }
+
+    /**
+     * Inspeciona e retorna as colunas disponíveis em uma tabela do PostgreSQL.
+     *
+     * @return array<string, bool>
+     */
+    protected function tableColumns(ConnectionInterface $connection, string $table): array
+    {
+        try {
+            $rows = $connection->select(
+                "SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = ?",
+                [$table]
+            );
+        } catch (Throwable) {
+            return [];
+        }
+
+        $columns = [];
+        foreach ($rows as $row) {
+            $columns[strtolower((string) $row->column_name)] = true;
+        }
+
+        return $columns;
+    }
+
+    /**
+     * Executa query opcional retornando array vazio caso tabela ou coluna não exista.
+     *
+     * @param  array<int, mixed>  $bindings
+     * @return array<int, object>
+     */
+    protected function selectOptional(ConnectionInterface $connection, string $sql, array $bindings): array
+    {
+        try {
+            return $connection->select($sql, $bindings);
+        } catch (Throwable $error) {
+            $message = strtolower($error->getMessage());
+            if (str_contains($message, 'does not exist') || str_contains($message, 'undefined column') || str_contains($message, 'undefined table')) {
+                return [];
+            }
+
+            throw $error;
+        }
+    }
+
+    /**
+     * Constrói o SELECT otimizado de tb_acomp_cidadaos_vinculados conforme colunas físicas do banco.
+     *
+     * @param  array<string, bool>  $columns
+     */
+    protected function buildAcompSelect(array $columns): string
+    {
+        $selects = [
+            'co_fat_cidadao_pec AS id',
+            'dt_nascimento_cidadao AS birth_date',
+            "COALESCE(NULLIF(TRIM(no_cidadao::text), ''), 'Cidadão ' || co_fat_cidadao_pec) AS name",
+        ];
+
+        // CPF
+        if (isset($columns['nu_cpf_cidadao'])) {
+            $selects[] = "COALESCE(NULLIF(TRIM(nu_cpf_cidadao::text), ''), '') AS cpf";
+        } elseif (isset($columns['nu_cpf'])) {
+            $selects[] = "COALESCE(NULLIF(TRIM(nu_cpf::text), ''), '') AS cpf";
+        } else {
+            $selects[] = "'' AS cpf";
+        }
+
+        // CNS
+        if (isset($columns['nu_cns_cidadao'])) {
+            $selects[] = "COALESCE(NULLIF(TRIM(nu_cns_cidadao::text), ''), '') AS cns";
+        } elseif (isset($columns['nu_cns'])) {
+            $selects[] = "COALESCE(NULLIF(TRIM(nu_cns::text), ''), '') AS cns";
+        } else {
+            $selects[] = "'' AS cns";
+        }
+
+        // Sexo
+        if (isset($columns['ds_sexo_cidadao'])) {
+            $selects[] = "COALESCE(ds_sexo_cidadao::text, 'O') AS gender";
+        } elseif (isset($columns['ds_sexo'])) {
+            $selects[] = "COALESCE(ds_sexo::text, 'O') AS gender";
+        } else {
+            $selects[] = "'O' AS gender";
+        }
+
+        // Raça / Cor
+        if (isset($columns['ds_raca_cor_cidadao'])) {
+            $selects[] = "COALESCE(ds_raca_cor_cidadao::text, 'Não informada') AS race_color";
+        } elseif (isset($columns['no_raca_cor'])) {
+            $selects[] = "COALESCE(no_raca_cor::text, 'Não informada') AS race_color";
+        } else {
+            $selects[] = "'Não informada' AS race_color";
+        }
+
+        // Microárea
+        if (isset($columns['nu_micro_area'])) {
+            $selects[] = "COALESCE(NULLIF(TRIM(nu_micro_area::text), ''), '00') AS microarea";
+        } elseif (isset($columns['nu_microarea'])) {
+            $selects[] = "COALESCE(NULLIF(TRIM(nu_microarea::text), ''), '00') AS microarea";
+        } elseif (isset($columns['nu_micro_area_domicilio'])) {
+            $selects[] = "COALESCE(NULLIF(TRIM(nu_micro_area_domicilio::text), ''), '00') AS microarea";
+        } else {
+            $selects[] = "'00' AS microarea";
+        }
+
+        // CNES
+        if (isset($columns['nu_cnes_vinc_unidade'])) {
+            $selects[] = "COALESCE(NULLIF(TRIM(nu_cnes_vinc_unidade::text), ''), '') AS cnes";
+        } elseif (isset($columns['nu_cnes_vinc_equipe'])) {
+            $selects[] = "COALESCE(NULLIF(TRIM(nu_cnes_vinc_equipe::text), ''), '') AS cnes";
+        } else {
+            $selects[] = "'' AS cnes";
+        }
+
+        // Nome da Unidade
+        if (isset($columns['no_unidade_vinc'])) {
+            $selects[] = "COALESCE(no_unidade_vinc::text, '') AS facility_name";
+        } else {
+            $selects[] = "'' AS facility_name";
+        }
+
+        // INE
+        if (isset($columns['nu_ine_vinc_equipe'])) {
+            $selects[] = "COALESCE(NULLIF(TRIM(nu_ine_vinc_equipe::text), ''), '') AS ine";
+        } else {
+            $selects[] = "'' AS ine";
+        }
+
+        // Nome da Equipe
+        if (isset($columns['no_equipe_vinc'])) {
+            $selects[] = "COALESCE(no_equipe_vinc::text, '') AS team_name";
+        } else {
+            $selects[] = "'' AS team_name";
+        }
+
+        // Profissional / ACS
+        if (isset($columns['nu_cns_profissional_vinc'])) {
+            $selects[] = "COALESCE(NULLIF(TRIM(nu_cns_profissional_vinc::text), ''), '') AS professional_cns";
+        } else {
+            $selects[] = "'' AS professional_cns";
+        }
+
+        if (isset($columns['no_profissional_vinc'])) {
+            $selects[] = "COALESCE(no_profissional_vinc::text, '') AS professional_name";
+        } else {
+            $selects[] = "'' AS professional_name";
+        }
+
+        return implode(', ', $selects);
     }
 
     /**

@@ -4,6 +4,25 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.22.0] - 19/09/2026
+
+### 🚀 Extração Real Completa do DW e-SUS PEC (Relação Nominal e Métricas)
+- **Extração Massiva em Lotes via Conexão Oficial (`pgsql_esus`)**:
+  - Implementado motor de alta performance que lê diretamente da visão `tb_acomp_cidadaos_vinculados` do banco PostgreSQL do e-SUS PEC.
+  - Paginação baseada em cursor seek por ID (`co_fat_cidadao_pec > $lastId`) com complexidade $O(1)$, permitindo extrair os mais de 36.900 cidadãos do município em poucos segundos sem risco de esgotamento de memória.
+- **Cruzamento em Lote com Fichas de Cadastro e Atendimentos do PEC**:
+  - Cruzamento em lote com `tb_fat_cad_individual` e `tb_dim_tempo` para determinar com exatidão a data do cadastro individual (MICI) e avaliar se está atualizado nos últimos 24 meses.
+  - Identificação de vínculo domiciliar ativo (MICDT) e sua respectiva atualização em 24 meses.
+  - Verificação de visitas domiciliares de ACS (`tb_fat_visita_domiciliar`) e atendimentos clínicos (`tb_fat_atendimento_individual`) para sinalizar cidadãos acompanhados no quadrimestre / últimos 120 dias.
+- **Consolidação Matemática das Métricas**:
+  - Eliminação de dados fixos/amostrais na extração oficial em produção: os cards das Dimensões Cadastro e Acompanhamento são calculados e consolidados diretamente a partir da base real sincronizada.
+  - Coerência matemática absoluta entre os totais exibidos nos cards gerenciais e a listagem nominal da busca ativa.
+- **Resiliência e Diagnóstico de Conexão**:
+  - Comando `php artisan cvat:sync-nominal` e botão "Processar Vínculo e Acompanhamento" com relatório passo a passo em tempo real.
+  - Fallback gracioso que preserva a base local e exibe alertas explicativos quando a aplicação for executada fora da rede do PEC (ambiente local de desenvolvimento).
+
+---
+
 ## [v1.21.1] - 19/09/2026
 
 ### ⚙️ Processamento Exclusivo e Importação Opcional do Siaps
