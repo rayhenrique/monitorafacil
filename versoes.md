@@ -4,6 +4,19 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.22.4] - 19/09/2026
+
+### 📑 Relação Nominal como Submódulo Principal de Vínculo e Acompanhamento
+- **Remoção de "Painel Oficial CVAT"**:
+  - Eliminação definitiva da aba e do item de menu "Painel Oficial CVAT" na sidebar (desktop e mobile) e no componente de abas do módulo.
+- **Relação Nominal como Primeiro Submódulo**:
+  - A **Relação Nominal e Busca Ativa** foi promovida a submódulo principal e primeiro item no menu e na navegação de abas.
+  - Ao clicar em **Vínculo e Acompanhamento** no menu principal ou nos atalhos do Dashboard, o sistema abre diretamente a Relação Nominal (`/vinculo-e-acompanhamento/relacao-nominal`).
+- **Acesso Fluido às Demais Dimensões**:
+  - O acesso às dimensões analíticas (**Dimensão Cadastro**, **Dimensão Acompanhamento**, **Desempenho das Equipes** e **Caderno Metodológico**) segue plenamente funcional através das abas e dos subitens do menu lateral.
+
+---
+
 ## [v1.22.3] - 19/09/2026
 
 ### 🎨 Redesign Responsivo do Painel de Processamento de Dados

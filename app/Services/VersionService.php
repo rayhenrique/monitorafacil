@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.22.3';
+    public const CURRENT_VERSION = 'v1.22.4';
 
     public const CURRENT_RELEASE_DATE = '19/09/2026';
 
@@ -61,9 +61,22 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.22.3',
+                'version' => 'v1.22.4',
                 'date' => '19/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Relação Nominal como Primeiro Submódulo de Vínculo e Acompanhamento',
+                'summary' => 'Remoção do Painel Oficial CVAT e reordenação dos submódulos, abrindo diretamente a Relação Nominal e Busca Ativa ao acessar o módulo de Vínculo e Acompanhamento.',
+                'highlights' => [
+                    ['type' => 'melhoria', 'text' => 'Remoção do item "Painel Oficial CVAT" da sidebar (desktop e mobile) e das abas horizontais do módulo.'],
+                    ['type' => 'melhoria', 'text' => 'Relação Nominal posicionada como o primeiro submódulo e tela inicial padrão de Vínculo e Acompanhamento.'],
+                    ['type' => 'melhoria', 'text' => 'Redirecionamento automático e transparente da raiz do módulo para a Relação Nominal, preservando o acesso às dimensões analíticas.'],
+                    ['type' => 'melhoria', 'text' => 'Atalhos no painel inicial (Dashboard) direcionando o gestor diretamente para a listagem nominal do PEC.'],
+                ],
+            ],
+            [
+                'version' => 'v1.22.3',
+                'date' => '19/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Redesign Responsivo do Painel de Processamento de Dados',
                 'summary' => 'Aprimoramento completo do layout da tela de Processamento de Dados: cabeçalho em largura total sem compressão e grid adaptativo de 5 cards temáticos para mobile, tablet e desktop.',
                 'highlights' => [

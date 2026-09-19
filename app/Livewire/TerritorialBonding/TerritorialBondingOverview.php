@@ -17,7 +17,7 @@ class TerritorialBondingOverview extends Component
     use WithFileUploads;
 
     #[Url(as: 'aba')]
-    public string $activeTab = 'overview';
+    public string $activeTab = 'cadastro';
 
     #[Url(as: 'ano')]
     public int $selectedYear = 2026;
@@ -47,10 +47,10 @@ class TerritorialBondingOverview extends Component
 
     public function mount(): void
     {
-        // Se a aba vier na rota ou URL, valida
-        $allowedTabs = ['overview', 'cadastro', 'acompanhamento', 'teams', 'guide'];
+        // Se a aba vier na rota ou URL, valida. Se for overview ou inválida, redireciona para a Relação Nominal
+        $allowedTabs = ['cadastro', 'acompanhamento', 'teams', 'guide'];
         if (! in_array($this->activeTab, $allowedTabs, true)) {
-            $this->activeTab = 'overview';
+            $this->redirect(route('territorial-bonding.nominal'), navigate: true);
         }
     }
 

@@ -246,3 +246,11 @@
   - [x] Micro-interações táteis, divisórias sutis, tags de escopo e feedback de carregamento (`wire:loading`) em cada card.
   - [x] Inclusão de `processCvat` nas diretivas `wire:target` da barra de progresso Livewire.
   - [x] Compilação de assets de produção com Vite (`npm run build`).
+
+- [x] **Fase 31: Relação Nominal como Submódulo Principal do CVAT (v1.22.4)**
+  - [x] Remoção definitiva do item e aba "Painel Oficial CVAT" na sidebar (desktop e mobile) e em `territorial-bonding-tabs`.
+  - [x] Promoção da Relação Nominal a primeiro submódulo e tela inicial padrão de Vínculo e Acompanhamento.
+  - [x] Redirecionamento da raiz do módulo (`/vinculo-e-acompanhamento`) diretamente para `/vinculo-e-acompanhamento/relacao-nominal`.
+  - [x] Atualização dos atalhos do dashboard para apontar diretamente para a listagem nominal.
+  - [x] Atualização dos testes automatizados de redirecionamento e das dimensões.
+

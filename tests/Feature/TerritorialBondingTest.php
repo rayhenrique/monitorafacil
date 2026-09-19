@@ -18,16 +18,24 @@ class TerritorialBondingTest extends TestCase
         $response->assertRedirect('/login');
     }
 
-    public function test_authenticated_user_can_access_territorial_bonding_overview(): void
+    public function test_authenticated_user_is_redirected_to_nominal_list_when_opening_territorial_bonding(): void
     {
         $user = User::factory()->create();
 
         $response = $this->actingAs($user)->get('/vinculo-e-acompanhamento');
 
+        $response->assertRedirect('/vinculo-e-acompanhamento/relacao-nominal');
+    }
+
+    public function test_authenticated_user_can_access_territorial_bonding_dimensions(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get('/vinculo-e-acompanhamento?aba=cadastro');
+
         $response->assertOk();
         $response->assertSee('Vínculo e Acompanhamento Territorial');
         $response->assertSee('CVAT - Dimensão Cadastro - eSF');
-        $response->assertSee('CVAT - Dimensão Acompanhamento - eSF');
     }
 
     public function test_cvat_service_imports_and_returns_correct_distributions_and_summary(): void
@@ -64,7 +72,7 @@ class TerritorialBondingTest extends TestCase
         $user = User::factory()->create();
 
         Livewire::actingAs($user)
-            ->test(TerritorialBondingOverview::class)
+            ->test(TerritorialBondingOverview::class, ['activeTab' => 'teams'])
             ->assertSet('selectedYear', 2026)
             ->assertSet('selectedQuarter', 1)
             ->assertSee('01 06 CS MANUEL A DE SANTANA')
