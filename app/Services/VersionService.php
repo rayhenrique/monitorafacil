@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.18.0';
+    public const CURRENT_VERSION = 'v1.19.0';
 
     public const CURRENT_RELEASE_DATE = '19/09/2026';
 
@@ -61,9 +61,21 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.18.0',
+                'version' => 'v1.19.0',
                 'date' => '19/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Indicadores Reais no Dashboard',
+                'summary' => 'Os cartões C1, C2 e C3 do Componente de Qualidade agora apresentam a distribuição real das equipes por conceito no quadrimestre selecionado.',
+                'highlights' => [
+                    ['type' => 'correcao', 'text' => 'Removidos os totais fixos em zero dos cartões C1, C2 e C3 no dashboard inicial.'],
+                    ['type' => 'novo', 'text' => 'Contagem das equipes com desempenho Ótimo, Bom, Suficiente e Regular a partir dos snapshots MySQL do período selecionado.'],
+                    ['type' => 'melhoria', 'text' => 'Somente snapshots por equipe da versão de cálculo vigente são exibidos; períodos sem consolidação mostram um estado de ausência de dados.'],
+                ],
+            ],
+            [
+                'version' => 'v1.18.0',
+                'date' => '19/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Progresso Visível no Processamento',
                 'summary' => 'A tela de processamento agora mostra imediatamente uma barra de progresso estimado, a etapa em andamento e o resultado confirmado pelo servidor ao final da consolidação.',
                 'highlights' => [

@@ -4,6 +4,17 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.19.0] - 19/09/2026
+
+### 📊 Indicadores Reais C1–C3 no Dashboard
+- **Fim dos zeros fixos**: os cartões C1, C2 e C3 deixam de apresentar valores definidos diretamente no componente visual.
+- **Snapshots reais**: as quantidades de equipes em Ótimo, Bom, Suficiente e Regular são lidas de `family_health_indicator_snapshots` para o ano e quadrimestre selecionados.
+- **Sem duplicidade municipal**: somente registros com INE são contados; o consolidado municipal não entra na distribuição das equipes.
+- **Versão vigente**: cada snapshot precisa corresponder à versão atual do cálculo C1, C2 ou C3, impedindo a exibição de dados antigos ou simulados.
+- **Ausência explícita**: quando não há consolidação válida, o cartão informa a ausência em vez de exibir quatro zeros como se fossem resultado real.
+
+---
+
 ## [v1.18.0] - 19/09/2026
 
 ### ⏳ Progresso Visível no Processamento

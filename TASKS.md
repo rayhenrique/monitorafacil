@@ -184,3 +184,11 @@
   - [x] Estado final em 100%, distinguindo conclusão com sucesso ou pendências e liberando os controles.
   - [x] Semântica acessível de `progressbar`, texto equivalente e movimento reduzido.
   - [x] Validação funcional em navegador, viewport desktop e responsividade em 390 × 844 px.
+
+- [x] **Fase 23: Dados reais C1–C3 no dashboard inicial (v1.19.0)**
+  - [x] Substituição dos totais estáticos em zero pela distribuição dos snapshots quadrimestrais por equipe.
+  - [x] Contagem de Ótimo, Bom, Suficiente e Regular somente para registros com INE e versões de cálculo vigentes.
+  - [x] Exclusão do consolidado municipal da contagem para evitar duplicidade.
+  - [x] Estado explícito de ausência quando C1, C2 ou C3 ainda não possui consolidação válida.
+  - [x] C4 a C7 permanecem identificados como ainda não processados.
+  - [x] Testes automatizados cobrem snapshots atuais, versão antiga e registro municipal.

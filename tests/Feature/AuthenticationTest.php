@@ -9,8 +9,13 @@ use App\Livewire\Dashboard\RegistrationsOverview;
 use App\Livewire\Dashboard\TeamsOverview;
 use App\Models\ConsolidationRegistration;
 use App\Models\ConsolidationTeam;
+use App\Models\FamilyHealthIndicatorSnapshot;
 use App\Models\Setting;
 use App\Models\User;
+use App\Services\C1DwService;
+use App\Services\C2DwService;
+use App\Services\C3DwService;
+use App\Services\DashboardSnapshotService;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
@@ -56,6 +61,23 @@ class AuthenticationTest extends TestCase
             $table->unsignedInteger('mici_outdated_count');
             $table->unsignedInteger('micdt_updated_count');
             $table->unsignedInteger('micdt_outdated_count');
+            $table->timestamps();
+        });
+
+        Schema::create('family_health_indicator_snapshots', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedSmallInteger('year');
+            $table->unsignedTinyInteger('quarter');
+            $table->string('ine', 20)->nullable()->index();
+            $table->string('team_name', 150)->nullable();
+            $table->string('team_type', 10)->nullable();
+            $table->string('indicator_code', 10)->index();
+            $table->unsignedInteger('numerator')->default(0);
+            $table->unsignedInteger('denominator')->default(0);
+            $table->decimal('score_percent', 5, 2)->default(0.00);
+            $table->string('performance_level', 20)->default('regular');
+            $table->json('good_practices_breakdown')->nullable();
+            $table->unsignedInteger('active_search_count')->default(0);
             $table->timestamps();
         });
     }
@@ -172,5 +194,61 @@ class AuthenticationTest extends TestCase
             ->assertSee('M1')
             ->assertSee('M2')
             ->assertSee('Ótimo');
+    }
+
+    public function test_quality_overview_uses_current_team_snapshots_for_c1_to_c3(): void
+    {
+        $rows = [
+            ['code' => 'c1', 'ine' => '1111111111', 'level' => 'otimo', 'version' => C1DwService::VERSION],
+            ['code' => 'c1', 'ine' => '2222222222', 'level' => 'bom', 'version' => C1DwService::VERSION],
+            ['code' => 'c2', 'ine' => '1111111111', 'level' => 'suficiente', 'version' => C2DwService::VERSION],
+            ['code' => 'c3', 'ine' => '1111111111', 'level' => 'regular', 'version' => C3DwService::VERSION],
+            ['code' => 'c3', 'ine' => '9999999999', 'level' => 'otimo', 'version' => 'versao-antiga'],
+        ];
+
+        foreach ($rows as $row) {
+            FamilyHealthIndicatorSnapshot::query()->create([
+                'year' => 2026,
+                'quarter' => 3,
+                'ine' => $row['ine'],
+                'team_name' => 'Equipe '.$row['ine'],
+                'team_type' => '70',
+                'indicator_code' => $row['code'],
+                'score_percent' => 50,
+                'performance_level' => $row['level'],
+                'good_practices_breakdown' => ['calculation_version' => $row['version']],
+            ]);
+        }
+
+        FamilyHealthIndicatorSnapshot::query()->create([
+            'year' => 2026,
+            'quarter' => 3,
+            'ine' => null,
+            'team_name' => 'Consolidado Municipal',
+            'team_type' => '70',
+            'indicator_code' => 'c1',
+            'score_percent' => 50,
+            'performance_level' => 'regular',
+            'good_practices_breakdown' => ['calculation_version' => C1DwService::VERSION],
+        ]);
+
+        $distribution = app(DashboardSnapshotService::class)->familyHealthPerformance(2026, 3);
+
+        $this->assertSame([
+            'optimal' => 1,
+            'good' => 1,
+            'sufficient' => 0,
+            'regular' => 0,
+            'evaluated_teams' => 2,
+            'has_data' => true,
+        ], $distribution['c1']);
+        $this->assertSame(1, $distribution['c2']['sufficient']);
+        $this->assertSame(1, $distribution['c3']['regular']);
+        $this->assertSame(1, $distribution['c3']['evaluated_teams']);
+
+        Livewire::test(QualityOverview::class, ['year' => 2026, 'quarter' => 3])
+            ->assertSee('2 equipes avaliadas com consolidação válida')
+            ->assertSee('1 equipe avaliada com consolidação válida')
+            ->assertSee('Indicador ainda não processado');
     }
 }

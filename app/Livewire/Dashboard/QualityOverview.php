@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Dashboard;
 
+use App\Services\DashboardSnapshotService;
 use Illuminate\View\View;
 use Livewire\Component;
 
@@ -12,7 +13,7 @@ class QualityOverview extends Component
     public int $quarter;
 
     /**
-     * @return array<int, array{code: string, name: string, description: string, icon: string, optimal: int, good: int, sufficient: int, regular: int}>
+     * @return array<int, array{code: string, name: string, description: string, icon: string, optimal: int, good: int, sufficient: int, regular: int, evaluated_teams: int, has_data: bool}>
      */
     public function getFamilyHealthIndicators(): array
     {
@@ -26,6 +27,8 @@ class QualityOverview extends Component
                 'good' => 0,
                 'sufficient' => 0,
                 'regular' => 0,
+                'evaluated_teams' => 0,
+                'has_data' => false,
             ],
             [
                 'code' => 'C2',
@@ -36,6 +39,8 @@ class QualityOverview extends Component
                 'good' => 0,
                 'sufficient' => 0,
                 'regular' => 0,
+                'evaluated_teams' => 0,
+                'has_data' => false,
             ],
             [
                 'code' => 'C3',
@@ -46,6 +51,8 @@ class QualityOverview extends Component
                 'good' => 0,
                 'sufficient' => 0,
                 'regular' => 0,
+                'evaluated_teams' => 0,
+                'has_data' => false,
             ],
             [
                 'code' => 'C4',
@@ -56,6 +63,8 @@ class QualityOverview extends Component
                 'good' => 0,
                 'sufficient' => 0,
                 'regular' => 0,
+                'evaluated_teams' => 0,
+                'has_data' => false,
             ],
             [
                 'code' => 'C5',
@@ -66,6 +75,8 @@ class QualityOverview extends Component
                 'good' => 0,
                 'sufficient' => 0,
                 'regular' => 0,
+                'evaluated_teams' => 0,
+                'has_data' => false,
             ],
             [
                 'code' => 'C6',
@@ -76,6 +87,8 @@ class QualityOverview extends Component
                 'good' => 0,
                 'sufficient' => 0,
                 'regular' => 0,
+                'evaluated_teams' => 0,
+                'has_data' => false,
             ],
             [
                 'code' => 'C7',
@@ -86,6 +99,8 @@ class QualityOverview extends Component
                 'good' => 0,
                 'sufficient' => 0,
                 'regular' => 0,
+                'evaluated_teams' => 0,
+                'has_data' => false,
             ],
         ];
     }
@@ -188,10 +203,19 @@ class QualityOverview extends Component
         ];
     }
 
-    public function render(): View
+    public function render(DashboardSnapshotService $snapshots): View
     {
+        $performance = $snapshots->familyHealthPerformance($this->year, $this->quarter);
+        $familyHealth = array_map(function (array $indicator) use ($performance): array {
+            $code = strtolower($indicator['code']);
+
+            return isset($performance[$code])
+                ? array_replace($indicator, $performance[$code])
+                : $indicator;
+        }, $this->getFamilyHealthIndicators());
+
         return view('livewire.dashboard.quality-overview', [
-            'familyHealth' => $this->getFamilyHealthIndicators(),
+            'familyHealth' => $familyHealth,
             'oralHealth' => $this->getOralHealthIndicators(),
             'eMulti' => $this->getEMultiIndicators(),
         ]);
