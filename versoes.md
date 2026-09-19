@@ -4,6 +4,21 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.20.0] - 19/09/2026
+
+### 🗺️ Módulo Vínculo e Acompanhamento Territorial (Componente II - CVAT)
+- **Posicionamento de Destaque**: O novo módulo "Vínculo e Acompanhamento" passa a integrar a navegação principal da aplicação, posicionado estrategicamente antes do módulo de *Saúde da Família* na barra lateral (desktop e mobile).
+- **Resultados Oficiais Siaps**: Incorporação dos dados oficiais dos 3 últimos quadrimestres homologados pelo Ministério da Saúde: **Q2/2025**, **Q3/2025** e **Q1/2026** (com nota explícita de que **Q2/2026** ainda aguarda publicação ministerial).
+- **Gráficos Espelhados do Siaps**: Reprodução visual fidedigna dos dois gráficos oficiais do Ministério da Saúde com barras horizontais empilhadas em 4 faixas normativas (Regular, Suficiente, Bom e Ótimo):
+  - **CVAT - Dimensão Cadastro - eSF** (Peso 3 / 0,00 a 3,00 pts - cadastros individuais MICI atualizados em 24 meses).
+  - **CVAT - Dimensão Acompanhamento - eSF** (Peso 7 / 0,00 a 7,00 pts - acompanhamento territorial e visitas de ACS).
+- **Detalhamento das 19 Equipes eSF**: Tabela nominal completa das 19 equipes de Teotônio Vilela/AL com CNES, Unidade de Saúde, INE, notas de Cadastro, notas de Acompanhamento, Nota Final até 10,00 pts e Classificação Final com badge colorido.
+- **Enquadramento Financeiro (Quadro 5 da NT 08/2026)**: Faixas oficiais de classificação para incentivo federal: Ótimo (`> 8,5`), Bom (`≥ 7,0 e ≤ 8,5`), Suficiente (`≥ 5,0 e < 7,0`) e Regular (`< 5,0`). O município alcançou média **8,77 / 10,00** no Q1/26 com classificação **ÓTIMO** (100% de repasse).
+- **Integração com o Dashboard**: O card de Vínculo e Território no painel inicial foi conectado às contagens oficiais do Siaps, exibindo a distribuição real das equipes e link direto para o novo módulo.
+- **Importação Automatizada**: Novo comando Artisan `php artisan cvat:import-siaps` e serviço `CvatService` para leitura e carga idempotente dos arquivos CSV do Siaps.
+
+---
+
 ## [v1.19.0] - 19/09/2026
 
 ### 📊 Indicadores Reais C1–C3 no Dashboard

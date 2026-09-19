@@ -43,11 +43,11 @@
 
                 <div class="mt-6 grid grid-cols-4 rounded-xl border border-line bg-canvas/60 p-3 text-center">
                     <div>
-                        <p class="text-xl font-bold tabular-nums text-emerald-700">{{ $classifications['optimal'] }}</p>
+                        <p class="text-xl font-bold tabular-nums text-blue-700">{{ $classifications['optimal'] }}</p>
                         <p class="text-[10px] font-semibold text-muted uppercase">Ótimo</p>
                     </div>
                     <div class="border-l border-line/80">
-                        <p class="text-xl font-bold tabular-nums text-teal-700">{{ $classifications['good'] }}</p>
+                        <p class="text-xl font-bold tabular-nums text-emerald-700">{{ $classifications['good'] }}</p>
                         <p class="text-[10px] font-semibold text-muted uppercase">Bom</p>
                     </div>
                     <div class="border-l border-line/80">
@@ -58,6 +58,15 @@
                         <p class="text-xl font-bold tabular-nums text-rose-700">{{ $classifications['regular'] }}</p>
                         <p class="text-[10px] font-semibold text-muted uppercase">Regular</p>
                     </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <a href="{{ route('territorial-bonding.overview') }}" class="text-xs font-semibold text-teal-700 hover:text-teal-900 transition inline-flex items-center gap-1">
+                        <span>Acessar Módulo Vínculo e Acompanhamento</span>
+                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                        </svg>
+                    </a>
                 </div>
             </article>
 

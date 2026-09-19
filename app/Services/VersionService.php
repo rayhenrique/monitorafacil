@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.19.0';
+    public const CURRENT_VERSION = 'v1.20.0';
 
     public const CURRENT_RELEASE_DATE = '19/09/2026';
 
@@ -61,9 +61,22 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.19.0',
+                'version' => 'v1.20.0',
                 'date' => '19/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Módulo Vínculo e Acompanhamento Territorial',
+                'summary' => 'Implementação oficial do Componente II (CVAT) com resultados do Siaps (Q2/25, Q3/25 e Q1/26), reprodução fidedigna dos gráficos de barras empilhadas e avaliação individual das 19 equipes eSF.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Novo módulo oficial Vínculo e Acompanhamento Territorial posicionado antes de Saúde da Família na barra lateral.'],
+                    ['type' => 'novo', 'text' => 'Gráficos idênticos aos do Siaps para a Dimensão Cadastro (Peso 3) e Dimensão Acompanhamento (Peso 7) com histórico dos últimos 3 quadrimestres.'],
+                    ['type' => 'novo', 'text' => 'Tabela detalhada com as 19 equipes eSF, notas por dimensão, nota final até 10,00 e conceitos para repasse financeiro (Quadro 5 da NT 08/2026).'],
+                    ['type' => 'melhoria', 'text' => 'Integração do card de Vínculo e Território no dashboard inicial com os dados oficiais do Siaps e link direto para o módulo.'],
+                ],
+            ],
+            [
+                'version' => 'v1.19.0',
+                'date' => '19/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Indicadores Reais no Dashboard',
                 'summary' => 'Os cartões C1, C2 e C3 do Componente de Qualidade agora apresentam a distribuição real das equipes por conceito no quadrimestre selecionado.',
                 'highlights' => [

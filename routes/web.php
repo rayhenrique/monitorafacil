@@ -11,6 +11,7 @@ use App\Livewire\Settings\DataProcessing;
 use App\Livewire\Settings\EsusConnection;
 use App\Livewire\Settings\MunicipalitySettings;
 use App\Livewire\Settings\UsersManager;
+use App\Livewire\TerritorialBonding\TerritorialBondingOverview;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
@@ -23,6 +24,10 @@ Route::middleware('guest')->group(function (): void {
 Route::middleware('auth')->group(function (): void {
     Route::view('/dashboard', 'dashboard')->name('dashboard');
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+    Route::prefix('vinculo-e-acompanhamento')->name('territorial-bonding.')->group(function (): void {
+        Route::get('/', TerritorialBondingOverview::class)->name('overview');
+    });
 
     Route::prefix('saude-da-familia')->name('family-health.')->group(function (): void {
         Route::get('/', FamilyHealthOverview::class)->name('overview');

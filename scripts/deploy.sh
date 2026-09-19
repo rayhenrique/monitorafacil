@@ -30,22 +30,25 @@ else
     PHP_BIN="php"
 fi
 
-echo "==> [4/9] Executando migrações do banco de dados..."
+echo "==> [4/10] Executando migrações do banco de dados..."
 $PHP_BIN artisan migrate --force
 
-echo "==> [5/9] Publicando assets do Livewire..."
+echo "==> [5/10] Importando dados oficiais do Siaps (CVAT)..."
+$PHP_BIN artisan cvat:import-siaps
+
+echo "==> [6/10] Publicando assets do Livewire..."
 $PHP_BIN artisan livewire:publish --assets
 
-echo "==> [6/9] Limpando caches da aplicação..."
+echo "==> [7/10] Limpando caches da aplicação..."
 $PHP_BIN artisan optimize:clear
 
-echo "==> [7/9] Otimizando cache de configuração..."
+echo "==> [8/10] Otimizando cache de configuração..."
 $PHP_BIN artisan config:cache
 
-echo "==> [8/9] Otimizando cache de rotas..."
+echo "==> [9/10] Otimizando cache de rotas..."
 $PHP_BIN artisan route:cache
 
-echo "==> [9/9] Otimizando cache de views..."
+echo "==> [10/10] Otimizando cache de views..."
 $PHP_BIN artisan view:cache
 
 echo "=============================================================================="

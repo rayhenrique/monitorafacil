@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Dashboard;
 
+use App\Services\CvatService;
 use App\Services\DashboardSnapshotService;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -12,9 +13,10 @@ class RegistrationsOverview extends Component
 
     public int $quarter;
 
-    public function render(DashboardSnapshotService $snapshots): View
+    public function render(DashboardSnapshotService $snapshots, CvatService $cvatService): View
     {
         $snapshot = $snapshots->registrations($this->year, $this->quarter);
+        $cvatSummary = $cvatService->getMunicipalSummary($this->year, $this->quarter);
 
         $groups = $snapshot === null ? [] : [
             [
@@ -37,11 +39,12 @@ class RegistrationsOverview extends Component
             'snapshot' => $snapshot,
             'groups' => $groups,
             'classifications' => [
-                'optimal' => 0,
-                'good' => 0,
-                'sufficient' => 0,
-                'regular' => 0,
+                'optimal' => $cvatSummary['optimal_count'],
+                'good' => $cvatSummary['good_count'],
+                'sufficient' => $cvatSummary['sufficient_count'],
+                'regular' => $cvatSummary['regular_count'],
             ],
+            'cvatSummary' => $cvatSummary,
         ]);
     }
 }

@@ -1,0 +1,31 @@
+﻿Ministério da Saúde - MS
+Secretaria de Atenção Primária à Saúde - Saps
+Sistema de Informação para a Atenção Primária à Saúde – Siaps
+Dado gerado em: 19 de setembro de 2026 - 12:55h
+Relatorio Publico - Vínculo e Acompanhamento Territorial
+Dado Preliminar
+
+Dados sociodemográficos:
+UF: AL
+Município: 270915 / TEOTÔNIO VILELA
+
+Filtro:
+Quadrimestre selecionada: Q2/25,Q3/25,Q1/26
+
+Quadrimestre/Ano;UF;Código IBGE;Município;Tipo de Equipe;Dimensão por tipo de equipe;Total de equipe - REGULAR;Total de equipe - SUFICIENTE;Total de equipe  - BOM;Total de equipe   - ÓTIMO
+"2025Q2	";"AL	";"270915	";"TEOTÔNIO VILELA	";"eSF	";"CVAT - Dimensão Cadastro	";"2	";"2	";"5	";"10	"
+"2025Q2	";"AL	";"270915	";"TEOTÔNIO VILELA	";"eSF	";"CVAT - Dimensão Acompanhamento	";"2	";"4	";"7	";"6	"
+"2025Q3	";"AL	";"270915	";"TEOTÔNIO VILELA	";"eSF	";"CVAT - Dimensão Cadastro	";"1	";"1	";"6	";"11	"
+"2025Q3	";"AL	";"270915	";"TEOTÔNIO VILELA	";"eSF	";"CVAT - Dimensão Acompanhamento	";"1	";"2	";"7	";"9	"
+"2026Q1	";"AL	";"270915	";"TEOTÔNIO VILELA	";"eSF	";"CVAT - Dimensão Cadastro	";"1	";"0	";"3	";"15	"
+"2026Q1	";"AL	";"270915	";"TEOTÔNIO VILELA	";"eSF	";"CVAT - Dimensão Acompanhamento	";"1	";"1	";"7	";"10	"
+
+Fonte: Sistema de Informação para a Atenção Primária à Saúde - SIAPS
+""
+"Legenda do Conceito Obtido do Indicador"
+"Regular";"0,25"
+"Suficiente";"0,50"
+"Bom";"0,75"
+"Ótimo";"1"
+""
+"Mais informacoes: NOTA TECNICA No 6/2025-DEAPS/SAPS/MS -  https://sisaps.saude.gov.br/sistemas/esusaps/assets/files/NT_06-2025_cvat-6a5e06dd9db348ec560999f7839da273.pdf"

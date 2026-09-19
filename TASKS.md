@@ -192,3 +192,14 @@
   - [x] Estado explícito de ausência quando C1, C2 ou C3 ainda não possui consolidação válida.
   - [x] C4 a C7 permanecem identificados como ainda não processados.
   - [x] Testes automatizados cobrem snapshots atuais, versão antiga e registro municipal.
+
+- [x] **Fase 24: Módulo Vínculo e Acompanhamento Territorial - CVAT (v1.20.0)**
+  - [x] Posicionamento do novo módulo "Vínculo e Acompanhamento" na navegação lateral (desktop e mobile) antes de Saúde da Família.
+  - [x] Migrations e Models para distribuições dimensionais (`cvat_dimension_distributions`) e avaliações individuais das equipes (`cvat_team_evaluations`).
+  - [x] Serviço `CvatService` e comando Artisan `php artisan cvat:import-siaps` com leitura e carga idempotente dos arquivos CSV do Siaps.
+  - [x] Carga dos 3 últimos quadrimestres oficiais (Q2/2025, Q3/2025, Q1/2026) e aviso explícito da pendência do Q2/2026.
+  - [x] Reprodução fiel dos gráficos de barras empilhadas do Siaps para a Dimensão Cadastro (Peso 3) e Dimensão Acompanhamento (Peso 7).
+  - [x] Tabela de desempenho das 19 equipes eSF com notas, ordenação, busca, filtros de classificação e totalizador municipal.
+  - [x] Enquadramento no Quadro 5 da NT 08/2026 (média municipal de 8,77 em Q1/26 com classificação Ótimo e 100% de incentivo financeiro).
+  - [x] Integração dos números oficiais de vínculo no dashboard inicial com link direto para o módulo.
+  - [x] Testes automatizados cobrindo rotas, serviço CVAT e componente Livewire.
