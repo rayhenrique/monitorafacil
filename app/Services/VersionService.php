@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.16.0';
+    public const CURRENT_VERSION = 'v1.16.1';
 
     public const CURRENT_RELEASE_DATE = '19/09/2026';
 
@@ -61,9 +61,21 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.16.0',
+                'version' => 'v1.16.1',
                 'date' => '19/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Compatibilidade Dinâmica com tb_dim_cid no DW e-SUS PEC',
+                'summary' => 'Correção crítica na extração do C3: a tabela de dimensão CID-10 no DW oficial do PEC é tb_dim_cid (PK co_seq_dim_cid, coluna nu_cid), e não tb_dim_cid10. Implementada detecção dinâmica via information_schema para garantir compatibilidade com qualquer versão do PEC.',
+                'highlights' => [
+                    ['type' => 'correcao', 'text' => 'Correção do erro SQLSTATE[42P01] "relation tb_dim_cid10 does not exist" na extração do C3 via DW PEC.'],
+                    ['type' => 'correcao', 'text' => 'Detecção dinâmica via information_schema da tabela (tb_dim_cid ou tb_dim_cid10), PK (co_seq_dim_cid), coluna de código (nu_cid) e FK (co_dim_cid) para compatibilidade com múltiplas versões do DW e-SUS PEC.'],
+                    ['type' => 'melhoria', 'text' => 'Fallback seguro: se nenhuma tabela CID existir no PEC, a query omite o JOIN e filtra gestantes apenas por CIAP, DUM e idade gestacional.'],
+                ],
+            ],
+            [
+                'version' => 'v1.16.0',
+                'date' => '19/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Módulo C3 - Cuidado na Gestação e Puerpério na APS (Componente III)',
                 'summary' => 'Implementação completa do Indicador C3 em conformidade estrita com a Nota Metodológica C3 (SAPS/MS), NT 06/2025, NT 08/2026 e DW e-SUS PEC (UFSC): peso 2.0 (até 2,00 pts), 11 boas práticas oficiais (100 pontos totais: A=10 pts, B a K=9 pts cada), coorte do 42º dia do puerpério, evolução mensal M1 a M4, busca ativa prospectiva com 22 colunas customizáveis, modal de busca avançada e auditoria clínica detalhada.',
                 'highlights' => [

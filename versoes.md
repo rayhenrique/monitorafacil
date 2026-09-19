@@ -4,6 +4,15 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.16.1] - 19/09/2026
+
+### 🔧 Compatibilidade Dinâmica com tb_dim_cid no DW e-SUS PEC
+- **Correção Crítica**: Erro `SQLSTATE[42P01]: relation "tb_dim_cid10" does not exist` na extração do C3. A tabela oficial de dimensão CID-10 no DW e-SUS PEC (UFSC v8.7.0) é `tb_dim_cid` (PK `co_seq_dim_cid`, coluna `nu_cid`), e não `tb_dim_cid10`.
+- **Detecção Dinâmica**: Implementada resolução via `information_schema` para detectar automaticamente a tabela (`tb_dim_cid` ou `tb_dim_cid10`), PK, coluna de código e FK em `tb_fat_atd_ind_problemas`, garantindo compatibilidade com qualquer versão do DW PEC.
+- **Fallback Seguro**: Se nenhuma tabela CID existir no PEC, a query omite o JOIN e filtra gestantes apenas por CIAP, DUM e idade gestacional.
+
+---
+
 ## [v1.16.0] - 19/09/2026
 
 ### 🤰 Módulo C3 - Cuidado na Gestação e Puerpério na APS (Componente III)

@@ -164,4 +164,5 @@
   - [x] Integração Centralizada no Processamento de Dados (`EsusDataProcessingService`, `DataProcessing`): Escopo `--scope=c3` e botão "Processar C3 & Lista Gestantes".
   - [x] Frontend Livewire (`IndicatorDetail`): Cabeçalho C3, decomposição das 11 práticas, evolução M1 a M4, desempenho por equipe, tabela interativa com seletor de colunas, modal de busca avançada e modal de auditoria clínica.
   - [x] Testes de Feature completos (`tests/Feature/FamilyHealthC3Test.php`) com 100% de aprovação.
+  - [x] **Patch v1.16.1**: Correção do erro `SQLSTATE[42P01] tb_dim_cid10 does not exist` via detecção dinâmica (`information_schema`) da tabela CID-10 (`tb_dim_cid` ou `tb_dim_cid10`), PK, coluna de código e FK em `tb_fat_atd_ind_problemas`. Fallback seguro omitindo JOIN CID quando a tabela não existir.
 

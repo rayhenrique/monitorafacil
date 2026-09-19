@@ -16,6 +16,86 @@ class C3DwService
     public const VERSION = 'dw-c3-2026-09-previa';
 
     /**
+     * Detecta dinamicamente a tabela e colunas de CID-10 no DW do PEC.
+     *
+     * Versões do DW podem usar `tb_dim_cid` (padrão v8.7+) ou `tb_dim_cid10` (legado).
+     * A FK em `tb_fat_atd_ind_problemas` pode ser `co_dim_cid` ou `co_dim_cid10`.
+     *
+     * @return array{table:string,pk:string,code_col:string,fk_col:string}|null null se nenhuma tabela existir
+     */
+    private function resolveCidSchema(ConnectionInterface $connection): ?array
+    {
+        if ($connection instanceof MockInterface) {
+            return null;
+        }
+
+        try {
+            // 1. Verifica qual tabela de dimensão CID existe
+            $tables = $connection->select(
+                "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('tb_dim_cid', 'tb_dim_cid10')"
+            );
+
+            $cidTable = null;
+            foreach ($tables as $t) {
+                $name = (string) $t->table_name;
+                // Prioriza tb_dim_cid (padrão oficial v8.7+)
+                if ($name === 'tb_dim_cid') {
+                    $cidTable = 'tb_dim_cid';
+                    break;
+                }
+                if ($name === 'tb_dim_cid10') {
+                    $cidTable = 'tb_dim_cid10';
+                }
+            }
+
+            if (! $cidTable) {
+                return null;
+            }
+
+            // 2. Detecta as colunas da tabela de dimensão CID
+            $cols = $connection->select(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = ? AND table_schema = 'public'",
+                [$cidTable]
+            );
+            $colSet = [];
+            foreach ($cols as $c) {
+                $colSet[strtolower((string) $c->column_name)] = true;
+            }
+
+            // PK: co_seq_dim_cid (padrão) ou co_seq_dim_cid10 (legado)
+            $pk = isset($colSet['co_seq_dim_cid']) ? 'co_seq_dim_cid' : 'co_seq_dim_cid10';
+
+            // Coluna de código: nu_cid (padrão) ou nu_cid10 (legado)
+            $codeCol = isset($colSet['nu_cid']) ? 'nu_cid' : 'nu_cid10';
+
+            // 3. Detecta FK em tb_fat_atd_ind_problemas
+            $fkCols = $connection->select(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'tb_fat_atd_ind_problemas' AND column_name IN ('co_dim_cid', 'co_dim_cid10') AND table_schema = 'public'"
+            );
+            $fkCol = 'co_dim_cid'; // padrão oficial
+            foreach ($fkCols as $f) {
+                $name = strtolower((string) $f->column_name);
+                if ($name === 'co_dim_cid') {
+                    $fkCol = 'co_dim_cid';
+                    break;
+                }
+                if ($name === 'co_dim_cid10') {
+                    $fkCol = 'co_dim_cid10';
+                }
+            }
+
+            return [
+                'table' => $cidTable,
+                'pk' => $pk,
+                'code_col' => $codeCol,
+                'fk_col' => $fkCol,
+            ];
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
      * @param  array<string, array{ine:string,name:string,type:string}>  $teams
      * @return array{
      *     scores: array<string, array<int, array{numerator:int,denominator:int,score_percent:float,practices:array<string,int>,incomplete:int}>>,
@@ -164,9 +244,24 @@ class C3DwService
         $allIds = array_keys($allById);
         $pregnantWomen = [];
 
+        // Resolve dinamicamente a tabela/colunas de CID-10 no DW do PEC
+        $cidSchema = $this->resolveCidSchema($connection);
+
         // 1. Busca atendimentos individuais com condições de gestação ou puerpério
         foreach (array_chunk($allIds, 500) as $ids) {
             $marks = implode(',', array_fill(0, count($ids), '?'));
+
+            // Monta SELECT e JOINs dinamicamente conforme existência da tabela CID
+            if ($cidSchema) {
+                $cidSelect = "UPPER(cid.{$cidSchema['code_col']}::text) AS cid";
+                $cidJoin = "LEFT JOIN {$cidSchema['table']} cid ON cid.{$cidSchema['pk']} = p.{$cidSchema['fk_col']}";
+                $cidFilter = "OR UPPER(cid.{$cidSchema['code_col']}::text) LIKE 'O%'
+                      OR UPPER(cid.{$cidSchema['code_col']}::text) IN ('Z32.1','Z33','Z34','Z35','Z36','Z64.0','F53','M83.0','Z37','Z38','Z39')";
+            } else {
+                $cidSelect = "''::text AS cid";
+                $cidJoin = '';
+                $cidFilter = '';
+            }
 
             $atendimentos = $connection->select(<<<SQL
                 SELECT a.co_fat_cidadao_pec AS id, a.co_seq_fat_atd_ind AS event_id,
@@ -175,7 +270,7 @@ class C3DwService
                        COALESCE(a.nu_idade_gestacional, 0) AS gest_age,
                        a.dt_ultima_menstruacao AS dum_date,
                        UPPER(ci.nu_ciap::text) AS ciap,
-                       UPPER(cid.nu_cid10::text) AS cid,
+                       {$cidSelect},
                        COALESCE(l.ds_local_atendimento, '') AS location,
                        EXISTS (
                            SELECT 1 FROM tb_fat_atd_ind_procedimentos ap
@@ -189,15 +284,14 @@ class C3DwService
                 JOIN tb_dim_profissional prof ON prof.co_seq_dim_profissional = a.co_dim_profissional_1
                 JOIN tb_fat_atd_ind_problemas p ON p.co_fat_atd_ind = a.co_seq_fat_atd_ind
                 LEFT JOIN tb_dim_ciap ci ON ci.co_seq_dim_ciap = p.co_dim_ciap
-                LEFT JOIN tb_dim_cid10 cid ON cid.co_seq_dim_cid10 = p.co_dim_cid10
+                {$cidJoin}
                 LEFT JOIN tb_dim_local_atendimento l ON l.co_seq_dim_local_atendimento = a.co_dim_local_atendimento
                 WHERE a.co_fat_cidadao_pec IN ({$marks})
                   AND t.dt_registro <= ?
                   AND NULLIF(TRIM(prof.nu_cns::text), '') IS NOT NULL
                   AND (
                       UPPER(ci.nu_ciap::text) IN ('W03','W78','W79','W81','W84','W85','48','49','P29','W18','W19','W70','W90','W91','W92','W93','W94','W95','W96')
-                      OR UPPER(cid.nu_cid10::text) LIKE 'O%'
-                      OR UPPER(cid.nu_cid10::text) IN ('Z32.1','Z33','Z34','Z35','Z36','Z64.0','F53','M83.0','Z37','Z38','Z39')
+                      {$cidFilter}
                       OR a.dt_ultima_menstruacao IS NOT NULL
                       OR a.nu_idade_gestacional > 0
                   )
