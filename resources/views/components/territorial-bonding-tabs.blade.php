@@ -15,7 +15,7 @@
         'teams' => [
             'label' => 'Equipes (Mensal)',
             'icon' => 'users',
-            'badge' => $teamCount !== null ? $teamCount.' eSF' : 'Mensal',
+            'badge' => $teamCount !== null ? $teamCount.' equipes' : 'Mensal',
         ],
         'guide' => [
             'label' => 'Caderno Metodológico',

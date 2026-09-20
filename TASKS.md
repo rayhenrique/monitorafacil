@@ -307,3 +307,10 @@
   - [x] Cálculo por INE dos índices ponderados, escores e classificação final conforme os parâmetros metodológicos existentes.
   - [x] Estado de ausência explícito quando não há registros válidos, sem números demonstrativos.
   - [x] Testes automatizados de regressão para navegação, dados reais, filtros e estado vazio.
+
+- [x] **Fase 38: Filtro de Equipes Homologadas eSF/eAP (v1.23.6)**
+  - [x] Restrição da listagem mensal aos INEs homologados no CNES como eSF tipo `70` ou eAP tipo `76`.
+  - [x] Exclusão de equipes de saúde bucal, eMulti e demais tipos dos totais e indicadores CVAT.
+  - [x] Fallback local limitado a snapshots MySQL individuais com tipo `70/76` e INE preenchido.
+  - [x] Validação da relação municipal com exatamente 19 equipes eSF homologadas.
+  - [x] Teste automatizado de regressão para tipos de equipe não elegíveis.

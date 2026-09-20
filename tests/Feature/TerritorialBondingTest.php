@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Livewire\TerritorialBonding\TerritorialBondingOverview;
 use App\Models\CvatNominalCitizen;
 use App\Models\User;
+use App\Services\CnesXmlParserService;
 use App\Services\CvatService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -17,6 +18,13 @@ class TerritorialBondingTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        $cnesParser = \Mockery::mock(CnesXmlParserService::class);
+        $cnesParser->shouldReceive('getEligibleC1Teams')->andReturn([
+            ['ine' => '0000000001', 'name' => 'EQUIPE ALFA', 'type' => '70', 'cnes' => '1111111'],
+            ['ine' => '0000000002', 'name' => 'EQUIPE BETA', 'type' => '76', 'cnes' => '2222222'],
+        ]);
+        $this->app->instance(CnesXmlParserService::class, $cnesParser);
 
         $this->createNominalCitizen(1, '0000000001', 'EQUIPE ALFA', 'UNIDADE ALFA', '1111111', [
             'has_micdt' => true,
@@ -35,6 +43,11 @@ class TerritorialBondingTest extends TestCase
             'micdt_updated' => true,
             'is_accompanied' => false,
             'last_visit_date' => null,
+        ]);
+        $this->createNominalCitizen(4, '0000000003', 'EQUIPE SAÚDE BUCAL', 'UNIDADE ALFA', '1111111');
+        $this->createNominalCitizen(5, '0000000003', 'EQUIPE SAÚDE BUCAL', 'UNIDADE ALFA', '1111111', [
+            'year' => 2027,
+            'month' => 1,
         ]);
     }
 
@@ -100,6 +113,11 @@ class TerritorialBondingTest extends TestCase
         $this->assertEquals('REGULAR', $summary['municipal_classification']);
         $this->assertEquals(2, $summary['regular_count']);
 
+        $teams = $service->getTeamsList(2026, 3);
+        $this->assertSame(['0000000001', '0000000002'], $teams->pluck('ine')->sort()->values()->all());
+        $this->assertSame('eSF', $teams->firstWhere('ine', '0000000001')?->team_type);
+        $this->assertSame('eAP', $teams->firstWhere('ine', '0000000002')?->team_type);
+
         $this->assertCount(3, $charts['cadastro']);
         $this->assertCount(3, $charts['acompanhamento']);
 
@@ -128,8 +146,9 @@ class TerritorialBondingTest extends TestCase
             ->assertSet('selectedQuarter', 3)
             ->assertSee('2026 / M9')
             ->assertSee('12/09/2026')
-            ->assertSee('2 eSF')
+            ->assertSee('2 equipes')
             ->assertSee('EQUIPE ALFA')
+            ->assertDontSee('EQUIPE SAÚDE BUCAL')
             ->set('filterClassification', 'REGULAR')
             ->assertSee('EQUIPE BETA')
             ->set('filterTeam', 'ALFA')

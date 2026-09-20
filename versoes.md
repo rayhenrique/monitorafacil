@@ -4,6 +4,18 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.23.6] - 19/09/2026
+
+### 🩺 Filtro de Equipes Homologadas eSF/eAP
+- A aba `Equipes (Mensal)` agora consolida somente os INEs homologados como eSF tipo `70` ou eAP tipo `76`.
+- O XML CNES local é usado como fonte principal da relação oficial de equipes ativas.
+- Na ausência do XML, o fallback consulta apenas snapshots MySQL individuais com INE preenchido e tipo `70/76`.
+- Equipes de saúde bucal, eMulti e quaisquer outros tipos deixam de participar dos totais, indicadores e linhas da tabela.
+- Validação local confirmou exatamente 19 equipes eSF homologadas na competência disponível.
+- Teste automatizado incluído para impedir a reintrodução de equipes não elegíveis.
+
+---
+
 ## [v1.23.5] - 19/09/2026
 
 ### 🔗 Navegação CVAT e Consolidação Mensal com Dados Reais

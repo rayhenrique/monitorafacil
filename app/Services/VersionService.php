@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.23.5';
+    public const CURRENT_VERSION = 'v1.23.6';
 
     public const CURRENT_RELEASE_DATE = '19/09/2026';
 
@@ -61,9 +61,21 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.23.5',
+                'version' => 'v1.23.6',
                 'date' => '19/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Filtro de Equipes Homologadas eSF/eAP',
+                'summary' => 'A listagem mensal do CVAT passa a considerar exclusivamente INEs homologados como eSF tipo 70 ou eAP tipo 76, impedindo a inclusão de equipes de saúde bucal, eMulti e outros tipos.',
+                'highlights' => [
+                    ['type' => 'correcao', 'text' => 'Consolidação mensal limitada à relação oficial de equipes eSF/eAP ativas do XML CNES.'],
+                    ['type' => 'dados', 'text' => 'Fallback seguro usa somente snapshots MySQL com INE individual e tipo 70/76 quando o XML CNES não estiver disponível.'],
+                    ['type' => 'qualidade', 'text' => 'Teste de regressão garante que equipes não homologadas não sejam contadas nem exibidas.'],
+                ],
+            ],
+            [
+                'version' => 'v1.23.5',
+                'date' => '19/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Navegação CVAT e Consolidação Mensal com Dados Reais',
                 'summary' => 'Correção do estado ativo da navegação do módulo e substituição dos valores demonstrativos da aba Equipes por uma consolidação mensal calculada a partir da relação nominal processada no MySQL.',
                 'highlights' => [

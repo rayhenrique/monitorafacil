@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\CvatDimensionDistribution;
 use App\Models\CvatNominalCitizen;
 use App\Models\CvatTeamEvaluation;
+use App\Models\FamilyHealthIndicatorSnapshot;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
@@ -16,6 +17,9 @@ class CvatService
 
     /** @var array<string, Collection<int, CvatTeamEvaluation>> */
     private array $teamSnapshotCache = [];
+
+    /** @var array<string, array{type: string, name: string, cnes: string}>|null */
+    private ?array $eligiblePrimaryCareTeams = null;
 
     /**
      * Importa os dados oficiais do Siaps a partir dos arquivos CSV.
@@ -258,9 +262,15 @@ class CvatService
             return [];
         }
 
+        $eligibleTeams = $this->eligiblePrimaryCareTeams();
+        if ($eligibleTeams === []) {
+            return [];
+        }
+
         return CvatNominalCitizen::query()
             ->whereNotNull('ine')
             ->where('ine', '!=', '')
+            ->whereIn('ine', array_keys($eligibleTeams))
             ->select(['year', 'month'])
             ->distinct()
             ->orderByDesc('year')
@@ -300,9 +310,15 @@ class CvatService
             return null;
         }
 
+        $eligibleTeams = $this->eligiblePrimaryCareTeams();
+        if ($eligibleTeams === []) {
+            return null;
+        }
+
         $query = CvatNominalCitizen::query()
             ->whereNotNull('ine')
-            ->where('ine', '!=', '');
+            ->where('ine', '!=', '')
+            ->whereIn('ine', array_keys($eligibleTeams));
 
         if ($year !== null) {
             $query->where('year', $year);
@@ -327,6 +343,7 @@ class CvatService
             ->where('month', $period->month)
             ->whereNotNull('ine')
             ->where('ine', '!=', '')
+            ->whereIn('ine', array_keys($eligibleTeams))
             ->max('last_visit_date');
 
         return [
@@ -646,12 +663,18 @@ class CvatService
             return $this->teamSnapshotCache[$cacheKey] = collect();
         }
 
+        $eligibleTeams = $this->eligiblePrimaryCareTeams();
+        if ($eligibleTeams === []) {
+            return $this->teamSnapshotCache[$cacheKey] = collect();
+        }
+
         $rows = CvatNominalCitizen::query()
             ->where('year', $period['year'])
             ->where('month', $period['month'])
             ->where('is_linked', true)
             ->whereNotNull('ine')
             ->where('ine', '!=', '')
+            ->whereIn('ine', array_keys($eligibleTeams))
             ->selectRaw('ine, MAX(cnes) as cnes, MAX(facility_name) as facility_name, MAX(team_name) as team_name')
             ->selectRaw('COUNT(*) as linked_registrations')
             ->selectRaw('SUM(CASE WHEN mici_updated = 1 AND (has_micdt = 0 OR micdt_updated = 0) THEN 1 ELSE 0 END) as mici_only')
@@ -663,8 +686,9 @@ class CvatService
             ->groupBy('ine')
             ->get();
 
-        $teams = $rows->map(function (CvatNominalCitizen $row) use ($period): CvatTeamEvaluation {
+        $teams = $rows->map(function (CvatNominalCitizen $row) use ($period, $eligibleTeams): CvatTeamEvaluation {
             $parameter = self::TEAM_POPULATION_PARAMETER;
+            $eligibleTeam = $eligibleTeams[(string) $row->ine];
             $registrationResult = round((((int) $row->mici_only * 0.75) + ((int) $row->mici_and_micdt * 1.5)) / $parameter * 100, 2);
             $monitoringResult = round((
                 ((int) $row->accompanied_no_criteria * 1.0)
@@ -683,7 +707,7 @@ class CvatService
                 'cnes' => (string) $row->cnes,
                 'facility_name' => (string) $row->facility_name,
                 'ine' => (string) $row->ine,
-                'team_type' => 'eSF',
+                'team_type' => $eligibleTeam['type'] === '76' ? 'eAP' : 'eSF',
                 'team_name' => (string) $row->team_name,
                 'parameter' => $parameter,
                 'linked_registrations' => (int) $row->linked_registrations,
@@ -698,6 +722,61 @@ class CvatService
         })->values();
 
         return $this->teamSnapshotCache[$cacheKey] = $teams;
+    }
+
+    /**
+     * Retorna somente INEs homologados como eSF (70) ou eAP (76).
+     * O XML CNES é a fonte principal; snapshots MySQL válidos são usados quando o arquivo não está disponível.
+     *
+     * @return array<string, array{type: string, name: string, cnes: string}>
+     */
+    private function eligiblePrimaryCareTeams(): array
+    {
+        if ($this->eligiblePrimaryCareTeams !== null) {
+            return $this->eligiblePrimaryCareTeams;
+        }
+
+        $teams = app(CnesXmlParserService::class)->getEligibleC1Teams();
+
+        if ($teams === [] && Schema::hasTable('family_health_indicator_snapshots')) {
+            $latestSnapshot = FamilyHealthIndicatorSnapshot::query()
+                ->whereIn('team_type', ['70', '76'])
+                ->whereNotNull('ine')
+                ->where('ine', '!=', '')
+                ->orderByDesc('year')
+                ->orderByDesc('quarter')
+                ->first(['year', 'quarter']);
+
+            if ($latestSnapshot) {
+                $teams = FamilyHealthIndicatorSnapshot::query()
+                    ->where('year', $latestSnapshot->year)
+                    ->where('quarter', $latestSnapshot->quarter)
+                    ->whereIn('team_type', ['70', '76'])
+                    ->whereNotNull('ine')
+                    ->where('ine', '!=', '')
+                    ->get(['ine', 'team_name', 'team_type'])
+                    ->map(fn (FamilyHealthIndicatorSnapshot $snapshot): array => [
+                        'ine' => (string) $snapshot->ine,
+                        'name' => (string) $snapshot->team_name,
+                        'type' => (string) $snapshot->team_type,
+                        'cnes' => '',
+                    ])
+                    ->all();
+            }
+        }
+
+        return $this->eligiblePrimaryCareTeams = collect($teams)
+            ->filter(fn (array $team): bool => in_array((string) ($team['type'] ?? ''), ['70', '76'], true)
+                && filled($team['ine'] ?? null))
+            ->unique('ine')
+            ->mapWithKeys(fn (array $team): array => [
+                (string) $team['ine'] => [
+                    'type' => (string) $team['type'],
+                    'name' => (string) ($team['name'] ?? ''),
+                    'cnes' => (string) ($team['cnes'] ?? ''),
+                ],
+            ])
+            ->all();
     }
 
     private function registrationScore(float $result): float
