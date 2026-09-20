@@ -1,4 +1,4 @@
-<div class="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6">
+<div class="app-page">
 
     <!-- Navegação em Abas do Módulo (Relação Nominal, Equipes (Mensal), Caderno Metodológico) -->
     <x-territorial-bonding-tabs

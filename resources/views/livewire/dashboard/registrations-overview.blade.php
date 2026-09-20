@@ -41,7 +41,7 @@
                     <p class="mt-4 text-xs leading-relaxed text-muted">Distribuição oficial das equipes no modelo de cofinanciamento.</p>
                 </div>
 
-                <div class="mt-6 grid grid-cols-4 rounded-xl border border-line bg-canvas/60 p-3 text-center">
+                <div class="mt-6 grid grid-cols-2 gap-y-3 rounded-xl border border-line bg-canvas/60 p-3 text-center sm:grid-cols-4 sm:gap-y-0">
                     <div>
                         <p class="text-xl font-bold tabular-nums text-blue-700">{{ $classifications['optimal'] }}</p>
                         <p class="text-[10px] font-semibold text-muted uppercase">Ótimo</p>
@@ -50,11 +50,11 @@
                         <p class="text-xl font-bold tabular-nums text-emerald-700">{{ $classifications['good'] }}</p>
                         <p class="text-[10px] font-semibold text-muted uppercase">Bom</p>
                     </div>
-                    <div class="border-l border-line/80">
+                    <div class="border-t border-line/80 pt-3 sm:border-l sm:border-t-0 sm:pt-0">
                         <p class="text-xl font-bold tabular-nums text-amber-700">{{ $classifications['sufficient'] }}</p>
                         <p class="text-[10px] font-semibold text-muted uppercase">Suficiente</p>
                     </div>
-                    <div class="border-l border-line/80">
+                    <div class="border-l border-t border-line/80 pt-3 sm:border-t-0 sm:pt-0">
                         <p class="text-xl font-bold tabular-nums text-rose-700">{{ $classifications['regular'] }}</p>
                         <p class="text-[10px] font-semibold text-muted uppercase">Regular</p>
                     </div>

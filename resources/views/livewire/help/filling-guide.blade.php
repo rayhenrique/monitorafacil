@@ -1,4 +1,4 @@
-<div class="px-4 py-6 sm:px-8 max-w-7xl mx-auto space-y-6">
+<div class="app-page">
     <x-help-tabs
         title="Guia de Preenchimento | Ministério da Saúde"
         subtitle="Orientações técnicas oficiais para registro qualificado no e-SUS APS (Componente de Qualidade)"
@@ -41,7 +41,7 @@
     </div>
 
     <!-- Navegação Interna por Modalidade de Equipe -->
-    <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+    <div class="flex items-center gap-2 overflow-x-auto pb-2">
         <button
             type="button"
             wire:click="setCategory('esf')"

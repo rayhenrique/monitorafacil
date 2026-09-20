@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.23.3';
+    public const CURRENT_VERSION = 'v1.23.4';
 
     public const CURRENT_RELEASE_DATE = '19/09/2026';
 
@@ -61,9 +61,22 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.23.3',
+                'version' => 'v1.23.4',
                 'date' => '19/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Responsividade Global e Contrato de UX',
+                'summary' => 'Revisão responsiva de toda a interface autenticada e da tela de acesso, cobrindo navegação, painéis, formulários, tabelas e modais em celulares, tablets e desktops, com regras de UX documentadas e testes automatizados de regressão.',
+                'highlights' => [
+                    ['type' => 'interface', 'text' => 'Layout principal, login, dashboard e barras de navegação ajustados para larguras reduzidas, áreas seguras e conteúdo sem estouro horizontal.'],
+                    ['type' => 'interface', 'text' => 'Abas, filtros, formulários, tabelas densas e modais de Saúde da Família, Vínculo e Acompanhamento, Configurações e Ajuda adaptados para mobile, tablet e desktop.'],
+                    ['type' => 'acessibilidade', 'text' => 'Controles interativos receberam áreas de toque consistentes, foco visível e comportamento previsível de rolagem e fechamento.'],
+                    ['type' => 'qualidade', 'text' => 'Contrato de UX documentado e teste automatizado de responsividade adicionado para proteger os principais padrões estruturais da interface.'],
+                ],
+            ],
+            [
+                'version' => 'v1.23.3',
+                'date' => '19/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Design Responsivo Global do Módulo Vínculo e Acompanhamento',
                 'summary' => 'Auditoria e refinamento de todas as abas do módulo CVAT (Relação Nominal, Equipes Mensal e Caderno Metodológico), garantindo layout 100% responsivo para mobile, tablet e desktop com proteção contra quebras de tabela e modais fluidos.',
                 'highlights' => [

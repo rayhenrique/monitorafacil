@@ -1,4 +1,4 @@
-<div class="px-4 py-6 sm:px-8 max-w-7xl mx-auto space-y-6">
+<div class="app-page">
     <x-family-health-tabs
         :title="$meta['code'] . ' · ' . $meta['short_title']"
         :subtitle="$meta['full_title']"
@@ -261,7 +261,7 @@
 
     <!-- Abas Internas de Navegação -->
     <div class="border-b border-line">
-        <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-xs font-semibold">
+        <div class="flex items-center gap-2 overflow-x-auto pb-2 text-xs font-semibold">
             <button
                 type="button"
                 wire:click="setTab('dashboard')"
@@ -631,7 +631,7 @@
                             </div>
                         @else
                             <div class="overflow-x-auto rounded-2xl border border-slate-200">
-                                <table class="w-full text-left text-xs text-slate-700">
+                                <table class="w-full min-w-[44rem] text-left text-xs text-slate-700">
                                     <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] tracking-wider border-b border-line font-bold">
                                         <tr>
                                             <th class="py-3 px-4">Equipe / Unidade</th>
@@ -1253,7 +1253,7 @@
                             </div>
                         @else
                             <div class="overflow-x-auto rounded-2xl border border-slate-200">
-                                <table class="w-full text-left text-xs text-slate-700">
+                                <table class="w-full min-w-[44rem] text-left text-xs text-slate-700">
                                     <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] tracking-wider border-b border-line font-bold">
                                         <tr>
                                             <th class="py-3 px-4">Equipe / Unidade</th>
@@ -1858,7 +1858,7 @@
             </div>
 
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs text-slate-700">
+                                <table class="w-full min-w-[44rem] text-left text-xs text-slate-700">
                     <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] tracking-wider border-b border-line font-bold">
                         <tr>
                             <th class="py-3 px-4">Equipe / Unidade</th>
@@ -2075,7 +2075,7 @@
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs text-slate-700">
+                                <table class="w-full min-w-[44rem] text-left text-xs text-slate-700">
                             <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] tracking-wider border-b border-line font-bold">
                                 <tr>
                                     <th class="py-3 px-4">Cidadão(ã)</th>
@@ -2441,7 +2441,7 @@
                 <!-- LISTA NOMINAL: TABELA INTERATIVA (CONFORME IMAGENS 1, 2 E 3) -->
                 <div class="rounded-3xl border border-slate-200 bg-white overflow-hidden shadow-2xs">
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs text-slate-700">
+                                <table class="w-full min-w-[44rem] text-left text-xs text-slate-700">
                             <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] tracking-wider border-b border-slate-200 font-bold">
                                 <tr>
                                     @if (in_array('id', $visibleColumns, true))
@@ -2821,12 +2821,12 @@
                 <!-- MODAL DE BUSCA AVANÇADA (EXATAMENTE CONFORME AS IMAGENS 4 E 5) -->
                 @if ($showAdvancedModal)
                     <div
-                        class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in"
+                        class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/60 p-3 backdrop-blur-xs animate-fade-in sm:p-4"
                         role="dialog"
                         aria-modal="true"
                     >
                         <div
-                            class="relative w-full max-w-4xl rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 my-8"
+                            class="app-modal-panel relative my-3 w-full max-w-4xl space-y-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl sm:my-8 sm:rounded-3xl sm:p-8"
                             @click.outside="$wire.closeAdvancedSearch()"
                         >
                             <!-- Modal Header -->
@@ -3499,12 +3499,12 @@
                 <!-- MODAL DE DETALHES CLÍNICOS DA CRIANÇA / BUSCA ATIVA -->
                 @if ($showDetailModal && $selectedChild)
                     <div
-                        class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in"
+                        class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/60 p-3 backdrop-blur-xs animate-fade-in sm:p-4"
                         role="dialog"
                         aria-modal="true"
                     >
                         <div
-                            class="relative w-full max-w-3xl rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 my-8"
+                            class="app-modal-panel relative my-3 w-full max-w-3xl space-y-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl sm:my-8 sm:rounded-3xl sm:p-8"
                             @click.outside="$wire.closeChildDetail()"
                         >
                             <!-- Header -->
@@ -3850,7 +3850,7 @@
                 <!-- LISTA NOMINAL: TABELA INTERATIVA DE GESTANTES E PUÉRPERAS -->
                 <div class="rounded-3xl border border-slate-200 bg-white overflow-hidden shadow-2xs">
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs text-slate-700">
+                                <table class="w-full min-w-[44rem] text-left text-xs text-slate-700">
                             <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] tracking-wider border-b border-slate-200 font-bold">
                                 <tr>
                                     @if (in_array('id', $visibleColumns, true))
@@ -4196,12 +4196,12 @@
                 <!-- MODAL DE BUSCA AVANÇADA C3 -->
                 @if ($showAdvancedModal)
                     <div
-                        class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in"
+                        class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/60 p-3 backdrop-blur-xs animate-fade-in sm:p-4"
                         role="dialog"
                         aria-modal="true"
                     >
                         <div
-                            class="relative w-full max-w-4xl rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 my-8"
+                            class="app-modal-panel relative my-3 w-full max-w-4xl space-y-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl sm:my-8 sm:rounded-3xl sm:p-8"
                             @click.outside="$wire.closeAdvancedSearch()"
                         >
                             <div class="flex items-center justify-between border-b border-slate-150 pb-4">
@@ -4466,12 +4466,12 @@
                 <!-- MODAL DE DETALHES CLÍNICOS DA GESTAÇÃO E PUERPÉRIO -->
                 @if ($showPregnancyDetailModal && $selectedPregnancy)
                     <div
-                        class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in"
+                        class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/60 p-3 backdrop-blur-xs animate-fade-in sm:p-4"
                         role="dialog"
                         aria-modal="true"
                     >
                         <div
-                            class="relative w-full max-w-3xl rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 my-8"
+                            class="app-modal-panel relative my-3 w-full max-w-3xl space-y-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl sm:my-8 sm:rounded-3xl sm:p-8"
                             @click.outside="$wire.closePregnancyDetail()"
                         >
                             <!-- Header -->
@@ -4746,7 +4746,7 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs text-slate-700">
+                                <table class="w-full min-w-[44rem] text-left text-xs text-slate-700">
                         <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] tracking-wider border-b border-line font-bold">
                             <tr>
                                 <th class="py-3 px-4">Cidadão(ã)</th>

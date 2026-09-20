@@ -1,4 +1,4 @@
-<div class="px-4 py-6 sm:px-8 max-w-7xl mx-auto space-y-6">
+<div class="app-page">
     <x-settings-tabs
         title="Importar CNES / XML"
         subtitle="Upload e validação estrutural do arquivo oficial de homologação das equipes de APS (XmlParaESUS31)"
@@ -89,7 +89,7 @@
                     </div>
 
                     <!-- Detalhamento por Tipo de Equipe -->
-                    <div class="grid grid-cols-3 gap-3">
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                         <div class="rounded-2xl bg-white p-4 border border-teal-100 shadow-xs text-center">
                             <span class="text-[10px] font-bold uppercase text-muted tracking-wider block">eSF (Tipo 70)</span>
                             <span class="text-2xl font-bold font-mono text-teal-900 mt-1 block">{{ $parsedPreview['counts']['esf'] }}</span>
@@ -110,18 +110,18 @@
                     </div>
 
                     <!-- Botão de Confirmação e Salvamento -->
-                    <div class="pt-4 border-t border-teal-200/60 flex items-center justify-end gap-3">
+                    <div class="flex flex-col-reverse gap-3 border-t border-teal-200/60 pt-4 sm:flex-row sm:items-center sm:justify-end">
                         <button
                             type="button"
                             wire:click="$set('parsedPreview', null)"
-                            class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer sm:w-auto"
                         >
                             Descartar
                         </button>
                         <button
                             type="button"
                             wire:click="saveXml"
-                            class="inline-flex items-center gap-2 rounded-xl bg-teal-700 hover:bg-teal-800 px-5 py-2 text-xs font-semibold text-white shadow-sm transition cursor-pointer"
+                            class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-teal-700 hover:bg-teal-800 px-5 py-2 text-xs font-semibold text-white shadow-sm transition cursor-pointer sm:w-auto"
                         >
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />

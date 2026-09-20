@@ -4,6 +4,23 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.23.4] - 19/09/2026
+
+### 📱 Responsividade Global e Contrato de UX
+- **Cobertura completa da aplicação**:
+  - Layout autenticado, gaveta mobile, tela de acesso e dashboard revisados para celulares, tablets, notebooks e monitores amplos.
+  - Abas e cabeçalhos dos módulos de Saúde da Família, Vínculo e Acompanhamento, Configurações e Ajuda com navegação horizontal segura e alvos de toque consistentes.
+  - Formulários, filtros e grupos de ações reorganizados progressivamente, evitando campos comprimidos e botões fora da viewport.
+  - Tabelas de alta densidade preservadas em contêineres de rolagem horizontal, com indicação visual para usuários de telas pequenas.
+  - Modais ajustados à altura útil da tela, com cabeçalhos, conteúdo rolável e rodapés de ação estáveis.
+- **Qualidade e manutenção**:
+  - Criação do `UX-CONTRACT.md` com regras duráveis de layout, navegação, tabelas, formulários, modais, acessibilidade e estados de interface.
+  - Ampliação do `DESIGN.md` com decisões responsivas globais do produto.
+  - Inclusão de teste automatizado cobrindo os padrões estruturais críticos de responsividade.
+  - Validação visual nas resoluções 320×568, 390×844, 768×1024, 1024×768 e 1440×900, sem overflow no documento.
+
+---
+
 ## [v1.23.3] - 19/09/2026
 
 ### 🎨 Design Responsivo Global do Módulo Vínculo e Acompanhamento

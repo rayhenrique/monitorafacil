@@ -23,6 +23,9 @@ rounded:
 spacing:
   section-gap: "2.5rem"
   page-max: "80rem"
+  page-gutter-mobile: "1rem"
+  page-gutter-tablet: "1.5rem"
+  page-gutter-desktop: "2rem"
 components:
   button: {}
   card: {}
@@ -62,6 +65,10 @@ Segoe UI e fallbacks de sistema permitem leitura rápida em português. Cabeçal
 
 Largura máxima de 80rem. Header flexível, conteúdo com margem lateral responsiva, cartões em grade quando houver espaço. Estados vazios preservam dimensões legíveis e explicam a ausência de dados.
 
+`app-page` é o contêiner canônico de todas as rotas autenticadas: 1rem de gutter no celular, 1,5rem no tablet e 2rem no desktop. Flex e grid devem usar `min-w-0` nos filhos que recebem conteúdo variável. Indicadores com quatro colunas passam para duas colunas abaixo de `sm`; grupos de ações passam a ocupar a largura disponível e empilham quando o rótulo não cabe.
+
+Tabelas densas preservam colunas legíveis e pertencem a uma região horizontal rolável, nunca ao documento inteiro. A região usa `scrollbar-gutter: stable`, rolagem tátil e a scrollbar global visível. Modais usam no máximo a altura útil da viewport dinâmica (`100dvh`) e rolagem interna.
+
 ## Elevation & Depth
 
 Bordas leves definem agrupamentos. A sombra `shadow-panel` é sutil e reservada para cartões de conteúdo. Não usar sombra em cada elemento interno.
@@ -75,6 +82,8 @@ Cartões de 1rem; campos e botões de 0.5rem. Logotipo ou monograma em bloco de 
 ### Foundational visual states
 
 Padrão em fundo branco; hover altera borda ou superfície; foco visível tem contorno de 2px em verde. Seleção combina cor e texto. Desabilitado reduz contraste somente junto de texto explicativo. Carregamento usa estado textual estável; erro e sucesso são descritos por texto.
+
+Scrollbars usam trilho `#e8efec`, polegar `#8aa59e` e hover `#5f7f77`, com retorno às cores do sistema em alto contraste. Controles de toque têm alvo mínimo de 44px em dispositivos de ponteiro grosso. Animações e transições são reduzidas quando `prefers-reduced-motion` está ativo.
 
 ### Buttons and actions
 

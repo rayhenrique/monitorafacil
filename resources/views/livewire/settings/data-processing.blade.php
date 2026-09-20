@@ -1,4 +1,4 @@
-<div class="px-4 py-6 sm:px-8 max-w-7xl mx-auto space-y-6">
+<div class="app-page">
     <x-settings-tabs
         title="Processamento de Dados"
         subtitle="Consolidação e sincronização analítica das tabelas do e-SUS PEC para os Indicadores da APS"
@@ -411,7 +411,7 @@
             </div>
 
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs text-slate-700">
+                <table class="w-full min-w-[48rem] text-left text-xs text-slate-700">
                     <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] tracking-wider border-b border-line font-bold">
                         <tr>
                             <th class="py-3 px-4">Tabela e-SUS PEC</th>

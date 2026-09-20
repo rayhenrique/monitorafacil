@@ -1,4 +1,4 @@
-<div class="px-4 py-6 sm:px-8 max-w-7xl mx-auto space-y-6">
+<div class="app-page">
     <x-settings-tabs
         title="Conexão com o e-SUS PEC"
         subtitle="Parâmetros de leitura do banco de dados PostgreSQL e diagnóstico de conectividade"

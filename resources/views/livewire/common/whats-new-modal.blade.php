@@ -4,16 +4,16 @@
             <!-- Backdrop com blur -->
             <div class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity"></div>
 
-            <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-6">
+            <div class="flex min-h-full items-center justify-center p-3 text-center sm:p-6">
                 <!-- Card do Modal -->
-                <div class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-slate-200">
+                <div class="app-modal-panel relative w-full transform overflow-y-auto rounded-2xl border border-slate-200 bg-white text-left shadow-2xl transition-all sm:my-8 sm:max-w-2xl sm:rounded-3xl">
                     <!-- Topo com gradiente executivo esmeralda -->
-                    <div class="bg-gradient-to-br from-[#0c1f1c] via-[#0f2d26] to-[#081714] p-6 sm:p-8 text-white relative">
+                    <div class="relative bg-gradient-to-br from-[#0c1f1c] via-[#0f2d26] to-[#081714] p-5 pr-14 text-white sm:p-8 sm:pr-16">
                         <!-- Botão fechar -->
                         <button
                             type="button"
                             wire:click="acknowledge"
-                            class="absolute top-5 right-5 text-slate-400 hover:text-white p-2 rounded-xl hover:bg-white/10 transition"
+                            class="absolute right-3 top-3 rounded-xl p-2 text-slate-400 transition hover:bg-white/10 hover:text-white sm:right-5 sm:top-5"
                             aria-label="Fechar"
                         >
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -21,7 +21,7 @@
                             </svg>
                         </button>
 
-                        <div class="flex items-center gap-2 mb-3">
+                        <div class="mb-3 flex flex-col items-start gap-2 sm:flex-row sm:items-center">
                             <span class="inline-flex items-center gap-1.5 rounded-full bg-teal-500/25 px-3 py-1 text-xs font-semibold text-teal-300 border border-teal-500/30">
                                 <span class="h-1.5 w-1.5 rounded-full bg-teal-400 animate-pulse"></span>
                                 Atualização do Sistema · {{ $release['version'] ?? \App\Services\VersionService::CURRENT_VERSION }}
@@ -39,7 +39,7 @@
                     </div>
 
                     <!-- Conteúdo: Lista de Destaques -->
-                    <div class="p-6 sm:p-8 space-y-4 max-h-[50vh] overflow-y-auto">
+                    <div class="max-h-[50dvh] space-y-4 overflow-y-auto p-5 sm:p-8">
                         <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">
                             Principais Destaques Desta Atualização
                         </h4>

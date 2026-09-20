@@ -290,3 +290,12 @@
   - [x] Equipes (Mensal): barra de filtros em grid de 6 colunas e tabela de 14 colunas com `min-w-[1100px]`.
   - [x] Componente de Abas: correção de fechamento de tag `<a>` e tipografia fluida.
   - [x] Validação de compilação de todas as 3 abas sem erros de sintaxe ou variáveis indefinidas.
+
+- [x] **Fase 36: Responsividade Global e Contrato de UX (v1.23.4)**
+  - [x] Revisão do layout principal, gaveta mobile, login e dashboard para smartphones, tablets, notebooks e telas amplas.
+  - [x] Padronização responsiva das abas de Saúde da Família, Vínculo e Acompanhamento, Configurações e Ajuda.
+  - [x] Ajuste de cards, filtros, formulários, tabelas e modais em todas as telas funcionais auditadas.
+  - [x] Proteção contra overflow horizontal do documento, mantendo rolagem localizada em tabelas de alta densidade.
+  - [x] Áreas de toque, foco visível e ações de modais refinados para acessibilidade e uso móvel.
+  - [x] Criação do contrato de UX em `UX-CONTRACT.md` e atualização das diretrizes em `DESIGN.md`.
+  - [x] Teste automatizado de regressão responsiva e matriz visual validada de 320×568 a 1440×900.

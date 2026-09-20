@@ -61,7 +61,7 @@
                     </div>
 
                     @if ($indicator['has_data'])
-                        <div class="mt-6 grid grid-cols-4 rounded-xl border border-line bg-canvas/60 p-2.5 text-center">
+                        <div class="mt-6 grid grid-cols-2 gap-y-3 rounded-xl border border-line bg-canvas/60 p-2.5 text-center sm:grid-cols-4 sm:gap-y-0">
                             <div>
                                 <p class="text-lg font-semibold tabular-nums text-emerald-700">{{ $indicator['optimal'] }}</p>
                                 <p class="text-[10px] font-medium text-muted uppercase">Ótimo</p>
@@ -124,7 +124,7 @@
                         </div>
                     </div>
 
-                    <div class="mt-6 grid grid-cols-4 rounded-xl border border-line bg-canvas/60 p-2.5 text-center">
+                    <div class="mt-6 grid grid-cols-2 gap-y-3 rounded-xl border border-line bg-canvas/60 p-2.5 text-center sm:grid-cols-4 sm:gap-y-0">
                         <div>
                             <p class="text-lg font-semibold tabular-nums text-emerald-700">{{ $indicator['optimal'] }}</p>
                             <p class="text-[10px] font-medium text-muted uppercase">Ótimo</p>
@@ -174,7 +174,7 @@
                         </div>
                     </div>
 
-                    <div class="mt-6 grid grid-cols-4 rounded-xl border border-line bg-canvas/60 p-2.5 text-center">
+                    <div class="mt-6 grid grid-cols-2 gap-y-3 rounded-xl border border-line bg-canvas/60 p-2.5 text-center sm:grid-cols-4 sm:gap-y-0">
                         <div>
                             <p class="text-lg font-semibold tabular-nums text-emerald-700">{{ $indicator['optimal'] }}</p>
                             <p class="text-[10px] font-medium text-muted uppercase">Ótimo</p>

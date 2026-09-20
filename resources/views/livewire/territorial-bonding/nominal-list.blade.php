@@ -1,4 +1,4 @@
-<div class="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6">
+<div class="app-page">
 
     <!-- Navegação em Abas do Módulo -->
     <x-territorial-bonding-tabs
@@ -738,10 +738,10 @@
 
     <!-- MODAL DE BUSCA AVANÇADA RESPONSIVO -->
     @if ($advancedModalOpen)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs">
-            <div class="bg-white rounded-2xl sm:rounded-3xl border border-line shadow-2xl max-w-2xl w-full p-4 sm:p-6 space-y-4 sm:space-y-5 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-3 backdrop-blur-xs sm:p-4" role="dialog" aria-modal="true" aria-labelledby="nominal-advanced-title">
+            <div class="app-modal-panel w-full max-w-2xl space-y-4 rounded-2xl border border-line bg-white p-4 shadow-2xl animate-in fade-in zoom-in-95 duration-150 sm:space-y-5 sm:rounded-3xl sm:p-6">
                 <div class="flex items-center justify-between border-b border-line pb-3">
-                    <h3 class="text-sm sm:text-base font-bold text-ink flex items-center gap-2">
+                    <h3 id="nominal-advanced-title" class="flex min-w-0 items-center gap-2 text-sm font-bold text-ink sm:text-base">
                         <svg class="h-5 w-5 text-teal-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                         </svg>
@@ -853,14 +853,14 @@
 
     <!-- MODAL DE AUDITORIA E DETALHES DO CIDADÃO (👁️ DETALHES) -->
     @if ($detailsModalOpen && $selectedCitizen)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs">
-            <div class="bg-white rounded-2xl sm:rounded-3xl border border-line shadow-2xl max-w-2xl w-full p-4 sm:p-6 space-y-4 sm:space-y-5 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-3 backdrop-blur-xs sm:p-4" role="dialog" aria-modal="true" aria-labelledby="nominal-details-title">
+            <div class="app-modal-panel w-full max-w-2xl space-y-4 rounded-2xl border border-line bg-white p-4 shadow-2xl animate-in fade-in zoom-in-95 duration-150 sm:space-y-5 sm:rounded-3xl sm:p-6">
                 <div class="flex items-start justify-between border-b border-line pb-3">
                     <div>
                         <span class="text-[10px] font-bold uppercase tracking-wider text-teal-700 bg-teal-50 px-2 py-0.5 rounded border border-teal-200">
                             Prontuário de Vínculo Territorial
                         </span>
-                        <h3 class="text-base sm:text-lg font-bold text-ink mt-1">{{ $selectedCitizen->name }}</h3>
+                        <h3 id="nominal-details-title" class="mt-1 text-base font-bold text-ink sm:text-lg">{{ $selectedCitizen->name }}</h3>
                         <p class="text-xs text-muted">ID PEC: {{ $selectedCitizen->cidadao_pec_id }} · Nascimento: {{ $selectedCitizen->birth_date ? $selectedCitizen->birth_date->format('d/m/Y') : '---' }} ({{ $selectedCitizen->age }} anos)</p>
                     </div>
                     <button type="button" wire:click="closeDetails" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 transition cursor-pointer">✕</button>

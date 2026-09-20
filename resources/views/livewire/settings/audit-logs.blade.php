@@ -1,4 +1,4 @@
-<div class="px-4 py-6 sm:px-8 max-w-7xl mx-auto space-y-6">
+<div class="app-page">
     <x-settings-tabs
         title="Log de Auditoria e Sincronizações"
         subtitle="Histórico detalhado das execuções de consolidação e rotinas do e-SUS PEC"
@@ -7,10 +7,10 @@
 
     <!-- Filtros e Resumo -->
     <div class="rounded-3xl border border-line bg-white shadow-sm overflow-hidden">
-        <div class="p-5 border-b border-line flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50">
-            <div class="flex items-center gap-2">
+        <div class="flex flex-col items-stretch justify-between gap-4 border-b border-line bg-slate-50/50 p-4 sm:flex-row sm:items-center sm:p-5">
+            <div class="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
                 <span class="text-xs font-semibold text-muted">Filtrar por status:</span>
-                <div class="inline-flex rounded-xl bg-slate-200/70 p-1 text-xs">
+                <div class="grid w-full grid-cols-2 rounded-xl bg-slate-200/70 p-1 text-xs sm:inline-flex sm:w-auto">
                     <button
                         type="button"
                         wire:click="$set('statusFilter', 'all')"
@@ -49,7 +49,7 @@
 
         <!-- Tabela de Logs -->
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-line text-left text-xs text-ink">
+            <table class="min-w-[48rem] divide-y divide-line text-left text-xs text-ink">
                 <thead class="bg-slate-50 text-[11px] font-semibold uppercase tracking-wider text-muted">
                     <tr>
                         <th scope="col" class="px-6 py-3.5">ID</th>
@@ -142,14 +142,14 @@
 
     <!-- Modal de Detalhes do Log -->
     @if ($showDetailModal && $selectedLog)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
-            <div class="relative w-full max-w-2xl rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-slate-200" @click.outside="$wire.closeDetailModal()">
-                <div class="flex items-center justify-between border-b border-line pb-4 mb-5">
-                    <div class="flex items-center gap-3">
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3 backdrop-blur-xs animate-fade-in sm:p-4">
+            <div class="app-modal-panel relative w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl sm:rounded-3xl sm:p-8" @click.outside="$wire.closeDetailModal()">
+                <div class="mb-5 flex items-start justify-between gap-3 border-b border-line pb-4">
+                    <div class="flex min-w-0 items-center gap-3">
                         <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-700 font-mono text-xs font-bold border border-teal-200">
                             #{{ $selectedLog->id }}
                         </span>
-                        <div>
+                        <div class="min-w-0">
                             <h3 class="text-base font-bold text-ink">Registro de Execução</h3>
                             <p class="text-xs text-muted">Iniciado em {{ $selectedLog->started_at ? $selectedLog->started_at->format('d/m/Y \à\s H:i:s') : '-' }}</p>
                         </div>

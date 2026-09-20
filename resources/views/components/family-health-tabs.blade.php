@@ -43,7 +43,7 @@
 
     <!-- Navegação em Abas Horizontais -->
     <div class="border-b border-line bg-white rounded-2xl p-1.5 shadow-sm border border-slate-200/80">
-        <nav class="flex items-center gap-1 overflow-x-auto text-xs font-medium scrollbar-none" aria-label="Abas do Módulo Saúde da Família">
+        <nav class="flex items-center gap-1 overflow-x-auto pb-1 text-xs font-medium" aria-label="Abas do Módulo Saúde da Família">
             @foreach ($tabs as $key => $tab)
                 @php
                     $isActive = ($activeIndicator === $key);

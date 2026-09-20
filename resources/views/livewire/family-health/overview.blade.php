@@ -1,4 +1,4 @@
-<div class="px-4 py-6 sm:px-8 max-w-7xl mx-auto space-y-6">
+<div class="app-page">
     <x-family-health-tabs
         title="Saúde da Família · Indicadores C1 ao C7"
         subtitle="Consolidado municipal do Componente de Qualidade do Cofinanciamento Federal (Portaria GM/MS nº 3.493/2024)"

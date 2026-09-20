@@ -1,4 +1,4 @@
-<div class="px-4 py-6 sm:px-8 max-w-7xl mx-auto space-y-6">
+<div class="app-page">
     <x-help-tabs
         title="Novidades da Versão"
         subtitle="Histórico oficial de atualizações, novas funcionalidades, melhorias e correções da plataforma"
@@ -35,7 +35,7 @@
 
     <!-- Barra de Filtros Rápidos -->
     <div class="flex items-center justify-between gap-4 flex-wrap border-b border-line pb-3">
-        <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <div class="flex items-center gap-2 overflow-x-auto pb-2">
             <button
                 type="button"
                 wire:click="setFilter('all')"

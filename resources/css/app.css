@@ -12,10 +12,102 @@
     --color-muted: #58716b;
     --color-line: #dce6e2;
     --color-accent: #0f766e;
+    --color-scroll-track: #e8efec;
+    --color-scroll-thumb: #8aa59e;
+    --color-scroll-thumb-hover: #5f7f77;
     --shadow-panel: 0 12px 32px -28px rgb(22 48 44 / 35%);
 }
 
+@layer base {
+    html {
+        background: var(--color-canvas);
+        scrollbar-color: var(--color-scroll-thumb) var(--color-scroll-track);
+        scrollbar-width: thin;
+    }
+
+    body {
+        overflow-x: clip;
+    }
+
+    :where(img, video, canvas) {
+        display: block;
+        height: auto;
+        max-inline-size: 100%;
+    }
+
+    :where(input, select, textarea, button) {
+        min-inline-size: 0;
+    }
+
+    :where(p, li, dd, a, button, label) {
+        overflow-wrap: anywhere;
+    }
+
+    :where(*, *::before, *::after) {
+        scrollbar-color: var(--color-scroll-thumb) var(--color-scroll-track);
+        scrollbar-width: thin;
+    }
+
+    :where(*::-webkit-scrollbar) {
+        width: 0.7rem;
+        height: 0.7rem;
+    }
+
+    :where(*::-webkit-scrollbar-track) {
+        background: var(--color-scroll-track);
+    }
+
+    :where(*::-webkit-scrollbar-thumb) {
+        border: 0.16rem solid var(--color-scroll-track);
+        border-radius: 999px;
+        background: var(--color-scroll-thumb);
+    }
+
+    :where(*::-webkit-scrollbar-thumb:hover) {
+        background: var(--color-scroll-thumb-hover);
+    }
+
+    @media (forced-colors: active) {
+        :where(*, *::before, *::after) {
+            scrollbar-color: auto;
+        }
+    }
+
+    @media (pointer: coarse) {
+        :where(button, [role='button'], input:not([type='hidden']), select, textarea) {
+            min-block-size: 2.75rem;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            scroll-behavior: auto !important;
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+}
+
 @layer components {
+    .app-page {
+        @apply mx-auto w-full max-w-7xl space-y-6 px-4 py-5 sm:px-6 sm:py-8 lg:px-8;
+    }
+
+    .app-scroll-region,
+    .overflow-x-auto {
+        max-inline-size: 100%;
+        overscroll-behavior-inline: contain;
+        scrollbar-gutter: stable;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .app-modal-panel {
+        max-block-size: calc(100dvh - 1.5rem);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
     .eyebrow {
         @apply text-xs font-bold uppercase tracking-[0.18em] text-teal-800;
     }

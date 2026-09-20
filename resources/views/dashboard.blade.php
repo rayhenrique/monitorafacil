@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <section aria-labelledby="dashboard-title" class="mx-auto max-w-7xl px-6 py-8 sm:px-10 lg:py-10">
+    <section aria-labelledby="dashboard-title" class="app-page lg:py-10">
         <div class="max-w-3xl">
             <p class="eyebrow">Visão Municipal</p>
             <h1 id="dashboard-title" class="mt-2.5 text-3xl font-bold tracking-tight text-ink sm:text-4xl">Resumo do Monitoramento da APS</h1>

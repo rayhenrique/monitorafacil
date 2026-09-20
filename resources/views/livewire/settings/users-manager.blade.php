@@ -1,4 +1,4 @@
-<div class="px-4 py-6 sm:px-8 max-w-7xl mx-auto space-y-6">
+<div class="app-page">
     <x-settings-tabs
         title="Usuários do Sistema"
         subtitle="Gerencie os operadores com permissão de acesso ao Monitora Fácil"
@@ -27,7 +27,7 @@
     <!-- Card Principal -->
     <div class="rounded-3xl border border-line bg-white shadow-sm overflow-hidden">
         <!-- Barra de Ações: Busca & Novo Usuário -->
-        <div class="p-5 border-b border-line flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50">
+        <div class="flex flex-col items-stretch justify-between gap-4 border-b border-line bg-slate-50/50 p-4 sm:flex-row sm:items-center sm:p-5">
             <div class="relative w-full sm:w-80">
                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -56,7 +56,7 @@
 
         <!-- Tabela de Usuários -->
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-line text-left text-xs text-ink">
+            <table class="min-w-[42rem] divide-y divide-line text-left text-xs text-ink">
                 <thead class="bg-slate-50 text-[11px] font-semibold uppercase tracking-wider text-muted">
                     <tr>
                         <th scope="col" class="px-6 py-3.5">Usuário</th>
@@ -146,8 +146,8 @@
 
     <!-- Modal de Criar / Editar Usuário -->
     @if ($showModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto bg-black/60 backdrop-blur-xs animate-fade-in">
-            <div class="relative w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl border border-slate-200" @click.outside="$wire.closeModal()">
+        <div class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 p-3 backdrop-blur-xs animate-fade-in sm:p-4">
+            <div class="app-modal-panel relative w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl sm:rounded-3xl sm:p-6" @click.outside="$wire.closeModal()">
                 <div class="flex items-center justify-between border-b border-line pb-4 mb-5">
                     <h3 class="text-lg font-bold text-ink">
                         {{ $isEditing ? 'Editar Usuário' : 'Novo Usuário' }}
@@ -211,17 +211,17 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-line mt-6">
+                    <div class="mt-6 flex flex-col-reverse gap-3 border-t border-line pt-4 sm:flex-row sm:items-center sm:justify-end">
                         <button
                             type="button"
                             wire:click="closeModal"
-                            class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition sm:w-auto"
                         >
                             Cancelar
                         </button>
                         <button
                             type="submit"
-                            class="rounded-xl bg-teal-700 px-5 py-2 text-xs font-semibold text-white hover:bg-teal-800 shadow-sm transition"
+                            class="w-full rounded-xl bg-teal-700 px-5 py-2 text-xs font-semibold text-white hover:bg-teal-800 shadow-sm transition sm:w-auto"
                         >
                             {{ $isEditing ? 'Salvar Alterações' : 'Cadastrar Usuário' }}
                         </button>
@@ -233,8 +233,8 @@
 
     <!-- Modal de Confirmação de Exclusão -->
     @if ($showDeleteModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
-            <div class="relative w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl border border-slate-200" @click.outside="$wire.closeDeleteModal()">
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3 backdrop-blur-xs animate-fade-in sm:p-4">
+            <div class="app-modal-panel relative w-full max-w-md rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl sm:rounded-3xl sm:p-6" @click.outside="$wire.closeDeleteModal()">
                 <div class="flex items-start gap-4">
                     <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-rose-100 text-rose-600">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -249,18 +249,18 @@
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-3 pt-5 border-t border-line mt-6">
+                <div class="mt-6 flex flex-col-reverse gap-3 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-end">
                     <button
                         type="button"
                         wire:click="closeDeleteModal"
-                        class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition sm:w-auto"
                     >
                         Cancelar
                     </button>
                     <button
                         type="button"
                         wire:click="delete"
-                        class="rounded-xl bg-rose-600 px-5 py-2 text-xs font-semibold text-white hover:bg-rose-700 shadow-sm transition"
+                        class="w-full rounded-xl bg-rose-600 px-5 py-2 text-xs font-semibold text-white hover:bg-rose-700 shadow-sm transition sm:w-auto"
                     >
                         Sim, Excluir
                     </button>

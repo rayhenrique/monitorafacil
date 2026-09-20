@@ -8,7 +8,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-900 antialiased">
-    <main class="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-12">
+    <main class="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-4 py-8 sm:px-6 sm:py-12">
         <div class="mb-8">
             @if (filled($settings['logo_path'] ?? null))
                 <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($settings['logo_path']) }}" alt="Logotipo de {{ trim($settings['municipio_nome'] ?? '') ?: 'município' }}" class="mb-5 h-12 w-12 rounded-xl object-contain">
@@ -20,7 +20,7 @@
             <p class="mt-2 text-sm text-slate-600">Entre para acompanhar os dados consolidados do município.</p>
         </div>
 
-        <form method="post" action="{{ route('login') }}" class="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <form method="post" action="{{ route('login') }}" class="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6" novalidate>
             @csrf
             <div>
                 <label for="email" class="mb-2 block text-sm font-medium">E-mail</label>

@@ -12,14 +12,14 @@
 <body class="min-h-full bg-canvas font-sans text-ink antialiased">
     <div x-data="{ mobileMenuOpen: false }" class="min-h-screen flex flex-col lg:flex-row">
         <!-- Barra superior para Mobile (< lg) -->
-        <header class="sticky top-0 z-30 flex items-center justify-between border-b border-[#1b3832] bg-[#0c1f1c] px-4 py-3 text-white lg:hidden">
-            <div class="flex items-center gap-3">
+        <header class="sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-[#1b3832] bg-[#0c1f1c] px-3 py-3 text-white sm:px-4 lg:hidden">
+            <div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
                 <button type="button" @click="mobileMenuOpen = true" class="inline-flex items-center justify-center rounded-lg p-2 text-slate-300 hover:bg-[#132d27] hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-400" aria-label="Abrir menu de navegação">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                     </svg>
                 </button>
-                <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5" aria-label="Ir para o painel">
+                <a href="{{ route('dashboard') }}" class="flex min-w-0 items-center gap-2.5" aria-label="Ir para o painel">
                     @if (filled($settings['logo_path'] ?? null))
                         <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($settings['logo_path']) }}" alt="Logotipo de {{ trim($settings['municipio_nome'] ?? '') ?: 'município' }}" class="h-8 w-8 rounded-lg object-contain">
                     @else
@@ -32,7 +32,7 @@
                 </a>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex shrink-0 items-center gap-2">
                 <span class="hidden text-xs text-slate-300 sm:inline">{{ auth()->user()->name }}</span>
                 <form method="post" action="{{ route('logout') }}">
                     @csrf
@@ -486,7 +486,7 @@
         </aside>
 
         <!-- Área Principal de Conteúdo -->
-        <div class="flex-1 flex flex-col min-w-0 min-h-screen bg-canvas">
+        <div class="flex min-h-screen min-w-0 flex-1 flex-col overflow-x-clip bg-canvas">
             <!-- Barra Superior Discreta de Contexto no Desktop -->
             <div class="hidden lg:flex items-center justify-between border-b border-line bg-white/75 px-8 py-3.5 backdrop-blur-sm shadow-[0_1px_3px_0_rgba(0,0,0,0.02)]">
                 <div class="flex items-center gap-2.5 text-xs text-muted">
@@ -503,7 +503,7 @@
                 </div>
             </div>
 
-            <main id="conteudo" class="flex-1">
+            <main id="conteudo" class="min-w-0 flex-1">
                 @hasSection('content')
                     @yield('content')
                 @else
@@ -511,7 +511,7 @@
                 @endif
             </main>
 
-            <footer class="border-t border-line bg-white/50 px-6 py-4 text-center text-xs text-muted sm:px-8 flex flex-wrap items-center justify-between gap-2">
+            <footer class="flex flex-col items-center justify-between gap-1.5 border-t border-line bg-white/50 px-4 py-4 text-center text-xs text-muted sm:flex-row sm:px-8 sm:text-left">
                 <span>Dados consolidados para apoio à gestão municipal da APS.</span>
                 <span>Monitora Fácil · {{ trim($settings['municipio_nome'] ?? '') ?: 'Gestão Municipal' }}</span>
             </footer>
