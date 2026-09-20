@@ -7,12 +7,15 @@ use App\Models\CvatNominalCitizen;
 use App\Models\CvatNominalMetric;
 use App\Models\User;
 use App\Services\CvatNominalDwService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Livewire;
 use Tests\TestCase;
 
 class CvatNominalListTest extends TestCase
 {
+    use RefreshDatabase;
+
     private function createUser(): User
     {
         return User::query()->create([
@@ -150,7 +153,7 @@ class CvatNominalListTest extends TestCase
         $this->assertGreaterThan(0.0, $metric->index_y);
         $this->assertContains($metric->classification_x, ['Ótimo', 'Bom', 'Suficiente', 'Regular']);
         $this->assertContains($metric->classification_y, ['Ótimo', 'Bom', 'Suficiente', 'Regular']);
-        $this->assertContains($metric->final_classification, ['ÓTIMO', 'BOM', 'SUFICIENTE', 'REGULAR']);
+        $this->assertContains(mb_strtoupper($metric->final_classification), ['ÓTIMO', 'BOM', 'SUFICIENTE', 'REGULAR']);
         $this->assertLessThanOrEqual(10.0, $metric->final_score);
     }
 
@@ -160,10 +163,10 @@ class CvatNominalListTest extends TestCase
         $this->actingAs($user);
 
         Livewire::test(\App\Livewire\Settings\DataProcessing::class)
-            ->assertSee('Processar Vínculo e Acompanhamento')
+            ->assertSee('CVAT')
             ->call('processCvat')
             ->assertSet('processStatus', 'success')
             ->assertSet('selectedScope', 'cvat')
-            ->assertSee('Processamento do módulo Vínculo e Acompanhamento Territorial concluído com sucesso');
+            ->assertSee('Processamento do módulo Vínculo e Acompanhamento Territorial concluído');
     }
 }

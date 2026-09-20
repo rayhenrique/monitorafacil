@@ -7,19 +7,19 @@
         </div>
     </div>
 
-    @if ($snapshot === null)
-        <div class="rounded-2xl border border-dashed border-line bg-white p-7 text-sm text-muted">Ainda não há consolidação de cadastros para este período.</div>
-    @else
-        @php
+    @php
+        if ($snapshot !== null) {
             $miciTotal = $snapshot->mici_updated_count + $snapshot->mici_outdated_count;
             $miciPct = $miciTotal > 0 ? round(($snapshot->mici_updated_count / $miciTotal) * 100, 2) : 0;
 
             $micdtTotal = $snapshot->micdt_updated_count + $snapshot->micdt_outdated_count;
             $micdtPct = $micdtTotal > 0 ? round(($snapshot->micdt_updated_count / $micdtTotal) * 100, 2) : 0;
-            $competenciaMes = $year . ' / M' . str_pad($quarter * 4, 2, '0', STR_PAD_LEFT);
-        @endphp
+        }
 
-        <div class="grid gap-5 lg:grid-cols-3">
+        $competenciaMes = $year . ' / M' . str_pad($quarter * 4, 2, '0', STR_PAD_LEFT);
+    @endphp
+
+    <div class="grid gap-5 lg:grid-cols-3">
             <!-- Card 1: Classificação do Quadrimestre -->
             <article class="flex flex-col justify-between rounded-2xl border border-line bg-white p-6 shadow-panel">
                 <div>
@@ -41,24 +41,30 @@
                     <p class="mt-4 text-xs leading-relaxed text-muted">Distribuição oficial das equipes no modelo de cofinanciamento.</p>
                 </div>
 
-                <div class="mt-6 grid grid-cols-2 gap-y-3 rounded-xl border border-line bg-canvas/60 p-3 text-center sm:grid-cols-4 sm:gap-y-0">
-                    <div>
-                        <p class="text-xl font-bold tabular-nums text-blue-700">{{ $classifications['optimal'] }}</p>
-                        <p class="text-[10px] font-semibold text-muted uppercase">Ótimo</p>
+                @if ($cvatSummary['has_data'])
+                    <div class="mt-6 grid grid-cols-2 gap-y-3 rounded-xl border border-line bg-canvas/60 p-3 text-center sm:grid-cols-4 sm:gap-y-0">
+                        <div>
+                            <p class="text-xl font-bold tabular-nums text-blue-700">{{ $classifications['optimal'] }}</p>
+                            <p class="text-[10px] font-semibold text-muted uppercase">ÓTIMO</p>
+                        </div>
+                        <div class="border-l border-line/80">
+                            <p class="text-xl font-bold tabular-nums text-emerald-700">{{ $classifications['good'] }}</p>
+                            <p class="text-[10px] font-semibold text-muted uppercase">BOM</p>
+                        </div>
+                        <div class="border-t border-line/80 pt-3 sm:border-l sm:border-t-0 sm:pt-0">
+                            <p class="text-xl font-bold tabular-nums text-amber-700">{{ $classifications['sufficient'] }}</p>
+                            <p class="text-[10px] font-semibold text-muted uppercase">SUFICIENTE</p>
+                        </div>
+                        <div class="border-l border-t border-line/80 pt-3 sm:border-t-0 sm:pt-0">
+                            <p class="text-xl font-bold tabular-nums text-rose-700">{{ $classifications['regular'] }}</p>
+                            <p class="text-[10px] font-semibold text-muted uppercase">REGULAR</p>
+                        </div>
                     </div>
-                    <div class="border-l border-line/80">
-                        <p class="text-xl font-bold tabular-nums text-emerald-700">{{ $classifications['good'] }}</p>
-                        <p class="text-[10px] font-semibold text-muted uppercase">Bom</p>
+                @else
+                    <div class="mt-6 rounded-xl border border-dashed border-line bg-canvas/50 px-4 py-5 text-center">
+                        <p class="text-xs font-semibold text-ink">Sem consolidação disponível neste período</p>
                     </div>
-                    <div class="border-t border-line/80 pt-3 sm:border-l sm:border-t-0 sm:pt-0">
-                        <p class="text-xl font-bold tabular-nums text-amber-700">{{ $classifications['sufficient'] }}</p>
-                        <p class="text-[10px] font-semibold text-muted uppercase">Suficiente</p>
-                    </div>
-                    <div class="border-l border-t border-line/80 pt-3 sm:border-t-0 sm:pt-0">
-                        <p class="text-xl font-bold tabular-nums text-rose-700">{{ $classifications['regular'] }}</p>
-                        <p class="text-[10px] font-semibold text-muted uppercase">Regular</p>
-                    </div>
-                </div>
+                @endif
 
                 <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
                     <a href="{{ route('territorial-bonding.nominal') }}" class="text-xs font-semibold text-teal-700 hover:text-teal-900 transition inline-flex items-center gap-1">
@@ -85,34 +91,44 @@
                                 <p class="text-xs text-muted">Cadastro Individual</p>
                             </div>
                         </div>
-                        <span class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 border border-emerald-200">
-                            {{ number_format($miciPct, 2, ',', '.') }}%
-                        </span>
+                        @if ($snapshot !== null)
+                            <span class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 border border-emerald-200">
+                                {{ number_format($miciPct, 2, ',', '.') }}%
+                            </span>
+                        @endif
                     </div>
 
-                    <p class="mt-4 text-3xl font-bold tracking-tight tabular-nums text-ink">
-                        {{ number_format($snapshot->mici_updated_count, 0, ',', '.') }}
-                    </p>
+                    @if ($snapshot !== null)
+                        <p class="mt-4 text-3xl font-bold tracking-tight tabular-nums text-ink">
+                            {{ number_format($snapshot->mici_updated_count, 0, ',', '.') }}
+                        </p>
+                    @endif
 
                     <p class="mt-2 text-xs leading-relaxed text-muted">
                         MICI — Cadastro Individual. Considera-se atualizado o cadastro incluído ou modificado nos últimos 24 meses.
                     </p>
                 </div>
 
-                <div class="mt-6 grid grid-cols-3 gap-2 border-t border-line pt-3 text-center">
-                    <div>
-                        <p class="text-[10px] font-medium text-muted uppercase">Mês</p>
-                        <p class="mt-0.5 text-xs font-semibold text-ink">{{ $competenciaMes }}</p>
+                @if ($snapshot !== null)
+                    <div class="mt-6 grid grid-cols-3 gap-2 border-t border-line pt-3 text-center">
+                        <div>
+                            <p class="text-[10px] font-medium text-muted uppercase">Mês</p>
+                            <p class="mt-0.5 text-xs font-semibold text-ink">{{ $competenciaMes }}</p>
+                        </div>
+                        <div class="border-l border-line/80">
+                            <p class="text-[10px] font-medium text-muted uppercase">Total Geral</p>
+                            <p class="mt-0.5 text-xs font-semibold text-ink">{{ number_format($miciTotal, 0, ',', '.') }}</p>
+                        </div>
+                        <div class="border-l border-line/80">
+                            <p class="text-[10px] font-medium text-muted uppercase">Desatualizados</p>
+                            <p class="mt-0.5 text-xs font-semibold text-amber-700">{{ number_format($snapshot->mici_outdated_count, 0, ',', '.') }}</p>
+                        </div>
                     </div>
-                    <div class="border-l border-line/80">
-                        <p class="text-[10px] font-medium text-muted uppercase">Total Geral</p>
-                        <p class="mt-0.5 text-xs font-semibold text-ink">{{ number_format($miciTotal, 0, ',', '.') }}</p>
+                @else
+                    <div class="mt-6 rounded-xl border border-dashed border-line bg-canvas/50 px-4 py-5 text-center">
+                        <p class="text-xs font-semibold text-ink">Sem consolidação disponível neste período</p>
                     </div>
-                    <div class="border-l border-line/80">
-                        <p class="text-[10px] font-medium text-muted uppercase">Desatualizados</p>
-                        <p class="mt-0.5 text-xs font-semibold text-amber-700">{{ number_format($snapshot->mici_outdated_count, 0, ',', '.') }}</p>
-                    </div>
-                </div>
+                @endif
             </article>
 
             <!-- Card 3: Total MICI + MICDT Atualizados -->
@@ -130,35 +146,44 @@
                                 <p class="text-xs text-muted">fichas/domicílios</p>
                             </div>
                         </div>
-                        <span class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 border border-emerald-200">
-                            {{ number_format($micdtPct, 2, ',', '.') }}%
-                        </span>
+                        @if ($snapshot !== null)
+                            <span class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 border border-emerald-200">
+                                {{ number_format($micdtPct, 2, ',', '.') }}%
+                            </span>
+                        @endif
                     </div>
 
-                    <p class="mt-4 text-3xl font-bold tracking-tight tabular-nums text-ink">
-                        {{ number_format($snapshot->micdt_updated_count, 0, ',', '.') }}
-                    </p>
+                    @if ($snapshot !== null)
+                        <p class="mt-4 text-3xl font-bold tracking-tight tabular-nums text-ink">
+                            {{ number_format($snapshot->micdt_updated_count, 0, ',', '.') }}
+                        </p>
+                    @endif
 
                     <p class="mt-2 text-xs leading-relaxed text-muted">
                         MICDT — Cadastro Domiciliar e Territorial (fichas/domicílios). A pessoa com cadastro completo tem MICI e MICDT.
                     </p>
                 </div>
 
-                <div class="mt-6 grid grid-cols-3 gap-2 border-t border-line pt-3 text-center">
-                    <div>
-                        <p class="text-[10px] font-medium text-muted uppercase">Mês</p>
-                        <p class="mt-0.5 text-xs font-semibold text-ink">{{ $competenciaMes }}</p>
+                @if ($snapshot !== null)
+                    <div class="mt-6 grid grid-cols-3 gap-2 border-t border-line pt-3 text-center">
+                        <div>
+                            <p class="text-[10px] font-medium text-muted uppercase">Mês</p>
+                            <p class="mt-0.5 text-xs font-semibold text-ink">{{ $competenciaMes }}</p>
+                        </div>
+                        <div class="border-l border-line/80">
+                            <p class="text-[10px] font-medium text-muted uppercase">Total Geral</p>
+                            <p class="mt-0.5 text-xs font-semibold text-ink">{{ number_format($micdtTotal, 0, ',', '.') }}</p>
+                        </div>
+                        <div class="border-l border-line/80">
+                            <p class="text-[10px] font-medium text-muted uppercase">Desatualizados</p>
+                            <p class="mt-0.5 text-xs font-semibold text-amber-700">{{ number_format($snapshot->micdt_outdated_count, 0, ',', '.') }}</p>
+                        </div>
                     </div>
-                    <div class="border-l border-line/80">
-                        <p class="text-[10px] font-medium text-muted uppercase">Total Geral</p>
-                        <p class="mt-0.5 text-xs font-semibold text-ink">{{ number_format($micdtTotal, 0, ',', '.') }}</p>
+                @else
+                    <div class="mt-6 rounded-xl border border-dashed border-line bg-canvas/50 px-4 py-5 text-center">
+                        <p class="text-xs font-semibold text-ink">Sem consolidação disponível neste período</p>
                     </div>
-                    <div class="border-l border-line/80">
-                        <p class="text-[10px] font-medium text-muted uppercase">Desatualizados</p>
-                        <p class="mt-0.5 text-xs font-semibold text-amber-700">{{ number_format($snapshot->micdt_outdated_count, 0, ',', '.') }}</p>
-                    </div>
-                </div>
+                @endif
             </article>
-        </div>
-    @endif
+    </div>
 </section>

@@ -430,7 +430,7 @@ class FamilyHealthC3Test extends TestCase
         $this->authenticateUser();
 
         Livewire::test(DataProcessing::class)
-            ->assertSee('Processar C3')
+            ->assertSee('Indicador C3')
             ->call('processC3')
             ->assertSet('selectedScope', 'c3')
             ->assertSet('isProcessing', false);

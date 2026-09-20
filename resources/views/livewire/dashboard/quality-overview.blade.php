@@ -124,24 +124,30 @@
                         </div>
                     </div>
 
-                    <div class="mt-6 grid grid-cols-2 gap-y-3 rounded-xl border border-line bg-canvas/60 p-2.5 text-center sm:grid-cols-4 sm:gap-y-0">
-                        <div>
-                            <p class="text-lg font-semibold tabular-nums text-emerald-700">{{ $indicator['optimal'] }}</p>
-                            <p class="text-[10px] font-medium text-muted uppercase">Ótimo</p>
+                    @if ($indicator['has_data'])
+                        <div class="mt-6 grid grid-cols-2 gap-y-3 rounded-xl border border-line bg-canvas/60 p-2.5 text-center sm:grid-cols-4 sm:gap-y-0">
+                            <div>
+                                <p class="text-lg font-semibold tabular-nums text-emerald-700">{{ $indicator['optimal'] }}</p>
+                                <p class="text-[10px] font-medium text-muted uppercase">Ótimo</p>
+                            </div>
+                            <div class="border-l border-line/80">
+                                <p class="text-lg font-semibold tabular-nums text-teal-700">{{ $indicator['good'] }}</p>
+                                <p class="text-[10px] font-medium text-muted uppercase">Bom</p>
+                            </div>
+                            <div class="border-l border-line/80">
+                                <p class="text-lg font-semibold tabular-nums text-amber-700">{{ $indicator['sufficient'] }}</p>
+                                <p class="text-[10px] font-medium text-muted uppercase">Suficiente</p>
+                            </div>
+                            <div class="border-l border-line/80">
+                                <p class="text-lg font-semibold tabular-nums text-rose-700">{{ $indicator['regular'] }}</p>
+                                <p class="text-[10px] font-medium text-muted uppercase">Regular</p>
+                            </div>
                         </div>
-                        <div class="border-l border-line/80">
-                            <p class="text-lg font-semibold tabular-nums text-teal-700">{{ $indicator['good'] }}</p>
-                            <p class="text-[10px] font-medium text-muted uppercase">Bom</p>
+                    @else
+                        <div class="mt-6 rounded-xl border border-dashed border-line bg-canvas/50 px-3 py-4 text-center">
+                            <p class="text-xs font-semibold text-ink">Sem consolidação disponível neste período</p>
                         </div>
-                        <div class="border-l border-line/80">
-                            <p class="text-lg font-semibold tabular-nums text-amber-700">{{ $indicator['sufficient'] }}</p>
-                            <p class="text-[10px] font-medium text-muted uppercase">Suficiente</p>
-                        </div>
-                        <div class="border-l border-line/80">
-                            <p class="text-lg font-semibold tabular-nums text-rose-700">{{ $indicator['regular'] }}</p>
-                            <p class="text-[10px] font-medium text-muted uppercase">Regular</p>
-                        </div>
-                    </div>
+                    @endif
                 </article>
             @endforeach
         </div>
@@ -174,24 +180,30 @@
                         </div>
                     </div>
 
-                    <div class="mt-6 grid grid-cols-2 gap-y-3 rounded-xl border border-line bg-canvas/60 p-2.5 text-center sm:grid-cols-4 sm:gap-y-0">
-                        <div>
-                            <p class="text-lg font-semibold tabular-nums text-emerald-700">{{ $indicator['optimal'] }}</p>
-                            <p class="text-[10px] font-medium text-muted uppercase">Ótimo</p>
+                    @if ($indicator['has_data'])
+                        <div class="mt-6 grid grid-cols-2 gap-y-3 rounded-xl border border-line bg-canvas/60 p-2.5 text-center sm:grid-cols-4 sm:gap-y-0">
+                            <div>
+                                <p class="text-lg font-semibold tabular-nums text-emerald-700">{{ $indicator['optimal'] }}</p>
+                                <p class="text-[10px] font-medium text-muted uppercase">Ótimo</p>
+                            </div>
+                            <div class="border-l border-line/80">
+                                <p class="text-lg font-semibold tabular-nums text-teal-700">{{ $indicator['good'] }}</p>
+                                <p class="text-[10px] font-medium text-muted uppercase">Bom</p>
+                            </div>
+                            <div class="border-l border-line/80">
+                                <p class="text-lg font-semibold tabular-nums text-amber-700">{{ $indicator['sufficient'] }}</p>
+                                <p class="text-[10px] font-medium text-muted uppercase">Suficiente</p>
+                            </div>
+                            <div class="border-l border-line/80">
+                                <p class="text-lg font-semibold tabular-nums text-rose-700">{{ $indicator['regular'] }}</p>
+                                <p class="text-[10px] font-medium text-muted uppercase">Regular</p>
+                            </div>
                         </div>
-                        <div class="border-l border-line/80">
-                            <p class="text-lg font-semibold tabular-nums text-teal-700">{{ $indicator['good'] }}</p>
-                            <p class="text-[10px] font-medium text-muted uppercase">Bom</p>
+                    @else
+                        <div class="mt-6 rounded-xl border border-dashed border-line bg-canvas/50 px-3 py-4 text-center">
+                            <p class="text-xs font-semibold text-ink">Sem consolidação disponível neste período</p>
                         </div>
-                        <div class="border-l border-line/80">
-                            <p class="text-lg font-semibold tabular-nums text-amber-700">{{ $indicator['sufficient'] }}</p>
-                            <p class="text-[10px] font-medium text-muted uppercase">Suficiente</p>
-                        </div>
-                        <div class="border-l border-line/80">
-                            <p class="text-lg font-semibold tabular-nums text-rose-700">{{ $indicator['regular'] }}</p>
-                            <p class="text-[10px] font-medium text-muted uppercase">Regular</p>
-                        </div>
-                    </div>
+                    @endif
                 </article>
             @endforeach
         </div>

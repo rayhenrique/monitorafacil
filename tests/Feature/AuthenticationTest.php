@@ -193,7 +193,7 @@ class AuthenticationTest extends TestCase
             ->assertSee('Ações interprofissionais')
             ->assertSee('M1')
             ->assertSee('M2')
-            ->assertSee('Ótimo');
+            ->assertSee('Sem consolidação disponível neste período');
     }
 
     public function test_quality_overview_uses_current_team_snapshots_for_c1_to_c3(): void

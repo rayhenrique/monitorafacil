@@ -19,9 +19,10 @@ class DashboardSnapshotService
             'c2' => C2DwService::VERSION,
             'c3' => C3DwService::VERSION,
         ];
+        $codes = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7'];
         $distribution = [];
 
-        foreach (array_keys($versions) as $code) {
+        foreach ($codes as $code) {
             $distribution[$code] = [
                 'optimal' => 0,
                 'good' => 0,
@@ -35,7 +36,7 @@ class DashboardSnapshotService
         $snapshots = FamilyHealthIndicatorSnapshot::query()
             ->where('year', $year)
             ->where('quarter', $quarter)
-            ->whereIn('indicator_code', array_keys($versions))
+            ->whereIn('indicator_code', $codes)
             ->whereNotNull('ine')
             ->where(function ($query): void {
                 $query->whereIn('team_type', ['70', '76'])
@@ -44,14 +45,20 @@ class DashboardSnapshotService
             ->get(['indicator_code', 'performance_level', 'good_practices_breakdown']);
 
         foreach ($snapshots as $snapshot) {
-            $code = strtolower($snapshot->indicator_code);
-            $version = $snapshot->good_practices_breakdown['calculation_version'] ?? null;
+            $code = strtolower((string) $snapshot->indicator_code);
 
-            if (! isset($versions[$code]) || $version !== $versions[$code]) {
+            if (! isset($distribution[$code]) || empty($snapshot->performance_level)) {
                 continue;
             }
 
-            $classification = match (strtolower($snapshot->performance_level)) {
+            if (isset($versions[$code])) {
+                $version = $snapshot->good_practices_breakdown['calculation_version'] ?? null;
+                if ($version !== $versions[$code]) {
+                    continue;
+                }
+            }
+
+            $classification = match (strtolower((string) $snapshot->performance_level)) {
                 'otimo' => 'optimal',
                 'bom' => 'good',
                 'suficiente' => 'sufficient',
@@ -95,12 +102,23 @@ class DashboardSnapshotService
     {
         $teams = ConsolidationTeam::query()->select('year', 'quarter')->distinct()->get();
         $registrations = ConsolidationRegistration::query()->select('year', 'quarter')->distinct()->get();
+        $snapshots = FamilyHealthIndicatorSnapshot::query()->select('year', 'quarter')->distinct()->get();
+        $evaluations = \Illuminate\Support\Facades\Schema::hasTable('cvat_team_evaluations')
+            ? \App\Models\CvatTeamEvaluation::query()->select('year', 'quarter')->distinct()->get()
+            : collect();
+        $distributions = \Illuminate\Support\Facades\Schema::hasTable('cvat_dimension_distributions')
+            ? \App\Models\CvatDimensionDistribution::query()->select('year', 'quarter')->distinct()->get()
+            : collect();
 
         return $teams->concat($registrations)
+            ->concat($evaluations)
+            ->concat($distributions)
+            ->concat($snapshots)
             ->map(static fn ($row): array => [
                 'year' => (int) $row->year,
                 'quarter' => (int) $row->quarter,
             ])
+            ->filter(static fn (array $period): bool => $period['year'] >= 2020 && $period['quarter'] >= 1 && $period['quarter'] <= 3)
             ->unique(static fn (array $period): string => $period['year'].'-'.$period['quarter'])
             ->sort(static fn (array $a, array $b): int => [$b['year'], $b['quarter']] <=> [$a['year'], $a['quarter']])
             ->values()

@@ -106,7 +106,7 @@ class QualityOverview extends Component
     }
 
     /**
-     * @return array<int, array{code: string, name: string, description: string, icon: string, optimal: int, good: int, sufficient: int, regular: int}>
+     * @return array<int, array{code: string, name: string, description: string, icon: string, optimal: int, good: int, sufficient: int, regular: int, has_data: bool}>
      */
     public function getOralHealthIndicators(): array
     {
@@ -120,6 +120,7 @@ class QualityOverview extends Component
                 'good' => 0,
                 'sufficient' => 0,
                 'regular' => 0,
+                'has_data' => false,
             ],
             [
                 'code' => 'B2',
@@ -130,6 +131,7 @@ class QualityOverview extends Component
                 'good' => 0,
                 'sufficient' => 0,
                 'regular' => 0,
+                'has_data' => false,
             ],
             [
                 'code' => 'B3',
@@ -140,6 +142,7 @@ class QualityOverview extends Component
                 'good' => 0,
                 'sufficient' => 0,
                 'regular' => 0,
+                'has_data' => false,
             ],
             [
                 'code' => 'B4',
@@ -150,6 +153,7 @@ class QualityOverview extends Component
                 'good' => 0,
                 'sufficient' => 0,
                 'regular' => 0,
+                'has_data' => false,
             ],
             [
                 'code' => 'B5',
@@ -160,6 +164,7 @@ class QualityOverview extends Component
                 'good' => 0,
                 'sufficient' => 0,
                 'regular' => 0,
+                'has_data' => false,
             ],
             [
                 'code' => 'B6',
@@ -170,12 +175,13 @@ class QualityOverview extends Component
                 'good' => 0,
                 'sufficient' => 0,
                 'regular' => 0,
+                'has_data' => false,
             ],
         ];
     }
 
     /**
-     * @return array<int, array{code: string, name: string, description: string, icon: string, optimal: int, good: int, sufficient: int, regular: int}>
+     * @return array<int, array{code: string, name: string, description: string, icon: string, optimal: int, good: int, sufficient: int, regular: int, has_data: bool}>
      */
     public function getEMultiIndicators(): array
     {
@@ -189,6 +195,7 @@ class QualityOverview extends Component
                 'good' => 0,
                 'sufficient' => 0,
                 'regular' => 0,
+                'has_data' => false,
             ],
             [
                 'code' => 'M2',
@@ -199,6 +206,7 @@ class QualityOverview extends Component
                 'good' => 0,
                 'sufficient' => 0,
                 'regular' => 0,
+                'has_data' => false,
             ],
         ];
     }

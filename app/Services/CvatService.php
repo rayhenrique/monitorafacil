@@ -435,7 +435,7 @@ class CvatService
      */
     public function getMunicipalSummary(int $year, int $quarter): array
     {
-        $teams = $this->teamEvaluationsFromNominal($year, $quarter);
+        $teams = $this->getEvaluations($year, $quarter);
 
         if ($teams->isEmpty()) {
             return [
@@ -458,10 +458,10 @@ class CvatService
         $avgReg = round($teams->avg('registration_score') ?? 0.0, 2);
         $avgMon = round($teams->avg('monitoring_score') ?? 0.0, 2);
 
-        $optimal = $teams->filter(fn ($t) => mb_strtoupper($t->final_classification) === 'ÓTIMO' || mb_strtoupper($t->final_classification) === 'OTIMO')->count();
-        $good = $teams->filter(fn ($t) => mb_strtoupper($t->final_classification) === 'BOM')->count();
-        $sufficient = $teams->filter(fn ($t) => mb_strtoupper($t->final_classification) === 'SUFICIENTE')->count();
-        $regular = $teams->filter(fn ($t) => mb_strtoupper($t->final_classification) === 'REGULAR')->count();
+        $optimal = $teams->filter(fn ($t) => in_array(mb_strtoupper((string) $t->final_classification), ['ÓTIMO', 'OTIMO'], true))->count();
+        $good = $teams->filter(fn ($t) => mb_strtoupper((string) $t->final_classification) === 'BOM')->count();
+        $sufficient = $teams->filter(fn ($t) => mb_strtoupper((string) $t->final_classification) === 'SUFICIENTE')->count();
+        $regular = $teams->filter(fn ($t) => mb_strtoupper((string) $t->final_classification) === 'REGULAR')->count();
 
         // Classificação do Município conforme Nota Técnica nº 08/2026 - Quadro 5
         // > 8,5: Ótimo | >= 7 e <= 8,5: Bom | >= 5 e < 7: Suficiente | < 5: Regular
@@ -495,6 +495,23 @@ class CvatService
     }
 
     /**
+     * Retorna a coleção de equipes avaliadas para o período, priorizando avaliações persistidas.
+     *
+     * @return Collection<int, CvatTeamEvaluation>
+     */
+    public function getEvaluations(int $year, int $quarter): Collection
+    {
+        if (Schema::hasTable('cvat_team_evaluations')) {
+            $evaluations = CvatTeamEvaluation::where('year', $year)->where('quarter', $quarter)->get();
+            if ($evaluations->isNotEmpty()) {
+                return $evaluations;
+            }
+        }
+
+        return $this->teamEvaluationsFromNominal($year, $quarter);
+    }
+
+    /**
      * Lista de equipes com filtros e ordenação.
      *
      * @return Collection<int, CvatTeamEvaluation>
@@ -514,6 +531,9 @@ class CvatService
         ?float $maxScore = null
     ): Collection {
         $teams = $this->teamEvaluationsFromNominal($year, $quarter);
+        if ($teams->isEmpty() && Schema::hasTable('cvat_team_evaluations')) {
+            $teams = CvatTeamEvaluation::where('year', $year)->where('quarter', $quarter)->get();
+        }
 
         $matches = static fn (?string $value, ?string $filter): bool => $filter === null
             || trim($filter) === ''
@@ -602,11 +622,10 @@ class CvatService
      */
     public function getMonthlyTeamSummary(int $year, int $quarter): array
     {
-        $period = $this->getLatestNominalPeriod($year, $quarter);
-        $teams = $this->teamEvaluationsFromNominal($year, $quarter);
+        $teams = $this->getEvaluations($year, $quarter);
         $total = $teams->count();
 
-        if (! $period || $total === 0) {
+        if ($total === 0) {
             return [
                 'has_data' => false,
                 'month_label' => null,
@@ -622,6 +641,13 @@ class CvatService
                 'regular_pct' => 0.0,
             ];
         }
+
+        $period = $this->getLatestNominalPeriod($year, $quarter) ?? [
+            'year' => $year,
+            'month' => min(12, $quarter * 4),
+            'quarter' => $quarter,
+            'last_attendance_date' => null,
+        ];
 
         $countClassification = static fn (string $classification): int => $teams
             ->filter(fn (CvatTeamEvaluation $team): bool => mb_strtoupper($team->final_classification) === $classification)
