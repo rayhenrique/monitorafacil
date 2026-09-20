@@ -299,3 +299,11 @@
   - [x] Áreas de toque, foco visível e ações de modais refinados para acessibilidade e uso móvel.
   - [x] Criação do contrato de UX em `UX-CONTRACT.md` e atualização das diretrizes em `DESIGN.md`.
   - [x] Teste automatizado de regressão responsiva e matriz visual validada de 320×568 a 1440×900.
+
+- [x] **Fase 37: Navegação CVAT e Consolidação Mensal com Dados Reais (v1.23.5)**
+  - [x] Correção do estado ativo da sidebar mobile e desktop para impedir destaque simultâneo de Relação Nominal e Equipes.
+  - [x] Inclusão de semântica `aria-current` nos links ativos do módulo.
+  - [x] Substituição de competência, datas, totais e métricas fixas da aba Equipes por consolidação mensal da relação nominal armazenada no MySQL.
+  - [x] Cálculo por INE dos índices ponderados, escores e classificação final conforme os parâmetros metodológicos existentes.
+  - [x] Estado de ausência explícito quando não há registros válidos, sem números demonstrativos.
+  - [x] Testes automatizados de regressão para navegação, dados reais, filtros e estado vazio.

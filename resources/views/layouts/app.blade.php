@@ -10,6 +10,11 @@
     @livewireStyles
 </head>
 <body class="min-h-full bg-canvas font-sans text-ink antialiased">
+    @php
+        $isTerritorialNominal = request()->routeIs('territorial-bonding.nominal');
+        $isTerritorialTeams = request()->routeIs('territorial-bonding.overview') && request()->query('aba', 'teams') === 'teams';
+        $isTerritorialGuide = request()->routeIs('territorial-bonding.overview') && request()->query('aba') === 'guide';
+    @endphp
     <div x-data="{ mobileMenuOpen: false }" class="min-h-screen flex flex-col lg:flex-row">
         <!-- Barra superior para Mobile (< lg) -->
         <header class="sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-[#1b3832] bg-[#0c1f1c] px-3 py-3 text-white sm:px-4 lg:hidden">
@@ -96,7 +101,7 @@
                             <!-- Links de Navegação Mobile -->
                             <div>
                                 <p class="px-2 text-[10px] font-bold uppercase tracking-widest text-teal-400/70">Navegação Principal</p>
-                                <nav class="mt-2 space-y-1.5">
+                                <nav class="mt-2 space-y-1.5" aria-label="Navegação da aplicação">
                                     <a href="{{ route('dashboard') }}" @click="mobileMenuOpen = false" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition {{ request()->routeIs('dashboard') ? 'bg-teal-500/15 text-teal-300 border-l-2 border-teal-400 font-semibold' : 'text-slate-300 hover:bg-[#132d27] hover:text-white' }}">
                                         <svg class="h-5 w-5 {{ request()->routeIs('dashboard') ? 'text-teal-400' : 'text-slate-400' }} shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
@@ -121,15 +126,15 @@
                                             </button>
                                         </div>
                                         <div x-show="open" class="ml-4 pl-3 border-l border-[#1a3832] space-y-1 mt-1" style="{{ request()->routeIs('territorial-bonding.*') ? '' : 'display: none;' }}">
-                                            <a href="{{ route('territorial-bonding.nominal') }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('territorial-bonding.nominal') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                            <a href="{{ route('territorial-bonding.nominal') }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ $isTerritorialNominal ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}" @if ($isTerritorialNominal) aria-current="page" @endif>
                                                 <span>Relação Nominal</span>
                                                 <span class="rounded bg-sky-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-sky-300">PEC</span>
                                             </a>
-                                            <a href="{{ route('territorial-bonding.overview', ['aba' => 'teams']) }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->query('aba') === 'teams' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                            <a href="{{ route('territorial-bonding.overview', ['aba' => 'teams']) }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ $isTerritorialTeams ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}" @if ($isTerritorialTeams) aria-current="page" @endif>
                                                 <span>Equipes (Mensal)</span>
-                                                <span class="text-[10px] text-teal-400 font-mono">19 eSF</span>
+                                                <span class="text-[10px] text-teal-400 font-mono">Mensal</span>
                                             </a>
-                                            <a href="{{ route('territorial-bonding.overview', ['aba' => 'guide']) }}" @click="mobileMenuOpen = false" class="block rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->query('aba') === 'guide' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">Caderno Metodológico</a>
+                                            <a href="{{ route('territorial-bonding.overview', ['aba' => 'guide']) }}" @click="mobileMenuOpen = false" class="block rounded-lg px-2.5 py-2 text-xs font-medium transition {{ $isTerritorialGuide ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}" @if ($isTerritorialGuide) aria-current="page" @endif>Caderno Metodológico</a>
                                         </div>
                                     </div>
 
@@ -323,15 +328,15 @@
                                 </button>
                             </div>
                             <div x-show="open" class="ml-4 pl-3 border-l border-[#1a3832] space-y-1 mt-1" style="{{ request()->routeIs('territorial-bonding.*') ? '' : 'display: none;' }}">
-                                <a href="{{ route('territorial-bonding.nominal') }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('territorial-bonding.nominal') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                <a href="{{ route('territorial-bonding.nominal') }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ $isTerritorialNominal ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}" @if ($isTerritorialNominal) aria-current="page" @endif>
                                     <span>Relação Nominal</span>
                                     <span class="rounded bg-sky-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-sky-300">PEC</span>
                                 </a>
-                                <a href="{{ route('territorial-bonding.overview', ['aba' => 'teams']) }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->query('aba') === 'teams' || !request()->query('aba') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                <a href="{{ route('territorial-bonding.overview', ['aba' => 'teams']) }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ $isTerritorialTeams ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}" @if ($isTerritorialTeams) aria-current="page" @endif>
                                     <span>Equipes (Mensal)</span>
-                                    <span class="text-[10px] font-mono text-teal-400/80">19 eSF</span>
+                                    <span class="text-[10px] font-mono text-teal-400/80">Mensal</span>
                                 </a>
-                                <a href="{{ route('territorial-bonding.overview', ['aba' => 'guide']) }}" class="block rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->query('aba') === 'guide' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                <a href="{{ route('territorial-bonding.overview', ['aba' => 'guide']) }}" class="block rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ $isTerritorialGuide ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}" @if ($isTerritorialGuide) aria-current="page" @endif>
                                     Caderno Metodológico
                                 </a>
                             </div>

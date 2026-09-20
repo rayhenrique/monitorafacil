@@ -5,6 +5,7 @@
         title="Vínculo e Acompanhamento Territorial"
         subtitle="Componente II · Monitoramento Mensal e Quadrimestral do Vínculo na Atenção Primária"
         :activeTab="$activeTab"
+        :teamCount="$monthlySummary['total_teams'] ?? null"
     />
 
     @if ($activeTab === 'teams')
@@ -18,7 +19,16 @@
                     <svg class="h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5" />
                     </svg>
-                    <span>Último atendimento registrado em {{ $monthlySummary['last_attendance_date'] }}</span>
+                    @if ($monthlySummary['has_data'])
+                        <span>
+                            Competência {{ $monthlySummary['month_label'] }}
+                            @if ($monthlySummary['last_attendance_date'])
+                                · último atendimento em {{ $monthlySummary['last_attendance_date'] }}
+                            @endif
+                        </span>
+                    @else
+                        <span>Sem consolidação nominal disponível para o período selecionado</span>
+                    @endif
                 </div>
             </div>
 
@@ -37,9 +47,15 @@
             </div>
         </div>
 
-        <!-- PAINEL SUPERIOR DE SÍNTESE (REPRODUÇÃO FIEL DA IMAGEM OFICIAL) -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-            <div class="grid grid-cols-2 sm:grid-cols-5 divide-slate-100">
+        @if ($monthlySummary['has_data'])
+            <div class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-teal-200 bg-teal-50/70 px-4 py-2.5 text-xs text-teal-950">
+                <span class="font-semibold">Dados calculados da relação nominal armazenada no MySQL após o processamento do PEC.</span>
+                <span class="font-mono font-bold">{{ $monthlySummary['total_teams'] }} {{ $monthlySummary['total_teams'] === 1 ? 'equipe' : 'equipes' }}</span>
+            </div>
+
+            <!-- PAINEL SUPERIOR DE SÍNTESE -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+                <div class="grid grid-cols-2 sm:grid-cols-5 divide-slate-100">
                 <!-- Coluna 1: Mês -->
                 <div class="p-4 sm:p-5 flex flex-col items-center justify-center text-center col-span-2 sm:col-span-1 bg-slate-50/50 border-b sm:border-b-0 sm:border-r border-slate-100">
                     <span class="text-xs font-semibold text-slate-500 mb-1">Mês</span>
@@ -83,8 +99,16 @@
                         <span class="text-xs sm:text-sm font-semibold text-slate-500 font-mono">({{ number_format($monthlySummary['regular_pct'], 2, '.', '') }}%)</span>
                     </div>
                 </div>
+                </div>
             </div>
-        </div>
+        @else
+            <div class="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-8 text-center">
+                <p class="text-sm font-bold text-slate-800">Sem dados reais de equipes para esta competência</p>
+                <p class="mx-auto mt-1 max-w-2xl text-xs leading-relaxed text-slate-500">
+                    Processe Vínculo e Acompanhamento em Configurações para consolidar a relação nominal do PEC no banco local. Nenhum valor demonstrativo será exibido enquanto a consolidação não existir.
+                </p>
+            </div>
+        @endif
 
         <!-- BARRA DE FILTROS RESPONSIVA (CNES, Unidade, INE, Equipe, Classificação Final, Paginação) -->
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
@@ -316,7 +340,9 @@
                         @empty
                             <tr>
                                 <td colspan="14" class="py-10 text-center text-slate-400">
-                                    Nenhuma equipe encontrada para os filtros selecionados.
+                                    {{ $monthlySummary['has_data']
+                                        ? 'Nenhuma equipe encontrada para os filtros selecionados.'
+                                        : 'Sem consolidação nominal de equipes para o período selecionado.' }}
                                 </td>
                             </tr>
                         @endforelse
@@ -330,7 +356,8 @@
                     Exibindo <span class="font-bold text-slate-800">{{ $teams->count() }}</span> de <span class="font-bold text-slate-800">{{ $totalTeamsFound }}</span> equipes cadastradas
                 </div>
                 <div class="font-medium">
-                    Município de Teotônio Vilela/AL · 19 Equipes de Saúde da Família Homologadas
+                    {{ trim($settings['municipio_nome'] ?? '') ?: 'Município não configurado' }} ·
+                    {{ $monthlySummary['total_teams'] }} {{ $monthlySummary['total_teams'] === 1 ? 'equipe consolidada' : 'equipes consolidadas' }} nesta competência
                 </div>
             </div>
         </div>

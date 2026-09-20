@@ -2,7 +2,6 @@
 
 namespace App\Livewire\TerritorialBonding;
 
-use App\Models\CvatTeamEvaluation;
 use App\Services\CvatService;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
@@ -58,10 +57,11 @@ class TerritorialBondingOverview extends Component
 
     public string $advTeamType = '';
 
-    public function mount(): void
+    public function mount(CvatService $cvatService): void
     {
-        if (! request()->has('aba')) {
+        if (request()->routeIs('territorial-bonding.overview') && ! request()->has('aba')) {
             $this->redirect(route('territorial-bonding.nominal'), navigate: true);
+
             return;
         }
 
@@ -73,6 +73,14 @@ class TerritorialBondingOverview extends Component
         $allowedTabs = ['teams', 'guide'];
         if (! in_array($this->activeTab, $allowedTabs, true)) {
             $this->activeTab = 'teams';
+        }
+
+        if (! request()->has('ano') && ! request()->has('q')) {
+            $latestPeriod = $cvatService->getLatestNominalPeriod();
+            if ($latestPeriod) {
+                $this->selectedYear = $latestPeriod['year'];
+                $this->selectedQuarter = $latestPeriod['quarter'];
+            }
         }
     }
 
@@ -127,9 +135,6 @@ class TerritorialBondingOverview extends Component
 
     public function render(CvatService $cvatService): View
     {
-        $availableQuarters = $cvatService->getAvailableQuarters();
-        $summary = $cvatService->getMunicipalSummary($this->selectedYear, $this->selectedQuarter);
-
         // Busca equipes com os filtros da tela
         $allMatchingTeams = $cvatService->getTeamsList(
             year: $this->selectedYear,
@@ -149,37 +154,12 @@ class TerritorialBondingOverview extends Component
         $totalTeamsFound = $allMatchingTeams->count();
         $teams = $this->perPage > 0 ? $allMatchingTeams->take($this->perPage) : $allMatchingTeams;
 
-        // Síntese mensal reproduzindo o painel da imagem com dados reais
-        $allTeams = CvatTeamEvaluation::where('year', $this->selectedYear)->where('quarter', $this->selectedQuarter)->get();
-        if ($allTeams->isEmpty()) {
-            $allTeams = CvatTeamEvaluation::all();
-        }
-        $totalTeamsCount = $allTeams->count() ?: 19;
-        $optimalTeams = $allTeams->filter(fn ($t) => in_array(mb_strtoupper($t->final_classification), ['ÓTIMO', 'OTIMO']))->count();
-        $goodTeams = $allTeams->filter(fn ($t) => mb_strtoupper($t->final_classification) === 'BOM')->count();
-        $sufficientTeams = $allTeams->filter(fn ($t) => mb_strtoupper($t->final_classification) === 'SUFICIENTE')->count();
-        $regularTeams = $allTeams->filter(fn ($t) => mb_strtoupper($t->final_classification) === 'REGULAR')->count();
+        $monthlySummary = $cvatService->getMonthlyTeamSummary($this->selectedYear, $this->selectedQuarter);
 
-        $monthlySummary = [
-            'month_label' => '2026 / M9',
-            'last_attendance_date' => '18/09/2026',
-            'total_teams' => $totalTeamsCount,
-            'optimal' => $optimalTeams,
-            'optimal_pct' => round(($optimalTeams / $totalTeamsCount) * 100, 2),
-            'good' => $goodTeams,
-            'good_pct' => round(($goodTeams / $totalTeamsCount) * 100, 2),
-            'sufficient' => $sufficientTeams,
-            'sufficient_pct' => round(($sufficientTeams / $totalTeamsCount) * 100, 2),
-            'regular' => $regularTeams,
-            'regular_pct' => round(($regularTeams / $totalTeamsCount) * 100, 2),
-        ];
-
-        $selectedQuarterLabel = 'Q' . $this->selectedQuarter . '/' . substr((string) $this->selectedYear, -2);
+        $selectedQuarterLabel = 'Q'.$this->selectedQuarter.'/'.substr((string) $this->selectedYear, -2);
 
         return view('livewire.territorial-bonding.overview', [
             'activeTab' => $this->activeTab,
-            'availableQuarters' => $availableQuarters,
-            'summary' => $summary,
             'teams' => $teams,
             'totalTeamsFound' => $totalTeamsFound,
             'monthlySummary' => $monthlySummary,

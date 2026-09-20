@@ -4,6 +4,24 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.23.5] - 19/09/2026
+
+### 🔗 Navegação CVAT e Consolidação Mensal com Dados Reais
+- **Navegação sem ambiguidade**:
+  - Correção do estado ativo da sidebar mobile e desktop para destacar somente `Relação Nominal` na rota nominal e somente `Equipes (Mensal)` na aba de equipes.
+  - Inclusão de `aria-current="page"` nos links ativos para tornar o estado atual também perceptível por tecnologias assistivas.
+- **Dados mensais derivados da base local**:
+  - Remoção dos totais, competência, data de atendimento, quantidade de equipes e detalhes por INE que estavam fixos na interface e no serviço.
+  - Consolidação por equipe calculada a partir de `cvat_nominal_citizens`, usando o mês mais recente da competência selecionada no MySQL.
+  - Cálculo dos índices ponderados de cadastro e acompanhamento, escores e classificação final por equipe com os parâmetros metodológicos existentes.
+  - Estado vazio explícito quando não há registros nominais válidos, sem substituir ausência de dados por valores demonstrativos.
+  - Badges, cabeçalho, resumo e rodapé atualizados para refletir a quantidade e o período realmente encontrados.
+- **Qualidade**:
+  - Cobertura automatizada para estados ativos da sidebar, consolidação de duas equipes, filtros e ausência de dados.
+  - Compatibilidade das migrations de consolidação com o banco SQLite usado na suíte de testes, sem alterar as restrições aplicadas no MySQL.
+
+---
+
 ## [v1.23.4] - 19/09/2026
 
 ### 📱 Responsividade Global e Contrato de UX

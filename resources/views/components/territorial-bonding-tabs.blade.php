@@ -2,6 +2,7 @@
     'title' => 'Vínculo e Acompanhamento Territorial',
     'subtitle' => 'Componente II · Metodologia Oficial Siaps / Portaria GM/MS nº 3.493/2024',
     'activeTab' => 'nominal', // 'nominal', 'cadastro', 'acompanhamento', 'teams', 'guide'
+    'teamCount' => null,
 ])
 
 @php
@@ -14,7 +15,7 @@
         'teams' => [
             'label' => 'Equipes (Mensal)',
             'icon' => 'users',
-            'badge' => '19 eSF',
+            'badge' => $teamCount !== null ? $teamCount.' eSF' : 'Mensal',
         ],
         'guide' => [
             'label' => 'Caderno Metodológico',
@@ -49,7 +50,7 @@
                 <svg class="h-3.5 w-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span>Dados Oficiais Siaps</span>
+                <span>Base local processada</span>
             </span>
         </div>
     </div>
@@ -65,6 +66,7 @@
                 @if ($key === 'nominal')
                     <a
                         href="{{ route('territorial-bonding.nominal') }}"
+                        @if ($isActive) aria-current="page" @endif
                         class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 whitespace-nowrap transition cursor-pointer {{ $isActive ? 'bg-teal-700 text-white font-semibold shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-ink' }}"
                     >
                         <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -78,6 +80,7 @@
                 @elseif ($isNominalRoute)
                     <a
                         href="{{ route('territorial-bonding.overview', ['aba' => $key]) }}"
+                        @if ($isActive) aria-current="page" @endif
                         class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 whitespace-nowrap transition cursor-pointer {{ $isActive ? 'bg-teal-700 text-white font-semibold shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-ink' }}"
                     >
                         @if ($tab['icon'] === 'id-card')

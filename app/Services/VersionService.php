@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.23.4';
+    public const CURRENT_VERSION = 'v1.23.5';
 
     public const CURRENT_RELEASE_DATE = '19/09/2026';
 
@@ -61,9 +61,22 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.23.4',
+                'version' => 'v1.23.5',
                 'date' => '19/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Navegação CVAT e Consolidação Mensal com Dados Reais',
+                'summary' => 'Correção do estado ativo da navegação do módulo e substituição dos valores demonstrativos da aba Equipes por uma consolidação mensal calculada a partir da relação nominal processada no MySQL.',
+                'highlights' => [
+                    ['type' => 'correcao', 'text' => 'Sidebar mobile e desktop agora destacam exclusivamente o submódulo atual, sem ativar Equipes ao acessar a Relação Nominal.'],
+                    ['type' => 'dados', 'text' => 'Indicadores, competências, datas, totais e classificações por equipe são calculados a partir dos registros nominais vinculados e persistidos no MySQL.'],
+                    ['type' => 'interface', 'text' => 'Badges, totais e rodapé deixaram de exibir quantidades fixas e passaram a refletir a competência realmente consolidada.'],
+                    ['type' => 'qualidade', 'text' => 'Estado de ausência explícito evita apresentar números demonstrativos quando não houver registros válidos para a competência.'],
+                ],
+            ],
+            [
+                'version' => 'v1.23.4',
+                'date' => '19/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Responsividade Global e Contrato de UX',
                 'summary' => 'Revisão responsiva de toda a interface autenticada e da tela de acesso, cobrindo navegação, painéis, formulários, tabelas e modais em celulares, tablets e desktops, com regras de UX documentadas e testes automatizados de regressão.',
                 'highlights' => [

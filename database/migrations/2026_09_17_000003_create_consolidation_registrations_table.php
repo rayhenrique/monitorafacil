@@ -22,9 +22,11 @@ return new class extends Migration
             $table->unique(['year', 'quarter']);
         });
 
-        DB::statement(
-            'ALTER TABLE consolidation_registrations ADD CONSTRAINT consolidation_registrations_quarter_check CHECK (quarter BETWEEN 1 AND 3)'
-        );
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            DB::statement(
+                'ALTER TABLE consolidation_registrations ADD CONSTRAINT consolidation_registrations_quarter_check CHECK (quarter BETWEEN 1 AND 3)'
+            );
+        }
     }
 
     public function down(): void
