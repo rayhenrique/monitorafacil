@@ -4,6 +4,16 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.23.9] - 21/09/2026
+
+### Filtro Dinâmico por Equipe nos Cards e Exportação CSV/PDF da Relação Nominal
+- **Atualização Dinâmica dos Cards por Equipe**: Ao selecionar qualquer equipe na Relação Nominal (pelo seletor do cabeçalho ou busca avançada), os cards de **Dimensão Cadastro** e **Dimensão Acompanhamento** têm seus quantitativos e percentuais recalculados em tempo real a partir dos microdados da equipe selecionada.
+- **Seletor de Equipe no Cabeçalho**: Adicionado seletor com todas as equipes ativas do município diretamente na barra de ações da Relação Nominal, com badge indicativo no cabeçalho dos cards e botão de limpeza para retornar ao consolidado municipal.
+- **Exportação Nominal em CSV (Excel)**: Adicionado botão de exportação que gera planilha em formato `.csv` com delimitador ponto-e-vírgula (`;`), cabeçalho completo de auditoria e marcador UTF-8 BOM para abertura imediata no Microsoft Excel sem distorção de caracteres ou acentuação gráfica. O download é realizado via streaming otimizado para suportar bases completas.
+- **Exportação Nominal em PDF (A4 Paisagem)**: Geração de relatório institucional em PDF no formato A4 paisagem via `Barryvdh\DomPDF`, contendo brasão/nome do município, competência, identificação da equipe, resumo dos indicadores de cadastro e acompanhamento e tabela nominal detalhada.
+
+---
+
 ## [v1.23.8] - 21/09/2026
 
 ### Cards Nominais CVAT, Filtro por Equipe e Toggle do Sidebar

@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.23.8';
+    public const CURRENT_VERSION = 'v1.23.9';
 
     public const CURRENT_RELEASE_DATE = '21/09/2026';
 
@@ -61,9 +61,22 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.23.8',
+                'version' => 'v1.23.9',
                 'date' => '21/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Filtro Dinâmico por Equipe nos Cards e Exportação CSV/PDF',
+                'summary' => 'Atualização dinâmica dos cards de Dimensão Cadastro e Dimensão Acompanhamento de acordo com a equipe selecionada na Relação Nominal, e nova funcionalidade de exportação completa em formatos CSV e PDF.',
+                'highlights' => [
+                    ['type' => 'melhoria', 'text' => 'Cards das Dimensões Cadastro e Acompanhamento atualizam todos os quantitativos e percentuais em tempo real ao selecionar uma equipe na Relação Nominal.'],
+                    ['type' => 'interface', 'text' => 'Seletor rápido de equipe no cabeçalho com indicador visual e botão de limpeza para retornar ao consolidado municipal.'],
+                    ['type' => 'recurso', 'text' => 'Exportação da lista nominal em CSV com codificação UTF-8 BOM e ponto-e-vírgula para abertura direta no Microsoft Excel.'],
+                    ['type' => 'recurso', 'text' => 'Exportação da relação nominal em PDF formatado em folha A4 paisagem, com cabeçalho institucional, resumo de indicadores e lista nominal.'],
+                ],
+            ],
+            [
+                'version' => 'v1.23.8',
+                'date' => '21/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Cards Nominais CVAT, Filtro por Equipe e Toggle do Sidebar',
                 'summary' => 'Exibição dos cards reais de Dimensão Cadastro e Acompanhamento na Relação Nominal, filtro de Equipe na Busca Avançada, restauração das avaliações das equipes e toggle para recolher/expandir o menu lateral.',
                 'highlights' => [

@@ -15,18 +15,75 @@ class CvatNominalDwService
 {
     public const SOURCE = 'pec_nt30_2025_v2';
 
-    public function getMetrics(?int $year = null, ?int $month = null): ?CvatNominalMetric
+    public function getMetrics(?int $year = null, ?int $month = null, ?string $team = null): ?object
     {
-        $query = CvatNominalMetric::query()->where('source', self::SOURCE);
+        $baseMetric = CvatNominalMetric::query()->where('source', self::SOURCE);
         if ($year !== null && $month !== null) {
-            $query->where('year', $year)->where('month', $month);
+            $baseMetric->where('year', $year)->where('month', $month);
+        }
+        $metric = $baseMetric->orderByDesc('year')->orderByDesc('month')->first();
+
+        if (blank($team) || ! $metric) {
+            return $metric;
         }
 
-        return $query->orderByDesc('year')->orderByDesc('month')->first();
+        $teamVal = trim((string) $team);
+        $teamQuery = DB::table('cvat_nominal_citizens')
+            ->where('source', self::SOURCE)
+            ->where('registration_eligible', true)
+            ->where('year', $metric->year)
+            ->where('month', $metric->month)
+            ->where(function ($q) use ($teamVal) {
+                $q->where('ine', $teamVal)
+                  ->orWhere('team_name', 'like', '%'.$teamVal.'%');
+            });
+
+        $counts = $teamQuery->selectRaw('
+            COUNT(*) as mici_total,
+            COUNT(CASE WHEN mici_updated = 1 THEN 1 END) as mici_updated,
+            COUNT(CASE WHEN mici_updated = 0 THEN 1 END) as mici_outdated,
+            COUNT(CASE WHEN has_micdt = 0 THEN 1 END) as mici_without_micdt_total,
+            COUNT(CASE WHEN has_micdt = 1 THEN 1 END) as mici_with_micdt_total,
+            COUNT(CASE WHEN mici_updated = 1 AND (has_micdt = 0 OR micdt_updated = 0) THEN 1 END) as mici_updated_micdt_outdated_or_none,
+            COUNT(CASE WHEN mici_updated = 1 AND has_micdt = 0 THEN 1 END) as mici_updated_without_micdt,
+            COUNT(CASE WHEN mici_updated = 1 AND micdt_updated = 1 THEN 1 END) as mici_and_micdt_updated,
+            COUNT(CASE WHEN mici_updated = 0 AND has_micdt = 1 AND micdt_updated = 0 THEN 1 END) as mici_and_micdt_outdated,
+            COUNT(CASE WHEN is_linked = 1 THEN 1 END) as citizens_linked,
+            COUNT(CASE WHEN is_linked = 0 THEN 1 END) as citizens_not_linked,
+            MAX(last_visit_date) as last_record_date,
+            MAX(team_name) as team_name,
+            MAX(ine) as team_ine,
+            COUNT(CASE WHEN vulnerability_type = "sem_criterio" AND (social_benefit NOT IN ("bpc", "pbf", "bpc_pbf") OR social_benefit IS NULL) THEN 1 END) as no_criteria_total,
+            COUNT(CASE WHEN vulnerability_type = "sem_criterio" AND (social_benefit NOT IN ("bpc", "pbf", "bpc_pbf") OR social_benefit IS NULL) AND is_accompanied = 1 THEN 1 END) as no_criteria_accompanied,
+            COUNT(CASE WHEN vulnerability_type = "sem_criterio" AND (social_benefit NOT IN ("bpc", "pbf", "bpc_pbf") OR social_benefit IS NULL) AND is_accompanied = 0 THEN 1 END) as no_criteria_not_accompanied,
+            COUNT(CASE WHEN vulnerability_type IN ("idoso", "crianca") AND (social_benefit NOT IN ("bpc", "pbf", "bpc_pbf") OR social_benefit IS NULL) THEN 1 END) as elderly_or_child_total,
+            COUNT(CASE WHEN vulnerability_type IN ("idoso", "crianca") AND (social_benefit NOT IN ("bpc", "pbf", "bpc_pbf") OR social_benefit IS NULL) AND is_accompanied = 1 THEN 1 END) as elderly_or_child_accompanied,
+            COUNT(CASE WHEN vulnerability_type IN ("idoso", "crianca") AND (social_benefit NOT IN ("bpc", "pbf", "bpc_pbf") OR social_benefit IS NULL) AND is_accompanied = 0 THEN 1 END) as elderly_or_child_not_accompanied,
+            COUNT(CASE WHEN vulnerability_type = "sem_criterio" AND social_benefit IN ("bpc", "pbf", "bpc_pbf") THEN 1 END) as bpc_or_pbf_total,
+            COUNT(CASE WHEN vulnerability_type = "sem_criterio" AND social_benefit IN ("bpc", "pbf", "bpc_pbf") AND is_accompanied = 1 THEN 1 END) as bpc_or_pbf_accompanied,
+            COUNT(CASE WHEN vulnerability_type = "sem_criterio" AND social_benefit IN ("bpc", "pbf", "bpc_pbf") AND is_accompanied = 0 THEN 1 END) as bpc_or_pbf_not_accompanied,
+            COUNT(CASE WHEN vulnerability_type IN ("idoso", "crianca") AND social_benefit IN ("bpc", "pbf", "bpc_pbf") THEN 1 END) as elderly_child_and_benefit_total,
+            COUNT(CASE WHEN vulnerability_type IN ("idoso", "crianca") AND social_benefit IN ("bpc", "pbf", "bpc_pbf") AND is_accompanied = 1 THEN 1 END) as elderly_child_and_benefit_accompanied,
+            COUNT(CASE WHEN vulnerability_type IN ("idoso", "crianca") AND social_benefit IN ("bpc", "pbf", "bpc_pbf") AND is_accompanied = 0 THEN 1 END) as elderly_child_and_benefit_not_accompanied
+        ')->first();
+
+        if (! $counts || (int) $counts->mici_total === 0) {
+            return $metric;
+        }
+
+        $counts->reference_date = $metric->reference_date;
+        $counts->year = $metric->year;
+        $counts->month = $metric->month;
+        $counts->is_team_specific = true;
+
+        return $counts;
     }
 
-    /** @param array<string, mixed> $filters */
-    public function queryCitizens(array $filters = []): LengthAwarePaginator
+    /**
+     * @param array<string, mixed> $filters
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function buildCitizensQuery(array $filters = [])
     {
         $metric = $this->getMetrics();
         $query = CvatNominalCitizen::query()->where('source', self::SOURCE)->where('registration_eligible', true);
@@ -70,9 +127,15 @@ class CvatNominalDwService
         $allowed = ['name', 'birth_date', 'age', 'ine', 'cnes', 'microarea', 'cidadao_pec_id', 'mici_date', 'micdt_date'];
         $query->orderBy(in_array($sort, $allowed, true) ? $sort : 'name', ($filters['sort_dir'] ?? 'asc') === 'desc' ? 'desc' : 'asc');
 
+        return $query;
+    }
+
+    /** @param array<string, mixed> $filters */
+    public function queryCitizens(array $filters = []): LengthAwarePaginator
+    {
         $perPage = (int) ($filters['per_page'] ?? 30);
 
-        return $query->paginate(in_array($perPage, [10, 15, 30, 50, 100], true) ? $perPage : 30);
+        return $this->buildCitizensQuery($filters)->paginate(in_array($perPage, [10, 15, 30, 50, 100], true) ? $perPage : 30);
     }
 
     /** @return array{success: bool, is_live: bool, message: string, metrics: ?CvatNominalMetric, nominal_citizens_count: int, rows: int} */

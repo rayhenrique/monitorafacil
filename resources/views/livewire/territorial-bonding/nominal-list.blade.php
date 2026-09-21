@@ -7,26 +7,90 @@
         activeTab="nominal"
     />
 
-    <!-- Cabeçalho da relação nominal -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <!-- Cabeçalho da relação nominal e Toolbar de Ações -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
         <div>
-            <h1 class="text-lg sm:text-xl font-bold tracking-tight text-sky-900 flex items-center gap-2">
-                <span>Monitoramento de Vínculo e Acompanhamento - Relação Nominal</span>
-            </h1>
-            <p class="text-xs text-slate-400 mt-1 flex items-center gap-1.5 font-medium">
-                <svg class="h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <div class="flex flex-wrap items-center gap-2">
+                <h1 class="text-base sm:text-lg font-bold tracking-tight text-sky-950 flex items-center gap-2">
+                    <span>Monitoramento de Vínculo e Acompanhamento - Relação Nominal</span>
+                </h1>
+                @if ($activeTeam)
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-100 text-sky-800 border border-sky-200">
+                        <svg class="h-3 w-3 text-sky-600" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/></svg>
+                        <span>Equipe: {{ $metrics?->team_name ?? ($activeTeamModel?->team_name ?? $activeTeam) }}</span>
+                        <button type="button" wire:click="clearTeamFilter" class="hover:text-rose-600 font-bold ml-0.5 cursor-pointer" title="Remover filtro de equipe">✕</button>
+                    </span>
+                @endif
+            </div>
+            <p class="text-xs text-slate-500 mt-1 flex flex-wrap items-center gap-1.5 font-medium">
+                <svg class="h-3.5 w-3.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5" />
                 </svg>
                 <span>Último atendimento registrado em {{ $metrics?->last_record_date ? \Carbon\Carbon::parse($metrics->last_record_date)->format('d/m/Y') : ($metrics ? $metrics->reference_date?->format('d/m/Y') : '---') }}</span>
+                <span class="text-slate-300">•</span>
+                <span class="text-sky-700 font-semibold">{{ number_format($totalRecordsCount, 0, ',', '.') }} cidadãos listados</span>
             </p>
         </div>
 
-        <!-- Botão Busca Avançada -->
-        <div class="w-full sm:w-auto">
+        <!-- Barra de Ações: Seleção de Equipe + Botões de Exportação + Busca Avançada -->
+        <div class="flex flex-wrap items-center gap-2">
+            <!-- Seletor de Equipe Principal -->
+            <div class="relative min-w-[220px] max-w-[280px]">
+                <label for="nominal-team-select" class="sr-only">Filtrar por Equipe</label>
+                <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                    </svg>
+                </div>
+                <select
+                    id="nominal-team-select"
+                    wire:model.live="selectedTeam"
+                    class="w-full rounded-lg border border-slate-300 bg-white pl-8 pr-7 py-2 text-xs font-semibold text-slate-800 shadow-2xs hover:border-slate-400 focus:bg-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition cursor-pointer"
+                >
+                    <option value="">Todas as Equipes (Município)</option>
+                    @foreach ($teamsList as $teamItem)
+                        <option value="{{ $teamItem->ine }}">{{ $teamItem->team_name }} (INE: {{ $teamItem->ine }})</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Exportar CSV -->
+            <button
+                type="button"
+                wire:click="exportCsv"
+                wire:loading.attr="disabled"
+                wire:target="exportCsv"
+                class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-semibold shadow-2xs transition cursor-pointer disabled:opacity-50"
+                title="Exportar dados nominais em planilha CSV (compatível com Excel)"
+            >
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+                <span wire:loading.remove wire:target="exportCsv">CSV</span>
+                <span wire:loading wire:target="exportCsv">Gerando...</span>
+            </button>
+
+            <!-- Exportar PDF -->
+            <button
+                type="button"
+                wire:click="exportPdf"
+                wire:loading.attr="disabled"
+                wire:target="exportPdf"
+                class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white text-xs font-semibold shadow-2xs transition cursor-pointer disabled:opacity-50"
+                title="Exportar relatório formatado em PDF (A4 Paisagem)"
+            >
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+                <span wire:loading.remove wire:target="exportPdf">PDF</span>
+                <span wire:loading wire:target="exportPdf">Gerando...</span>
+            </button>
+
+            <!-- Botão Busca Avançada -->
             <button
                 type="button"
                 wire:click="openAdvancedModal"
-                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold shadow-xs transition cursor-pointer"
+                class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white text-xs font-semibold shadow-2xs transition cursor-pointer"
             >
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -37,8 +101,19 @@
     </div>
 
     <!-- TÍTULO: DIMENSÃO CADASTRO -->
-    <div class="text-center font-bold text-xs uppercase tracking-wider text-slate-700 mt-2 mb-1">
-        DIMENSÃO CADASTRO
+    <div class="flex items-center justify-between mt-3 mb-1.5 px-1">
+        <div class="flex items-center gap-2">
+            <span class="font-bold text-xs uppercase tracking-wider text-slate-700">DIMENSÃO CADASTRO</span>
+            @if ($activeTeam)
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-sky-100 text-sky-800 border border-sky-200">
+                    Equipe: {{ $metrics?->team_name ?? ($activeTeamModel?->team_name ?? $activeTeam) }}
+                    <button type="button" wire:click="clearTeamFilter" class="ml-1 text-sky-600 hover:text-rose-600 font-bold cursor-pointer" title="Remover filtro de equipe">✕</button>
+                </span>
+            @endif
+        </div>
+        <div class="text-[11px] text-slate-400">
+            {{ $activeTeam ? 'Métricas da equipe selecionada' : 'Consolidado Municipal' }}
+        </div>
     </div>
 
     <!-- PAINEL: DIMENSÃO CADASTRO -->
@@ -57,6 +132,14 @@
                     <span class="text-lg sm:text-xl font-bold text-slate-800 tracking-tight font-mono">
                         {{ $metrics->year }} / M{{ str_pad((string) $metrics->month, 2, '0', STR_PAD_LEFT) }}
                     </span>
+                    @if ($metrics->is_team_specific ?? false)
+                        <span class="mt-1.5 px-2 py-0.5 text-[10px] font-bold rounded bg-sky-100 text-sky-800 border border-sky-200 max-w-[150px] truncate" title="{{ $metrics->team_name }}">
+                            {{ $metrics->team_name }}
+                        </span>
+                        <span class="text-[9px] text-slate-400 font-mono">INE: {{ $metrics->team_ine }}</span>
+                    @else
+                        <span class="mt-1 text-[10px] text-slate-400 font-medium">Consolidado</span>
+                    @endif
                 </div>
 
                 <!-- Coluna 1: Total Geral de MICI -->
@@ -200,26 +283,37 @@
     @endif
 
     <!-- TÍTULO E TOGGLE: DIMENSÃO ACOMPANHAMENTO -->
-    <div class="relative flex items-center justify-center mt-3 mb-1">
-        <div class="font-bold text-xs uppercase tracking-wider text-slate-700 text-center">
-            DIMENSÃO ACOMPANHAMENTO
-        </div>
-        <button
-            type="button"
-            wire:click="toggleAcompanhamento"
-            class="absolute right-0 p-1 rounded-md border border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition cursor-pointer"
-            title="{{ $acompanhamentoExpanded ? 'Ocultar Dimensão Acompanhamento' : 'Expandir Dimensão Acompanhamento' }}"
-        >
-            @if ($acompanhamentoExpanded)
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
-                </svg>
-            @else
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                </svg>
+    <div class="flex items-center justify-between mt-4 mb-1.5 px-1">
+        <div class="flex items-center gap-2">
+            <span class="font-bold text-xs uppercase tracking-wider text-slate-700">DIMENSÃO ACOMPANHAMENTO</span>
+            @if ($activeTeam)
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-sky-100 text-sky-800 border border-sky-200">
+                    Equipe: {{ $metrics?->team_name ?? ($activeTeamModel?->team_name ?? $activeTeam) }}
+                </span>
             @endif
-        </button>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="text-[11px] text-slate-400 hidden sm:inline">
+                {{ $activeTeam ? 'Métricas da equipe selecionada' : 'Consolidado Municipal' }}
+            </span>
+            <button
+                type="button"
+                wire:click="toggleAcompanhamento"
+                class="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50 text-xs transition cursor-pointer"
+                title="{{ $acompanhamentoExpanded ? 'Ocultar Dimensão Acompanhamento' : 'Expandir Dimensão Acompanhamento' }}"
+            >
+                <span class="text-[10px] uppercase font-bold">{{ $acompanhamentoExpanded ? 'Recolher' : 'Expandir' }}</span>
+                @if ($acompanhamentoExpanded)
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                    </svg>
+                @else
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
+                @endif
+            </button>
+        </div>
     </div>
 
     <!-- PAINEL: DIMENSÃO ACOMPANHAMENTO -->
@@ -408,7 +502,7 @@
                     </select>
                 </div>
 
-                @if ($filterCns || $filterCpf || $filterName || $filterProfCns || $filterProfName || $filterCnes || $filterIne || $filterRaceColor !== 'ALL' || $advMicroarea || $advMiciUpdated !== '' || $advMicdtUpdated !== '' || $advHasMicdt !== '' || $advVulnerability !== 'ALL' || $advSocialBenefit !== 'ALL' || $advAccompanied !== '')
+                @if ($selectedTeam || $advTeam || $filterCns || $filterCpf || $filterName || $filterProfCns || $filterProfName || $filterCnes || $filterIne || $filterRaceColor !== 'ALL' || $advMicroarea || $advMiciUpdated !== '' || $advMicdtUpdated !== '' || $advHasMicdt !== '' || $advVulnerability !== 'ALL' || $advSocialBenefit !== 'ALL' || $advAccompanied !== '')
                     <button
                         type="button"
                         wire:click="clearAllFilters"
