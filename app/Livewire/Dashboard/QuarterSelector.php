@@ -15,25 +15,23 @@ class QuarterSelector extends Component
     #[Url(as: 'quadrimestre', history: true)]
     public int $quarter = 0;
 
-    public function mount(DashboardSnapshotService $snapshots): void
+    public function mount(): void
     {
-        $latest = $snapshots->periods()[0] ?? [
-            'year' => (int) now()->year,
-            'quarter' => min(3, (int) ceil(now()->month / 4)),
-        ];
+        $currentYear = (int) now()->year;
+        $currentQuarter = min(3, (int) ceil(now()->month / 4));
 
-        if ($this->year < 2020 || $this->year > 2100) {
-            $this->year = $latest['year'];
+        if ($this->year < 2020 || $this->year > (int) now()->year) {
+            $this->year = $currentYear;
         }
 
         if ($this->quarter < 1 || $this->quarter > 3) {
-            $this->quarter = $latest['quarter'];
+            $this->quarter = $currentQuarter;
         }
     }
 
     public function updatedYear(): void
     {
-        if ($this->year < 2020 || $this->year > 2100) {
+        if ($this->year < 2020 || $this->year > (int) now()->year) {
             $this->year = (int) now()->year;
         }
     }
@@ -50,6 +48,7 @@ class QuarterSelector extends Component
         $years = collect($snapshots->periods())
             ->pluck('year')
             ->push($this->year)
+            ->push((int) now()->year)
             ->unique()
             ->sortDesc()
             ->values()
