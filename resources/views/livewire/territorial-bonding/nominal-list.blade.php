@@ -8,16 +8,16 @@
     />
 
     <!-- Cabeçalho da relação nominal -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-line shadow-xs">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h1 class="text-lg sm:text-xl font-bold tracking-tight text-ink flex items-center gap-2">
-                <span class="text-teal-800">Monitoramento de Vínculo e Acompanhamento - Relação Nominal</span>
+            <h1 class="text-lg sm:text-xl font-bold tracking-tight text-sky-900 flex items-center gap-2">
+                <span>Monitoramento de Vínculo e Acompanhamento - Relação Nominal</span>
             </h1>
-            <p class="text-xs text-muted mt-1 flex items-center gap-1.5 font-medium">
+            <p class="text-xs text-slate-400 mt-1 flex items-center gap-1.5 font-medium">
                 <svg class="h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5" />
                 </svg>
-                <span>@if ($metrics) Extração PEC em {{ $metrics->reference_date?->format('d/m/Y') }} @else Sem extração real disponível @endif</span>
+                <span>Último atendimento registrado em {{ $metrics?->last_record_date ? \Carbon\Carbon::parse($metrics->last_record_date)->format('d/m/Y') : ($metrics ? $metrics->reference_date?->format('d/m/Y') : '---') }}</span>
             </p>
         </div>
 
@@ -26,7 +26,7 @@
             <button
                 type="button"
                 wire:click="openAdvancedModal"
-                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold shadow-xs transition cursor-pointer"
+                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold shadow-xs transition cursor-pointer"
             >
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -36,27 +36,284 @@
         </div>
     </div>
 
+    <!-- TÍTULO: DIMENSÃO CADASTRO -->
+    <div class="text-center font-bold text-xs uppercase tracking-wider text-slate-700 mt-2 mb-1">
+        DIMENSÃO CADASTRO
+    </div>
+
+    <!-- PAINEL: DIMENSÃO CADASTRO -->
     @if ($metrics)
-        <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-950">
-            <p class="font-bold">Extração local parcial · {{ $metrics->year }}/M{{ str_pad((string) $metrics->month, 2, '0', STR_PAD_LEFT) }}</p>
-            <p class="mt-1 text-xs leading-relaxed">MICI e MICDT usam a janela de 24 meses da NT nº 30/2025. Os contatos usam 12 meses e exigem ao menos duas ocorrências, incluindo uma prática de cuidado. {{ $metrics->pbf_import_id ? 'Beneficiários PBF foram identificados pela importação ' . $metrics->pbf_vigencia . ' do PEC, usando CPF ou CNS.' : 'Nenhuma importação PBF finalizada foi encontrada no PEC.' }} O BPC ainda não foi identificado; por isso o índice Y, a classificação final e o repasse estão indisponíveis.</p>
-            @if ($metrics->excluded_without_pec_id > 0)
-                <p class="mt-2 text-xs">{{ $metrics->excluded_without_pec_id }} registros da visão territorial sem identificador PEC ficaram fora da relação nominal.</p>
-            @endif
-        </div>
-        <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
-            <div class="rounded-2xl border border-line bg-white p-4"><p class="text-xs text-muted">MICI válidos</p><p class="mt-1 text-2xl font-black text-ink tabular-nums">{{ number_format($metrics->mici_total, 0, ',', '.') }}</p></div>
-            <div class="rounded-2xl border border-line bg-white p-4"><p class="text-xs text-muted">MICI atualizados</p><p class="mt-1 text-2xl font-black text-teal-800 tabular-nums">{{ number_format($metrics->mici_updated, 0, ',', '.') }}</p></div>
-            <div class="rounded-2xl border border-line bg-white p-4"><p class="text-xs text-muted">MICI e MICDT atualizados</p><p class="mt-1 text-2xl font-black text-teal-800 tabular-nums">{{ number_format($metrics->mici_and_micdt_updated, 0, ',', '.') }}</p></div>
-            <div class="rounded-2xl border border-line bg-white p-4"><p class="text-xs text-muted">Vinculados à equipe</p><p class="mt-1 text-2xl font-black text-ink tabular-nums">{{ number_format($metrics->citizens_linked, 0, ',', '.') }}</p></div>
-            @if ($metrics->pbf_import_id)
-                <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4"><p class="text-xs text-amber-900">PBF identificado no PEC</p><p class="mt-1 text-2xl font-black text-amber-900 tabular-nums">{{ number_format($metrics->pbf_confirmed_total, 0, ',', '.') }}</p></div>
-            @endif
+        @php
+            $miciTotal = max(1, (int) $metrics->mici_total);
+            $miciWithoutMicdt = max(1, (int) $metrics->mici_without_micdt_total);
+            $miciWithMicdt = max(1, (int) $metrics->mici_with_micdt_total);
+        @endphp
+        <div class="bg-white rounded-lg border border-slate-200 shadow-2xs overflow-hidden">
+            <!-- Grid Superior (4 Colunas) -->
+            <div class="grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-slate-200">
+                <!-- Coluna Mês -->
+                <div class="md:col-span-2 p-4 flex flex-col items-center justify-center text-center bg-slate-50/40">
+                    <span class="text-xs text-slate-400 font-medium mb-1">Mês</span>
+                    <span class="text-lg sm:text-xl font-bold text-slate-800 tracking-tight font-mono">
+                        {{ $metrics->year }} / M{{ str_pad((string) $metrics->month, 2, '0', STR_PAD_LEFT) }}
+                    </span>
+                </div>
+
+                <!-- Coluna 1: Total Geral de MICI -->
+                <div class="md:col-span-3 p-4 sm:p-5 flex flex-col justify-between space-y-3">
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">Total Geral de MICI</span>
+                        <span class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                            {{ number_format($metrics->mici_total, 0, ',', '.') }}
+                        </span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">MICI Atualizados</span>
+                        <div class="flex items-baseline gap-1.5">
+                            <span class="text-base sm:text-lg font-bold text-emerald-600">
+                                {{ number_format($metrics->mici_updated, 0, ',', '.') }}
+                            </span>
+                            <span class="text-xs text-slate-500 font-medium">
+                                ({{ number_format(($metrics->mici_updated / $miciTotal) * 100, 2, ',', '.') }}%)
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">MICI Desatualizados</span>
+                        <div class="flex items-baseline gap-1.5">
+                            <span class="text-base sm:text-lg font-bold text-rose-600">
+                                {{ number_format($metrics->mici_outdated, 0, ',', '.') }}
+                            </span>
+                            <span class="text-xs text-slate-500 font-medium">
+                                ({{ number_format(($metrics->mici_outdated / $miciTotal) * 100, 2, ',', '.') }}%)
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coluna 2: Total Geral de MICI Sem MICDT -->
+                <div class="md:col-span-3 p-4 sm:p-5 flex flex-col justify-between space-y-3">
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">Total Geral de MICI Sem MICDT</span>
+                        <span class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                            {{ number_format($metrics->mici_without_micdt_total, 0, ',', '.') }}
+                        </span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">MICI Atua. e MICDT Desat. ou Sem</span>
+                        <div class="flex items-baseline gap-1.5">
+                            <span class="text-base sm:text-lg font-bold text-emerald-600">
+                                {{ number_format($metrics->mici_updated_micdt_outdated_or_none, 0, ',', '.') }}
+                            </span>
+                            <span class="text-xs text-slate-500 font-medium">
+                                ({{ number_format(($metrics->mici_updated_micdt_outdated_or_none / $miciTotal) * 100, 2, ',', '.') }}%)
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">MICI Atualizados e Sem MICDT</span>
+                        <div class="flex items-baseline gap-1.5">
+                            <span class="text-base sm:text-lg font-bold text-rose-600">
+                                {{ number_format($metrics->mici_updated_without_micdt, 0, ',', '.') }}
+                            </span>
+                            <span class="text-xs text-slate-500 font-medium">
+                                ({{ number_format(($metrics->mici_without_micdt_total > 0 ? ($metrics->mici_updated_without_micdt / $miciWithoutMicdt) * 100 : 0), 2, ',', '.') }}%)
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coluna 3: Total MICI Com MICDT -->
+                <div class="md:col-span-4 p-4 sm:p-5 flex flex-col justify-between space-y-3">
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">Total MICI Com MICDT</span>
+                        <div class="flex items-baseline gap-1.5">
+                            <span class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                                {{ number_format($metrics->mici_with_micdt_total, 0, ',', '.') }}
+                            </span>
+                            <span class="text-xs text-slate-500 font-medium">
+                                ({{ number_format(($metrics->mici_with_micdt_total / $miciTotal) * 100, 2, ',', '.') }}%)
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">MICI e MICDT Atualizados</span>
+                        <div class="flex items-baseline gap-1.5">
+                            <span class="text-base sm:text-lg font-bold text-emerald-600">
+                                {{ number_format($metrics->mici_and_micdt_updated, 0, ',', '.') }}
+                            </span>
+                            <span class="text-xs text-slate-500 font-medium">
+                                ({{ number_format(($metrics->mici_with_micdt_total > 0 ? ($metrics->mici_and_micdt_updated / $miciWithMicdt) * 100 : 0), 2, ',', '.') }}%)
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">MICI e MICDT Desatualizados</span>
+                        <div class="flex items-baseline gap-1.5">
+                            <span class="text-base sm:text-lg font-bold text-rose-600">
+                                {{ number_format($metrics->mici_and_micdt_outdated, 0, ',', '.') }}
+                            </span>
+                            <span class="text-xs text-slate-500 font-medium">
+                                ({{ number_format(($metrics->mici_with_micdt_total > 0 ? ($metrics->mici_and_micdt_outdated / $miciWithMicdt) * 100 : 0), 2, ',', '.') }}%)
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Linha Inferior: Cidadãos Vinculados / Não Vinculados -->
+            <div class="border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 bg-white">
+                <div class="p-4 sm:p-5 flex flex-col justify-center">
+                    <div class="flex items-center gap-1.5 text-xs text-slate-700 font-bold mb-1">
+                        <span>Cidadãos Vinculados</span>
+                        <span class="inline-flex items-center justify-center h-4 w-4 rounded-full bg-slate-400 text-white text-[10px] font-bold" title="Cidadãos vinculados à equipe">i</span>
+                    </div>
+                    <div class="flex items-baseline gap-1.5">
+                        <span class="text-xl sm:text-2xl font-bold text-emerald-600">
+                            {{ number_format($metrics->citizens_linked, 0, ',', '.') }}
+                        </span>
+                        <span class="text-xs text-slate-500 font-medium">
+                            ({{ number_format(($metrics->citizens_linked / $miciTotal) * 100, 2, ',', '.') }}%)
+                        </span>
+                    </div>
+                </div>
+                <div class="p-4 sm:p-5 flex flex-col justify-center">
+                    <div class="text-xs text-slate-700 font-bold mb-1">
+                        Cidadãos Não Vinculados
+                    </div>
+                    <div class="flex items-baseline gap-1.5">
+                        <span class="text-xl sm:text-2xl font-bold text-rose-600">
+                            {{ number_format($metrics->citizens_not_linked, 0, ',', '.') }}
+                        </span>
+                        <span class="text-xs text-slate-500 font-medium">
+                            ({{ number_format(($metrics->citizens_not_linked / $miciTotal) * 100, 2, ',', '.') }}%)
+                        </span>
+                    </div>
+                </div>
+            </div>
         </div>
     @else
         <div class="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-8 text-center">
             <p class="text-sm font-bold text-slate-800">Sem extração real do PEC</p>
             <p class="mt-1 text-xs text-slate-500">Execute o processamento CVAT em Configurações. Nenhum cadastro demonstrativo será criado.</p>
+        </div>
+    @endif
+
+    <!-- TÍTULO E TOGGLE: DIMENSÃO ACOMPANHAMENTO -->
+    <div class="relative flex items-center justify-center mt-3 mb-1">
+        <div class="font-bold text-xs uppercase tracking-wider text-slate-700 text-center">
+            DIMENSÃO ACOMPANHAMENTO
+        </div>
+        <button
+            type="button"
+            wire:click="toggleAcompanhamento"
+            class="absolute right-0 p-1 rounded-md border border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+            title="{{ $acompanhamentoExpanded ? 'Ocultar Dimensão Acompanhamento' : 'Expandir Dimensão Acompanhamento' }}"
+        >
+            @if ($acompanhamentoExpanded)
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                </svg>
+            @else
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+            @endif
+        </button>
+    </div>
+
+    <!-- PAINEL: DIMENSÃO ACOMPANHAMENTO -->
+    @if ($metrics && $acompanhamentoExpanded)
+        <div class="bg-white rounded-lg border border-slate-200 shadow-2xs overflow-hidden">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-200">
+                <!-- Coluna 1: Sem Critério -->
+                <div class="p-4 sm:p-5 flex flex-col justify-between space-y-4">
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">Sem Critério</span>
+                        <span class="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">
+                            {{ number_format($metrics->no_criteria_total, 0, ',', '.') }}
+                        </span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">Sem Critério Acompanhados</span>
+                        <span class="text-xl sm:text-2xl font-bold text-emerald-600 tracking-tight">
+                            {{ number_format($metrics->no_criteria_accompanied, 0, ',', '.') }}
+                        </span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">Sem Critério Não acompanhados</span>
+                        <span class="text-xl sm:text-2xl font-bold text-rose-600 tracking-tight">
+                            {{ number_format($metrics->no_criteria_not_accompanied, 0, ',', '.') }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Coluna 2: Idoso ou Criança -->
+                <div class="p-4 sm:p-5 flex flex-col justify-between space-y-4">
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">Idoso ou Criança</span>
+                        <span class="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">
+                            {{ number_format($metrics->elderly_or_child_total, 0, ',', '.') }}
+                        </span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">Idoso ou Criança Acompanhados</span>
+                        <span class="text-xl sm:text-2xl font-bold text-emerald-600 tracking-tight">
+                            {{ number_format($metrics->elderly_or_child_accompanied, 0, ',', '.') }}
+                        </span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">Idoso ou Criança Não acompanhados</span>
+                        <span class="text-xl sm:text-2xl font-bold text-rose-600 tracking-tight">
+                            {{ number_format($metrics->elderly_or_child_not_accompanied, 0, ',', '.') }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Coluna 3: BPC ou PBF -->
+                <div class="p-4 sm:p-5 flex flex-col justify-between space-y-4">
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">BPC ou PBF</span>
+                        <span class="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">
+                            {{ number_format($metrics->bpc_or_pbf_total, 0, ',', '.') }}
+                        </span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">BPC ou PBF Acompanhados</span>
+                        <span class="text-xl sm:text-2xl font-bold text-emerald-600 tracking-tight">
+                            {{ number_format($metrics->bpc_or_pbf_accompanied, 0, ',', '.') }}
+                        </span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">BPC ou PBF Não acompanhados</span>
+                        <span class="text-xl sm:text-2xl font-bold text-rose-600 tracking-tight">
+                            {{ number_format($metrics->bpc_or_pbf_not_accompanied, 0, ',', '.') }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Coluna 4: Idoso ou Criança + BPC ou PBF -->
+                <div class="p-4 sm:p-5 flex flex-col justify-between space-y-4">
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">Idoso ou Criança + BPC ou PBF</span>
+                        <span class="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">
+                            {{ number_format($metrics->elderly_child_and_benefit_total, 0, ',', '.') }}
+                        </span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">ID/CR + BPC/PBF Acompanhados</span>
+                        <span class="text-xl sm:text-2xl font-bold text-emerald-600 tracking-tight">
+                            {{ number_format($metrics->elderly_child_and_benefit_accompanied, 0, ',', '.') }}
+                        </span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 font-medium block">ID/CR + BPC/PBF Não acompanhados</span>
+                        <span class="text-xl sm:text-2xl font-bold text-rose-600 tracking-tight">
+                            {{ number_format($metrics->elderly_child_and_benefit_not_accompanied, 0, ',', '.') }}
+                        </span>
+                    </div>
+                </div>
+            </div>
         </div>
     @endif
 
@@ -479,6 +736,17 @@
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs">
+                    <!-- Equipe -->
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Equipe</label>
+                        <select wire:model="advTeam" class="w-full rounded-xl border border-slate-200 p-2 text-xs">
+                            <option value="">Todas as Equipes</option>
+                            @foreach ($teamsList as $teamItem)
+                                <option value="{{ $teamItem->ine }}">{{ $teamItem->team_name }} ({{ $teamItem->ine }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <!-- Microárea -->
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Microárea</label>

@@ -166,6 +166,7 @@ class TerritorialBondingOverview extends Component
             'monthlySummary' => $monthlySummary,
             'nominalPeriod' => $nominalPeriod,
             'selectedQuarterLabel' => $selectedQuarterLabel,
+            'availableQuarters' => $cvatService->getAvailableQuarters(),
             'filterCnes' => $this->filterCnes,
             'filterUnit' => $this->filterUnit,
             'filterIne' => $this->filterIne,

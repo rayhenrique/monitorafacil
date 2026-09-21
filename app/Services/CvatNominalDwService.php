@@ -46,6 +46,14 @@ class CvatNominalDwService
             }
         }
 
+        if (filled($filters['team'] ?? null)) {
+            $teamVal = trim((string) $filters['team']);
+            $query->where(function ($q) use ($teamVal) {
+                $q->where('ine', $teamVal)
+                  ->orWhere('team_name', 'like', '%'.$teamVal.'%');
+            });
+        }
+
         foreach (['race_color', 'vulnerability_type', 'social_benefit'] as $field) {
             if (filled($filters[$field] ?? null) && $filters[$field] !== 'ALL') {
                 $query->where($field, $filters[$field]);
@@ -416,19 +424,18 @@ class CvatNominalDwService
             'mici_and_micdt_outdated' => (clone $base)->where('mici_updated', false)->where('has_micdt', true)->where('micdt_updated', false)->count(),
             'citizens_linked' => $linked,
             'citizens_not_linked' => $total - $linked,
-            // BPC is still unknown. Do not publish incomplete BPC/PBF weighting.
-            'no_criteria_total' => 0,
-            'elderly_or_child_total' => 0,
-            'bpc_or_pbf_total' => 0,
-            'elderly_child_and_benefit_total' => 0,
-            'no_criteria_accompanied' => 0,
-            'elderly_or_child_accompanied' => 0,
-            'bpc_or_pbf_accompanied' => 0,
-            'elderly_child_and_benefit_accompanied' => 0,
-            'no_criteria_not_accompanied' => 0,
-            'elderly_or_child_not_accompanied' => 0,
-            'bpc_or_pbf_not_accompanied' => 0,
-            'elderly_child_and_benefit_not_accompanied' => 0,
+            'no_criteria_total' => (clone $base)->where('vulnerability_type', 'sem_criterio')->where(fn ($q) => $q->whereNotIn('social_benefit', ['bpc', 'pbf', 'bpc_pbf'])->orWhereNull('social_benefit'))->count(),
+            'elderly_or_child_total' => (clone $base)->whereIn('vulnerability_type', ['idoso', 'crianca'])->where(fn ($q) => $q->whereNotIn('social_benefit', ['bpc', 'pbf', 'bpc_pbf'])->orWhereNull('social_benefit'))->count(),
+            'bpc_or_pbf_total' => (clone $base)->where('vulnerability_type', 'sem_criterio')->whereIn('social_benefit', ['bpc', 'pbf', 'bpc_pbf'])->count(),
+            'elderly_child_and_benefit_total' => (clone $base)->whereIn('vulnerability_type', ['idoso', 'crianca'])->whereIn('social_benefit', ['bpc', 'pbf', 'bpc_pbf'])->count(),
+            'no_criteria_accompanied' => (clone $base)->where('vulnerability_type', 'sem_criterio')->where(fn ($q) => $q->whereNotIn('social_benefit', ['bpc', 'pbf', 'bpc_pbf'])->orWhereNull('social_benefit'))->where('is_accompanied', true)->count(),
+            'elderly_or_child_accompanied' => (clone $base)->whereIn('vulnerability_type', ['idoso', 'crianca'])->where(fn ($q) => $q->whereNotIn('social_benefit', ['bpc', 'pbf', 'bpc_pbf'])->orWhereNull('social_benefit'))->where('is_accompanied', true)->count(),
+            'bpc_or_pbf_accompanied' => (clone $base)->where('vulnerability_type', 'sem_criterio')->whereIn('social_benefit', ['bpc', 'pbf', 'bpc_pbf'])->where('is_accompanied', true)->count(),
+            'elderly_child_and_benefit_accompanied' => (clone $base)->whereIn('vulnerability_type', ['idoso', 'crianca'])->whereIn('social_benefit', ['bpc', 'pbf', 'bpc_pbf'])->where('is_accompanied', true)->count(),
+            'no_criteria_not_accompanied' => (clone $base)->where('vulnerability_type', 'sem_criterio')->where(fn ($q) => $q->whereNotIn('social_benefit', ['bpc', 'pbf', 'bpc_pbf'])->orWhereNull('social_benefit'))->where('is_accompanied', false)->count(),
+            'elderly_or_child_not_accompanied' => (clone $base)->whereIn('vulnerability_type', ['idoso', 'crianca'])->where(fn ($q) => $q->whereNotIn('social_benefit', ['bpc', 'pbf', 'bpc_pbf'])->orWhereNull('social_benefit'))->where('is_accompanied', false)->count(),
+            'bpc_or_pbf_not_accompanied' => (clone $base)->where('vulnerability_type', 'sem_criterio')->whereIn('social_benefit', ['bpc', 'pbf', 'bpc_pbf'])->where('is_accompanied', false)->count(),
+            'elderly_child_and_benefit_not_accompanied' => (clone $base)->whereIn('vulnerability_type', ['idoso', 'crianca'])->whereIn('social_benefit', ['bpc', 'pbf', 'bpc_pbf'])->where('is_accompanied', false)->count(),
         ]);
     }
 }

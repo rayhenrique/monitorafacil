@@ -4,6 +4,17 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.23.8] - 21/09/2026
+
+### Cards Nominais CVAT, Filtro por Equipe e Toggle do Sidebar
+- **Cards de Dimensão Cadastro na Relação Nominal**: Estrutura métrica com dados reais da competência atual (`2026/M09`), detalhando Total Geral de MICI, MICI Atualizados/Desatualizados, MICI Sem MICDT, MICI Atua. e MICDT Desat. ou Sem, MICI Atualizados e Sem MICDT, MICI Com MICDT, MICI e MICDT Atualizados/Desatualizados e Cidadãos Vinculados/Não Vinculados.
+- **Accordion de Dimensão Acompanhamento**: Painel com 4 colunas mutuamente exclusivas seguindo a Nota Técnica nº 30/2025 (*Sem Critério*, *Idoso ou Criança*, *BPC ou PBF*, *Idoso ou Criança + BPC ou PBF*), exibindo quantitativos reais de acompanhados e não acompanhados.
+- **Busca Avançada com Filtro de Equipe**: Adicionado seletor de Equipe no modal de busca avançada com todas as equipes ativas do município para filtragem nominal ágil.
+- **Módulo de Equipes (Mensal)**: Restaurado o carregamento e consolidação das 19 equipes ativas do município a partir da base local, exibindo indicadores de cadastro (X), acompanhamento (Y) e classificações finais (Ótimo, Bom, Suficiente e Regular).
+- **Toggle do Sidebar**: Adicionado controle de alternância no menu lateral (cabeçalho da sidebar e barra superior) para recolher em modo compacto de ícones (`w-20`) e expandir (`w-72`), com persistência de preferência no `localStorage`.
+
+---
+
 ## [v1.23.7] - 21/09/2026
 
 ### Vínculo e Acompanhamento: extração real e PBF identificado

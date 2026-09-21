@@ -63,6 +63,8 @@ class NominalList extends Component
 
     public string $advLinked = '';
 
+    public string $advTeam = '';
+
     // Modal de Detalhes do Cidadão
     public bool $detailsModalOpen = false;
 
@@ -171,6 +173,7 @@ class NominalList extends Component
         $this->advSocialBenefit = 'ALL';
         $this->advAccompanied = '';
         $this->advLinked = '';
+        $this->advTeam = '';
         $this->resetPage();
     }
 
@@ -205,6 +208,7 @@ class NominalList extends Component
             'ine' => $this->filterIne,
             'race_color' => $this->filterRaceColor,
             'microarea' => $this->advMicroarea,
+            'team' => $this->advTeam,
             'mici_updated' => $this->advMiciUpdated,
             'micdt_updated' => $this->advMicdtUpdated,
             'has_micdt' => $this->advHasMicdt,
@@ -219,11 +223,22 @@ class NominalList extends Component
 
         $citizens = $service->queryCitizens($filters);
 
+        $teamsList = CvatNominalCitizen::query()
+            ->where('source', CvatNominalDwService::SOURCE)
+            ->where('registration_eligible', true)
+            ->whereNotNull('ine')
+            ->where('ine', '!=', '')
+            ->select(['ine', 'team_name'])
+            ->distinct()
+            ->orderBy('team_name')
+            ->get();
+
         return view('livewire.territorial-bonding.nominal-list', array_merge(
             get_object_vars($this),
             [
                 'metrics' => $metrics,
                 'citizens' => $citizens,
+                'teamsList' => $teamsList,
                 'races' => ['ALL' => 'Todas as Raças/Cores', 'Parda' => 'Parda', 'Branca' => 'Branca', 'Preta' => 'Preta', 'Amarela' => 'Amarela', 'Indígena' => 'Indígena'],
                 'totalRecordsCount' => $citizens->total(),
             ]

@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.23.7';
+    public const CURRENT_VERSION = 'v1.23.8';
 
     public const CURRENT_RELEASE_DATE = '21/09/2026';
 
@@ -61,9 +61,22 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.23.7',
+                'version' => 'v1.23.8',
                 'date' => '21/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Cards Nominais CVAT, Filtro por Equipe e Toggle do Sidebar',
+                'summary' => 'Exibição dos cards reais de Dimensão Cadastro e Acompanhamento na Relação Nominal, filtro de Equipe na Busca Avançada, restauração das avaliações das equipes e toggle para recolher/expandir o menu lateral.',
+                'highlights' => [
+                    ['type' => 'interface', 'text' => 'Cards reais de Dimensão Cadastro e accordion com 4 colunas de Acompanhamento (Sem Critério, Idoso/Criança, BPC/PBF e misto) conforme a NT nº 30/2025 na Relação Nominal.'],
+                    ['type' => 'melhoria', 'text' => 'Filtro avançado por Equipe na Relação Nominal para seleção rápida entre todas as equipes ativas do município.'],
+                    ['type' => 'correcao', 'text' => 'Restauração da aba de Equipes (Mensal) com avaliação e classificação real das 19 equipes ativas do município a partir da base local.'],
+                    ['type' => 'interface', 'text' => 'Novo botão de alternância (toggle) no sidebar e na barra superior para recolher e expandir o menu lateral com persistência no navegador.'],
+                ],
+            ],
+            [
+                'version' => 'v1.23.7',
+                'date' => '21/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Vínculo e Acompanhamento com dados reais do PEC',
                 'summary' => 'A relação nominal passa a identificar beneficiários PBF pela importação finalizada no PEC. Resultados demonstrativos deixam de aparecer como aferição e as dimensões ainda incompletas ficam explicitamente indisponíveis.',
                 'highlights' => [

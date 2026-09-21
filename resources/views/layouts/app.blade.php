@@ -15,7 +15,14 @@
         $isTerritorialTeams = request()->routeIs('territorial-bonding.overview') && request()->query('aba', 'teams') === 'teams';
         $isTerritorialGuide = request()->routeIs('territorial-bonding.overview') && request()->query('aba') === 'guide';
     @endphp
-    <div x-data="{ mobileMenuOpen: false }" class="min-h-screen flex flex-col lg:flex-row">
+    <div x-data="{
+        mobileMenuOpen: false,
+        sidebarCollapsed: localStorage.getItem('sidebar_collapsed') === 'true',
+        toggleSidebar() {
+            this.sidebarCollapsed = !this.sidebarCollapsed;
+            localStorage.setItem('sidebar_collapsed', this.sidebarCollapsed);
+        }
+    }" class="min-h-screen flex flex-col lg:flex-row">
         <!-- Barra superior para Mobile (< lg) -->
         <header class="sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-[#1b3832] bg-[#0c1f1c] px-3 py-3 text-white sm:px-4 lg:hidden">
             <div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
@@ -266,23 +273,40 @@
         </div>
 
         <!-- Sidebar Fixo no Desktop (>= lg) -->
-        <aside class="hidden lg:flex lg:w-72 lg:shrink-0 lg:sticky lg:top-0 lg:h-screen lg:flex-col lg:justify-between bg-[#0c1f1c] text-slate-200 border-r border-[#1a3832] z-30">
-            <div class="flex flex-col gap-6 p-5 overflow-y-auto">
-                <!-- Cabeçalho do Município / Logo -->
-                <a href="{{ route('dashboard') }}" class="group flex items-center gap-3.5 rounded-2xl p-2 transition hover:bg-[#132d27]/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal-400" aria-label="Ir para o painel">
-                    @if (filled($settings['logo_path'] ?? null))
-                        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($settings['logo_path']) }}" alt="Logotipo de {{ trim($settings['municipio_nome'] ?? '') ?: 'município' }}" class="h-11 w-11 rounded-xl object-contain shadow-md">
-                    @else
-                        <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-emerald-700 font-bold text-white shadow-lg shadow-teal-950/50 ring-1 ring-white/10" aria-hidden="true">MF</span>
-                    @endif
-                    <div class="min-w-0">
-                        <span class="block truncate text-sm font-semibold text-white group-hover:text-teal-200 transition">{{ trim($settings['municipio_nome'] ?? '') ?: 'Município não configurado' }}</span>
-                        <span class="block text-xs text-teal-300/80">Monitora Fácil · Gestão APS</span>
-                    </div>
-                </a>
+        <aside :class="sidebarCollapsed ? 'lg:w-20' : 'lg:w-72'"
+               class="hidden lg:flex lg:shrink-0 lg:sticky lg:top-0 lg:h-screen lg:flex-col lg:justify-between bg-[#0c1f1c] text-slate-200 border-r border-[#1a3832] z-30 transition-all duration-300 ease-in-out">
+            <div class="flex flex-col gap-5 overflow-y-auto" :class="sidebarCollapsed ? 'p-3' : 'p-5'">
+                <!-- Cabeçalho do Município / Logo + Botão de Recolher/Expandir -->
+                <div class="flex items-center gap-2" :class="sidebarCollapsed ? 'flex-col justify-center' : 'justify-between'">
+                    <a href="{{ route('dashboard') }}" class="group flex items-center gap-3.5 rounded-2xl p-1.5 transition hover:bg-[#132d27]/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal-400 min-w-0" aria-label="Ir para o painel" :title="sidebarCollapsed ? '{{ trim($settings['municipio_nome'] ?? '') ?: 'Monitora Fácil' }}' : ''">
+                        @if (filled($settings['logo_path'] ?? null))
+                            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($settings['logo_path']) }}" alt="Logotipo de {{ trim($settings['municipio_nome'] ?? '') ?: 'município' }}" class="h-10 w-10 shrink-0 rounded-xl object-contain shadow-md">
+                        @else
+                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-emerald-700 font-bold text-white shadow-lg shadow-teal-950/50 ring-1 ring-white/10" aria-hidden="true">MF</span>
+                        @endif
+                        <div class="min-w-0" x-show="!sidebarCollapsed" x-transition>
+                            <span class="block truncate text-sm font-semibold text-white group-hover:text-teal-200 transition">{{ trim($settings['municipio_nome'] ?? '') ?: 'Município não configurado' }}</span>
+                            <span class="block text-xs text-teal-300/80">Monitora Fácil · Gestão APS</span>
+                        </div>
+                    </a>
 
-                <!-- Indicador de Status do Sistema -->
-                <div class="rounded-xl border border-[#1b3a33] bg-[#081714]/80 p-3 shadow-inner">
+                    <!-- Toggle Sidebar Button (Recolher/Expandir) -->
+                    <button type="button"
+                            @click="toggleSidebar()"
+                            id="sidebar-toggle-btn"
+                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#1b3a33] bg-[#102722] text-slate-300 hover:border-teal-500/50 hover:bg-[#163830] hover:text-white transition focus:outline-none focus:ring-2 focus:ring-teal-400 shadow-sm"
+                            :title="sidebarCollapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'"
+                            :aria-label="sidebarCollapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'">
+                        <svg class="h-4 w-4 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                            <rect width="18" height="18" x="3" y="3" rx="2" stroke="currentColor"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v18" />
+                            <path stroke-linecap="round" stroke-linejoin="round" :d="sidebarCollapsed ? 'M13 9l3 3-3 3' : 'M15 9l-3 3 3 3'" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Indicador de Status do Sistema (oculto quando recolhido) -->
+                <div x-show="!sidebarCollapsed" x-transition class="rounded-xl border border-[#1b3a33] bg-[#081714]/80 p-3 shadow-inner">
                     <div class="flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2">
                             <span class="relative flex h-2 w-2">
@@ -301,33 +325,39 @@
 
                 <!-- Seção de Navegação -->
                 <div>
-                    <p class="px-3 text-[11px] font-bold uppercase tracking-widest text-teal-400/70">Navegação Principal</p>
+                    <p x-show="!sidebarCollapsed" x-transition class="px-3 text-[11px] font-bold uppercase tracking-widest text-teal-400/70">Navegação Principal</p>
                     <nav class="mt-2.5 space-y-1.5" aria-label="Navegação da aplicação">
                         <!-- Visão Geral -->
-                        <a href="{{ route('dashboard') }}" class="group flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm transition {{ request()->routeIs('dashboard') ? 'bg-teal-500/15 text-teal-300 border-l-4 border-teal-400 shadow-sm shadow-teal-950/30 font-semibold' : 'text-slate-300 hover:bg-[#132d27] hover:text-white font-medium' }}">
+                        <a href="{{ route('dashboard') }}"
+                           :class="sidebarCollapsed ? 'justify-center !px-2' : 'px-3.5'"
+                           :title="sidebarCollapsed ? 'Visão Geral' : ''"
+                           class="group flex items-center gap-3 rounded-xl py-2.5 text-sm transition {{ request()->routeIs('dashboard') ? 'bg-teal-500/15 text-teal-300 border-l-4 border-teal-400 shadow-sm shadow-teal-950/30 font-semibold' : 'text-slate-300 hover:bg-[#132d27] hover:text-white font-medium' }}">
                             <svg class="h-5 w-5 {{ request()->routeIs('dashboard') ? 'text-teal-400' : 'text-slate-400 group-hover:text-teal-300' }} shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
                             </svg>
-                            <span>Visão Geral</span>
+                            <span x-show="!sidebarCollapsed" class="truncate">Visão Geral</span>
                         </a>
 
                         <!-- Vínculo e Acompanhamento (Componente II - CVAT) -->
                         <div x-data="{ open: {{ request()->routeIs('territorial-bonding.*') ? 'true' : 'false' }} }" class="space-y-1">
                             <div class="flex items-center justify-between rounded-xl transition {{ request()->routeIs('territorial-bonding.*') ? 'bg-teal-500/15 text-teal-300 font-semibold' : 'text-slate-300 hover:bg-[#132d27] hover:text-white font-medium' }}">
-                                <a href="{{ route('territorial-bonding.nominal') }}" class="flex-1 flex items-center gap-3 px-3.5 py-2.5 text-sm">
+                                <a href="{{ route('territorial-bonding.nominal') }}"
+                                   :class="sidebarCollapsed ? 'justify-center !px-2' : 'px-3.5'"
+                                   :title="sidebarCollapsed ? 'Vínculo e Acompanhamento' : ''"
+                                   class="flex-1 flex items-center gap-3 py-2.5 text-sm">
                                     <svg class="h-5 w-5 {{ request()->routeIs('territorial-bonding.*') ? 'text-teal-400' : 'text-slate-400 group-hover:text-teal-300' }} shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
                                     </svg>
-                                    <span>Vínculo e Acompanhamento</span>
+                                    <span x-show="!sidebarCollapsed" class="truncate">Vínculo e Acompanhamento</span>
                                 </a>
-                                <button type="button" @click="open = !open" class="p-2.5 text-slate-400 hover:text-white transition" aria-label="Alternar menu vínculo e acompanhamento">
+                                <button type="button" x-show="!sidebarCollapsed" @click="open = !open" class="p-2.5 text-slate-400 hover:text-white transition" aria-label="Alternar menu vínculo e acompanhamento">
                                     <svg class="h-4 w-4 transition-transform duration-200" :class="{ 'rotate-180 text-teal-400': open }" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                                     </svg>
                                 </button>
                             </div>
-                            <div x-show="open" class="ml-4 pl-3 border-l border-[#1a3832] space-y-1 mt-1" style="{{ request()->routeIs('territorial-bonding.*') ? '' : 'display: none;' }}">
+                            <div x-show="open && !sidebarCollapsed" class="ml-4 pl-3 border-l border-[#1a3832] space-y-1 mt-1" style="{{ request()->routeIs('territorial-bonding.*') ? '' : 'display: none;' }}">
                                 <a href="{{ route('territorial-bonding.nominal') }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ $isTerritorialNominal ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}" @if ($isTerritorialNominal) aria-current="page" @endif>
                                     <span>Relação Nominal</span>
                                     <span class="rounded bg-sky-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-sky-300">PEC</span>
@@ -345,19 +375,22 @@
                         <!-- Saúde da Família (C1 ao C7) -->
                         <div x-data="{ open: {{ request()->routeIs('family-health.*') ? 'true' : 'false' }} }" class="space-y-1">
                             <div class="flex items-center justify-between rounded-xl transition {{ request()->routeIs('family-health.*') ? 'bg-teal-500/15 text-teal-300 font-semibold' : 'text-slate-300 hover:bg-[#132d27] hover:text-white font-medium' }}">
-                                <a href="{{ route('family-health.overview') }}" class="flex-1 flex items-center gap-3 px-3.5 py-2.5 text-sm">
+                                <a href="{{ route('family-health.overview') }}"
+                                   :class="sidebarCollapsed ? 'justify-center !px-2' : 'px-3.5'"
+                                   :title="sidebarCollapsed ? 'Saúde da Família' : ''"
+                                   class="flex-1 flex items-center gap-3 py-2.5 text-sm">
                                     <svg class="h-5 w-5 {{ request()->routeIs('family-health.*') ? 'text-teal-400' : 'text-slate-400 group-hover:text-teal-300' }} shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
                                     </svg>
-                                    <span>Saúde da Família</span>
+                                    <span x-show="!sidebarCollapsed" class="truncate">Saúde da Família</span>
                                 </a>
-                                <button type="button" @click="open = !open" class="p-2.5 text-slate-400 hover:text-white transition" aria-label="Alternar menu saúde da família">
+                                <button type="button" x-show="!sidebarCollapsed" @click="open = !open" class="p-2.5 text-slate-400 hover:text-white transition" aria-label="Alternar menu saúde da família">
                                     <svg class="h-4 w-4 transition-transform duration-200" :class="{ 'rotate-180 text-teal-400': open }" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                                     </svg>
                                 </button>
                             </div>
-                            <div x-show="open" class="ml-4 pl-3 border-l border-[#1a3832] space-y-1 mt-1" style="{{ request()->routeIs('family-health.*') ? '' : 'display: none;' }}">
+                            <div x-show="open && !sidebarCollapsed" class="ml-4 pl-3 border-l border-[#1a3832] space-y-1 mt-1" style="{{ request()->routeIs('family-health.*') ? '' : 'display: none;' }}">
                                 <a href="{{ route('family-health.overview') }}" class="block rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('family-health.overview') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
                                     Painel Municipal
                                 </a>
@@ -395,20 +428,23 @@
                         <!-- Configurações com Sub-itens -->
                         <div x-data="{ open: {{ request()->routeIs('settings.*') ? 'true' : 'false' }} }" class="space-y-1">
                             <div class="flex items-center justify-between rounded-xl transition {{ request()->routeIs('settings.*') ? 'bg-teal-500/15 text-teal-300 font-semibold' : 'text-slate-300 hover:bg-[#132d27] hover:text-white font-medium' }}">
-                                <a href="{{ route('settings.users') }}" class="flex-1 flex items-center gap-3 px-3.5 py-2.5 text-sm">
+                                <a href="{{ route('settings.users') }}"
+                                   :class="sidebarCollapsed ? 'justify-center !px-2' : 'px-3.5'"
+                                   :title="sidebarCollapsed ? 'Configurações' : ''"
+                                   class="flex-1 flex items-center gap-3 py-2.5 text-sm">
                                     <svg class="h-5 w-5 {{ request()->routeIs('settings.*') ? 'text-teal-400' : 'text-slate-400 group-hover:text-teal-300' }} shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.241.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     </svg>
-                                    <span>Configurações</span>
+                                    <span x-show="!sidebarCollapsed" class="truncate">Configurações</span>
                                 </a>
-                                <button type="button" @click="open = !open" class="p-2.5 text-slate-400 hover:text-white transition" aria-label="Alternar menu configurações">
+                                <button type="button" x-show="!sidebarCollapsed" @click="open = !open" class="p-2.5 text-slate-400 hover:text-white transition" aria-label="Alternar menu configurações">
                                     <svg class="h-4 w-4 transition-transform duration-200" :class="{ 'rotate-180 text-teal-400': open }" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                                     </svg>
                                 </button>
                             </div>
-                            <div x-show="open" class="ml-4 pl-3 border-l border-[#1a3832] space-y-1 mt-1" style="{{ request()->routeIs('settings.*') ? '' : 'display: none;' }}">
+                            <div x-show="open && !sidebarCollapsed" class="ml-4 pl-3 border-l border-[#1a3832] space-y-1 mt-1" style="{{ request()->routeIs('settings.*') ? '' : 'display: none;' }}">
                                 <a href="{{ route('settings.users') }}" class="block rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('settings.users') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
                                     Usuários
                                 </a>
@@ -433,19 +469,22 @@
                         <!-- Ajuda com Sub-itens -->
                         <div x-data="{ open: {{ request()->routeIs('help.*') ? 'true' : 'false' }} }" class="space-y-1">
                             <div class="flex items-center justify-between rounded-xl transition {{ request()->routeIs('help.*') ? 'bg-teal-500/15 text-teal-300 font-semibold' : 'text-slate-300 hover:bg-[#132d27] hover:text-white font-medium' }}">
-                                <a href="{{ route('help.guide') }}" class="flex-1 flex items-center gap-3 px-3.5 py-2.5 text-sm">
+                                <a href="{{ route('help.guide') }}"
+                                   :class="sidebarCollapsed ? 'justify-center !px-2' : 'px-3.5'"
+                                   :title="sidebarCollapsed ? 'Ajuda' : ''"
+                                   class="flex-1 flex items-center gap-3 py-2.5 text-sm">
                                     <svg class="h-5 w-5 {{ request()->routeIs('help.*') ? 'text-teal-400' : 'text-slate-400 group-hover:text-teal-300' }} shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
                                     </svg>
-                                    <span>Ajuda</span>
+                                    <span x-show="!sidebarCollapsed" class="truncate">Ajuda</span>
                                 </a>
-                                <button type="button" @click="open = !open" class="p-2.5 text-slate-400 hover:text-white transition" aria-label="Alternar menu ajuda">
+                                <button type="button" x-show="!sidebarCollapsed" @click="open = !open" class="p-2.5 text-slate-400 hover:text-white transition" aria-label="Alternar menu ajuda">
                                     <svg class="h-4 w-4 transition-transform duration-200" :class="{ 'rotate-180 text-teal-400': open }" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                                     </svg>
                                 </button>
                             </div>
-                            <div x-show="open" class="ml-4 pl-3 border-l border-[#1a3832] space-y-1 mt-1" style="{{ request()->routeIs('help.*') ? '' : 'display: none;' }}">
+                            <div x-show="open && !sidebarCollapsed" class="ml-4 pl-3 border-l border-[#1a3832] space-y-1 mt-1" style="{{ request()->routeIs('help.*') ? '' : 'display: none;' }}">
                                 <a href="{{ route('help.guide') }}" class="block rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('help.guide') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
                                     Guia de Preenchimento
                                 </a>
@@ -460,13 +499,13 @@
             </div>
 
             <!-- Rodapé da Sidebar: Usuário Autenticado, Logout e Versão -->
-            <div class="border-t border-[#1a3832] p-4 bg-[#081714]">
-                <div class="flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-3 min-w-0">
-                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-800/90 text-sm font-bold text-teal-200 ring-1 ring-teal-500/30 shadow-inner">
+            <div class="border-t border-[#1a3832] bg-[#081714]" :class="sidebarCollapsed ? 'p-2.5' : 'p-4'">
+                <div class="flex items-center gap-2" :class="sidebarCollapsed ? 'flex-col justify-center' : 'justify-between'">
+                    <div class="flex items-center gap-3 min-w-0" :class="sidebarCollapsed ? 'justify-center' : ''">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-800/90 text-sm font-bold text-teal-200 ring-1 ring-teal-500/30 shadow-inner" :title="auth()->user()->name">
                             {{ strtoupper(substr(auth()->user()->name ?? 'AD', 0, 2)) }}
                         </span>
-                        <div class="min-w-0">
+                        <div class="min-w-0" x-show="!sidebarCollapsed" x-transition>
                             <p class="truncate text-xs font-semibold text-white">{{ auth()->user()->name }}</p>
                             <p class="truncate text-[11px] text-slate-400">{{ auth()->user()->email }}</p>
                         </div>
@@ -481,7 +520,7 @@
                         </button>
                     </form>
                 </div>
-                <div class="mt-3 pt-2.5 border-t border-[#132d27] flex items-center justify-between text-[11px] text-slate-400">
+                <div class="mt-3 pt-2.5 border-t border-[#132d27] flex items-center justify-between text-[11px] text-slate-400" x-show="!sidebarCollapsed" x-transition>
                     <span class="text-slate-400">Monitora Fácil</span>
                     <a href="{{ route('help.whats-new') }}" class="inline-flex items-center gap-1 rounded bg-teal-900/80 hover:bg-teal-800 text-teal-300 px-1.5 py-0.5 font-mono text-[10px] font-bold transition border border-teal-700/50" title="Ver notas da versão e histórico">
                         <span>{{ \App\Services\VersionService::CURRENT_VERSION }}</span>
@@ -493,8 +532,20 @@
         <!-- Área Principal de Conteúdo -->
         <div class="flex min-h-screen min-w-0 flex-1 flex-col overflow-x-clip bg-canvas">
             <!-- Barra Superior Discreta de Contexto no Desktop -->
-            <div class="hidden lg:flex items-center justify-between border-b border-line bg-white/75 px-8 py-3.5 backdrop-blur-sm shadow-[0_1px_3px_0_rgba(0,0,0,0.02)]">
-                <div class="flex items-center gap-2.5 text-xs text-muted">
+            <div class="hidden lg:flex items-center justify-between border-b border-line bg-white/75 px-6 py-3 backdrop-blur-sm shadow-[0_1px_3px_0_rgba(0,0,0,0.02)]">
+                <div class="flex items-center gap-3 text-xs text-muted">
+                    <button type="button"
+                            @click="toggleSidebar()"
+                            id="topbar-sidebar-toggle-btn"
+                            class="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:border-teal-500/50 hover:bg-slate-50 hover:text-teal-700 transition shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+                            :title="sidebarCollapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'"
+                            :aria-label="sidebarCollapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'">
+                        <svg class="h-4 w-4 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                            <rect width="18" height="18" x="3" y="3" rx="2" stroke="currentColor"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v18" />
+                            <path stroke-linecap="round" stroke-linejoin="round" :d="sidebarCollapsed ? 'M13 9l3 3-3 3' : 'M15 9l-3 3 3 3'" />
+                        </svg>
+                    </button>
                     <span class="font-medium text-teal-800">Monitora Fácil</span>
                     <span class="text-slate-300">/</span>
                     <span class="text-ink font-medium">Gestão da Atenção Primária à Saúde</span>
