@@ -176,8 +176,8 @@ class NominalList extends Component
 
     public function openDetails(int $citizenId): void
     {
-        $this->selectedCitizen = CvatNominalCitizen::where('cidadao_pec_id', $citizenId)
-            ->orWhere('id', $citizenId)
+        $this->selectedCitizen = CvatNominalCitizen::where('source', CvatNominalDwService::SOURCE)
+            ->where('id', $citizenId)
             ->first();
 
         if ($this->selectedCitizen) {
@@ -193,7 +193,7 @@ class NominalList extends Component
 
     public function render(CvatNominalDwService $service): View
     {
-        $metrics = $service->getMetrics(2026, 12);
+        $metrics = $service->getMetrics();
 
         $filters = [
             'cns' => $this->filterCns,

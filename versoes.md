@@ -4,6 +4,18 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.23.7] - 21/09/2026
+
+### Vínculo e Acompanhamento: extração real e PBF identificado
+- A relação nominal da competência corrente usa dados do PEC em leitura PostgreSQL e salva o resultado no MySQL local, com proveniência e data de referência.
+- A última importação PBF finalizada no PEC é cruzada por CPF ou CNS. A tela mostra o beneficiário, a vigência da importação e o total elegível, com filtro nominal PBF.
+- Contatos e práticas de cuidado, atualização MICI/MICDT e vínculo a equipes eSF/eAP seguem as janelas e os critérios examinados nas NT 30/2025 e 8/2026. A rotina de extração é agendada fora da requisição web.
+- O botão de processamento CVAT exige fila assíncrona e worker ativo; o deploy reinicia os workers e verifica o serviço. O prazo de reentrega da fila supera o tempo máximo do job.
+- Dados e classificações demonstrativos deixam de aparecer como aferição. Como BPC e a série mensal completa ainda não foram confirmados, os quadrantes ponderados, o índice Y, a classificação final e o repasse permanecem não aferíveis.
+- Validação local: importação PEC 202602 finalizada; 8.924 beneficiários PBF com cadastro elegível no filtro nominal. Os arquivos nominais de importação não integram o repositório.
+
+---
+
 ## [v1.23.6] - 19/09/2026
 
 ### 🩺 Filtro de Equipes Homologadas eSF/eAP

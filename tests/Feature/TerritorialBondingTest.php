@@ -97,62 +97,31 @@ class TerritorialBondingTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Monitoramento de Vínculo e Acompanhamento - Equipes (Mensal)');
-        $response->assertSee('Total Ótimo');
-        $response->assertSee('EQUIPE ALFA');
+        $response->assertSee('Sem dados reais de equipes para esta competência');
+        $response->assertDontSee('EQUIPE ALFA');
     }
 
-    public function test_cvat_service_imports_and_returns_correct_distributions_and_summary(): void
+    public function test_cvat_service_does_not_classify_unverified_nominal_data(): void
     {
         $service = app(CvatService::class);
         $summary = $service->getMunicipalSummary(2026, 3);
-        $charts = $service->getDimensionChartsData();
-
-        $this->assertTrue($summary['has_data']);
-        $this->assertEquals(2, $summary['total_teams']);
-        $this->assertEquals(2.5, $summary['average_final_score']);
-        $this->assertEquals('REGULAR', $summary['municipal_classification']);
-        $this->assertEquals(2, $summary['regular_count']);
-
-        $teams = $service->getTeamsList(2026, 3);
-        $this->assertSame(['0000000001', '0000000002'], $teams->pluck('ine')->sort()->values()->all());
-        $this->assertSame('eSF', $teams->firstWhere('ine', '0000000001')?->team_type);
-        $this->assertSame('eAP', $teams->firstWhere('ine', '0000000002')?->team_type);
-
-        $this->assertCount(3, $charts['cadastro']);
-        $this->assertCount(3, $charts['acompanhamento']);
-
-        // Verifica os números de Q1/26 na Dimensão Cadastro: Regular 1, Suficiente 0, Bom 3, Ótimo 15
-        $q1Cadastro = collect($charts['cadastro'])->firstWhere('period', 'Q1/26');
-        $this->assertEquals(1, $q1Cadastro['regular']);
-        $this->assertEquals(0, $q1Cadastro['sufficient']);
-        $this->assertEquals(3, $q1Cadastro['good']);
-        $this->assertEquals(15, $q1Cadastro['optimal']);
-
-        // Verifica os números de Q1/26 na Dimensão Acompanhamento: Regular 1, Suficiente 1, Bom 7, Ótimo 10
-        $q1Acomp = collect($charts['acompanhamento'])->firstWhere('period', 'Q1/26');
-        $this->assertEquals(1, $q1Acomp['regular']);
-        $this->assertEquals(1, $q1Acomp['sufficient']);
-        $this->assertEquals(7, $q1Acomp['good']);
-        $this->assertEquals(10, $q1Acomp['optimal']);
+        $this->assertFalse($summary['has_data']);
+        $this->assertSame('NÃO AFERÍVEL', $summary['municipal_classification']);
+        $this->assertCount(0, $service->getTeamsList(2026, 3));
+        $this->assertSame([], $service->getAvailableQuarters());
     }
 
-    public function test_livewire_component_filters_teams_by_classification(): void
+    public function test_livewire_component_does_not_list_unverified_teams(): void
     {
         $user = User::factory()->create();
 
         Livewire::actingAs($user)
             ->test(TerritorialBondingOverview::class, ['activeTab' => 'teams'])
             ->assertSet('selectedYear', 2026)
-            ->assertSet('selectedQuarter', 3)
-            ->assertSee('2026 / M9')
-            ->assertSee('12/09/2026')
-            ->assertSee('2 equipes')
-            ->assertSee('EQUIPE ALFA')
-            ->assertDontSee('EQUIPE SAÚDE BUCAL')
+            ->assertSet('selectedQuarter', 1)
+            ->assertSee('Sem dados reais de equipes')
+            ->assertDontSee('EQUIPE ALFA')
             ->set('filterClassification', 'REGULAR')
-            ->assertSee('EQUIPE BETA')
-            ->set('filterTeam', 'ALFA')
-            ->assertSee('EQUIPE ALFA')
             ->assertDontSee('EQUIPE BETA');
     }
 
@@ -215,8 +184,7 @@ class TerritorialBondingTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Monitoramento de Vínculo e Acompanhamento - Relação Nominal');
-        $response->assertSee('DIMENSÃO CADASTRO');
-        $response->assertSee('DIMENSÃO ACOMPANHAMENTO');
+        $response->assertSee('Sem extração real do PEC');
         $response->assertSee('Busca Avançada');
     }
 }

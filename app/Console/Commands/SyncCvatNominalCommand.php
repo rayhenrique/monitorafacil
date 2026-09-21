@@ -12,7 +12,7 @@ class SyncCvatNominalCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'cvat:sync-nominal {--year=2026} {--month=12}';
+    protected $signature = 'cvat:sync-nominal {--year=} {--month=}';
 
     /**
      * The console command description.
@@ -26,12 +26,12 @@ class SyncCvatNominalCommand extends Command
      */
     public function handle(CvatNominalDwService $service): int
     {
-        $year = (int) $this->option('year');
-        $month = (int) $this->option('month');
+        $year = (int) ($this->option('year') ?: now()->year);
+        $month = (int) ($this->option('month') ?: now()->month);
 
-        $this->info("=== Sincronização do Vínculo e Acompanhamento Territorial (CVAT) ===");
+        $this->info('=== Sincronização do Vínculo e Acompanhamento Territorial (CVAT) ===');
         $this->line("Competência de Referência: {$year}/M{$month}");
-        $this->line("Iniciando extração direta da base PostgreSQL e-SUS PEC (pgsql_esus)...");
+        $this->line('Iniciando extração direta da base PostgreSQL e-SUS PEC (pgsql_esus)...');
 
         $startTime = microtime(true);
 
@@ -48,6 +48,7 @@ class SyncCvatNominalCommand extends Command
 
         if (! $result['success']) {
             $this->error("Falha na sincronização: {$result['message']}");
+
             return Command::FAILURE;
         }
 
@@ -61,18 +62,29 @@ class SyncCvatNominalCommand extends Command
             ['Indicador', 'Valor', 'Percentual'],
             [
                 ['Total Geral de Cadastros Individuais (MICI)', number_format($metric->mici_total, 0, ',', '.'), '100%'],
-                ['MICI Atualizados (últimos 24 meses)', number_format($metric->mici_updated, 0, ',', '.'), round(($metric->mici_updated / max(1, $metric->mici_total)) * 100, 1) . '%'],
-                ['MICI Desatualizados', number_format($metric->mici_outdated, 0, ',', '.'), round(($metric->mici_outdated / max(1, $metric->mici_total)) * 100, 1) . '%'],
-                ['MICI Sem Ficha Domiciliar (Sem MICDT)', number_format($metric->mici_without_micdt_total, 0, ',', '.'), round(($metric->mici_without_micdt_total / max(1, $metric->mici_total)) * 100, 1) . '%'],
-                ['MICI Com Ficha Domiciliar (Com MICDT)', number_format($metric->mici_with_micdt_total, 0, ',', '.'), round(($metric->mici_with_micdt_total / max(1, $metric->mici_total)) * 100, 1) . '%'],
-                ['MICI e MICDT Atualizados', number_format($metric->mici_and_micdt_updated, 0, ',', '.'), round(($metric->mici_and_micdt_updated / max(1, $metric->mici_total)) * 100, 1) . '%'],
-                ['Cidadãos Vinculados a Equipes', number_format($metric->citizens_linked, 0, ',', '.'), round(($metric->citizens_linked / max(1, $metric->mici_total)) * 100, 1) . '%'],
-                ['Cidadãos Não Vinculados a Equipes', number_format($metric->citizens_not_linked, 0, ',', '.'), round(($metric->citizens_not_linked / max(1, $metric->mici_total)) * 100, 1) . '%'],
+                ['MICI Atualizados (últimos 24 meses)', number_format($metric->mici_updated, 0, ',', '.'), round(($metric->mici_updated / max(1, $metric->mici_total)) * 100, 1).'%'],
+                ['MICI Desatualizados', number_format($metric->mici_outdated, 0, ',', '.'), round(($metric->mici_outdated / max(1, $metric->mici_total)) * 100, 1).'%'],
+                ['MICI Sem Ficha Domiciliar (Sem MICDT)', number_format($metric->mici_without_micdt_total, 0, ',', '.'), round(($metric->mici_without_micdt_total / max(1, $metric->mici_total)) * 100, 1).'%'],
+                ['MICI Com Ficha Domiciliar (Com MICDT)', number_format($metric->mici_with_micdt_total, 0, ',', '.'), round(($metric->mici_with_micdt_total / max(1, $metric->mici_total)) * 100, 1).'%'],
+                ['MICI e MICDT Atualizados', number_format($metric->mici_and_micdt_updated, 0, ',', '.'), round(($metric->mici_and_micdt_updated / max(1, $metric->mici_total)) * 100, 1).'%'],
+                ['Cidadãos Vinculados a Equipes', number_format($metric->citizens_linked, 0, ',', '.'), round(($metric->citizens_linked / max(1, $metric->mici_total)) * 100, 1).'%'],
+                ['Cidadãos Não Vinculados a Equipes', number_format($metric->citizens_not_linked, 0, ',', '.'), round(($metric->citizens_not_linked / max(1, $metric->mici_total)) * 100, 1).'%'],
             ]
         );
 
         $this->newLine();
         $this->line('--- Métricas da Dimensão Acompanhamento ---');
+        if (! $metric->benefit_data_available) {
+            if ($metric->pbf_import_id) {
+                $this->line("PBF confirmado no PEC (vigência {$metric->pbf_vigencia}): {$metric->pbf_confirmed_total} cidadãos elegíveis.");
+            }
+            $this->warn('Quadrantes de vulnerabilidade e escore Y: não aferíveis (situação BPC ainda indisponível).');
+            $this->line('Contatos e práticas de cuidado foram extraídos na relação nominal.');
+            $this->line("Registros sem identificador PEC excluídos: {$metric->excluded_without_pec_id}");
+            $this->line("Total de cidadãos extraídos: {$result['nominal_citizens_count']}");
+
+            return Command::SUCCESS;
+        }
         $this->table(
             ['Critério de Vulnerabilidade', 'Total Cidadãos', 'Acompanhados', 'Não Acompanhados', '% Acompanhamento'],
             [
@@ -81,28 +93,28 @@ class SyncCvatNominalCommand extends Command
                     number_format($metric->no_criteria_total, 0, ',', '.'),
                     number_format($metric->no_criteria_accompanied, 0, ',', '.'),
                     number_format($metric->no_criteria_not_accompanied, 0, ',', '.'),
-                    round(($metric->no_criteria_accompanied / max(1, $metric->no_criteria_total)) * 100, 1) . '%',
+                    round(($metric->no_criteria_accompanied / max(1, $metric->no_criteria_total)) * 100, 1).'%',
                 ],
                 [
-                    'Idoso (≥60) ou Criança (<6)',
+                    'Idoso (≥60) ou Criança (<5)',
                     number_format($metric->elderly_or_child_total, 0, ',', '.'),
                     number_format($metric->elderly_or_child_accompanied, 0, ',', '.'),
                     number_format($metric->elderly_or_child_not_accompanied, 0, ',', '.'),
-                    round(($metric->elderly_or_child_accompanied / max(1, $metric->elderly_or_child_total)) * 100, 1) . '%',
+                    round(($metric->elderly_or_child_accompanied / max(1, $metric->elderly_or_child_total)) * 100, 1).'%',
                 ],
                 [
                     'Benefício Social (BPC ou PBF)',
                     number_format($metric->bpc_or_pbf_total, 0, ',', '.'),
                     number_format($metric->bpc_or_pbf_accompanied, 0, ',', '.'),
                     number_format($metric->bpc_or_pbf_not_accompanied, 0, ',', '.'),
-                    round(($metric->bpc_or_pbf_accompanied / max(1, $metric->bpc_or_pbf_total)) * 100, 1) . '%',
+                    round(($metric->bpc_or_pbf_accompanied / max(1, $metric->bpc_or_pbf_total)) * 100, 1).'%',
                 ],
                 [
                     'Idoso/Criança E Benefício Social',
                     number_format($metric->elderly_child_and_benefit_total, 0, ',', '.'),
                     number_format($metric->elderly_child_and_benefit_accompanied, 0, ',', '.'),
                     number_format($metric->elderly_child_and_benefit_not_accompanied, 0, ',', '.'),
-                    round(($metric->elderly_child_and_benefit_accompanied / max(1, $metric->elderly_child_and_benefit_total)) * 100, 1) . '%',
+                    round(($metric->elderly_child_and_benefit_accompanied / max(1, $metric->elderly_child_and_benefit_total)) * 100, 1).'%',
                 ],
             ]
         );

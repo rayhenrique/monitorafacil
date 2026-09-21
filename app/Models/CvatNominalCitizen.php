@@ -8,6 +8,10 @@ class CvatNominalCitizen extends Model
 {
     protected $fillable = [
         'cidadao_pec_id',
+        'source',
+        'care_contacts',
+        'total_contacts',
+        'registration_eligible',
         'cns',
         'cpf',
         'responsible_cns_cpf',
@@ -42,6 +46,9 @@ class CvatNominalCitizen extends Model
     {
         return [
             'cidadao_pec_id' => 'integer',
+            'care_contacts' => 'integer',
+            'total_contacts' => 'integer',
+            'registration_eligible' => 'boolean',
             'birth_date' => 'date',
             'age' => 'integer',
             'mici_updated' => 'boolean',
@@ -68,10 +75,10 @@ class CvatNominalCitizen extends Model
 
         $c = preg_replace('/\D/', '', $this->cns);
         if (strlen($c) < 15) {
-            return substr($c, 0, 3) . '***' . substr($c, -3);
+            return substr($c, 0, 3).'***'.substr($c, -3);
         }
 
-        return '***.**' . substr($c, 4, 1) . '.' . substr($c, 5, 3) . '.' . substr($c, 8, 1) . '**.' . substr($c, 11, 3);
+        return '***.**'.substr($c, 4, 1).'.'.substr($c, 5, 3).'.'.substr($c, 8, 1).'**.'.substr($c, 11, 3);
     }
 
     /**
@@ -88,7 +95,7 @@ class CvatNominalCitizen extends Model
             return '***.***.***-**';
         }
 
-        return '***.' . substr($c, 3, 3) . '.' . substr($c, 6, 2) . '*.-*';
+        return '***.'.substr($c, 3, 3).'.'.substr($c, 6, 2).'*.-*';
     }
 
     /**
@@ -102,7 +109,7 @@ class CvatNominalCitizen extends Model
 
         $c = preg_replace('/\D/', '', $this->professional_cns);
         if (strlen($c) === 15) {
-            return substr($c, 0, 3) . '.' . substr($c, 3, 3) . '.' . substr($c, 6, 3) . '.' . substr($c, 9, 3) . '.' . substr($c, 12, 3);
+            return substr($c, 0, 3).'.'.substr($c, 3, 3).'.'.substr($c, 6, 3).'.'.substr($c, 9, 3).'.'.substr($c, 12, 3);
         }
 
         return $this->professional_cns;

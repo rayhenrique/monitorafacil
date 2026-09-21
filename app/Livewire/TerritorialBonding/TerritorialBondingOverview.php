@@ -155,6 +155,7 @@ class TerritorialBondingOverview extends Component
         $teams = $this->perPage > 0 ? $allMatchingTeams->take($this->perPage) : $allMatchingTeams;
 
         $monthlySummary = $cvatService->getMonthlyTeamSummary($this->selectedYear, $this->selectedQuarter);
+        $nominalPeriod = $cvatService->getLatestNominalPeriod($this->selectedYear, $this->selectedQuarter);
 
         $selectedQuarterLabel = 'Q'.$this->selectedQuarter.'/'.substr((string) $this->selectedYear, -2);
 
@@ -163,6 +164,7 @@ class TerritorialBondingOverview extends Component
             'teams' => $teams,
             'totalTeamsFound' => $totalTeamsFound,
             'monthlySummary' => $monthlySummary,
+            'nominalPeriod' => $nominalPeriod,
             'selectedQuarterLabel' => $selectedQuarterLabel,
             'filterCnes' => $this->filterCnes,
             'filterUnit' => $this->filterUnit,

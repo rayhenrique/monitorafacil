@@ -15,9 +15,6 @@ class CvatService
 {
     private const TEAM_POPULATION_PARAMETER = 2500;
 
-    /** @var array<string, Collection<int, CvatTeamEvaluation>> */
-    private array $teamSnapshotCache = [];
-
     /** @var array<string, array{type: string, name: string, cnes: string}>|null */
     private ?array $eligiblePrimaryCareTeams = null;
 
@@ -268,6 +265,8 @@ class CvatService
         }
 
         return CvatNominalCitizen::query()
+            ->where('source', CvatNominalDwService::SOURCE)
+            ->where('registration_eligible', true)
             ->whereNotNull('ine')
             ->where('ine', '!=', '')
             ->whereIn('ine', array_keys($eligibleTeams))
@@ -283,10 +282,10 @@ class CvatService
                 return [
                     'year' => $period->year,
                     'quarter' => $quarter,
-                    'label' => $shortLabel.' ('.$period->year.')',
+                    'label' => $shortLabel.' (extração parcial)',
                     'short_label' => $shortLabel,
                     'is_latest' => false,
-                    'has_team_details' => true,
+                    'has_team_details' => false,
                 ];
             })
             ->unique(fn (array $period): string => $period['year'].'-'.$period['quarter'])
@@ -316,6 +315,8 @@ class CvatService
         }
 
         $query = CvatNominalCitizen::query()
+            ->where('source', CvatNominalDwService::SOURCE)
+            ->where('registration_eligible', true)
             ->whereNotNull('ine')
             ->where('ine', '!=', '')
             ->whereIn('ine', array_keys($eligibleTeams));
@@ -339,6 +340,8 @@ class CvatService
         }
 
         $lastAttendanceDate = CvatNominalCitizen::query()
+            ->where('source', CvatNominalDwService::SOURCE)
+            ->where('registration_eligible', true)
             ->where('year', $period->year)
             ->where('month', $period->month)
             ->whereNotNull('ine')
@@ -435,62 +438,18 @@ class CvatService
      */
     public function getMunicipalSummary(int $year, int $quarter): array
     {
-        $teams = $this->getEvaluations($year, $quarter);
-
-        if ($teams->isEmpty()) {
-            return [
-                'has_data' => false,
-                'average_final_score' => 0.0,
-                'municipal_classification' => 'SEM DADOS',
-                'average_registration' => 0.0,
-                'average_monitoring' => 0.0,
-                'total_teams' => 0,
-                'optimal_count' => 0,
-                'good_count' => 0,
-                'sufficient_count' => 0,
-                'regular_count' => 0,
-                'financial_incentive' => 'Pendente',
-            ];
-        }
-
-        $totalTeams = $teams->count();
-        $avgFinal = round($teams->avg('final_score') ?? 0.0, 2);
-        $avgReg = round($teams->avg('registration_score') ?? 0.0, 2);
-        $avgMon = round($teams->avg('monitoring_score') ?? 0.0, 2);
-
-        $optimal = $teams->filter(fn ($t) => in_array(mb_strtoupper((string) $t->final_classification), ['ÓTIMO', 'OTIMO'], true))->count();
-        $good = $teams->filter(fn ($t) => mb_strtoupper((string) $t->final_classification) === 'BOM')->count();
-        $sufficient = $teams->filter(fn ($t) => mb_strtoupper((string) $t->final_classification) === 'SUFICIENTE')->count();
-        $regular = $teams->filter(fn ($t) => mb_strtoupper((string) $t->final_classification) === 'REGULAR')->count();
-
-        // Classificação do Município conforme Nota Técnica nº 08/2026 - Quadro 5
-        // > 8,5: Ótimo | >= 7 e <= 8,5: Bom | >= 5 e < 7: Suficiente | < 5: Regular
-        $classification = match (true) {
-            $avgFinal > 8.5 => 'ÓTIMO',
-            $avgFinal >= 7.0 => 'BOM',
-            $avgFinal >= 5.0 => 'SUFICIENTE',
-            default => 'REGULAR',
-        };
-
-        $financialIncentive = match ($classification) {
-            'ÓTIMO' => 'Incentivo Máximo (100% repasse)',
-            'BOM' => 'Incentivo Bom (75% repasse)',
-            'SUFICIENTE' => 'Incentivo Suficiente (50% repasse)',
-            default => 'Incentivo Regular (25% repasse)',
-        };
-
         return [
-            'has_data' => true,
-            'average_final_score' => $avgFinal,
-            'municipal_classification' => $classification,
-            'average_registration' => $avgReg,
-            'average_monitoring' => $avgMon,
-            'total_teams' => $totalTeams,
-            'optimal_count' => $optimal,
-            'good_count' => $good,
-            'sufficient_count' => $sufficient,
-            'regular_count' => $regular,
-            'financial_incentive' => $financialIncentive,
+            'has_data' => false,
+            'average_final_score' => 0.0,
+            'municipal_classification' => 'NÃO AFERÍVEL',
+            'average_registration' => 0.0,
+            'average_monitoring' => 0.0,
+            'total_teams' => 0,
+            'optimal_count' => 0,
+            'good_count' => 0,
+            'sufficient_count' => 0,
+            'regular_count' => 0,
+            'financial_incentive' => 'Pendente',
         ];
     }
 
@@ -501,14 +460,9 @@ class CvatService
      */
     public function getEvaluations(int $year, int $quarter): Collection
     {
-        if (Schema::hasTable('cvat_team_evaluations')) {
-            $evaluations = CvatTeamEvaluation::where('year', $year)->where('quarter', $quarter)->get();
-            if ($evaluations->isNotEmpty()) {
-                return $evaluations;
-            }
-        }
-
-        return $this->teamEvaluationsFromNominal($year, $quarter);
+        // Sem BPC/PBF, bônus de satisfação e quatro meses históricos, a NT não permite
+        // uma classificação quadrimestral. Os CSVs antigos não têm proveniência verificável.
+        return collect();
     }
 
     /**
@@ -530,10 +484,7 @@ class CvatService
         ?float $minScore = null,
         ?float $maxScore = null
     ): Collection {
-        $teams = $this->teamEvaluationsFromNominal($year, $quarter);
-        if ($teams->isEmpty() && Schema::hasTable('cvat_team_evaluations')) {
-            $teams = CvatTeamEvaluation::where('year', $year)->where('quarter', $quarter)->get();
-        }
+        $teams = $this->getEvaluations($year, $quarter);
 
         $matches = static fn (?string $value, ?string $filter): bool => $filter === null
             || trim($filter) === ''
@@ -676,80 +627,6 @@ class CvatService
         ];
     }
 
-    /** @return Collection<int, CvatTeamEvaluation> */
-    private function teamEvaluationsFromNominal(int $year, int $quarter): Collection
-    {
-        $cacheKey = $year.'-'.$quarter;
-        if (isset($this->teamSnapshotCache[$cacheKey])) {
-            return $this->teamSnapshotCache[$cacheKey];
-        }
-
-        $period = $this->getLatestNominalPeriod($year, $quarter);
-        if (! $period) {
-            return $this->teamSnapshotCache[$cacheKey] = collect();
-        }
-
-        $eligibleTeams = $this->eligiblePrimaryCareTeams();
-        if ($eligibleTeams === []) {
-            return $this->teamSnapshotCache[$cacheKey] = collect();
-        }
-
-        $rows = CvatNominalCitizen::query()
-            ->where('year', $period['year'])
-            ->where('month', $period['month'])
-            ->where('is_linked', true)
-            ->whereNotNull('ine')
-            ->where('ine', '!=', '')
-            ->whereIn('ine', array_keys($eligibleTeams))
-            ->selectRaw('ine, MAX(cnes) as cnes, MAX(facility_name) as facility_name, MAX(team_name) as team_name')
-            ->selectRaw('COUNT(*) as linked_registrations')
-            ->selectRaw('SUM(CASE WHEN mici_updated = 1 AND (has_micdt = 0 OR micdt_updated = 0) THEN 1 ELSE 0 END) as mici_only')
-            ->selectRaw('SUM(CASE WHEN mici_updated = 1 AND has_micdt = 1 AND micdt_updated = 1 THEN 1 ELSE 0 END) as mici_and_micdt')
-            ->selectRaw("SUM(CASE WHEN is_accompanied = 1 AND vulnerability_type = 'sem_criterio' AND social_benefit = 'nenhum' THEN 1 ELSE 0 END) as accompanied_no_criteria")
-            ->selectRaw("SUM(CASE WHEN is_accompanied = 1 AND vulnerability_type IN ('idoso', 'crianca') AND social_benefit = 'nenhum' THEN 1 ELSE 0 END) as accompanied_age")
-            ->selectRaw("SUM(CASE WHEN is_accompanied = 1 AND vulnerability_type = 'sem_criterio' AND social_benefit IN ('bpc', 'pbf', 'bpc_pbf') THEN 1 ELSE 0 END) as accompanied_benefit")
-            ->selectRaw("SUM(CASE WHEN is_accompanied = 1 AND vulnerability_type IN ('idoso', 'crianca') AND social_benefit IN ('bpc', 'pbf', 'bpc_pbf') THEN 1 ELSE 0 END) as accompanied_age_benefit")
-            ->groupBy('ine')
-            ->get();
-
-        $teams = $rows->map(function (CvatNominalCitizen $row) use ($period, $eligibleTeams): CvatTeamEvaluation {
-            $parameter = self::TEAM_POPULATION_PARAMETER;
-            $eligibleTeam = $eligibleTeams[(string) $row->ine];
-            $registrationResult = round((((int) $row->mici_only * 0.75) + ((int) $row->mici_and_micdt * 1.5)) / $parameter * 100, 2);
-            $monitoringResult = round((
-                ((int) $row->accompanied_no_criteria * 1.0)
-                + ((int) $row->accompanied_age * 1.2)
-                + ((int) $row->accompanied_benefit * 1.3)
-                + ((int) $row->accompanied_age_benefit * 2.5)
-            ) / $parameter * 100, 2);
-            $registrationScore = $this->registrationScore($registrationResult);
-            $monitoringScore = $this->monitoringScore($monitoringResult);
-            $finalScore = round($registrationScore + $monitoringScore, 2);
-
-            return new CvatTeamEvaluation([
-                'year' => $period['year'],
-                'quarter' => $period['quarter'],
-                'quarter_label' => 'M'.$period['month'].'/'.substr((string) $period['year'], -2),
-                'cnes' => (string) $row->cnes,
-                'facility_name' => (string) $row->facility_name,
-                'ine' => (string) $row->ine,
-                'team_type' => $eligibleTeam['type'] === '76' ? 'eAP' : 'eSF',
-                'team_name' => (string) $row->team_name,
-                'parameter' => $parameter,
-                'linked_registrations' => (int) $row->linked_registrations,
-                'linked_ratio' => round(((int) $row->linked_registrations / $parameter) * 100, 2),
-                'registration_result' => $registrationResult,
-                'registration_score' => $registrationScore,
-                'monitoring_result' => $monitoringResult,
-                'monitoring_score' => $monitoringScore,
-                'final_score' => $finalScore,
-                'final_classification' => $this->finalClassification($finalScore),
-            ]);
-        })->values();
-
-        return $this->teamSnapshotCache[$cacheKey] = $teams;
-    }
-
     /**
      * Retorna somente INEs homologados como eSF (70) ou eAP (76).
      * O XML CNES é a fonte principal; snapshots MySQL válidos são usados quando o arquivo não está disponível.
@@ -803,35 +680,5 @@ class CvatService
                 ],
             ])
             ->all();
-    }
-
-    private function registrationScore(float $result): float
-    {
-        return match (true) {
-            $result > 85.0 => 3.0,
-            $result >= 65.0 => 2.25,
-            $result >= 45.0 => 1.5,
-            default => 0.75,
-        };
-    }
-
-    private function monitoringScore(float $result): float
-    {
-        return match (true) {
-            $result > 85.0 => 7.0,
-            $result >= 65.0 => 5.25,
-            $result >= 45.0 => 3.5,
-            default => 1.75,
-        };
-    }
-
-    private function finalClassification(float $score): string
-    {
-        return match (true) {
-            $score > 8.5 => 'ÓTIMO',
-            $score >= 7.0 => 'BOM',
-            $score >= 5.0 => 'SUFICIENTE',
-            default => 'REGULAR',
-        };
     }
 }

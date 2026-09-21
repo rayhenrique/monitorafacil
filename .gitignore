@@ -23,3 +23,5 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 scratch*.php
+/importacao/pbf_*.zip
+/importacao/pbf_*/

@@ -1,0 +1,19 @@
+[Unit]
+Description=Monitora Facil Laravel queue worker
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=kltecnologia-monitorafacil
+Group=kltecnologia-monitorafacil
+WorkingDirectory=/home/kltecnologia-monitorafacil/htdocs/monitorafacil.kltecnologia.com
+ExecStart=/usr/bin/php8.5 artisan queue:work --queue=default --sleep=3 --tries=1 --timeout=900 --max-time=3600
+Restart=always
+RestartSec=5
+TimeoutStopSec=960
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

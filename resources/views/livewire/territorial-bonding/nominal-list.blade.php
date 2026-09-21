@@ -7,7 +7,7 @@
         activeTab="nominal"
     />
 
-    <!-- Cabeçalho Oficial do Submódulo -->
+    <!-- Cabeçalho da relação nominal -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-line shadow-xs">
         <div>
             <h1 class="text-lg sm:text-xl font-bold tracking-tight text-ink flex items-center gap-2">
@@ -17,7 +17,7 @@
                 <svg class="h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5" />
                 </svg>
-                <span>Último atendimento registrado em <strong>{{ $metrics->last_record_date ? $metrics->last_record_date->format('d/m/Y') : '18/09/2026' }}</strong></span>
+                <span>@if ($metrics) Extração PEC em {{ $metrics->reference_date?->format('d/m/Y') }} @else Sem extração real disponível @endif</span>
             </p>
         </div>
 
@@ -36,301 +36,29 @@
         </div>
     </div>
 
-    <!-- PAINEL EXECUTIVO: RESULTADO OFICIAL COMPONENTE II (PORTARIA SAPS/MS Nº 161/2024 & NT Nº 30/2025) -->
-    <div class="bg-white rounded-2xl sm:rounded-3xl border border-line shadow-panel p-4 sm:p-5 space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-line pb-3">
-            <div class="flex items-start sm:items-center gap-2.5">
-                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-teal-100 text-teal-800 font-bold text-xs">
-                    NT
-                </span>
-                <div>
-                    <h2 class="text-xs sm:text-sm font-bold text-ink flex flex-wrap items-center gap-2">
-                        <span>Aferição Oficial de Desempenho · Portaria SAPS/MS nº 161/2024 & NT nº 30/2025</span>
-                        <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold">19 eSF · Meta: {{ number_format($metrics->target_population, 0, '', '.') }} munícipes</span>
-                    </h2>
-                    <p class="text-[10px] sm:text-[11px] text-muted mt-0.5">
-                        Critérios: MICI/MICDT em até 24 meses (sem FA/Mudou-se) · Acompanhamento: &ge; 2 contatos em 12 meses com &ge; 1 prática de cuidado.
-                    </p>
-                </div>
-            </div>
-            <div class="flex items-center gap-2 self-start sm:self-auto">
-                <span class="text-xs text-slate-500 font-medium">Classificação Ministerial:</span>
-                <span class="px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider shadow-xs {{ $metrics->final_classification === 'ÓTIMO' ? 'bg-blue-600 text-white' : ($metrics->final_classification === 'BOM' ? 'bg-emerald-600 text-white' : ($metrics->final_classification === 'SUFICIENTE' ? 'bg-amber-500 text-white' : 'bg-rose-600 text-white')) }}">
-                    {{ $metrics->final_classification }}
-                </span>
-            </div>
+    @if ($metrics)
+        <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-950">
+            <p class="font-bold">Extração local parcial · {{ $metrics->year }}/M{{ str_pad((string) $metrics->month, 2, '0', STR_PAD_LEFT) }}</p>
+            <p class="mt-1 text-xs leading-relaxed">MICI e MICDT usam a janela de 24 meses da NT nº 30/2025. Os contatos usam 12 meses e exigem ao menos duas ocorrências, incluindo uma prática de cuidado. {{ $metrics->pbf_import_id ? 'Beneficiários PBF foram identificados pela importação ' . $metrics->pbf_vigencia . ' do PEC, usando CPF ou CNS.' : 'Nenhuma importação PBF finalizada foi encontrada no PEC.' }} O BPC ainda não foi identificado; por isso o índice Y, a classificação final e o repasse estão indisponíveis.</p>
+            @if ($metrics->excluded_without_pec_id > 0)
+                <p class="mt-2 text-xs">{{ $metrics->excluded_without_pec_id }} registros da visão territorial sem identificador PEC ficaram fora da relação nominal.</p>
+            @endif
         </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-            <!-- Escore Final -->
-            <div class="bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80 flex flex-col justify-between col-span-1 sm:col-span-2 md:col-span-1">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Escore Final (X + Y)</span>
-                    <span class="text-[10px] sm:text-[11px] font-bold text-teal-800 bg-teal-50 px-2 py-0.5 rounded border border-teal-200">
-                        {{ in_array($metrics->final_classification, ['ÓTIMO', 'BOM']) ? '100% Repasse' : ($metrics->final_classification === 'SUFICIENTE' ? '75% Repasse' : '50% Repasse') }}
-                    </span>
-                </div>
-                <div class="my-2 flex items-baseline gap-2">
-                    <span class="text-2xl sm:text-3xl font-black text-ink tabular-nums">{{ number_format($metrics->final_score, 2, ',', '.') }}</span>
-                    <span class="text-xs text-muted font-semibold">/ 10,00 pts</span>
-                </div>
-                <div class="text-[10px] sm:text-[11px] text-slate-500 flex items-center justify-between border-t border-slate-200/60 pt-2">
-                    <span>Corte Ótimo: &gt; 8,50 pts</span>
-                    <span>Bom: &ge; 7,00 pts</span>
-                </div>
-            </div>
-
-            <!-- Dimensão Cadastro (X) -->
-            <div class="bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80 flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-teal-900 uppercase tracking-wider">Dimensão Cadastro (X)</span>
-                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold {{ $metrics->classification_x === 'Ótimo' ? 'bg-blue-100 text-blue-800' : ($metrics->classification_x === 'Bom' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800') }}">
-                        {{ $metrics->classification_x }}
-                    </span>
-                </div>
-                <div class="my-2 flex items-baseline justify-between">
-                    <div class="flex items-baseline gap-1.5">
-                        <span class="text-2xl sm:text-3xl font-black text-teal-900 tabular-nums">{{ number_format($metrics->score_x, 2, ',', '.') }}</span>
-                        <span class="text-xs text-muted font-semibold">/ 3,00 pts</span>
-                    </div>
-                    <span class="text-xs font-mono font-bold text-slate-600">Índice: {{ number_format($metrics->index_x, 1, ',', '.') }}%</span>
-                </div>
-                <div class="text-[10px] sm:text-[11px] text-slate-500 border-t border-slate-200/60 pt-2 flex items-center justify-between">
-                    <span>MICI (&times;0,75) + MICDT (&times;1,5)</span>
-                    <span class="font-bold text-teal-800">Meta: 100%</span>
-                </div>
-            </div>
-
-            <!-- Dimensão Acompanhamento (Y) -->
-            <div class="bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80 flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-blue-900 uppercase tracking-wider">Dimensão Acompanhamento (Y)</span>
-                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold {{ $metrics->classification_y === 'Ótimo' ? 'bg-blue-100 text-blue-800' : ($metrics->classification_y === 'Bom' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800') }}">
-                        {{ $metrics->classification_y }}
-                    </span>
-                </div>
-                <div class="my-2 flex items-baseline justify-between">
-                    <div class="flex items-baseline gap-1.5">
-                        <span class="text-2xl sm:text-3xl font-black text-blue-900 tabular-nums">{{ number_format($metrics->score_y, 2, ',', '.') }}</span>
-                        <span class="text-xs text-muted font-semibold">/ 7,00 pts</span>
-                    </div>
-                    <span class="text-xs font-mono font-bold text-slate-600">Índice: {{ number_format($metrics->index_y, 1, ',', '.') }}%</span>
-                </div>
-                <div class="text-[10px] sm:text-[11px] text-slate-500 border-t border-slate-200/60 pt-2 flex items-center justify-between">
-                    <span>Ponderação: 1,0 · 1,2 · 1,3 · 2,5</span>
-                    <span class="font-bold text-blue-800">Meta: 50%</span>
-                </div>
-            </div>
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+            <div class="rounded-2xl border border-line bg-white p-4"><p class="text-xs text-muted">MICI válidos</p><p class="mt-1 text-2xl font-black text-ink tabular-nums">{{ number_format($metrics->mici_total, 0, ',', '.') }}</p></div>
+            <div class="rounded-2xl border border-line bg-white p-4"><p class="text-xs text-muted">MICI atualizados</p><p class="mt-1 text-2xl font-black text-teal-800 tabular-nums">{{ number_format($metrics->mici_updated, 0, ',', '.') }}</p></div>
+            <div class="rounded-2xl border border-line bg-white p-4"><p class="text-xs text-muted">MICI e MICDT atualizados</p><p class="mt-1 text-2xl font-black text-teal-800 tabular-nums">{{ number_format($metrics->mici_and_micdt_updated, 0, ',', '.') }}</p></div>
+            <div class="rounded-2xl border border-line bg-white p-4"><p class="text-xs text-muted">Vinculados à equipe</p><p class="mt-1 text-2xl font-black text-ink tabular-nums">{{ number_format($metrics->citizens_linked, 0, ',', '.') }}</p></div>
+            @if ($metrics->pbf_import_id)
+                <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4"><p class="text-xs text-amber-900">PBF identificado no PEC</p><p class="mt-1 text-2xl font-black text-amber-900 tabular-nums">{{ number_format($metrics->pbf_confirmed_total, 0, ',', '.') }}</p></div>
+            @endif
         </div>
-    </div>
-
-    <!-- BOX 1: DIMENSÃO CADASTRO (EXATA CONFORME IMAGEM 1 COM MÉTRICAS DA NT 30/2025) -->
-    <div class="bg-white rounded-2xl sm:rounded-3xl border border-line shadow-panel overflow-hidden">
-        <!-- Título da Seção -->
-        <div class="bg-slate-50/60 py-2.5 px-4 sm:px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-line">
-            <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">DIMENSÃO CADASTRO</h2>
-            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px]">
-                <span class="text-slate-500 font-medium">Índice Ponderado (X): <strong class="text-teal-800">{{ number_format($metrics->index_x, 2, ',', '.') }}%</strong></span>
-                <span class="hidden sm:inline text-slate-300">·</span>
-                <span class="text-slate-500 font-medium">Escore Oficial: <strong class="text-teal-800">{{ number_format($metrics->score_x, 2, ',', '.') }} / 3,00 pts</strong> ({{ $metrics->classification_x }})</span>
-            </div>
+    @else
+        <div class="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-8 text-center">
+            <p class="text-sm font-bold text-slate-800">Sem extração real do PEC</p>
+            <p class="mt-1 text-xs text-slate-500">Execute o processamento CVAT em Configurações. Nenhum cadastro demonstrativo será criado.</p>
         </div>
-
-        <!-- Grid de Métricas de Cadastro -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 divide-y sm:divide-y-0 md:divide-x divide-slate-100">
-            <!-- Coluna 1: Mês -->
-            <div class="p-4 sm:p-5 flex flex-col items-center justify-center text-center sm:border-r border-slate-100">
-                <span class="text-xs text-muted font-semibold mb-1">Mês</span>
-                <span class="text-2xl sm:text-3xl font-black text-ink tracking-tight font-mono">{{ $metrics->year }} / M{{ str_pad((string) $metrics->month, 2, '0', STR_PAD_LEFT) }}</span>
-            </div>
-
-            <!-- Coluna 2: Total Geral de MICI -->
-            <div class="p-4 sm:p-5 space-y-3">
-                <div>
-                    <span class="text-xs text-slate-600 font-medium block">Total Geral de MICI</span>
-                    <span class="text-xl sm:text-2xl font-black text-ink tabular-nums">{{ number_format($metrics->mici_total, 0, '', '.') }}</span>
-                </div>
-                <div class="pt-2 border-t border-slate-100">
-                    <span class="text-xs text-slate-500 block">MICI Atualizados</span>
-                    <div class="flex items-baseline gap-1.5">
-                        <span class="text-base sm:text-lg font-bold text-emerald-600 tabular-nums">{{ number_format($metrics->mici_updated, 0, '', '.') }}</span>
-                        <span class="text-xs font-bold text-emerald-600">({{ $metrics->mici_total > 0 ? number_format(($metrics->mici_updated / $metrics->mici_total) * 100, 2, ',', '.') : 0 }}%)</span>
-                    </div>
-                </div>
-                <div class="pt-2 border-t border-slate-100">
-                    <span class="text-xs text-slate-500 block">MICI Desatualizados</span>
-                    <div class="flex items-baseline gap-1.5">
-                        <span class="text-base sm:text-lg font-bold text-rose-600 tabular-nums">{{ number_format($metrics->mici_outdated, 0, '', '.') }}</span>
-                        <span class="text-xs font-bold text-rose-600">({{ $metrics->mici_total > 0 ? number_format(($metrics->mici_outdated / $metrics->mici_total) * 100, 2, ',', '.') : 0 }}%)</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Coluna 3: Total Geral de MICI Sem MICDT -->
-            <div class="p-4 sm:p-5 space-y-3 sm:border-r border-slate-100">
-                <div>
-                    <span class="text-xs text-slate-600 font-medium block">Total Geral de MICI Sem MICDT</span>
-                    <span class="text-xl sm:text-2xl font-black text-ink tabular-nums">{{ number_format($metrics->mici_without_micdt_total, 0, '', '.') }}</span>
-                </div>
-                <div class="pt-2 border-t border-slate-100">
-                    <span class="text-xs text-slate-500 block">MICI Atua. e MICDT Desat. ou Sem</span>
-                    <div class="flex items-baseline gap-1.5">
-                        <span class="text-base sm:text-lg font-bold text-emerald-600 tabular-nums">{{ number_format($metrics->mici_updated_micdt_outdated_or_none, 0, '', '.') }}</span>
-                        <span class="text-xs font-bold text-emerald-600">({{ $metrics->mici_total > 0 ? number_format(($metrics->mici_updated_micdt_outdated_or_none / $metrics->mici_total) * 100, 2, ',', '.') : 0 }}%)</span>
-                    </div>
-                </div>
-                <div class="pt-2 border-t border-slate-100">
-                    <span class="text-xs text-slate-500 block">MICI Atualizados e Sem MICDT</span>
-                    <div class="flex items-baseline gap-1.5">
-                        <span class="text-base sm:text-lg font-bold text-rose-600 tabular-nums">{{ number_format($metrics->mici_updated_without_micdt, 0, '', '.') }}</span>
-                        <span class="text-xs font-bold text-rose-600">({{ $metrics->mici_without_micdt_total > 0 ? number_format(($metrics->mici_updated_without_micdt / $metrics->mici_without_micdt_total) * 100, 2, ',', '.') : 0 }}%)</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Coluna 4: Total MICI Com MICDT -->
-            <div class="p-4 sm:p-5 space-y-3">
-                <div>
-                    <span class="text-xs text-slate-600 font-medium block">Total MICI Com MICDT</span>
-                    <div class="flex items-baseline gap-1.5">
-                        <span class="text-xl sm:text-2xl font-black text-ink tabular-nums">{{ number_format($metrics->mici_with_micdt_total, 0, '', '.') }}</span>
-                        <span class="text-xs font-bold text-slate-500">({{ $metrics->mici_total > 0 ? number_format(($metrics->mici_with_micdt_total / $metrics->mici_total) * 100, 2, ',', '.') : 0 }}%)</span>
-                    </div>
-                </div>
-                <div class="pt-2 border-t border-slate-100">
-                    <span class="text-xs text-slate-500 block">MICI e MICDT Atualizados</span>
-                    <div class="flex items-baseline gap-1.5">
-                        <span class="text-base sm:text-lg font-bold text-emerald-600 tabular-nums">{{ number_format($metrics->mici_and_micdt_updated, 0, '', '.') }}</span>
-                        <span class="text-xs font-bold text-emerald-600">({{ $metrics->mici_with_micdt_total > 0 ? number_format(($metrics->mici_and_micdt_updated / $metrics->mici_with_micdt_total) * 100, 2, ',', '.') : 0 }}%)</span>
-                    </div>
-                </div>
-                <div class="pt-2 border-t border-slate-100">
-                    <span class="text-xs text-slate-500 block">MICI e MICDT Desatualizados</span>
-                    <div class="flex items-baseline gap-1.5">
-                        <span class="text-base sm:text-lg font-bold text-rose-600 tabular-nums">{{ number_format($metrics->mici_and_micdt_outdated, 0, '', '.') }}</span>
-                        <span class="text-xs font-bold text-rose-600">({{ $metrics->mici_with_micdt_total > 0 ? number_format(($metrics->mici_and_micdt_outdated / $metrics->mici_with_micdt_total) * 100, 2, ',', '.') : 0 }}%)</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Barra Inferior: Cidadãos Vinculados / Não Vinculados -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 border-t border-slate-200 bg-slate-50/50 p-3 sm:p-4 text-xs">
-            <div class="flex items-center justify-between px-2 sm:px-3 py-1 sm:py-0">
-                <span class="font-medium text-slate-700 flex items-center gap-1.5">
-                    Cidadãos Vinculados
-                    <span class="text-[10px] text-slate-400">ℹ️</span>
-                </span>
-                <div class="flex items-baseline gap-1.5">
-                    <span class="text-base font-black text-emerald-600 tabular-nums">{{ number_format($metrics->citizens_linked, 0, '', '.') }}</span>
-                    <span class="font-bold text-emerald-600 text-[11px] sm:text-xs">({{ $metrics->mici_total > 0 ? number_format(($metrics->citizens_linked / $metrics->mici_total) * 100, 2, ',', '.') : 0 }}%)</span>
-                </div>
-            </div>
-
-            <div class="flex items-center justify-between px-2 sm:px-3 py-1 sm:py-0">
-                <span class="font-medium text-slate-700">Cidadãos Não Vinculados</span>
-                <div class="flex items-baseline gap-1.5">
-                    <span class="text-base font-black text-rose-600 tabular-nums">{{ number_format($metrics->citizens_not_linked, 0, '', '.') }}</span>
-                    <span class="font-bold text-rose-600 text-[11px] sm:text-xs">({{ $metrics->mici_total > 0 ? number_format(($metrics->citizens_not_linked / $metrics->mici_total) * 100, 2, ',', '.') : 0 }}%)</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- BOX 2: DIMENSÃO ACOMPANHAMENTO (RETRÁTIL CONFORME IMAGEM 2 COM MÉTRICAS DA NT 30/2025) -->
-    <div class="bg-white rounded-2xl sm:rounded-3xl border border-line shadow-panel overflow-hidden">
-        <!-- Cabeçalho com Botão Retrátil -->
-        <div
-            wire:click="toggleAcompanhamento"
-            class="bg-slate-50/60 py-2.5 px-4 sm:px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-line cursor-pointer hover:bg-slate-100/70 transition select-none"
-        >
-            <div class="flex items-center gap-2">
-                <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">DIMENSÃO ACOMPANHAMENTO</h2>
-                <span class="text-[10px] text-slate-400">(&ge; 2 contatos com prática de cuidado)</span>
-            </div>
-            <div class="flex flex-wrap items-center justify-between w-full sm:w-auto gap-2 sm:gap-3">
-                <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px]">
-                    <span class="text-slate-500 font-medium">Índice Ponderado (Y): <strong class="text-blue-800">{{ number_format($metrics->index_y, 2, ',', '.') }}%</strong></span>
-                    <span class="hidden sm:inline text-slate-300">·</span>
-                    <span class="text-slate-500 font-medium">Escore Oficial: <strong class="text-blue-800">{{ number_format($metrics->score_y, 2, ',', '.') }} / 7,00 pts</strong> ({{ $metrics->classification_y }})</span>
-                </div>
-                <button type="button" class="text-slate-400 hover:text-slate-600 transition ml-1" aria-label="Expandir ou recolher Dimensão Acompanhamento">
-                    <svg class="h-4 w-4 transition-transform duration-200 {{ $acompanhamentoExpanded ? 'rotate-180' : '' }}" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-
-        <!-- Matriz de Vulnerabilidade e Acompanhamento -->
-        @if ($acompanhamentoExpanded)
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 divide-y sm:divide-y-0 md:divide-x divide-slate-100 p-1">
-                <!-- Coluna 1: Sem Critério -->
-                <div class="p-4 sm:p-5 space-y-3 sm:border-r border-slate-100">
-                    <div>
-                        <span class="text-xs text-slate-600 font-medium block">Sem Critério</span>
-                        <span class="text-xl sm:text-2xl font-black text-ink tabular-nums">{{ number_format($metrics->no_criteria_total, 0, '', '.') }}</span>
-                    </div>
-                    <div class="pt-2 border-t border-slate-100">
-                        <span class="text-xs text-slate-500 block">Sem Critério Acompanhados</span>
-                        <span class="text-base sm:text-lg font-bold text-emerald-600 tabular-nums block">{{ number_format($metrics->no_criteria_accompanied, 0, '', '.') }}</span>
-                    </div>
-                    <div class="pt-2 border-t border-slate-100">
-                        <span class="text-xs text-slate-500 block">Sem Critério Não acompanhados</span>
-                        <span class="text-base sm:text-lg font-bold text-rose-600 tabular-nums block">{{ number_format($metrics->no_criteria_not_accompanied, 0, '', '.') }}</span>
-                    </div>
-                </div>
-
-                <!-- Coluna 2: Idoso ou Criança -->
-                <div class="p-4 sm:p-5 space-y-3">
-                    <div>
-                        <span class="text-xs text-slate-600 font-medium block">Idoso ou Criança</span>
-                        <span class="text-xl sm:text-2xl font-black text-ink tabular-nums">{{ number_format($metrics->elderly_or_child_total, 0, '', '.') }}</span>
-                    </div>
-                    <div class="pt-2 border-t border-slate-100">
-                        <span class="text-xs text-slate-500 block">Idoso ou Criança Acompanhados</span>
-                        <span class="text-base sm:text-lg font-bold text-emerald-600 tabular-nums block">{{ number_format($metrics->elderly_or_child_accompanied, 0, '', '.') }}</span>
-                    </div>
-                    <div class="pt-2 border-t border-slate-100">
-                        <span class="text-xs text-slate-500 block">Idoso ou Criança Não acompanhados</span>
-                        <span class="text-base sm:text-lg font-bold text-rose-600 tabular-nums block">{{ number_format($metrics->elderly_or_child_not_accompanied, 0, '', '.') }}</span>
-                    </div>
-                </div>
-
-                <!-- Coluna 3: BPC ou PBF -->
-                <div class="p-4 sm:p-5 space-y-3 sm:border-r border-slate-100">
-                    <div>
-                        <span class="text-xs text-slate-600 font-medium block">BPC ou PBF</span>
-                        <span class="text-xl sm:text-2xl font-black text-ink tabular-nums">{{ number_format($metrics->bpc_or_pbf_total, 0, '', '.') }}</span>
-                    </div>
-                    <div class="pt-2 border-t border-slate-100">
-                        <span class="text-xs text-slate-500 block">BPC ou PBF Acompanhados</span>
-                        <span class="text-base sm:text-lg font-bold text-emerald-600 tabular-nums block">{{ number_format($metrics->bpc_or_pbf_accompanied, 0, '', '.') }}</span>
-                    </div>
-                    <div class="pt-2 border-t border-slate-100">
-                        <span class="text-xs text-slate-500 block">BPC ou PBF Não acompanhados</span>
-                        <span class="text-base sm:text-lg font-bold text-rose-600 tabular-nums block">{{ number_format($metrics->bpc_or_pbf_not_accompanied, 0, '', '.') }}</span>
-                    </div>
-                </div>
-
-                <!-- Coluna 4: Idoso ou Criança + BPC ou PBF -->
-                <div class="p-4 sm:p-5 space-y-3">
-                    <div>
-                        <span class="text-xs text-slate-600 font-medium block">Idoso ou Criança + BPC ou PBF</span>
-                        <span class="text-xl sm:text-2xl font-black text-ink tabular-nums">{{ number_format($metrics->elderly_child_and_benefit_total, 0, '', '.') }}</span>
-                    </div>
-                    <div class="pt-2 border-t border-slate-100">
-                        <span class="text-xs text-slate-500 block">ID/CR + BPC/PBF Acompanhados</span>
-                        <span class="text-base sm:text-lg font-bold text-emerald-600 tabular-nums block">{{ number_format($metrics->elderly_child_and_benefit_accompanied, 0, '', '.') }}</span>
-                    </div>
-                    <div class="pt-2 border-t border-slate-100">
-                        <span class="text-xs text-slate-500 block">ID/CR + BPC/PBF Não acompanhados</span>
-                        <span class="text-base sm:text-lg font-bold text-rose-600 tabular-nums block">{{ number_format($metrics->elderly_child_and_benefit_not_accompanied, 0, '', '.') }}</span>
-                    </div>
-                </div>
-            </div>
-        @endif
-    </div>
+    @endif
 
     <!-- SEÇÃO DE FILTROS RÁPIDOS (EXATAMENTE COMO NAS IMAGENS 2 E 3) -->
     <div class="bg-white rounded-2xl sm:rounded-3xl border border-line shadow-panel p-4 sm:p-5 space-y-3 sm:space-y-4">
@@ -639,8 +367,8 @@
 
                             <!-- MICI (ATUALIZAÇÃO) -->
                             <td class="py-3 px-3 text-center">
-                                @if ($c->mici_updated && $c->mici_date)
-                                    <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500 text-white shadow-2xs">
+                                @if ($c->mici_date)
+                                    <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold {{ $c->mici_updated ? 'bg-emerald-500' : 'bg-amber-600' }} text-white shadow-2xs" title="{{ $c->mici_updated ? 'Atualizado' : 'Fora da janela de 24 meses' }}">
                                         {{ $c->mici_date->format('d/m/Y') }}
                                     </span>
                                 @else
@@ -653,7 +381,7 @@
                             <!-- MICDT (ATUALIZAÇÃO) -->
                             <td class="py-3 px-3 text-center">
                                 @if ($c->has_micdt && $c->micdt_date)
-                                    <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500 text-white shadow-2xs">
+                                    <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold {{ $c->micdt_updated ? 'bg-emerald-500' : 'bg-amber-600' }} text-white shadow-2xs" title="{{ $c->micdt_updated ? 'Atualizado' : 'Fora da janela de 24 meses' }}">
                                         {{ $c->micdt_date->format('d/m/Y') }}
                                     </span>
                                 @else
@@ -674,7 +402,7 @@
                                         Criança
                                     </span>
                                 @else
-                                    <span class="text-slate-500 text-[11px]">Sem Critério</span>
+                                    <span class="text-slate-500 text-[11px]">Sem critério de idade</span>
                                 @endif
                             </td>
 
@@ -687,7 +415,7 @@
                                 @elseif ($c->social_benefit === 'bpc_pbf')
                                     <span class="text-purple-800 bg-purple-50 px-2 py-0.5 rounded">BPC+PBF</span>
                                 @else
-                                    <span class="text-slate-400">---</span>
+                                    <span class="text-slate-500">Não aferível</span>
                                 @endif
                             </td>
 
@@ -798,6 +526,7 @@
                         </select>
                     </div>
 
+                    @if ($metrics?->benefit_data_available)
                     <!-- Benefício Social -->
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Benefício Social</label>
@@ -809,6 +538,7 @@
                             <option value="nenhum">Sem Benefício Registrado</option>
                         </select>
                     </div>
+                    @endif
 
                     <!-- Status de Acompanhamento -->
                     <div>
@@ -923,8 +653,8 @@
                         <span class="font-bold text-teal-900 block text-xs uppercase">Auditoria Dimensão Cadastro</span>
                         <div class="flex items-center justify-between">
                             <span class="text-slate-600">Cadastro Individual (MICI):</span>
-                            @if ($selectedCitizen->mici_updated && $selectedCitizen->mici_date)
-                                <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">Atualizado ({{ $selectedCitizen->mici_date->format('d/m/Y') }})</span>
+                            @if ($selectedCitizen->mici_date)
+                                <span class="px-2 py-0.5 rounded {{ $selectedCitizen->mici_updated ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }} font-bold">{{ $selectedCitizen->mici_updated ? 'Atualizado' : 'Desatualizado' }} ({{ $selectedCitizen->mici_date->format('d/m/Y') }})</span>
                             @else
                                 <span class="px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-bold">Sem MICI</span>
                             @endif
@@ -932,7 +662,7 @@
                         <div class="flex items-center justify-between">
                             <span class="text-slate-600">Cadastro Domiciliar (MICDT):</span>
                             @if ($selectedCitizen->has_micdt && $selectedCitizen->micdt_date)
-                                <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">Atualizado ({{ $selectedCitizen->micdt_date->format('d/m/Y') }})</span>
+                                <span class="px-2 py-0.5 rounded {{ $selectedCitizen->micdt_updated ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }} font-bold">{{ $selectedCitizen->micdt_updated ? 'Atualizado' : 'Desatualizado' }} ({{ $selectedCitizen->micdt_date->format('d/m/Y') }})</span>
                             @else
                                 <span class="px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-bold">Sem MICDT</span>
                             @endif
@@ -954,7 +684,7 @@
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="text-slate-600">Benefício Social:</span>
-                            <span class="font-bold uppercase text-slate-800">{{ $selectedCitizen->social_benefit }}</span>
+                            <span class="font-bold text-slate-800">{{ $selectedCitizen->social_benefit === 'nao_informado' ? 'Não identificado nas fontes disponíveis' : mb_strtoupper($selectedCitizen->social_benefit) }}</span>
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="text-slate-600">Status Acompanhamento:</span>
@@ -962,6 +692,7 @@
                                 {{ $selectedCitizen->is_accompanied ? 'Acompanhado(a)' : 'Não Acompanhado(a)' }}
                             </span>
                         </div>
+                        <p class="text-[11px] text-slate-600">{{ $selectedCitizen->total_contacts }} contatos distintos em 12 meses; {{ $selectedCitizen->care_contacts }} práticas de cuidado.</p>
                     </div>
                 </div>
 

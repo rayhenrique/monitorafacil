@@ -6,9 +6,9 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.23.6';
+    public const CURRENT_VERSION = 'v1.23.7';
 
-    public const CURRENT_RELEASE_DATE = '19/09/2026';
+    public const CURRENT_RELEASE_DATE = '21/09/2026';
 
     /**
      * Retorna a versão mais recente do sistema.
@@ -61,9 +61,23 @@ class VersionService
     {
         return [
             [
+                'version' => 'v1.23.7',
+                'date' => '21/09/2026',
+                'badge' => 'Versão Atual',
+                'title' => 'Vínculo e Acompanhamento com dados reais do PEC',
+                'summary' => 'A relação nominal passa a identificar beneficiários PBF pela importação finalizada no PEC. Resultados demonstrativos deixam de aparecer como aferição e as dimensões ainda incompletas ficam explicitamente indisponíveis.',
+                'highlights' => [
+                    ['type' => 'melhoria', 'text' => 'Cadastro, vínculo e contatos são extraídos em leitura do PEC e persistidos no MySQL local, com vigência e proveniência registradas.'],
+                    ['type' => 'melhoria', 'text' => 'Beneficiários PBF identificados por CPF ou CNS aparecem na relação nominal e podem ser filtrados.'],
+                    ['type' => 'correcao', 'text' => 'Sem fonte individual de BPC e histórico mensal completo, o índice Y, a classificação final e o repasse permanecem não aferíveis.'],
+                    ['type' => 'melhoria', 'text' => 'Regras das NT 30/2025 e 8/2026 cobertas por testes e dados demonstrativos de CVAT removidos do resultado exibido.'],
+                    ['type' => 'melhoria', 'text' => 'Processamento CVAT agendado em fila assíncrona, com prazo e worker ajustados para a extração do PEC.'],
+                ],
+            ],
+            [
                 'version' => 'v1.23.6',
                 'date' => '19/09/2026',
-                'badge' => 'Versão Atual',
+                'badge' => 'Versão Anterior',
                 'title' => 'Filtro de Equipes Homologadas eSF/eAP',
                 'summary' => 'A listagem mensal do CVAT passa a considerar exclusivamente INEs homologados como eSF tipo 70 ou eAP tipo 76, impedindo a inclusão de equipes de saúde bucal, eMulti e outros tipos.',
                 'highlights' => [

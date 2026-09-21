@@ -3,10 +3,10 @@
 namespace App\Livewire\Settings;
 
 use App\Enums\TeamType;
+use App\Jobs\SyncCvatNominalJob;
 use App\Models\ConsolidationRegistration;
 use App\Models\ConsolidationTeam;
 use App\Models\SyncLog;
-use App\Services\CvatNominalDwService;
 use App\Services\EsusDataProcessingService;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
@@ -56,89 +56,26 @@ class DataProcessing extends Component
         $this->executeProcessing($service, 'c3');
     }
 
-    public function processCvat(CvatNominalDwService $service): void
+    public function processCvat(): void
     {
         $this->selectedScope = 'cvat';
-        $this->isProcessing = true;
-        $this->processMessage = null;
-        $this->processStatus = null;
-        $this->updateProgress(15, 'Conectando ao e-SUS PEC e verificando tabelas do Vínculo Territorial...');
+        $this->tablesReport = [];
+        $this->progressPercent = 0;
+        if (config('queue.default') === 'sync') {
+            $this->processStatus = 'error';
+            $this->processMessage = 'A fila precisa ser assíncrona para extrair o CVAT fora da requisição web. Configure QUEUE_CONNECTION=database e mantenha o worker ativo.';
+
+            return;
+        }
 
         try {
-            $startTime = microtime(true);
-            $this->updateProgress(20, 'Conectando ao banco PostgreSQL e-SUS PEC e verificando esquema...');
-
-            $result = $service->syncFromPec(
-                null,
-                (int) now()->year,
-                min(12, (int) now()->month),
-                function (int $percent, string $step): void {
-                    $this->updateProgress($percent, $step);
-                }
-            );
-
-            $executionTimeMs = round((microtime(true) - $startTime) * 1000, 2);
-            $this->executionTimeMs = $executionTimeMs;
-            $this->processStatus = $result['success'] ? 'success' : 'error';
-
-            $totalMici = number_format($result['metrics']->mici_total, 0, ',', '.');
-            $miciAtualizados = number_format($result['metrics']->mici_updated, 0, ',', '.');
-            $comMicdt = number_format($result['metrics']->mici_with_micdt_total, 0, ',', '.');
-            $vinculados = number_format($result['metrics']->citizens_linked, 0, ',', '.');
-            $totalNominal = number_format($result['nominal_citizens_count'], 0, ',', '.');
-
-            $sourceBadge = ($result['is_live'] ?? false)
-                ? 'Base Oficial e-SUS PEC (Extração Real)'
-                : 'Ambiente Local (Aguardando Deploy na VPS para Extração do PEC)';
-
-            $this->processMessage = "Processamento do módulo Vínculo e Acompanhamento Territorial concluído!\n"
-                . "• Origem dos Dados: {$sourceBadge}\n"
-                . "• Total Geral de MICI: {$totalMici} ({$miciAtualizados} atualizados)\n"
-                . "• Total com MICDT: {$comMicdt}\n"
-                . "• Cidadãos Vinculados: {$vinculados}\n"
-                . "• Relação Nominal da Busca Ativa: {$totalNominal} cidadãos sincronizados ({$executionTimeMs} ms).\n\n"
-                . $result['message'];
-
-            $this->tablesReport = [
-                'tb_acomp_cidadaos_vinculados' => [
-                    'name' => 'tb_acomp_cidadaos_vinculados',
-                    'description' => 'Cidadãos Vinculados e Território (DW e-SUS PEC)',
-                    'status' => ($result['is_live'] ?? false) ? 'Concluído' : 'Simulado Local',
-                    'rows' => (int) $result['nominal_citizens_count'],
-                    'message' => ($result['is_live'] ?? false)
-                        ? "Extração real de {$totalNominal} cidadãos realizada com sucesso."
-                        : 'Acesso ao PostgreSQL restrito à rede de produção.',
-                ],
-                'tb_fat_cad_individual' => [
-                    'name' => 'tb_fat_cad_individual',
-                    'description' => 'Fichas de Cadastro Individual (MICI)',
-                    'status' => 'Concluído',
-                    'rows' => (int) $result['metrics']->mici_total,
-                    'message' => "MICI atualizados: {$miciAtualizados}",
-                ],
-                'tb_fat_cad_domiciliar' => [
-                    'name' => 'tb_fat_cad_domiciliar',
-                    'description' => 'Fichas de Cadastro Domiciliar e Territorial (MICDT)',
-                    'status' => 'Concluído',
-                    'rows' => (int) $result['metrics']->mici_with_micdt_total,
-                    'message' => "Cadastros com domicílio: {$comMicdt}",
-                ],
-                'cvat_nominal_citizens' => [
-                    'name' => 'cvat_nominal_citizens',
-                    'description' => 'Relação Nominal e Busca Ativa (Monitora Fácil)',
-                    'status' => 'Atualizado',
-                    'rows' => (int) $result['nominal_citizens_count'],
-                    'message' => 'Base local sincronizada para busca e acompanhamento territorial',
-                ],
-            ];
-
-            $this->updateProgress(100, 'Processamento do Vínculo Territorial concluído com sucesso!');
+            SyncCvatNominalJob::dispatch((int) now()->year, (int) now()->month);
+            $this->processStatus = 'success';
+            $this->processMessage = 'Extração CVAT agendada. Os resultados aparecerão na Relação Nominal após o processamento pelo worker da fila.';
         } catch (Throwable $e) {
+            report($e);
             $this->processStatus = 'error';
-            $this->processMessage = 'Exceção ao processar Vínculo e Acompanhamento: '.$e->getMessage();
-            $this->updateProgress(100, 'Falha durante o processamento do Vínculo e Acompanhamento.');
-        } finally {
-            $this->isProcessing = false;
+            $this->processMessage = 'Não foi possível agendar a extração CVAT. Verifique a fila de processamento.';
         }
     }
 
@@ -151,6 +88,12 @@ class DataProcessing extends Component
     public function processNow(EsusDataProcessingService $service, ?string $scope = null): void
     {
         $targetScope = $scope ?: $this->selectedScope;
+        if ($targetScope === 'cvat') {
+            $this->processCvat();
+
+            return;
+        }
+
         $this->executeProcessing($service, $targetScope);
     }
 

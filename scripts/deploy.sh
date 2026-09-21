@@ -14,13 +14,13 @@ else
     cd "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 fi
 
-echo "==> [1/9] Atualizando repositório a partir da branch main..."
+echo "==> [1/11] Atualizando repositório a partir da branch main..."
 git pull origin main
 
-echo "==> [2/9] Instalando dependências de produção do Composer..."
+echo "==> [2/11] Instalando dependências de produção do Composer..."
 composer install --no-dev --optimize-autoloader
 
-echo "==> [3/9] Compilando assets do frontend (Vite)..."
+echo "==> [3/11] Compilando assets do frontend (Vite)..."
 npm run build
 
 # Detecção do binário PHP (preferência para php8.5 do CloudPanel)
@@ -30,25 +30,32 @@ else
     PHP_BIN="php"
 fi
 
-echo "==> [4/10] Executando migrações do banco de dados..."
+echo "==> [4/11] Executando migrações do banco de dados..."
 $PHP_BIN artisan migrate --force
 
-echo "==> [5/10] Sincronizando dados nominais do PEC (CVAT Relação Nominal)..."
+echo "==> [5/11] Sincronizando dados nominais do PEC (CVAT Relação Nominal)..."
 $PHP_BIN artisan cvat:sync-nominal
 
-echo "==> [6/10] Publicando assets do Livewire..."
+echo "==> [6/11] Publicando assets do Livewire..."
 $PHP_BIN artisan livewire:publish --assets
 
-echo "==> [7/10] Limpando caches da aplicação..."
+echo "==> [7/11] Limpando caches da aplicação..."
 $PHP_BIN artisan optimize:clear
 
-echo "==> [8/10] Otimizando cache de configuração..."
+echo "==> [8/11] Otimizando cache de configuração..."
 $PHP_BIN artisan config:cache
 
-echo "==> [9/10] Otimizando cache de rotas..."
+echo "==> [9/11] Reiniciando workers da fila com a versão nova..."
+$PHP_BIN artisan queue:restart
+if command -v systemctl &> /dev/null && ! systemctl is-active --quiet monitorafacil-queue.service; then
+    echo "ATENÇÃO: monitorafacil-queue.service não está ativo. O botão CVAT agenda jobs, mas eles precisam de um worker para executar." >&2
+    echo "Veja scripts/monitorafacil-queue.service.example e as instruções no README.md." >&2
+fi
+
+echo "==> [10/11] Otimizando cache de rotas..."
 $PHP_BIN artisan route:cache
 
-echo "==> [10/10] Otimizando cache de views..."
+echo "==> [11/11] Otimizando cache de views..."
 $PHP_BIN artisan view:cache
 
 echo "=============================================================================="

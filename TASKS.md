@@ -314,3 +314,17 @@
   - [x] Fallback local limitado a snapshots MySQL individuais com tipo `70/76` e INE preenchido.
   - [x] Validação da relação municipal com exatamente 19 equipes eSF homologadas.
   - [x] Teste automatizado de regressão para tipos de equipe não elegíveis.
+
+## Reavaliação CVAT pelas NT 30/2025 e 8/2026 (21/09/2026)
+
+Os checklists históricos das fases 32 a 38 registram a implementação da época; suas afirmações de escore oficial e consolidação completa foram superadas por esta auditoria.
+
+- [x] Remover a geração e a exibição automática de cadastros e métricas demonstrativas.
+- [x] Marcar a proveniência da extração e impedir que avaliações legadas ou Q3/2026 demonstrativas apareçam como resultado real.
+- [x] Mapear o esquema real do PEC, extrair a competência corrente em leitura PostgreSQL e validar datas MICI/MICDT por amostragem.
+- [x] Extrair contatos e práticas de cuidado das tabelas por cidadão; aplicar janelas de 24 e 12 meses e vínculo a equipes CNES 70/76.
+- [x] Implementar as fórmulas determinísticas das duas NT com testes de limites e média quadrimestral.
+- [x] Ler a última importação PBF finalizada do PEC, cruzar CPF/CNS e mostrar a quantidade confirmada com vigência; manter BPC e classificação como não aferíveis.
+- [x] Processamento CVAT via fila assíncrona com prazo de reentrega superior ao timeout; deploy reinicia workers e verifica o serviço.
+- [x] Mostrar ausência explícita de BPC, bônus e classificação, sem tratar ausência de dado como zero.
+- [ ] Obter BPC/PBF, satisfação e quatro snapshots mensais completos, validar com Siaps e habilitar classificação quadrimestral.

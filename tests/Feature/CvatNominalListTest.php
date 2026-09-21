@@ -2,13 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\SyncCvatNominalJob;
+use App\Livewire\Settings\DataProcessing;
 use App\Livewire\TerritorialBonding\NominalList;
 use App\Models\CvatNominalCitizen;
 use App\Models\CvatNominalMetric;
 use App\Models\User;
 use App\Services\CvatNominalDwService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Queue;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -16,157 +18,143 @@ class CvatNominalListTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function createUser(): User
-    {
-        return User::query()->create([
-            'name' => 'Gestor Municipal Teste',
-            'email' => 'gestor-nominal@monitorafacil.com.br',
-            'password' => Hash::make('password123'),
-        ]);
-    }
-
     public function test_guest_is_redirected_to_login(): void
     {
-        $response = $this->get('/vinculo-e-acompanhamento/relacao-nominal');
-        $response->assertRedirect('/login');
+        $this->get('/vinculo-e-acompanhamento/relacao-nominal')->assertRedirect('/login');
     }
 
-    public function test_authenticated_user_can_access_nominal_list_page(): void
+    public function test_page_never_seeds_or_displays_legacy_demo_records(): void
     {
-        $user = $this->createUser();
-        $this->actingAs($user);
+        CvatNominalCitizen::query()->create([
+            'cidadao_pec_id' => 1,
+            'name' => 'PESSOA DEMONSTRATIVA',
+            'year' => 2026,
+            'month' => 12,
+        ]);
+        CvatNominalMetric::query()->create([
+            'year' => 2026,
+            'month' => 12,
+            'mici_total' => 36951,
+        ]);
 
-        // Garante seed dos dados
-        app(CvatNominalDwService::class)->syncFromPec();
+        $response = $this->actingAs(User::factory()->create())->get('/vinculo-e-acompanhamento/relacao-nominal');
 
-        $response = $this->get('/vinculo-e-acompanhamento/relacao-nominal');
-
-        $response->assertOk();
-        $response->assertSee('Monitoramento de Vínculo e Acompanhamento - Relação Nominal');
-        $response->assertSee('DIMENSÃO CADASTRO');
-        $response->assertSee('DIMENSÃO ACOMPANHAMENTO');
-        $response->assertSee('36.951');
-        $response->assertSee('35.401');
-        $response->assertSee('36.751');
-        $response->assertSee('2.047');
+        $response->assertOk()->assertSee('Sem extração real do PEC')->assertDontSee('PESSOA DEMONSTRATIVA')->assertDontSee('36.951');
+        $this->assertSame(1, CvatNominalCitizen::query()->count());
+        $this->assertNull(app(CvatNominalDwService::class)->getMetrics());
     }
 
-    public function test_nominal_list_livewire_component_renders_metrics_and_citizens(): void
+    public function test_real_extraction_displays_counts_without_invented_score(): void
     {
-        $user = $this->createUser();
-        $this->actingAs($user);
+        CvatNominalMetric::query()->create([
+            'source' => CvatNominalDwService::SOURCE,
+            'year' => 2026,
+            'month' => 9,
+            'reference_date' => '2026-09-21',
+            'mici_total' => 1,
+            'mici_updated' => 1,
+            'mici_and_micdt_updated' => 1,
+            'citizens_linked' => 1,
+            'benefit_data_available' => false,
+            'pbf_import_id' => 2,
+            'pbf_vigencia' => '202602',
+            'pbf_confirmed_total' => 1,
+        ]);
+        $citizen = CvatNominalCitizen::query()->create([
+            'source' => CvatNominalDwService::SOURCE,
+            'cidadao_pec_id' => 2,
+            'name' => 'PESSOA REAL TESTE',
+            'year' => 2026,
+            'month' => 9,
+            'registration_eligible' => true,
+            'mici_updated' => true,
+            'has_micdt' => true,
+            'micdt_updated' => true,
+            'is_linked' => true,
+            'is_accompanied' => true,
+            'social_benefit' => 'pbf',
+        ]);
+        CvatNominalCitizen::query()->create([
+            'source' => CvatNominalDwService::SOURCE,
+            'cidadao_pec_id' => 3,
+            'name' => 'PESSOA EXCLUÍDA TESTE',
+            'year' => 2026,
+            'month' => 9,
+            'registration_eligible' => false,
+        ]);
 
-        app(CvatNominalDwService::class)->syncFromPec();
+        $user = User::factory()->create();
+        $this->actingAs($user)->get('/vinculo-e-acompanhamento/relacao-nominal')
+            ->assertOk()
+            ->assertSee('PESSOA REAL TESTE')
+            ->assertDontSee('PESSOA EXCLUÍDA TESTE')
+            ->assertSee('PBF identificado no PEC')
+            ->assertSee('202602')
+            ->assertSee('índice Y')
+            ->assertDontSee('Aferição Oficial');
 
-        $firstCitizen = CvatNominalCitizen::first();
-
-        Livewire::test(NominalList::class)
-            ->assertSee('36.951')
-            ->assertSee('20.550')
-            ->assertSee('7.617')
-            ->assertSee('7.688')
-            ->assertSee('1.096')
-            ->assertSee($firstCitizen->name)
-            ->assertSet('filterCns', '')
-            ->assertSet('filterCpf', '')
-            ->assertSet('filterName', '');
-    }
-
-    public function test_nominal_list_filters_by_citizen_name(): void
-    {
-        $user = $this->createUser();
-        $this->actingAs($user);
-
-        app(CvatNominalDwService::class)->syncFromPec();
-
-        Livewire::test(NominalList::class)
-            ->set('filterName', 'ABEL ANDREZA')
-            ->assertSee('ABEL ANDREZA')
-            ->set('filterName', 'NOME_INEXISTENTE_XYZ')
-            ->assertSee('Nenhum cidadão encontrado');
-    }
-
-    public function test_nominal_list_filters_by_raca_cor(): void
-    {
-        $user = $this->createUser();
-        $this->actingAs($user);
-
-        app(CvatNominalDwService::class)->syncFromPec();
-
-        Livewire::test(NominalList::class)
-            ->set('filterRaceColor', 'Amarela')
-            ->assertSee('Amarela');
-    }
-
-    public function test_nominal_list_modal_citizen_details(): void
-    {
-        $user = $this->createUser();
-        $this->actingAs($user);
-
-        app(CvatNominalDwService::class)->syncFromPec();
-
-        $citizen = CvatNominalCitizen::first();
-
-        Livewire::test(NominalList::class)
-            ->assertSet('detailsModalOpen', false)
+        Livewire::actingAs($user)->test(NominalList::class)
+            ->set('filterName', 'NOME INEXISTENTE')
+            ->assertSee('Nenhum cidadão encontrado')
+            ->set('filterName', '')
             ->call('openDetails', $citizen->id)
             ->assertSet('detailsModalOpen', true)
-            ->assertSee($citizen->name)
             ->call('closeDetails')
             ->assertSet('detailsModalOpen', false);
     }
 
-    public function test_nominal_list_modal_advanced_search(): void
+    public function test_past_month_cannot_be_reconstructed_from_current_pec_view(): void
     {
-        $user = $this->createUser();
-        $this->actingAs($user);
-
-        Livewire::test(NominalList::class)
-            ->assertSet('advancedModalOpen', false)
-            ->call('openAdvancedModal')
-            ->assertSet('advancedModalOpen', true)
-            ->assertSee('Busca Avançada')
-            ->call('closeAdvancedModal')
-            ->assertSet('advancedModalOpen', false);
+        $result = app(CvatNominalDwService::class)->syncFromPec(null, 2025, 12);
+        $this->assertFalse($result['success']);
+        $this->assertNull($result['metrics']);
+        $this->assertSame(0, CvatNominalCitizen::query()->count());
     }
 
-    public function test_cvat_nominal_metric_calculates_scores_according_to_nt_30_2025(): void
+    public function test_settings_action_schedules_cli_worker_instead_of_querying_pec_in_web_request(): void
     {
-        $metric = new CvatNominalMetric([
-            'year' => 2026,
-            'month' => 9,
-            'mici_total' => 36951,
-            'mici_updated' => 35401,
-            'mici_outdated' => 1550,
-            'mici_updated_micdt_outdated_or_none' => 14851,
-            'mici_and_micdt_updated' => 20550,
-            'no_criteria_accompanied' => 2047,
-            'elderly_or_child_accompanied' => 3804,
-            'bpc_or_pbf_accompanied' => 4565,
-            'elderly_child_and_benefit_accompanied' => 1096,
-        ]);
-
-        $this->assertEquals(47500, $metric->target_population);
-
-        // Teste de cálculo de X e Y
-        $this->assertGreaterThan(50.0, $metric->index_x);
-        $this->assertGreaterThan(0.0, $metric->index_y);
-        $this->assertContains($metric->classification_x, ['Ótimo', 'Bom', 'Suficiente', 'Regular']);
-        $this->assertContains($metric->classification_y, ['Ótimo', 'Bom', 'Suficiente', 'Regular']);
-        $this->assertContains(mb_strtoupper($metric->final_classification), ['ÓTIMO', 'BOM', 'SUFICIENTE', 'REGULAR']);
-        $this->assertLessThanOrEqual(10.0, $metric->final_score);
-    }
-
-    public function test_data_processing_has_exclusive_cvat_action_and_executes(): void
-    {
-        $user = $this->createUser();
-        $this->actingAs($user);
-
-        Livewire::test(\App\Livewire\Settings\DataProcessing::class)
-            ->assertSee('CVAT')
+        config()->set('queue.default', 'database');
+        Queue::fake();
+        Livewire::actingAs(User::factory()->create())
+            ->test(DataProcessing::class)
             ->call('processCvat')
             ->assertSet('processStatus', 'success')
-            ->assertSet('selectedScope', 'cvat')
-            ->assertSee('Processamento do módulo Vínculo e Acompanhamento Territorial concluído');
+            ->assertSee('Extração CVAT agendada');
+
+        Queue::assertPushed(SyncCvatNominalJob::class, 1);
+    }
+
+    public function test_cvat_action_rejects_synchronous_queue(): void
+    {
+        config()->set('queue.default', 'sync');
+        Queue::fake();
+
+        Livewire::actingAs(User::factory()->create())
+            ->test(DataProcessing::class)
+            ->call('processCvat')
+            ->assertSet('processStatus', 'error')
+            ->assertSee('fila precisa ser assíncrona');
+
+        Queue::assertNothingPushed();
+    }
+
+    public function test_generic_process_now_routes_cvat_to_the_queue(): void
+    {
+        config()->set('queue.default', 'database');
+        Queue::fake();
+
+        Livewire::actingAs(User::factory()->create())
+            ->test(DataProcessing::class)
+            ->call('processNow', 'cvat')
+            ->assertSet('processStatus', 'success');
+
+        Queue::assertPushed(SyncCvatNominalJob::class, 1);
+    }
+
+    public function test_queue_retry_interval_exceeds_cvat_job_timeout(): void
+    {
+        $job = new SyncCvatNominalJob(2026, 9);
+
+        $this->assertGreaterThan($job->timeout, config('queue.connections.database.retry_after'));
     }
 }

@@ -27,7 +27,7 @@
                             @endif
                         </span>
                     @else
-                        <span>Sem consolidação nominal disponível para o período selecionado</span>
+                        <span>{{ $nominalPeriod ? 'Relação nominal extraída; classificação não aferível nesta competência' : 'Sem extração nominal disponível para o período selecionado' }}</span>
                     @endif
                 </div>
             </div>
@@ -103,9 +103,9 @@
             </div>
         @else
             <div class="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-8 text-center">
-                <p class="text-sm font-bold text-slate-800">Sem dados reais de equipes para esta competência</p>
+                <p class="text-sm font-bold text-slate-800">{{ $nominalPeriod ? 'Classificação das equipes não aferível' : 'Sem dados reais de equipes para esta competência' }}</p>
                 <p class="mx-auto mt-1 max-w-2xl text-xs leading-relaxed text-slate-500">
-                    Processe Vínculo e Acompanhamento em Configurações para consolidar a relação nominal do PEC no banco local. Nenhum valor demonstrativo será exibido enquanto a consolidação não existir.
+                    {{ $nominalPeriod ? 'O PEC forneceu a relação nominal e a importação PBF pode identificar beneficiários, mas ainda falta a situação BPC para ponderar a NT nº 30/2025. A classificação quadrimestral também requer quatro competências mensais.' : 'Processe Vínculo e Acompanhamento em Configurações para extrair a relação nominal do PEC. Nenhum valor demonstrativo será exibido.' }}
                 </p>
             </div>
         @endif

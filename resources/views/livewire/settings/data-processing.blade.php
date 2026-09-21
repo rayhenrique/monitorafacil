@@ -94,7 +94,6 @@
                 <button
                     type="button"
                     wire:click="processCvat"
-                    x-on:click="startProgress('o Vínculo e Acompanhamento Territorial (CVAT)')"
                     wire:loading.attr="disabled"
                     class="group relative flex flex-col justify-between p-4 sm:p-4.5 rounded-2xl border transition-all duration-200 text-left cursor-pointer bg-gradient-to-b from-emerald-50/80 to-white border-emerald-300/80 hover:border-emerald-500 hover:shadow-md hover:shadow-emerald-950/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 disabled:opacity-60"
                 >
@@ -122,7 +121,7 @@
 
                     <div class="mt-4 pt-3 border-t border-emerald-100 flex items-center justify-between text-xs font-semibold text-emerald-800">
                         <span wire:loading.remove wire:target="processCvat" class="inline-flex items-center gap-1">
-                            <span>Processar</span>
+                            <span>Agendar extração</span>
                             <svg class="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                             </svg>
@@ -132,7 +131,7 @@
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            <span>Extraindo...</span>
+                            <span>Agendando...</span>
                         </span>
                     </div>
                 </button>
@@ -299,7 +298,7 @@
                                 Processamento Geral
                             </h3>
                             <p class="text-[11px] text-slate-300 mt-0.5 leading-normal">
-                                Todos os Indicadores & Dados
+                                Indicadores C1, C2 e C3 · CVAT separado
                             </p>
                         </div>
                     </div>
@@ -331,7 +330,7 @@
                 </svg>
             </div>
             <div class="text-teal-950 leading-relaxed">
-                <strong class="font-bold text-teal-900">Rotina Noturna Agendada Automática:</strong> O processamento automatizado no servidor executa diariamente às <strong>03:30 (horário de Brasília)</strong> sempre no modo geral completo (<span class="font-mono font-bold bg-teal-100/70 px-1.5 py-0.5 rounded text-[11px]">--scope=all</span>), auditando e consolidando todos os indicadores clínicos e territoriais (MICI e MICDT).
+                <strong class="font-bold text-teal-900">Rotina Noturna Agendada Automática:</strong> O processamento automatizado no servidor executa diariamente às <strong>03:30 (horário de Brasília)</strong> no escopo <span class="font-mono font-bold bg-teal-100/70 px-1.5 py-0.5 rounded text-[11px]">--scope=all</span> para C1, C2 e C3. A extração nominal CVAT é agendada separadamente pelo card acima e depende do worker da fila.
             </div>
         </div>
 

@@ -336,14 +336,13 @@ php artisan admin:reset-password
 
 ## ⏰ Rotinas de Sincronização e Agendamento
 
-O comando `esus:sync-snapshot` está configurado em [`routes/console.php`](file:///c:/Users/rayhe/Downloads/monitorafacil/routes/console.php) para rodar automaticamente todas as madrugadas às **02:00**, no fuso horário configurado no município (`America/Maceio`):
+O comando `esus:sync-snapshot` está configurado em `routes/console.php` para rodar automaticamente às **03:00** e `esus:process-data --scope=all` às **03:30**, no fuso horário configurado no município (`America/Maceio`). O escopo geral cobre C1, C2 e C3; a relação nominal CVAT é extraída separadamente.
 
 ```php
 Schedule::command('esus:sync-snapshot')
-    ->dailyAt('02:00')
-    ->timezone(config('esus.schedule_timezone', 'America/Maceio'))
-    ->withoutOverlapping()
-    ->onOneServer();
+    ->dailyAt('03:00')
+    ->timezone(config('esus.schedule_timezone'))
+    ->withoutOverlapping();
 ```
 
 ### Em ambiente de Desenvolvimento:
@@ -359,6 +358,17 @@ Adicione a seguinte entrada ao `crontab -e`:
 ```cron
 * * * * * cd /caminho/para/o/monitorafacil && php artisan schedule:run >> /dev/null 2>&1
 ```
+
+O botão **CVAT > Agendar extração** em *Configurações > Processar Dados* envia um job para a fila `database`; ele não consulta o PEC durante a requisição web. No servidor, mantenha um worker ativo. Confira o usuário do serviço, o diretório e o caminho do PHP 8.5 no modelo `scripts/monitorafacil-queue.service.example` antes de instalá-lo:
+
+```bash
+sudo cp scripts/monitorafacil-queue.service.example /etc/systemd/system/monitorafacil-queue.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now monitorafacil-queue.service
+sudo systemctl status monitorafacil-queue.service
+```
+
+Use `QUEUE_CONNECTION=database` e `DB_QUEUE_RETRY_AFTER=1200` no `.env`; o prazo de reentrega precisa superar os 900 segundos permitidos ao job. O `scripts/deploy.sh` executa a extração CVAT após as migrações, sinaliza os workers para reinício e avisa se o serviço não estiver ativo. A migração e a extração precisam alcançar o PEC a partir do servidor.
 
 ---
 
