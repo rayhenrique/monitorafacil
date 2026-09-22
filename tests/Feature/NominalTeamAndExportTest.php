@@ -148,4 +148,26 @@ class NominalTeamAndExportTest extends TestCase
         $component->call('exportPdf')
             ->assertFileDownloaded();
     }
+
+    public function test_nominal_list_advanced_modal_renders_with_team_selected(): void
+    {
+        $user = User::factory()->create();
+
+        Livewire::actingAs($user)
+            ->test(NominalList::class)
+            ->set('selectedTeam', '0000111111')
+            ->call('openAdvancedModal')
+            ->assertSet('advancedModalOpen', true)
+            ->assertSee('Busca Avançada · Vínculo e Território')
+            ->assertSee('Vulnerabilidade (Faixa Etária)');
+    }
+
+    public function test_nominal_list_page_with_equipe_query_param(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get('/vinculo-e-acompanhamento/relacao-nominal?equipe=0000111111');
+        $response->assertOk();
+        $response->assertSee('ESF ALFA');
+    }
 }

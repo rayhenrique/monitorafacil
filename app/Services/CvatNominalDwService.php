@@ -74,6 +74,12 @@ class CvatNominalDwService
         $counts->reference_date = $metric->reference_date;
         $counts->year = $metric->year;
         $counts->month = $metric->month;
+        $counts->source = $metric->source;
+        $counts->benefit_data_available = (bool) ($metric->benefit_data_available ?? false);
+        $counts->excluded_without_pec_id = $metric->excluded_without_pec_id ?? 0;
+        $counts->pbf_import_id = $metric->pbf_import_id ?? null;
+        $counts->pbf_vigencia = $metric->pbf_vigencia ?? null;
+        $counts->pbf_confirmed_total = $metric->pbf_confirmed_total ?? 0;
         $counts->is_team_specific = true;
 
         return $counts;

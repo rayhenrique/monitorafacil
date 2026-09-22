@@ -6,9 +6,9 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.23.9';
+    public const CURRENT_VERSION = 'v1.23.10';
 
-    public const CURRENT_RELEASE_DATE = '21/09/2026';
+    public const CURRENT_RELEASE_DATE = '22/09/2026';
 
     /**
      * Retorna a versão mais recente do sistema.
@@ -61,9 +61,20 @@ class VersionService
     {
         return [
             [
+                'version' => 'v1.23.10',
+                'date' => '22/09/2026',
+                'badge' => 'Versão Atual',
+                'title' => 'Correção de Métricas por Equipe e Busca Avançada',
+                'summary' => 'Correção de exceção interna (Undefined property stdClass::$benefit_data_available) ao selecionar equipes na Relação Nominal e abrir a Busca Avançada.',
+                'highlights' => [
+                    ['type' => 'correcao', 'text' => 'Definição dos atributos de procedência e benefício (benefit_data_available) no objeto de agregação por equipe em CvatNominalDwService.'],
+                    ['type' => 'correcao', 'text' => 'Acesso defensivo a benefit_data_available na view Blade da Relação Nominal, prevenindo erro 500 em atualizações Livewire.'],
+                ],
+            ],
+            [
                 'version' => 'v1.23.9',
                 'date' => '21/09/2026',
-                'badge' => 'Versão Atual',
+                'badge' => 'Versão Anterior',
                 'title' => 'Filtro Dinâmico por Equipe nos Cards e Exportação CSV/PDF',
                 'summary' => 'Atualização dinâmica dos cards de Dimensão Cadastro e Dimensão Acompanhamento de acordo com a equipe selecionada na Relação Nominal, e nova funcionalidade de exportação completa em formatos CSV e PDF.',
                 'highlights' => [

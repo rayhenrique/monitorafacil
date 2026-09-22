@@ -888,7 +888,7 @@
                         </select>
                     </div>
 
-                    @if ($metrics?->benefit_data_available)
+                    @if (! empty($metrics->benefit_data_available))
                     <!-- Benefício Social -->
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Benefício Social</label>

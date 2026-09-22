@@ -4,6 +4,14 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.23.10] - 22/09/2026
+
+### Correção de Métricas por Equipe e Busca Avançada na Relação Nominal
+- **Correção de Atributos de Agregação por Equipe**: Em `CvatNominalDwService`, inclusão da cópia dos atributos de benefício e proveniência (`benefit_data_available`, `source`, `excluded_without_pec_id`, `pbf_import_id`, `pbf_vigencia`, `pbf_confirmed_total`) para o objeto `stdClass` resultante da consulta agregada por equipe.
+- **Prevenção de Erro 500 no Livewire**: Acesso defensivo com `! empty($metrics->benefit_data_available)` na view Blade da Relação Nominal (`nominal-list.blade.php`), eliminando a exceção `ErrorException: Undefined property: stdClass::$benefit_data_available` ao filtrar por equipes e abrir o modal de Busca Avançada.
+
+---
+
 ## [v1.23.9] - 21/09/2026
 
 ### Filtro Dinâmico por Equipe nos Cards e Exportação CSV/PDF da Relação Nominal
