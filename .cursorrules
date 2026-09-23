@@ -29,4 +29,5 @@
 - **NUNCA COPIAR DESIGN EXTERNO**: Em nenhuma hipótese copie o design, paleta de cores, estilos visuais ou componentes de páginas ou sistemas externos (como DashSaúde ou outros).
 - **PRESERVAÇÃO DO DESIGN SYSTEM MONITORA FÁCIL**: Mantenha estritamente a identidade própria do Monitora Fácil (sidebar executiva escura `#0c1f1c`, acentos esmeralda `#0f766e`/`#10b981`, canvas claro `#f5f7f6` e badges `MF`).
 - **INSPIRAÇÃO EXCLUSIVA EM MÓDULOS**: Referências externas servem apenas para identificar quais módulos e conceitos gerenciais de APS são pertinentes.
-- **DESENVOLVIMENTO COMPASSIVO**: Daqui em diante, novos módulos serão desenvolvidos de forma compassiva, gradual e planejada passo a passo.
+- **DESENVOLVIMENTO COMPASSIVO**: Daqui em diante, novos módulos serão desenvolvidos de forma compassiva, gradual e planejada passo a passo.
+- **POLÍTICA DE RODAPÉ ÚNICO (NUNCA DUPLICAR O RODAPÉ)**: O único rodapé permitido no sistema é o rodapé global renderizado em `resources/views/layouts/app.blade.php`, contendo os dados consolidados da gestão da APS e a versão do sistema (`VersionService::CURRENT_VERSION`). Nunca adicione rodapés institucionais ou de versão em páginas, views filhas ou componentes. Onde houver duplicidade de rodapé, remova imediatamente.

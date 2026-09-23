@@ -569,7 +569,12 @@
 
             <footer class="flex flex-col items-center justify-between gap-1.5 border-t border-line bg-white/50 px-4 py-4 text-center text-xs text-muted sm:flex-row sm:px-8 sm:text-left">
                 <span>Dados consolidados para apoio à gestão municipal da APS.</span>
-                <span>Monitora Fácil · {{ trim($settings['municipio_nome'] ?? '') ?: 'Gestão Municipal' }}</span>
+                <span class="flex items-center gap-1">
+                    <span>Monitora Fácil · {{ trim($settings['municipio_nome'] ?? '') ?: 'Gestão Municipal' }} ·</span>
+                    <a href="{{ route('help.whats-new') }}" class="font-mono hover:text-teal-700 transition font-medium" title="Novidades da versão">
+                        {{ \App\Services\VersionService::CURRENT_VERSION }}
+                    </a>
+                </span>
             </footer>
         </div>
     </div>

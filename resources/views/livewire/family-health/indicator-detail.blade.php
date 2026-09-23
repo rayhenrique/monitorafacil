@@ -371,17 +371,6 @@
                             </table>
                         </div>
                     </div>
-
-                    <!-- Rodapé Institucional -->
-                    <div class="pt-4 pb-2 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2">
-                        <div>
-                            Sistema de Monitoramento da Atenção Primária · Versão 2.12.0
-                        </div>
-                        <div class="flex items-center gap-1.5 font-semibold text-slate-600">
-                            <span>Desenvolvimento por</span>
-                            <span class="font-bold text-[#004e82]">PWDEV_</span>
-                        </div>
-                    </div>
                 </div>
             @else
                 <!-- Card de Filtros e Detalhamento por Equipe -->
@@ -687,16 +676,6 @@
                 </div>
             </div>
         @endif
-
-            <!-- Rodapé Institucional -->
-            <div class="pt-4 pb-2 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2">
-                <div>
-                    Sistema de Monitoramento da Atenção Primária · Versão {{ \App\Services\VersionService::CURRENT_VERSION }}
-                </div>
-                <div class="flex items-center gap-1 font-semibold text-slate-600">
-                    <span>Monitora Fácil</span>
-                </div>
-            </div>
         </div>
     @elseif ($isC2)
         <!-- ========================================================================= -->
@@ -1593,17 +1572,6 @@
                 </div>
             </div>
         @endif
-
-            <!-- Rodapé Institucional -->
-            <div class="pt-4 pb-2 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2">
-                <div>
-                    Sistema de Monitoramento da Atenção Primária · Versão 2.12.0
-                </div>
-                <div class="flex items-center gap-1.5 font-semibold text-slate-600">
-                    <span>Desenvolvimento por</span>
-                    <span class="font-bold text-[#004e82]">PWDEV_</span>
-                </div>
-            </div>
 
             <!-- MODAL DE BUSCA AVANÇADA -->
             @if ($showAdvancedModal)
