@@ -324,7 +324,9 @@ class CvatNominalDwService
         }
 
         $metrics = $this->getMetrics($year, $month);
-        $progressCallback?->__invoke(100, 'Extração local concluída; o escore Y ainda depende dos dados de BPC.');
+        if ($progressCallback !== null) {
+            $progressCallback(100, 'Extração local concluída; o escore Y ainda depende dos dados de BPC.');
+        }
 
         return [
             'success' => true,

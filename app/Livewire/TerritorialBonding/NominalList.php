@@ -86,6 +86,18 @@ class NominalList extends Component
     // Estado do Acordeão Dimensão Acompanhamento
     public bool $acompanhamentoExpanded = true;
 
+    // Aba ativa (compatibilidade com componente de abas)
+    public string $activeTab = 'nominal';
+
+    public function updatedActiveTab(): mixed
+    {
+        if ($this->activeTab !== 'nominal') {
+            return redirect()->route('territorial-bonding.overview', ['aba' => $this->activeTab]);
+        }
+
+        return null;
+    }
+
     public function updatedSelectedTeam(): void
     {
         $this->advTeam = $this->selectedTeam;
@@ -344,48 +356,61 @@ class NominalList extends Component
         ]);
     }
 
-    public function exportPdf(CvatNominalDwService $service, SettingsService $settingsService): StreamedResponse
+    public function exportPdf(CvatNominalDwService $service, SettingsService $settingsService): ?StreamedResponse
     {
-        $filters = $this->getFilters();
-        $activeTeam = $filters['team'] ?? '';
-        $metrics = $service->getMetrics(team: $activeTeam ?: null);
+        try {
+            @ini_set('memory_limit', '512M');
+            @set_time_limit(180);
 
-        $query = $service->buildCitizensQuery($filters);
-        $totalCount = (clone $query)->count();
+            $filters = $this->getFilters();
+            $activeTeam = $filters['team'] ?? '';
+            $metrics = $service->getMetrics(team: $activeTeam ?: null);
 
-        // Limit to 1000 records for PDF to avoid browser/memory timeouts
-        $citizens = $query->limit(1000)->get();
+            $query = $service->buildCitizensQuery($filters);
+            $totalCount = (clone $query)->count();
 
-        $teamName = '';
-        if ($activeTeam) {
-            $teamModel = CvatNominalCitizen::where('source', CvatNominalDwService::SOURCE)
-                ->where(function ($q) use ($activeTeam) {
-                    $q->where('ine', $activeTeam)
-                      ->orWhere('team_name', 'like', '%'.$activeTeam.'%');
-                })
-                ->select(['team_name', 'ine'])
-                ->first();
-            $teamName = $teamModel ? "{$teamModel->team_name} (INE: {$teamModel->ine})" : $activeTeam;
+            // Limite seguro de 200 registros no PDF para evitar estouro de memória no DomPDF
+            $citizens = $query->limit(200)->get();
+
+            $teamName = '';
+            if ($activeTeam) {
+                $teamModel = CvatNominalCitizen::where('source', CvatNominalDwService::SOURCE)
+                    ->where(function ($q) use ($activeTeam) {
+                        $q->where('ine', $activeTeam)
+                          ->orWhere('team_name', 'like', '%'.$activeTeam.'%');
+                    })
+                    ->select(['team_name', 'ine'])
+                    ->first();
+                $teamName = $teamModel ? "{$teamModel->team_name} (INE: {$teamModel->ine})" : $activeTeam;
+            }
+
+            $settings = $settingsService->all();
+
+            $pdf = Pdf::loadView('reports.nominal-pdf', [
+                'metrics' => $metrics,
+                'citizens' => $citizens,
+                'totalCount' => $totalCount,
+                'teamName' => $teamName,
+                'settings' => $settings,
+            ])->setPaper('a4', 'landscape');
+
+            $pdfContent = $pdf->output();
+
+            $teamSlug = $activeTeam ? 'equipe_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $activeTeam) . '_' : 'consolidado_';
+            $fileName = 'relacao_nominal_' . $teamSlug . now()->format('Ymd_His') . '.pdf';
+
+            return response()->streamDownload(
+                fn () => print($pdfContent),
+                $fileName,
+                ['Content-Type' => 'application/pdf']
+            );
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Erro ao exportar PDF nominal: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+            $this->dispatch('notify', message: 'Não foi possível gerar o PDF: ' . $e->getMessage(), type: 'error');
+            return null;
         }
-
-        $settings = $settingsService->all();
-
-        $pdf = Pdf::loadView('reports.nominal-pdf', [
-            'metrics' => $metrics,
-            'citizens' => $citizens,
-            'totalCount' => $totalCount,
-            'teamName' => $teamName,
-            'settings' => $settings,
-        ])->setPaper('a4', 'landscape');
-
-        $teamSlug = $activeTeam ? 'equipe_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $activeTeam) . '_' : 'consolidado_';
-        $fileName = 'relacao_nominal_' . $teamSlug . now()->format('Ymd_His') . '.pdf';
-
-        return response()->streamDownload(
-            fn () => print($pdf->output()),
-            $fileName,
-            ['Content-Type' => 'application/pdf']
-        );
     }
 
     public function render(CvatNominalDwService $service): View

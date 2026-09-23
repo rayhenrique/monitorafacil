@@ -11,7 +11,7 @@
     <main class="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-4 py-8 sm:px-6 sm:py-12">
         <div class="mb-8">
             @if (filled($settings['logo_path'] ?? null))
-                <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($settings['logo_path']) }}" alt="Logotipo de {{ trim($settings['municipio_nome'] ?? '') ?: 'município' }}" class="mb-5 h-12 w-12 rounded-xl object-contain">
+                <img src="{{ asset('storage/' . ltrim($settings['logo_path'], '/')) }}" alt="Logotipo de {{ trim($settings['municipio_nome'] ?? '') ?: 'município' }}" class="mb-5 h-12 w-12 rounded-xl object-contain">
             @else
                 <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-teal-800 text-lg font-bold text-white">MF</div>
             @endif

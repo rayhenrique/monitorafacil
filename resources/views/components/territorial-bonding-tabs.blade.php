@@ -61,7 +61,7 @@
             @foreach ($tabs as $key => $tab)
                 @php
                     $isActive = ($activeTab === $key);
-                    $isNominalRoute = request()->routeIs('territorial-bonding.nominal');
+                    $isNominalRoute = ($activeTab === 'nominal') || request()->routeIs('territorial-bonding.nominal');
                 @endphp
                 @if ($key === 'nominal')
                     <a

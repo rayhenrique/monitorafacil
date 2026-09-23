@@ -73,7 +73,8 @@
         }
         .table-citizens {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             font-size: 7.5px;
         }
         .table-citizens th {
@@ -83,13 +84,22 @@
             text-transform: uppercase;
             padding: 4px 3px;
             text-align: left;
-            border: 1px solid #0d9488;
+            border-top: 1px solid #0d9488;
+            border-bottom: 1px solid #0d9488;
+            border-right: 1px solid #0d9488;
             font-size: 7px;
+        }
+        .table-citizens th:first-child {
+            border-left: 1px solid #0d9488;
         }
         .table-citizens td {
             padding: 3.5px 3px;
-            border: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+            border-right: 1px solid #e2e8f0;
             vertical-align: middle;
+        }
+        .table-citizens td:first-child {
+            border-left: 1px solid #e2e8f0;
         }
         .table-citizens tr:nth-child(even) {
             background-color: #f8fafc;
@@ -272,7 +282,7 @@
             Monitora Fácil · Sistema de Gestão e Monitoramento da Atenção Primária à Saúde | Relatório gerado em {{ now()->format('d/m/Y \à\s H:i:s') }}
         </div>
         <div class="footer-right">
-            Total listado: {{ count($citizens) }} registros
+            Total listado: {{ count($citizens) }} de {{ number_format($totalCount ?? count($citizens), 0, ',', '.') }} registros@if(isset($totalCount) && $totalCount > count($citizens)) (amostra de 200 no PDF · exporte em CSV para base completa)@endif
         </div>
     </div>
 </body>

@@ -33,7 +33,7 @@
                 </button>
                 <a href="{{ route('dashboard') }}" class="flex min-w-0 items-center gap-2.5" aria-label="Ir para o painel">
                     @if (filled($settings['logo_path'] ?? null))
-                        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($settings['logo_path']) }}" alt="Logotipo de {{ trim($settings['municipio_nome'] ?? '') ?: 'município' }}" class="h-8 w-8 rounded-lg object-contain">
+                        <img src="{{ asset('storage/' . ltrim($settings['logo_path'], '/')) }}" alt="Logotipo de {{ trim($settings['municipio_nome'] ?? '') ?: 'município' }}" class="h-8 w-8 rounded-lg object-contain">
                     @else
                         <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500 to-emerald-700 text-xs font-bold text-white shadow-sm" aria-hidden="true">MF</span>
                     @endif
@@ -95,7 +95,7 @@
                             <!-- Cabeçalho / Município -->
                             <div class="flex items-center gap-3 pr-8">
                                 @if (filled($settings['logo_path'] ?? null))
-                                    <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($settings['logo_path']) }}" alt="Logotipo de {{ trim($settings['municipio_nome'] ?? '') ?: 'município' }}" class="h-10 w-10 rounded-xl object-contain shadow">
+                                    <img src="{{ asset('storage/' . ltrim($settings['logo_path'], '/')) }}" alt="Logotipo de {{ trim($settings['municipio_nome'] ?? '') ?: 'município' }}" class="h-10 w-10 rounded-xl object-contain shadow">
                                 @else
                                     <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-emerald-700 font-bold text-white shadow-md shadow-teal-950/40" aria-hidden="true">MF</span>
                                 @endif
@@ -280,7 +280,7 @@
                 <div class="flex items-center gap-2" :class="sidebarCollapsed ? 'flex-col justify-center' : 'justify-between'">
                     <a href="{{ route('dashboard') }}" class="group flex items-center gap-3.5 rounded-2xl p-1.5 transition hover:bg-[#132d27]/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal-400 min-w-0" aria-label="Ir para o painel" :title="sidebarCollapsed ? '{{ trim($settings['municipio_nome'] ?? '') ?: 'Monitora Fácil' }}' : ''">
                         @if (filled($settings['logo_path'] ?? null))
-                            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($settings['logo_path']) }}" alt="Logotipo de {{ trim($settings['municipio_nome'] ?? '') ?: 'município' }}" class="h-10 w-10 shrink-0 rounded-xl object-contain shadow-md">
+                            <img src="{{ asset('storage/' . ltrim($settings['logo_path'], '/')) }}" alt="Logotipo de {{ trim($settings['municipio_nome'] ?? '') ?: 'município' }}" class="h-10 w-10 shrink-0 rounded-xl object-contain shadow-md">
                         @else
                             <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-emerald-700 font-bold text-white shadow-lg shadow-teal-950/50 ring-1 ring-white/10" aria-hidden="true">MF</span>
                         @endif
