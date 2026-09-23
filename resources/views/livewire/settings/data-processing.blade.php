@@ -427,6 +427,8 @@
                                     'success' => 'bg-emerald-100 text-emerald-800 border-emerald-200',
                                     'simulated' => 'bg-sky-100 text-sky-800 border-sky-200',
                                     'warning' => 'bg-amber-100 text-amber-800 border-amber-200',
+                                    'error' => 'bg-rose-100 text-rose-800 border-rose-200',
+                                    'info' => 'bg-slate-100 text-slate-600 border-slate-200',
                                     default => 'bg-slate-100 text-slate-700 border-slate-200',
                                 };
 
@@ -434,6 +436,8 @@
                                     'success' => 'Processada',
                                     'simulated' => 'Consolidada',
                                     'warning' => 'Aviso',
+                                    'error' => 'Falha',
+                                    'info' => 'Ignorado',
                                     default => 'Pendente',
                                 };
                             @endphp
@@ -445,6 +449,18 @@
                                         @if ($table['status'] === 'success' || $table['status'] === 'simulated')
                                             <svg class="h-3 w-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                            </svg>
+                                        @elseif ($table['status'] === 'error')
+                                            <svg class="h-3 w-3 text-rose-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        @elseif ($table['status'] === 'warning')
+                                            <svg class="h-3 w-3 text-amber-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                                            </svg>
+                                        @elseif ($table['status'] === 'info')
+                                            <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" />
                                             </svg>
                                         @endif
                                         <span>{{ $statusLabel }}</span>

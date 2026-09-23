@@ -27,6 +27,9 @@ class SettingsTest extends TestCase
         $sqliteConnection = DB::connection('sqlite');
         app('db')->extend('mysql', static fn () => $sqliteConnection);
 
+        config(['database.connections.pgsql_esus.host' => '127.0.0.1', 'database.connections.pgsql_esus.port' => 54339]);
+        DB::purge('pgsql_esus');
+
         Schema::dropIfExists('users');
         Schema::dropIfExists('settings');
         Schema::dropIfExists('sync_logs');
@@ -380,6 +383,14 @@ XML;
             ->assertSet('selectedScope', 'c2')
             ->assertSee('A leitura do C2 exige conexão com o DW do PEC');
 
+        // Processamento Apenas C3
+        Livewire::test(DataProcessing::class)
+            ->call('processC3')
+            ->assertSet('progressPercent', 100)
+            ->assertSet('processStatus', 'error')
+            ->assertSet('selectedScope', 'c3')
+            ->assertSee('A leitura do C3 exige conexão com o DW do PEC');
+
         // Processamento Geral Completo
         Livewire::test(DataProcessing::class)
             ->call('processAll')
@@ -397,6 +408,10 @@ XML;
 
         $this->artisan('esus:process-data', ['--scope' => 'c2'])
             ->expectsOutputToContain('[Escopo: C2]')
+            ->assertExitCode(1);
+
+        $this->artisan('esus:process-data', ['--scope' => 'c3'])
+            ->expectsOutputToContain('[Escopo: C3]')
             ->assertExitCode(1);
 
         $this->artisan('esus:process-data', ['--scope' => 'all'])

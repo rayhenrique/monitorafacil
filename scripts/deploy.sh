@@ -21,13 +21,13 @@ for arg in "$@"; do
     fi
 done
 
-echo "==> [1/13] Atualizando repositório a partir da branch main..."
+echo "==> [1/14] Atualizando repositório a partir da branch main..."
 git pull origin main
 
-echo "==> [2/13] Instalando dependências de produção do Composer..."
+echo "==> [2/14] Instalando dependências de produção do Composer..."
 composer install --no-dev --optimize-autoloader
 
-echo "==> [3/13] Compilando assets do frontend (Vite)..."
+echo "==> [3/14] Compilando assets do frontend (Vite)..."
 npm run build
 
 # Detecção do binário PHP (preferência para php8.5 do CloudPanel)
@@ -37,42 +37,45 @@ else
     PHP_BIN="php"
 fi
 
-echo "==> [4/13] Executando migrações do banco de dados..."
+echo "==> [4/14] Executando migrações do banco de dados..."
 $PHP_BIN artisan migrate --force
 
 if [ "$SYNC_DATA" = true ]; then
-    echo "==> [5/13] Sincronizando dados nominais do PEC (CVAT Relação Nominal)..."
+    echo "==> [5/14] Sincronizando dados nominais do PEC (CVAT Relação Nominal)..."
     $PHP_BIN artisan cvat:sync-nominal || echo "AVISO: Falha na sincronização nominal do CVAT. Continuando deploy..."
 
-    echo "==> [6/13] Consolidando dados reais do Indicador C1 (Mais Acesso)..."
+    echo "==> [6/14] Consolidando dados reais do Indicador C1 (Mais Acesso)..."
     $PHP_BIN artisan esus:process-data --scope=c1 || echo "AVISO: Falha na consolidação do C1. Continuando deploy..."
 
-    echo "==> [7/13] Consolidando dados reais do Indicador C2 (Desenvolvimento Infantil)..."
+    echo "==> [7/14] Consolidando dados reais do Indicador C2 (Desenvolvimento Infantil)..."
     $PHP_BIN artisan esus:process-data --scope=c2 || echo "AVISO: Falha na consolidação do C2. Continuando deploy..."
+
+    echo "==> [8/14] Consolidando dados reais do Indicador C3 (Gestação e Puerpério)..."
+    $PHP_BIN artisan esus:process-data --scope=c3 || echo "AVISO: Falha na consolidação do C3. Continuando deploy..."
 else
-    echo "==> [5-7/13] Sincronização de dados do PEC ignorada (--quick / --no-sync ativo)."
+    echo "==> [5-8/14] Sincronização de dados do PEC ignorada (--quick / --no-sync ativo)."
 fi
 
-echo "==> [8/13] Publicando assets do Livewire..."
+echo "==> [9/14] Publicando assets do Livewire..."
 $PHP_BIN artisan livewire:publish --assets
 
-echo "==> [9/13] Limpando caches da aplicação..."
+echo "==> [10/14] Limpando caches da aplicação..."
 $PHP_BIN artisan optimize:clear
 
-echo "==> [10/13] Otimizando cache de configuração..."
+echo "==> [11/14] Otimizando cache de configuração..."
 $PHP_BIN artisan config:cache
 
-echo "==> [11/13] Reiniciando workers da fila com a versão nova..."
+echo "==> [12/14] Reiniciando workers da fila com a versão nova..."
 $PHP_BIN artisan queue:restart || true
 if command -v systemctl &> /dev/null && ! systemctl is-active --quiet monitorafacil-queue.service; then
     echo "ATENÇÃO: monitorafacil-queue.service não está ativo. O botão CVAT agenda jobs, mas eles precisam de um worker para executar." >&2
     echo "Veja scripts/monitorafacil-queue.service.example e as instruções no README.md." >&2
 fi
 
-echo "==> [12/13] Otimizando cache de rotas..."
+echo "==> [13/14] Otimizando cache de rotas..."
 $PHP_BIN artisan route:cache
 
-echo "==> [13/13] Otimizando cache de views..."
+echo "==> [14/14] Otimizando cache de views..."
 $PHP_BIN artisan view:cache
 
 echo "=============================================================================="

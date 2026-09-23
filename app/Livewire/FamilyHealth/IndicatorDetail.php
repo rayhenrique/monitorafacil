@@ -3,6 +3,7 @@
 namespace App\Livewire\FamilyHealth;
 
 use App\Models\C2NominalChild;
+use App\Models\C3NominalPregnancy;
 use App\Models\CvatTeamEvaluation;
 use App\Models\FamilyHealthIndicatorSnapshot;
 use App\Models\FamilyHealthMonthlySnapshot;
@@ -10,6 +11,7 @@ use App\Services\C2ActiveSearchService;
 use App\Services\C3ActiveSearchService;
 use App\Services\DashboardSnapshotService;
 use App\Services\FamilyHealthService;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
@@ -47,6 +49,8 @@ class IndicatorDetail extends Component
 
     public string $c2SubTab = 'monthly_summary'; // 'monthly_summary', 'nominal'
 
+    public string $c3SubTab = 'monthly_summary'; // 'monthly_summary', 'nominal'
+
     public string $activeTab = 'dashboard'; // 'dashboard', 'teams', 'active_search', 'rules'
 
     // --- PROPRIEDADES DA ABA BUSCA ATIVA C2 / C3 ---
@@ -72,6 +76,10 @@ class IndicatorDetail extends Component
 
     // Modal Busca Avançada
     public bool $showAdvancedModal = false;
+
+    public string $advDistrict = '';
+
+    public string $advFacility = '';
 
     public string $advTeam = '';
 
@@ -108,11 +116,17 @@ class IndicatorDetail extends Component
     /** @var list<int> */
     public array $advAgeMonths = [];
 
+    public string $advDpp = '';
+
     public ?string $advMici = null;
 
     public ?string $advMicdt = null;
 
     public ?string $advAccompanied = null;
+
+    public ?string $advAbortion = null;
+
+    public ?string $advDumDivergence = null;
 
     public ?string $advPracticeA = null;
 
@@ -290,6 +304,8 @@ class IndicatorDetail extends Component
 
     public function clearAdvancedFilters(): void
     {
+        $this->advDistrict = '';
+        $this->advFacility = '';
         $this->advTeam = '';
         $this->advMicroarea = '';
         $this->advCitizenName = '';
@@ -305,11 +321,14 @@ class IndicatorDetail extends Component
         $this->advProfessionalCns = '';
         $this->advProfessionalName = '';
         $this->advRaceColor = '';
+        $this->advDpp = '';
         $this->advAgeGroup = '';
         $this->advAgeMonths = [];
         $this->advMici = null;
         $this->advMicdt = null;
         $this->advAccompanied = null;
+        $this->advAbortion = null;
+        $this->advDumDivergence = null;
         $this->advPracticeA = null;
         $this->advPracticeB = null;
         $this->advPracticeC = null;
@@ -323,6 +342,11 @@ class IndicatorDetail extends Component
         $this->advPracticeK = null;
         $this->c2Page = 1;
         $this->c3Page = 1;
+    }
+
+    public function switchC3SubTab(string $tab): void
+    {
+        $this->c3SubTab = in_array($tab, ['monthly_summary', 'nominal'], true) ? $tab : 'monthly_summary';
     }
 
     public function setAgeGroup(string $group): void
@@ -502,10 +526,18 @@ class IndicatorDetail extends Component
         $this->c2SubTab = in_array($tab, ['monthly_summary', 'nominal'], true) ? $tab : 'monthly_summary';
     }
 
+    public function setC3SubTab(string $tab): void
+    {
+        $this->c3SubTab = in_array($tab, ['monthly_summary', 'nominal'], true) ? $tab : 'monthly_summary';
+    }
+
     public function updatedActiveTab(string $tab): void
     {
         if ($this->indicator === 'c2' && $tab === 'active_search') {
             $this->c2SubTab = 'nominal';
+        }
+        if ($this->indicator === 'c3' && $tab === 'active_search') {
+            $this->c3SubTab = 'nominal';
         }
     }
 
@@ -638,444 +670,27 @@ class IndicatorDetail extends Component
     ): View {
         $data = $service->getIndicatorDetail($this->indicator, $this->year, $this->quarter, $this->selectedIne);
         $periods = $snapshots->periods();
+        $filteredTeams = $this->getFilteredTeams($data['teams']);
 
-        $filteredTeams = $data['teams'];
+        $c1Data = $this->prepareC1Data();
+        $c2Data = $this->prepareC2Data($c2Service);
+        $c3Data = $this->prepareC3Data($c3Service);
 
-        // Se estiver no C1, C2 ou C3, aplica filtragem reativa de Equipe e Classificação
-        if (in_array($this->indicator, ['c1', 'c2', 'c3'], true)) {
-            if ($this->selectedIne) {
-                $filteredTeams = $filteredTeams->filter(fn ($t) => $t->ine === $this->selectedIne);
-            }
+        $activeFiltersCount = match ($this->indicator) {
+            'c2' => $c2Data['activeFiltersCount'],
+            'c3' => $c3Data['activeFiltersCount'],
+            default => 0,
+        };
 
-            if ($this->selectedClassification) {
-                $filteredTeams = $filteredTeams->filter(function ($t) {
-                    if ($this->selectedMonth !== null && isset($t->monthly_details[$this->selectedMonth])) {
-                        return $t->monthly_details[$this->selectedMonth]['performance_level'] === $this->selectedClassification;
-                    }
+        $c2SubTabEffective = ($this->indicator === 'c2' && $this->activeTab === 'active_search')
+            ? 'nominal'
+            : $this->c2SubTab;
 
-                    $level = $t->quarter_level ?? $t->performance_level;
+        $c3SubTabEffective = ($this->indicator === 'c3' && $this->activeTab === 'active_search')
+            ? 'nominal'
+            : $this->c3SubTab;
 
-                    return $level === $this->selectedClassification;
-                });
-            }
-        }
-
-        // Processamento da coorte nominal C2
-        $c2NominalList = collect();
-        $c2SummaryKpis = null;
-        $c2FilterOptions = [];
-        $c2AvailableColumns = C2ActiveSearchService::getAvailableColumns();
-        $c2TotalItems = 0;
-        $c2TotalPages = 1;
-
-        // Processamento da coorte nominal C3
-        $c3NominalList = collect();
-        $c3SummaryKpis = null;
-        $c3FilterOptions = [];
-        $c3AvailableColumns = C3ActiveSearchService::getAvailableColumns();
-        $c3TotalItems = 0;
-        $c3TotalPages = 1;
-
-        $activeFiltersCount = 0;
-
-        if ($this->indicator === 'c2') {
-            $c2BaseCohort = $c2Service->getBaseCohort($this->year, $this->quarter, $this->selectedIne);
-
-            $filters = [
-                'searchCns' => $this->searchCns,
-                'searchCpf' => $this->searchCpf,
-                'searchName' => $this->searchName,
-                'searchCnes' => $this->searchCnes,
-                'searchIne' => $this->searchIne,
-                'advTeam' => $this->advTeam,
-                'advMicroarea' => $this->advMicroarea,
-                'advCitizenName' => $this->advCitizenName,
-                'advCitizenCpf' => $this->advCitizenCpf,
-                'advCitizenCns' => $this->advCitizenCns,
-                'advMotherName' => $this->advMotherName,
-                'advMonth' => $this->advMonth,
-                'advMonthOption' => $this->advMonthOption,
-                'advQuarter' => $this->advQuarter,
-                'advProfessionalCns' => $this->advProfessionalCns,
-                'advProfessionalName' => $this->advProfessionalName,
-                'advRaceColor' => $this->advRaceColor,
-                'advAgeGroup' => $this->advAgeGroup,
-                'advAgeMonths' => $this->advAgeMonths,
-                'advMici' => $this->advMici,
-                'advMicdt' => $this->advMicdt,
-                'advAccompanied' => $this->advAccompanied,
-                'advPracticeA' => $this->advPracticeA,
-                'advPracticeB' => $this->advPracticeB,
-                'advPracticeC' => $this->advPracticeC,
-                'advPracticeD' => $this->advPracticeD,
-                'advPracticeE' => $this->advPracticeE,
-                'baseYear' => $this->year,
-                'baseQuarter' => $this->quarter,
-            ];
-
-            foreach ($filters as $k => $val) {
-                if ($k === 'baseYear' || $k === 'baseQuarter' || $k === 'advMonthOption') {
-                    continue;
-                }
-                if ($k === 'advAgeMonths') {
-                    if (! empty($val) && empty($filters['advAgeGroup'])) {
-                        $activeFiltersCount++;
-                    }
-
-                    continue;
-                }
-                if ($val !== '' && $val !== null && $val !== []) {
-                    $activeFiltersCount++;
-                }
-            }
-
-            $c2FilteredCohort = $c2Service->filterCohort($c2BaseCohort, $filters);
-            $c2SummaryKpis = $c2Service->getSummaryKpis($c2FilteredCohort, $this->year, $this->quarter, $this->selectedMonth);
-            $c2FilterOptions = $c2Service->getFilterOptions($this->year, $this->quarter);
-
-            $c2TotalItems = $c2FilteredCohort->count();
-            $c2TotalPages = max(1, (int) ceil($c2TotalItems / max(1, $this->perPage)));
-            $this->c2Page = min(max(1, $this->c2Page), $c2TotalPages);
-
-            $c2NominalList = $c2FilteredCohort->forPage($this->c2Page, $this->perPage);
-        } elseif ($this->indicator === 'c3') {
-            $c3BaseCohort = $c3Service->getBaseCohort($this->year, $this->quarter, $this->selectedIne);
-
-            $filters = [
-                'searchCns' => $this->searchCns,
-                'searchCpf' => $this->searchCpf,
-                'searchName' => $this->searchName,
-                'searchCnes' => $this->searchCnes,
-                'searchIne' => $this->searchIne,
-                'advTeam' => $this->advTeam,
-                'advMicroarea' => $this->advMicroarea,
-                'advCitizenName' => $this->advCitizenName,
-                'advCitizenCpf' => $this->advCitizenCpf,
-                'advCitizenCns' => $this->advCitizenCns,
-                'advPhone' => $this->advPhone,
-                'advStatus' => $this->advStatus,
-                'advTrimester' => $this->advTrimester,
-                'advMonth' => $this->advMonth,
-                'advMonthOption' => $this->advMonthOption,
-                'advQuarter' => $this->advQuarter,
-                'advProfessionalCns' => $this->advProfessionalCns,
-                'advProfessionalName' => $this->advProfessionalName,
-                'advRaceColor' => $this->advRaceColor,
-                'advMici' => $this->advMici,
-                'advAccompanied' => $this->advAccompanied,
-                'advPracticeA' => $this->advPracticeA,
-                'advPracticeB' => $this->advPracticeB,
-                'advPracticeC' => $this->advPracticeC,
-                'advPracticeD' => $this->advPracticeD,
-                'advPracticeE' => $this->advPracticeE,
-                'advPracticeF' => $this->advPracticeF,
-                'advPracticeG' => $this->advPracticeG,
-                'advPracticeH' => $this->advPracticeH,
-                'advPracticeI' => $this->advPracticeI,
-                'advPracticeJ' => $this->advPracticeJ,
-                'advPracticeK' => $this->advPracticeK,
-                'baseYear' => $this->year,
-                'baseQuarter' => $this->quarter,
-            ];
-
-            foreach ($filters as $k => $val) {
-                if ($k === 'baseYear' || $k === 'baseQuarter' || $k === 'advMonthOption') {
-                    continue;
-                }
-                if ($val !== '' && $val !== null) {
-                    $activeFiltersCount++;
-                }
-            }
-
-            $c3FilteredCohort = $c3Service->filterCohort($c3BaseCohort, $filters);
-            $c3SummaryKpis = $c3Service->getSummaryKpis($c3FilteredCohort, $this->year, $this->quarter, $this->selectedIne);
-            $c3FilterOptions = $c3Service->getFilterOptions($this->year, $this->quarter);
-
-            $c3TotalItems = $c3FilteredCohort->count();
-            $c3TotalPages = max(1, (int) ceil($c3TotalItems / max(1, $this->perPage)));
-            $this->c3Page = min(max(1, $this->c3Page), $c3TotalPages);
-
-            $c3NominalList = $c3FilteredCohort->forPage($this->c3Page, $this->perPage);
-        }
-
-        // Preparação específica para C1 (Mensal)
-        $c1TableRows = collect();
-        $availableUnits = collect();
-        $availableTeams = collect();
-        $quarterMonths = [];
-        $unassignedAttendances = 0;
-
-        if ($this->indicator === 'c1') {
-            $firstM = ($this->quarter - 1) * 4 + 1;
-            $quarterMonths = [
-                $firstM => sprintf('%02d / %d', $firstM, $this->year),
-                $firstM + 1 => sprintf('%02d / %d', $firstM + 1, $this->year),
-                $firstM + 2 => sprintf('%02d / %d', $firstM + 2, $this->year),
-                $firstM + 3 => sprintf('%02d / %d', $firstM + 3, $this->year),
-            ];
-
-            $hasCvat = Schema::hasTable('cvat_team_evaluations');
-
-            $facilityMap = $hasCvat ? CvatTeamEvaluation::select('ine', 'cnes', 'facility_name')
-                ->whereNotNull('ine')
-                ->get()
-                ->keyBy('ine') : collect();
-
-            $availableUnits = $hasCvat ? CvatTeamEvaluation::select('cnes', 'facility_name')
-                ->distinct()
-                ->whereNotNull('cnes')
-                ->orderBy('facility_name')
-                ->get()
-                ->map(fn ($item) => [
-                    'cnes' => $item->cnes,
-                    'name' => $item->facility_name,
-                ]) : collect();
-
-            $teamsQuery = $hasCvat ? CvatTeamEvaluation::select('ine', 'team_name', 'cnes')
-                ->distinct()
-                ->whereNotNull('ine')
-                ->orderBy('team_name') : null;
-
-            if ($teamsQuery && $this->selectedCnes) {
-                $teamsQuery->where('cnes', $this->selectedCnes);
-            }
-
-            $availableTeams = $teamsQuery ? $teamsQuery->get()->map(fn ($item) => [
-                'ine' => $item->ine,
-                'name' => $item->team_name,
-                'cnes' => $item->cnes,
-            ]) : collect();
-
-            $monthlyQuery = FamilyHealthMonthlySnapshot::query()
-                ->where('indicator_code', 'c1')
-                ->where('year', $this->year)
-                ->where('quarter', $this->quarter)
-                ->whereNotNull('ine')
-                ->where('ine', '!=', '')
-                ->where('team_name', 'not like', 'ESB%')
-                ->where('team_name', 'not like', 'esb%')
-                ->where('team_name', 'not like', '%E-MULTI%')
-                ->where('team_name', 'not like', '%e-multi%')
-                ->where('team_name', 'not like', '%SEM EQUIPE%');
-
-            if ($this->selectedMonth !== null) {
-                $monthlyQuery->where('month', $this->selectedMonth);
-            }
-
-            if ($this->selectedIne) {
-                $monthlyQuery->where('ine', $this->selectedIne);
-            }
-
-            $rawRows = $monthlyQuery->get();
-
-            $c1TableRows = $rawRows->map(function ($snap) use ($facilityMap) {
-                $facility = $facilityMap->get($snap->ine);
-                $cnes = $facility?->cnes ?? '—';
-                $facilityName = $facility?->facility_name ?? 'Unidade Básica de Saúde';
-                $numerator = (int) $snap->numerator;
-                $denominator = (int) $snap->denominator;
-                $spontaneous = max(0, $denominator - $numerator);
-                $score = (float) $snap->score_percent;
-                $level = $snap->performance_level ?: FamilyHealthService::calculatePerformanceLevel('c1', $score);
-
-                return [
-                    'ine' => $snap->ine,
-                    'team_name' => $snap->team_name,
-                    'cnes' => $cnes,
-                    'facility_name' => $facilityName,
-                    'month' => (int) $snap->month,
-                    'year' => (int) $snap->year,
-                    'month_label' => sprintf('%02d/%d', $snap->month, $snap->year),
-                    'numerator' => $numerator,
-                    'spontaneous' => $spontaneous,
-                    'denominator' => $denominator,
-                    'is_evaluated' => true,
-                    'score_percent' => $score,
-                    'performance_level' => $level,
-                ];
-            });
-
-            if ($this->selectedCnes) {
-                $c1TableRows = $c1TableRows->filter(fn ($row) => $row['cnes'] === $this->selectedCnes);
-            }
-
-            if ($this->selectedClassification) {
-                $c1TableRows = $c1TableRows->filter(fn ($row) => $row['performance_level'] === $this->selectedClassification);
-            }
-
-            $c1TableRows = $c1TableRows->sortByDesc('score_percent')->values();
-
-            $unassignedSnap = FamilyHealthMonthlySnapshot::query()
-                ->where('indicator_code', 'c1')
-                ->where('year', $this->year)
-                ->where('quarter', $this->quarter)
-                ->when($this->selectedMonth, fn ($q) => $q->where('month', $this->selectedMonth))
-                ->where(fn ($q) => $q->whereNull('ine')->orWhere('ine', ''))
-                ->first();
-            $unassignedAttendances = $unassignedSnap ? (int) $unassignedSnap->denominator : 0;
-        }
-
-        $c1SummaryRows = collect();
-        $c1Distribution = [
-            'total' => 0,
-            'regular' => ['count' => 0, 'percent' => 0.0],
-            'suficiente' => ['count' => 0, 'percent' => 0.0],
-            'bom' => ['count' => 0, 'percent' => 0.0],
-            'otimo' => ['count' => 0, 'percent' => 0.0],
-        ];
-
-        if ($this->indicator === 'c1') {
-            $c1AllTeamsQuery = FamilyHealthMonthlySnapshot::query()
-                ->where('indicator_code', 'c1')
-                ->where('year', $this->year)
-                ->where('quarter', $this->quarter)
-                ->whereNotNull('ine')
-                ->where('ine', '!=', '')
-                ->where('team_name', 'not like', 'ESB%')
-                ->where('team_name', 'not like', 'esb%')
-                ->where('team_name', 'not like', '%E-MULTI%')
-                ->where('team_name', 'not like', '%e-multi%')
-                ->where('team_name', 'not like', '%SEM EQUIPE%');
-
-            if ($this->selectedMonth !== null) {
-                $c1AllTeamsQuery->where('month', $this->selectedMonth);
-            }
-
-            $c1SummaryRows = $c1AllTeamsQuery->get()->map(function ($snap) use ($facilityMap) {
-                $facility = $facilityMap->get($snap->ine);
-                $cnes = $facility?->cnes ?? '—';
-                $facilityName = $facility?->facility_name ?? 'Unidade Básica de Saúde';
-                $numerator = (int) $snap->numerator;
-                $denominator = (int) $snap->denominator;
-                $score = (float) $snap->score_percent;
-                $level = $snap->performance_level ?: FamilyHealthService::calculatePerformanceLevel('c1', $score);
-
-                return [
-                    'ine' => $snap->ine,
-                    'team_name' => $snap->team_name,
-                    'cnes' => $cnes,
-                    'facility_name' => $facilityName,
-                    'numerator' => $numerator,
-                    'denominator' => $denominator,
-                    'score_percent' => $score,
-                    'performance_level' => $level,
-                ];
-            })->sortByDesc('score_percent')->values();
-
-            $c1Total = $c1SummaryRows->count();
-            $c1Reg = $c1SummaryRows->filter(fn ($r) => $r['performance_level'] === 'regular')->count();
-            $c1Suf = $c1SummaryRows->filter(fn ($r) => $r['performance_level'] === 'suficiente')->count();
-            $c1Bom = $c1SummaryRows->filter(fn ($r) => $r['performance_level'] === 'bom')->count();
-            $c1Oti = $c1SummaryRows->filter(fn ($r) => $r['performance_level'] === 'otimo')->count();
-
-            $c1Distribution = [
-                'total' => $c1Total,
-                'regular' => ['count' => $c1Reg, 'percent' => $c1Total > 0 ? round(($c1Reg / $c1Total) * 100, 1) : 0.0],
-                'suficiente' => ['count' => $c1Suf, 'percent' => $c1Total > 0 ? round(($c1Suf / $c1Total) * 100, 1) : 0.0],
-                'bom' => ['count' => $c1Bom, 'percent' => $c1Total > 0 ? round(($c1Bom / $c1Total) * 100, 1) : 0.0],
-                'otimo' => ['count' => $c1Oti, 'percent' => $c1Total > 0 ? round(($c1Oti / $c1Total) * 100, 1) : 0.0],
-            ];
-        }
-
-        $c2TeamRows = collect();
-        $c2Distribution = [
-            'total' => 0,
-            'regular' => ['count' => 0, 'percent' => 0.0],
-            'suficiente' => ['count' => 0, 'percent' => 0.0],
-            'bom' => ['count' => 0, 'percent' => 0.0],
-            'otimo' => ['count' => 0, 'percent' => 0.0],
-        ];
-
-        if ($this->indicator === 'c2') {
-            $hasCvat = Schema::hasTable('cvat_team_evaluations');
-            $facilityMap = $hasCvat ? CvatTeamEvaluation::select('ine', 'cnes', 'facility_name')
-                ->whereNotNull('ine')
-                ->get()
-                ->keyBy('ine') : collect();
-
-            $c2ChildrenGrouped = collect();
-            if (Schema::hasTable('c2_nominal_children')) {
-                $c2ChildrenGrouped = C2NominalChild::query()
-                    ->where('year', $this->year)
-                    ->where('quarter', $this->quarter)
-                    ->whereNotNull('ine')
-                    ->where('ine', '!=', '')
-                    ->selectRaw('ine, team_name, cnes, facility_name, count(*) as total_children, sum(score_percent) as sum_score, avg(score_percent) as avg_score')
-                    ->groupBy('ine', 'team_name', 'cnes', 'facility_name')
-                    ->get();
-            }
-
-            if ($c2ChildrenGrouped->isNotEmpty()) {
-                $c2TeamRows = $c2ChildrenGrouped->map(function ($group) use ($facilityMap) {
-                    $facility = $facilityMap->get($group->ine);
-                    $cnes = $group->cnes ?: ($facility?->cnes ?? '—');
-                    $facilityName = $group->facility_name ?: ($facility?->facility_name ?? 'Unidade Básica de Saúde');
-                    $score = round((float) $group->avg_score, 2);
-                    $level = FamilyHealthService::calculatePerformanceLevel('c2', $score);
-
-                    return [
-                        'ine' => $group->ine,
-                        'team_name' => $group->team_name,
-                        'cnes' => $cnes,
-                        'facility_name' => $facilityName,
-                        'numerator' => (int) round((float) $group->sum_score),
-                        'denominator' => (int) $group->total_children,
-                        'score_percent' => $score,
-                        'performance_level' => $level,
-                    ];
-                })->sortByDesc('score_percent')->values();
-            } elseif (Schema::hasTable('family_health_indicator_snapshots')) {
-                $c2Snaps = FamilyHealthIndicatorSnapshot::query()
-                    ->where('indicator_code', 'c2')
-                    ->where('year', $this->year)
-                    ->where('quarter', $this->quarter)
-                    ->whereNotNull('ine')
-                    ->where('ine', '!=', '')
-                    ->get();
-
-                $c2TeamRows = $c2Snaps->map(function ($snap) use ($facilityMap) {
-                    $facility = $facilityMap->get($snap->ine);
-                    $cnes = $facility?->cnes ?? '—';
-                    $facilityName = $facility?->facility_name ?? 'Unidade Básica de Saúde';
-                    $denominator = (int) $snap->denominator;
-                    $numerator = (int) $snap->numerator;
-                    $score = (float) $snap->score_percent;
-                    $level = $snap->performance_level ?: FamilyHealthService::calculatePerformanceLevel('c2', $score);
-
-                    return [
-                        'ine' => $snap->ine,
-                        'team_name' => $snap->team_name,
-                        'cnes' => $cnes,
-                        'facility_name' => $facilityName,
-                        'numerator' => $numerator,
-                        'denominator' => $denominator,
-                        'score_percent' => $score,
-                        'performance_level' => $level,
-                    ];
-                })->sortByDesc('score_percent')->values();
-            }
-
-            $c2Total = $c2TeamRows->count();
-            $c2Reg = $c2TeamRows->filter(fn ($r) => $r['performance_level'] === 'regular')->count();
-            $c2Suf = $c2TeamRows->filter(fn ($r) => $r['performance_level'] === 'suficiente')->count();
-            $c2Bom = $c2TeamRows->filter(fn ($r) => $r['performance_level'] === 'bom')->count();
-            $c2Oti = $c2TeamRows->filter(fn ($r) => $r['performance_level'] === 'otimo')->count();
-
-            $c2Distribution = [
-                'total' => $c2Total,
-                'regular' => ['count' => $c2Reg, 'percent' => $c2Total > 0 ? round(($c2Reg / $c2Total) * 100, 1) : 0.0],
-                'suficiente' => ['count' => $c2Suf, 'percent' => $c2Total > 0 ? round(($c2Suf / $c2Total) * 100, 1) : 0.0],
-                'bom' => ['count' => $c2Bom, 'percent' => $c2Total > 0 ? round(($c2Bom / $c2Total) * 100, 1) : 0.0],
-                'otimo' => ['count' => $c2Oti, 'percent' => $c2Total > 0 ? round(($c2Oti / $c2Total) * 100, 1) : 0.0],
-            ];
-        }
-
-        $c2SubTabEffective = $this->c2SubTab;
-        if ($this->indicator === 'c2' && $this->activeTab === 'active_search') {
-            $c2SubTabEffective = 'nominal';
-        }
-
-        return view('livewire.family-health.indicator-detail', [
+        return view('livewire.family-health.indicator-detail', array_merge([
             'indicator' => $this->indicator,
             'year' => $this->year,
             'quarter' => $this->quarter,
@@ -1094,36 +709,621 @@ class IndicatorDetail extends Component
             'c2Teams' => $filteredTeams,
             'c3Teams' => $filteredTeams,
             'filteredTeams' => $filteredTeams,
-            'c1TableRows' => $c1TableRows,
-            'c1SummaryRows' => $c1SummaryRows,
-            'c1Distribution' => $c1Distribution,
-            'c2TeamRows' => $c2TeamRows,
-            'c2Distribution' => $c2Distribution,
-            'availableUnits' => $availableUnits,
-            'availableTeams' => $availableTeams,
-            'quarterMonths' => $quarterMonths,
-            'unassignedAttendances' => $unassignedAttendances,
             'c1SubTab' => $this->c1SubTab,
             'c2SubTab' => $c2SubTabEffective,
+            'c3SubTab' => $c3SubTabEffective,
             'activeSearchList' => $data['active_search_list'],
             'periods' => $periods,
-            'c2NominalList' => $c2NominalList,
-            'c2SummaryKpis' => $c2SummaryKpis,
-            'c2FilterOptions' => $c2FilterOptions,
-            'c2AvailableColumns' => $c2AvailableColumns,
-            'c2TotalItems' => $c2TotalItems,
-            'c2TotalPages' => $c2TotalPages,
-            'c3NominalList' => $c3NominalList,
-            'c3SummaryKpis' => $c3SummaryKpis,
-            'c3FilterOptions' => $c3FilterOptions,
-            'c3AvailableColumns' => $c3AvailableColumns,
-            'c3TotalItems' => $c3TotalItems,
-            'c3TotalPages' => $c3TotalPages,
             'activeFiltersCount' => $activeFiltersCount,
             'isRealDataAvailable' => $this->indicator === 'c2' ? C2ActiveSearchService::isRealDataAvailable($this->year, $this->quarter) : false,
             'realChildrenCount' => $this->indicator === 'c2' ? C2ActiveSearchService::getRealChildrenCount($this->year, $this->quarter, $this->selectedIne) : 0,
             'isRealC3DataAvailable' => $this->indicator === 'c3' ? C3ActiveSearchService::isRealDataAvailable($this->year, $this->quarter) : false,
             'realPregnanciesCount' => $this->indicator === 'c3' ? C3ActiveSearchService::getRealPregnanciesCount($this->year, $this->quarter, $this->selectedIne) : 0,
-        ]);
+        ], $c1Data, $c2Data['viewVars'], $c3Data['viewVars']));
     }
+
+    private function getFilteredTeams(Collection $teams): Collection
+    {
+        if (! in_array($this->indicator, ['c1', 'c2', 'c3'], true)) {
+            return $teams;
+        }
+
+        $filtered = $teams;
+
+        if ($this->selectedIne) {
+            $filtered = $filtered->filter(fn ($t) => $t->ine === $this->selectedIne);
+        }
+
+        if ($this->selectedClassification) {
+            $filtered = $filtered->filter(function ($t) {
+                if ($this->selectedMonth !== null && isset($t->monthly_details[$this->selectedMonth])) {
+                    return $t->monthly_details[$this->selectedMonth]['performance_level'] === $this->selectedClassification;
+                }
+
+                $level = $t->quarter_level ?? $t->performance_level;
+
+                return $level === $this->selectedClassification;
+            });
+        }
+
+        return $filtered;
+    }
+
+    private function prepareC1Data(): array
+    {
+        if ($this->indicator !== 'c1') {
+            return [
+                'c1TableRows' => collect(),
+                'c1SummaryRows' => collect(),
+                'c1Distribution' => [
+                    'total' => 0,
+                    'regular' => ['count' => 0, 'percent' => 0.0],
+                    'suficiente' => ['count' => 0, 'percent' => 0.0],
+                    'bom' => ['count' => 0, 'percent' => 0.0],
+                    'otimo' => ['count' => 0, 'percent' => 0.0],
+                ],
+                'availableUnits' => collect(),
+                'availableTeams' => collect(),
+                'quarterMonths' => [],
+                'unassignedAttendances' => 0,
+            ];
+        }
+
+        $firstM = ($this->quarter - 1) * 4 + 1;
+        $quarterMonths = [
+            $firstM => sprintf('%02d / %d', $firstM, $this->year),
+            $firstM + 1 => sprintf('%02d / %d', $firstM + 1, $this->year),
+            $firstM + 2 => sprintf('%02d / %d', $firstM + 2, $this->year),
+            $firstM + 3 => sprintf('%02d / %d', $firstM + 3, $this->year),
+        ];
+
+        $hasCvat = Schema::hasTable('cvat_team_evaluations');
+
+        $facilityMap = $hasCvat ? CvatTeamEvaluation::select('ine', 'cnes', 'facility_name')
+            ->whereNotNull('ine')
+            ->get()
+            ->keyBy('ine') : collect();
+
+        $availableUnits = $hasCvat ? CvatTeamEvaluation::select('cnes', 'facility_name')
+            ->distinct()
+            ->whereNotNull('cnes')
+            ->orderBy('facility_name')
+            ->get()
+            ->map(fn ($item) => [
+                'cnes' => $item->cnes,
+                'name' => $item->facility_name,
+            ]) : collect();
+
+        $teamsQuery = $hasCvat ? CvatTeamEvaluation::select('ine', 'team_name', 'cnes')
+            ->distinct()
+            ->whereNotNull('ine')
+            ->orderBy('team_name') : null;
+
+        if ($teamsQuery && $this->selectedCnes) {
+            $teamsQuery->where('cnes', $this->selectedCnes);
+        }
+
+        $availableTeams = $teamsQuery ? $teamsQuery->get()->map(fn ($item) => [
+            'ine' => $item->ine,
+            'name' => $item->team_name,
+            'cnes' => $item->cnes,
+        ]) : collect();
+
+        $monthlyQuery = FamilyHealthMonthlySnapshot::query()
+            ->where('indicator_code', 'c1')
+            ->where('year', $this->year)
+            ->where('quarter', $this->quarter)
+            ->whereNotNull('ine')
+            ->where('ine', '!=', '')
+            ->where('team_name', 'not like', 'ESB%')
+            ->where('team_name', 'not like', 'esb%')
+            ->where('team_name', 'not like', '%E-MULTI%')
+            ->where('team_name', 'not like', '%e-multi%')
+            ->where('team_name', 'not like', '%SEM EQUIPE%');
+
+        if ($this->selectedMonth !== null) {
+            $monthlyQuery->where('month', $this->selectedMonth);
+        }
+
+        if ($this->selectedIne) {
+            $monthlyQuery->where('ine', $this->selectedIne);
+        }
+
+        $rawRows = $monthlyQuery->get();
+
+        $c1TableRows = $rawRows->map(function ($snap) use ($facilityMap) {
+            $facility = $facilityMap->get($snap->ine);
+            $cnes = $facility?->cnes ?? '—';
+            $facilityName = $facility?->facility_name ?? 'Unidade Básica de Saúde';
+            $numerator = (int) $snap->numerator;
+            $denominator = (int) $snap->denominator;
+            $spontaneous = max(0, $denominator - $numerator);
+            $score = (float) $snap->score_percent;
+            $level = $snap->performance_level ?: FamilyHealthService::calculatePerformanceLevel('c1', $score);
+
+            return [
+                'ine' => $snap->ine,
+                'team_name' => $snap->team_name,
+                'cnes' => $cnes,
+                'facility_name' => $facilityName,
+                'month' => (int) $snap->month,
+                'year' => (int) $snap->year,
+                'month_label' => sprintf('%02d/%d', $snap->month, $snap->year),
+                'numerator' => $numerator,
+                'spontaneous' => $spontaneous,
+                'denominator' => $denominator,
+                'is_evaluated' => true,
+                'score_percent' => $score,
+                'performance_level' => $level,
+            ];
+        });
+
+        if ($this->selectedCnes) {
+            $c1TableRows = $c1TableRows->filter(fn ($row) => $row['cnes'] === $this->selectedCnes);
+        }
+
+        if ($this->selectedClassification) {
+            $c1TableRows = $c1TableRows->filter(fn ($row) => $row['performance_level'] === $this->selectedClassification);
+        }
+
+        $c1TableRows = $c1TableRows->sortByDesc('score_percent')->values();
+
+        $unassignedSnap = FamilyHealthMonthlySnapshot::query()
+            ->where('indicator_code', 'c1')
+            ->where('year', $this->year)
+            ->where('quarter', $this->quarter)
+            ->when($this->selectedMonth, fn ($q) => $q->where('month', $this->selectedMonth))
+            ->where(fn ($q) => $q->whereNull('ine')->orWhere('ine', ''))
+            ->first();
+        $unassignedAttendances = $unassignedSnap ? (int) $unassignedSnap->denominator : 0;
+
+        $c1AllTeamsQuery = FamilyHealthMonthlySnapshot::query()
+            ->where('indicator_code', 'c1')
+            ->where('year', $this->year)
+            ->where('quarter', $this->quarter)
+            ->whereNotNull('ine')
+            ->where('ine', '!=', '')
+            ->where('team_name', 'not like', 'ESB%')
+            ->where('team_name', 'not like', 'esb%')
+            ->where('team_name', 'not like', '%E-MULTI%')
+            ->where('team_name', 'not like', '%e-multi%')
+            ->where('team_name', 'not like', '%SEM EQUIPE%');
+
+        if ($this->selectedMonth !== null) {
+            $c1AllTeamsQuery->where('month', $this->selectedMonth);
+        }
+
+        $c1SummaryRows = $c1AllTeamsQuery->get()->map(function ($snap) use ($facilityMap) {
+            $facility = $facilityMap->get($snap->ine);
+            $cnes = $facility?->cnes ?? '—';
+            $facilityName = $facility?->facility_name ?? 'Unidade Básica de Saúde';
+            $numerator = (int) $snap->numerator;
+            $denominator = (int) $snap->denominator;
+            $score = (float) $snap->score_percent;
+            $level = $snap->performance_level ?: FamilyHealthService::calculatePerformanceLevel('c1', $score);
+
+            return [
+                'ine' => $snap->ine,
+                'team_name' => $snap->team_name,
+                'cnes' => $cnes,
+                'facility_name' => $facilityName,
+                'numerator' => $numerator,
+                'denominator' => $denominator,
+                'score_percent' => $score,
+                'performance_level' => $level,
+            ];
+        })->sortByDesc('score_percent')->values();
+
+        $c1Total = $c1SummaryRows->count();
+        $c1Reg = $c1SummaryRows->filter(fn ($r) => $r['performance_level'] === 'regular')->count();
+        $c1Suf = $c1SummaryRows->filter(fn ($r) => $r['performance_level'] === 'suficiente')->count();
+        $c1Bom = $c1SummaryRows->filter(fn ($r) => $r['performance_level'] === 'bom')->count();
+        $c1Oti = $c1SummaryRows->filter(fn ($r) => $r['performance_level'] === 'otimo')->count();
+
+        $c1Distribution = [
+            'total' => $c1Total,
+            'regular' => ['count' => $c1Reg, 'percent' => $c1Total > 0 ? round(($c1Reg / $c1Total) * 100, 1) : 0.0],
+            'suficiente' => ['count' => $c1Suf, 'percent' => $c1Total > 0 ? round(($c1Suf / $c1Total) * 100, 1) : 0.0],
+            'bom' => ['count' => $c1Bom, 'percent' => $c1Total > 0 ? round(($c1Bom / $c1Total) * 100, 1) : 0.0],
+            'otimo' => ['count' => $c1Oti, 'percent' => $c1Total > 0 ? round(($c1Oti / $c1Total) * 100, 1) : 0.0],
+        ];
+
+        return [
+            'c1TableRows' => $c1TableRows,
+            'c1SummaryRows' => $c1SummaryRows,
+            'c1Distribution' => $c1Distribution,
+            'availableUnits' => $availableUnits,
+            'availableTeams' => $availableTeams,
+            'quarterMonths' => $quarterMonths,
+            'unassignedAttendances' => $unassignedAttendances,
+        ];
+    }
+
+    private function prepareC2Data(C2ActiveSearchService $c2Service): array
+    {
+        $c2NominalList = collect();
+        $c2SummaryKpis = null;
+        $c2FilterOptions = [];
+        $c2AvailableColumns = C2ActiveSearchService::getAvailableColumns();
+        $c2TotalItems = 0;
+        $c2TotalPages = 1;
+        $activeFiltersCount = 0;
+        $c2TeamRows = collect();
+        $c2Distribution = [
+            'total' => 0,
+            'regular' => ['count' => 0, 'percent' => 0.0],
+            'suficiente' => ['count' => 0, 'percent' => 0.0],
+            'bom' => ['count' => 0, 'percent' => 0.0],
+            'otimo' => ['count' => 0, 'percent' => 0.0],
+        ];
+
+        if ($this->indicator !== 'c2') {
+            return [
+                'activeFiltersCount' => 0,
+                'viewVars' => [
+                    'c2NominalList' => $c2NominalList,
+                    'c2SummaryKpis' => $c2SummaryKpis,
+                    'c2FilterOptions' => $c2FilterOptions,
+                    'c2AvailableColumns' => $c2AvailableColumns,
+                    'c2TotalItems' => $c2TotalItems,
+                    'c2TotalPages' => $c2TotalPages,
+                    'c2TeamRows' => $c2TeamRows,
+                    'c2Distribution' => $c2Distribution,
+                ],
+            ];
+        }
+
+        $c2BaseCohort = $c2Service->getBaseCohort($this->year, $this->quarter, $this->selectedIne);
+
+        $filters = [
+            'searchCns' => $this->searchCns,
+            'searchCpf' => $this->searchCpf,
+            'searchName' => $this->searchName,
+            'searchCnes' => $this->searchCnes,
+            'searchIne' => $this->searchIne,
+            'advTeam' => $this->advTeam,
+            'advMicroarea' => $this->advMicroarea,
+            'advCitizenName' => $this->advCitizenName,
+            'advCitizenCpf' => $this->advCitizenCpf,
+            'advCitizenCns' => $this->advCitizenCns,
+            'advMotherName' => $this->advMotherName,
+            'advMonth' => $this->advMonth,
+            'advMonthOption' => $this->advMonthOption,
+            'advQuarter' => $this->advQuarter,
+            'advProfessionalCns' => $this->advProfessionalCns,
+            'advProfessionalName' => $this->advProfessionalName,
+            'advRaceColor' => $this->advRaceColor,
+            'advAgeGroup' => $this->advAgeGroup,
+            'advAgeMonths' => $this->advAgeMonths,
+            'advMici' => $this->advMici,
+            'advMicdt' => $this->advMicdt,
+            'advAccompanied' => $this->advAccompanied,
+            'advPracticeA' => $this->advPracticeA,
+            'advPracticeB' => $this->advPracticeB,
+            'advPracticeC' => $this->advPracticeC,
+            'advPracticeD' => $this->advPracticeD,
+            'advPracticeE' => $this->advPracticeE,
+            'baseYear' => $this->year,
+            'baseQuarter' => $this->quarter,
+        ];
+
+        foreach ($filters as $k => $val) {
+            if ($k === 'baseYear' || $k === 'baseQuarter' || $k === 'advMonthOption') {
+                continue;
+            }
+            if ($k === 'advAgeMonths') {
+                if (! empty($val) && empty($filters['advAgeGroup'])) {
+                    $activeFiltersCount++;
+                }
+
+                continue;
+            }
+            if ($val !== '' && $val !== null && $val !== []) {
+                $activeFiltersCount++;
+            }
+        }
+
+        $c2FilteredCohort = $c2Service->filterCohort($c2BaseCohort, $filters);
+        $c2SummaryKpis = $c2Service->getSummaryKpis($c2FilteredCohort, $this->year, $this->quarter, $this->selectedMonth);
+        $c2FilterOptions = $c2Service->getFilterOptions($this->year, $this->quarter);
+
+        $c2TotalItems = $c2FilteredCohort->count();
+        $c2TotalPages = max(1, (int) ceil($c2TotalItems / max(1, $this->perPage)));
+        $this->c2Page = min(max(1, $this->c2Page), $c2TotalPages);
+
+        $c2NominalList = $c2FilteredCohort->forPage($this->c2Page, $this->perPage);
+
+        $hasCvat = Schema::hasTable('cvat_team_evaluations');
+        $facilityMap = $hasCvat ? CvatTeamEvaluation::select('ine', 'cnes', 'facility_name')
+            ->whereNotNull('ine')
+            ->get()
+            ->keyBy('ine') : collect();
+
+        $c2ChildrenGrouped = collect();
+        if (Schema::hasTable('c2_nominal_children')) {
+            $c2ChildrenGrouped = C2NominalChild::query()
+                ->where('year', $this->year)
+                ->where('quarter', $this->quarter)
+                ->whereNotNull('ine')
+                ->where('ine', '!=', '')
+                ->selectRaw('ine, team_name, cnes, facility_name, count(*) as total_children, sum(score_percent) as sum_score, avg(score_percent) as avg_score')
+                ->groupBy('ine', 'team_name', 'cnes', 'facility_name')
+                ->get();
+        }
+
+        if ($c2ChildrenGrouped->isNotEmpty()) {
+            $c2TeamRows = $c2ChildrenGrouped->map(function ($group) use ($facilityMap) {
+                $facility = $facilityMap->get($group->ine);
+                $cnes = $group->cnes ?: ($facility?->cnes ?? '—');
+                $facilityName = $group->facility_name ?: ($facility?->facility_name ?? 'Unidade Básica de Saúde');
+                $score = round((float) $group->avg_score, 2);
+                $level = FamilyHealthService::calculatePerformanceLevel('c2', $score);
+
+                return [
+                    'ine' => $group->ine,
+                    'team_name' => $group->team_name,
+                    'cnes' => $cnes,
+                    'facility_name' => $facilityName,
+                    'numerator' => (int) round((float) $group->sum_score),
+                    'denominator' => (int) $group->total_children,
+                    'score_percent' => $score,
+                    'performance_level' => $level,
+                ];
+            })->sortByDesc('score_percent')->values();
+        } elseif (Schema::hasTable('family_health_indicator_snapshots')) {
+            $c2Snaps = FamilyHealthIndicatorSnapshot::query()
+                ->where('indicator_code', 'c2')
+                ->where('year', $this->year)
+                ->where('quarter', $this->quarter)
+                ->whereNotNull('ine')
+                ->where('ine', '!=', '')
+                ->get();
+
+            $c2TeamRows = $c2Snaps->map(function ($snap) use ($facilityMap) {
+                $facility = $facilityMap->get($snap->ine);
+                $cnes = $facility?->cnes ?? '—';
+                $facilityName = $facility?->facility_name ?? 'Unidade Básica de Saúde';
+                $denominator = (int) $snap->denominator;
+                $numerator = (int) $snap->numerator;
+                $score = (float) $snap->score_percent;
+                $level = $snap->performance_level ?: FamilyHealthService::calculatePerformanceLevel('c2', $score);
+
+                return [
+                    'ine' => $snap->ine,
+                    'team_name' => $snap->team_name,
+                    'cnes' => $cnes,
+                    'facility_name' => $facilityName,
+                    'numerator' => $numerator,
+                    'denominator' => $denominator,
+                    'score_percent' => $score,
+                    'performance_level' => $level,
+                ];
+            })->sortByDesc('score_percent')->values();
+        }
+
+        $c2Total = $c2TeamRows->count();
+        $c2Reg = $c2TeamRows->filter(fn ($r) => $r['performance_level'] === 'regular')->count();
+        $c2Suf = $c2TeamRows->filter(fn ($r) => $r['performance_level'] === 'suficiente')->count();
+        $c2Bom = $c2TeamRows->filter(fn ($r) => $r['performance_level'] === 'bom')->count();
+        $c2Oti = $c2TeamRows->filter(fn ($r) => $r['performance_level'] === 'otimo')->count();
+
+        $c2Distribution = [
+            'total' => $c2Total,
+            'regular' => ['count' => $c2Reg, 'percent' => $c2Total > 0 ? round(($c2Reg / $c2Total) * 100, 1) : 0.0],
+            'suficiente' => ['count' => $c2Suf, 'percent' => $c2Total > 0 ? round(($c2Suf / $c2Total) * 100, 1) : 0.0],
+            'bom' => ['count' => $c2Bom, 'percent' => $c2Total > 0 ? round(($c2Bom / $c2Total) * 100, 1) : 0.0],
+            'otimo' => ['count' => $c2Oti, 'percent' => $c2Total > 0 ? round(($c2Oti / $c2Total) * 100, 1) : 0.0],
+        ];
+
+        return [
+            'activeFiltersCount' => $activeFiltersCount,
+            'viewVars' => [
+                'c2NominalList' => $c2NominalList,
+                'c2SummaryKpis' => $c2SummaryKpis,
+                'c2FilterOptions' => $c2FilterOptions,
+                'c2AvailableColumns' => $c2AvailableColumns,
+                'c2TotalItems' => $c2TotalItems,
+                'c2TotalPages' => $c2TotalPages,
+                'c2TeamRows' => $c2TeamRows,
+                'c2Distribution' => $c2Distribution,
+            ],
+        ];
+    }
+
+    private function prepareC3Data(C3ActiveSearchService $c3Service): array
+    {
+        $c3NominalList = collect();
+        $c3SummaryKpis = null;
+        $c3FilterOptions = [];
+        $c3AvailableColumns = C3ActiveSearchService::getAvailableColumns();
+        $c3TotalItems = 0;
+        $c3TotalPages = 1;
+        $activeFiltersCount = 0;
+        $c3TeamRows = collect();
+        $c3Distribution = [
+            'total' => 0,
+            'regular' => ['count' => 0, 'percent' => 0.0],
+            'suficiente' => ['count' => 0, 'percent' => 0.0],
+            'bom' => ['count' => 0, 'percent' => 0.0],
+            'otimo' => ['count' => 0, 'percent' => 0.0],
+        ];
+
+        if ($this->indicator !== 'c3') {
+            return [
+                'activeFiltersCount' => 0,
+                'viewVars' => [
+                    'c3NominalList' => $c3NominalList,
+                    'c3SummaryKpis' => $c3SummaryKpis,
+                    'c3FilterOptions' => $c3FilterOptions,
+                    'c3AvailableColumns' => $c3AvailableColumns,
+                    'c3TotalItems' => $c3TotalItems,
+                    'c3TotalPages' => $c3TotalPages,
+                    'c3TeamRows' => $c3TeamRows,
+                    'c3Distribution' => $c3Distribution,
+                ],
+            ];
+        }
+
+        $c3BaseCohort = $c3Service->getBaseCohort($this->year, $this->quarter, $this->selectedIne);
+
+        $filters = [
+            'searchCns' => $this->searchCns,
+            'searchCpf' => $this->searchCpf,
+            'searchName' => $this->searchName,
+            'searchCnes' => $this->searchCnes,
+            'searchIne' => $this->searchIne,
+            'advDistrict' => $this->advDistrict,
+            'advFacility' => $this->advFacility,
+            'advTeam' => $this->advTeam,
+            'advMicroarea' => $this->advMicroarea,
+            'advCitizenName' => $this->advCitizenName,
+            'advCitizenCpf' => $this->advCitizenCpf,
+            'advCitizenCns' => $this->advCitizenCns,
+            'advMotherName' => $this->advMotherName,
+            'advPhone' => $this->advPhone,
+            'advStatus' => $this->advStatus,
+            'advTrimester' => $this->advTrimester,
+            'advMonth' => $this->advMonth,
+            'advMonthOption' => $this->advMonthOption,
+            'advQuarter' => $this->advQuarter,
+            'advProfessionalCns' => $this->advProfessionalCns,
+            'advProfessionalName' => $this->advProfessionalName,
+            'advRaceColor' => $this->advRaceColor,
+            'advDpp' => $this->advDpp,
+            'advMici' => $this->advMici,
+            'advMicdt' => $this->advMicdt,
+            'advAccompanied' => $this->advAccompanied,
+            'advAbortion' => $this->advAbortion,
+            'advDumDivergence' => $this->advDumDivergence,
+            'advPracticeA' => $this->advPracticeA,
+            'advPracticeB' => $this->advPracticeB,
+            'advPracticeC' => $this->advPracticeC,
+            'advPracticeD' => $this->advPracticeD,
+            'advPracticeE' => $this->advPracticeE,
+            'advPracticeF' => $this->advPracticeF,
+            'advPracticeG' => $this->advPracticeG,
+            'advPracticeH' => $this->advPracticeH,
+            'advPracticeI' => $this->advPracticeI,
+            'advPracticeJ' => $this->advPracticeJ,
+            'advPracticeK' => $this->advPracticeK,
+            'baseYear' => $this->year,
+            'baseQuarter' => $this->quarter,
+        ];
+
+        foreach ($filters as $k => $val) {
+            if ($k === 'baseYear' || $k === 'baseQuarter' || $k === 'advMonthOption') {
+                continue;
+            }
+            if ($val !== '' && $val !== null) {
+                $activeFiltersCount++;
+            }
+        }
+
+        $c3FilteredCohort = $c3Service->filterCohort($c3BaseCohort, $filters);
+        $c3SummaryKpis = $c3Service->getSummaryKpis($c3FilteredCohort, $this->year, $this->quarter, $this->selectedIne);
+        $c3FilterOptions = $c3Service->getFilterOptions($this->year, $this->quarter);
+
+        $c3TotalItems = $c3FilteredCohort->count();
+        $c3TotalPages = max(1, (int) ceil($c3TotalItems / max(1, $this->perPage)));
+        $this->c3Page = min(max(1, $this->c3Page), $c3TotalPages);
+
+        $c3NominalList = $c3FilteredCohort->forPage($this->c3Page, $this->perPage);
+
+        $hasCvat = Schema::hasTable('cvat_team_evaluations');
+        $facilityMap = $hasCvat ? CvatTeamEvaluation::select('ine', 'cnes', 'facility_name')
+            ->whereNotNull('ine')
+            ->get()
+            ->keyBy('ine') : collect();
+
+        $c3PregnanciesGrouped = collect();
+        if (Schema::hasTable('c3_nominal_pregnancies')) {
+            $c3PregnanciesGrouped = C3NominalPregnancy::query()
+                ->where('year', $this->year)
+                ->where('quarter', $this->quarter)
+                ->whereNotNull('ine')
+                ->where('ine', '!=', '')
+                ->selectRaw('ine, team_name, cnes, facility_name, count(*) as total_pregnancies, sum(score_percent) as sum_score, avg(score_percent) as avg_score')
+                ->groupBy('ine', 'team_name', 'cnes', 'facility_name')
+                ->get();
+        }
+
+        if ($c3PregnanciesGrouped->isNotEmpty()) {
+            $c3TeamRows = $c3PregnanciesGrouped->map(function ($group) use ($facilityMap) {
+                $facility = $facilityMap->get($group->ine);
+                $cnes = $group->cnes ?: ($facility?->cnes ?? '—');
+                $facilityName = $group->facility_name ?: ($facility?->facility_name ?? 'Unidade Básica de Saúde');
+                $score = round((float) $group->avg_score, 2);
+                $level = FamilyHealthService::calculatePerformanceLevel('c3', $score);
+
+                return [
+                    'ine' => $group->ine,
+                    'team_name' => $group->team_name,
+                    'cnes' => $cnes,
+                    'facility_name' => $facilityName,
+                    'numerator' => (int) round((float) $group->sum_score),
+                    'denominator' => (int) $group->total_pregnancies,
+                    'score_percent' => $score,
+                    'performance_level' => $level,
+                ];
+            })->sortByDesc('score_percent')->values();
+        } elseif (Schema::hasTable('family_health_indicator_snapshots')) {
+            $c3Snaps = FamilyHealthIndicatorSnapshot::query()
+                ->where('indicator_code', 'c3')
+                ->where('year', $this->year)
+                ->where('quarter', $this->quarter)
+                ->whereNotNull('ine')
+                ->where('ine', '!=', '')
+                ->get();
+
+            $c3TeamRows = $c3Snaps->map(function ($snap) use ($facilityMap) {
+                $facility = $facilityMap->get($snap->ine);
+                $cnes = $facility?->cnes ?? '—';
+                $facilityName = $facility?->facility_name ?? 'Unidade Básica de Saúde';
+                $denominator = (int) $snap->denominator;
+                $numerator = (int) $snap->numerator;
+                $score = (float) $snap->score_percent;
+                $level = $snap->performance_level ?: FamilyHealthService::calculatePerformanceLevel('c3', $score);
+
+                return [
+                    'ine' => $snap->ine,
+                    'team_name' => $snap->team_name,
+                    'cnes' => $cnes,
+                    'facility_name' => $facilityName,
+                    'numerator' => $numerator,
+                    'denominator' => $denominator,
+                    'score_percent' => $score,
+                    'performance_level' => $level,
+                ];
+            })->sortByDesc('score_percent')->values();
+        }
+
+        $c3Total = $c3TeamRows->count();
+        $c3Reg = $c3TeamRows->filter(fn ($r) => $r['performance_level'] === 'regular')->count();
+        $c3Suf = $c3TeamRows->filter(fn ($r) => $r['performance_level'] === 'suficiente')->count();
+        $c3Bom = $c3TeamRows->filter(fn ($r) => $r['performance_level'] === 'bom')->count();
+        $c3Oti = $c3TeamRows->filter(fn ($r) => $r['performance_level'] === 'otimo')->count();
+
+        $c3Distribution = [
+            'total' => $c3Total,
+            'regular' => ['count' => $c3Reg, 'percent' => $c3Total > 0 ? round(($c3Reg / $c3Total) * 100, 1) : 0.0],
+            'suficiente' => ['count' => $c3Suf, 'percent' => $c3Total > 0 ? round(($c3Suf / $c3Total) * 100, 1) : 0.0],
+            'bom' => ['count' => $c3Bom, 'percent' => $c3Total > 0 ? round(($c3Bom / $c3Total) * 100, 1) : 0.0],
+            'otimo' => ['count' => $c3Oti, 'percent' => $c3Total > 0 ? round(($c3Oti / $c3Total) * 100, 1) : 0.0],
+        ];
+
+        return [
+            'activeFiltersCount' => $activeFiltersCount,
+            'viewVars' => [
+                'c3NominalList' => $c3NominalList,
+                'c3SummaryKpis' => $c3SummaryKpis,
+                'c3FilterOptions' => $c3FilterOptions,
+                'c3AvailableColumns' => $c3AvailableColumns,
+                'c3TotalItems' => $c3TotalItems,
+                'c3TotalPages' => $c3TotalPages,
+                'c3TeamRows' => $c3TeamRows,
+                'c3Distribution' => $c3Distribution,
+            ],
+        ];
+    }
+
 }

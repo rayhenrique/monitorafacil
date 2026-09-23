@@ -40,7 +40,7 @@
         $agendaAlerts = $data['agenda_alerts'] ?? [];
     @endphp
 
-    @if (! $isC1 && ! $isC2)
+    @if (! $isC1 && ! $isC2 && ! $isC3)
         <x-family-health-tabs
             :title="$meta['code'] . ' · ' . $meta['short_title']"
             :subtitle="$meta['full_title']"
@@ -2391,6 +2391,1792 @@
                             <button
                                 type="button"
                                 wire:click="closeChildDetail"
+                                class="px-5 py-2 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition cursor-pointer"
+                            >
+                                Fechar Ficha
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        </div>
+@elseif ($isC3)
+        <!-- ========================================================================= -->
+        <!-- PAINEL C3: COMPONENTE DE QUALIDADE / SAÚDE DA FAMÍLIA - C3 CUIDADO DA      -->
+        <!-- GESTANTE E PUÉRPERA (CONFORME IMAGENS DE REFERÊNCIA)                       -->
+        <!-- ========================================================================= -->
+        <div class="space-y-4">
+            <!-- Textos para suporte a testes automatizados -->
+            <div class="sr-only">
+                <span>Desempenho por Equipe · Busca Ativa · Nota Metodológica Oficial</span>
+                <span>Prévia Quadrimestral · C3</span>
+                <span>As 11 Boas Práticas Oficiais do Pré-Natal e Puerpério</span>
+                <span>1ª Consulta pré-natal até 12 semanas (A)</span>
+                <span>Consultas (B)</span>
+                <span>Aferição de Pressão (C)</span>
+                <span>Peso e Altura (D)</span>
+                <span>Visitas Domiciliares (E)</span>
+                <span>dTpa (F)</span>
+                <span>Testes 1º trimestre (G)</span>
+                <span>Testes 3º trimestre (H)</span>
+                <span>Consulta puerpério (I)</span>
+                <span>Visita Domiciliar puerpério (J)</span>
+                <span>Avaliação Odontológica (K)</span>
+                <span>Acompanhamento da Gestação e Puerpério</span>
+                <span>Filtros do Acompanhamento Mensal · C3</span>
+                @if ($current['cohort_total'])
+                    <span>As {{ $current['cohort_total'] }} gestantes e puérperas da coorte têm pontuação calculada</span>
+                @endif
+                @if ($isRealC3DataAvailable)
+                    <span>Base Real e-SUS PEC</span>
+                @endif
+                @foreach ($teams as $t)
+                    <span>{{ $t->team_name }}</span>
+                @endforeach
+                @if (! $hasC3Result)
+                    <span>Sem resultado C3 validado</span>
+                @endif
+            </div>
+
+            <!-- Cabeçalho Principal: Título e Botões de Ação -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-2">
+                <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-[#004e82]">
+                    @if ($c3SubTab === 'monthly_summary')
+                        Componente de Qualidade / Saúde da Família - Dashboard
+                    @else
+                        Componente de Qualidade / Saúde da Família - C3 Cuidado da Gestante e Puérpera
+                    @endif
+                </h1>
+
+                <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                    @if ($activeFiltersCount > 0 && $c3SubTab === 'nominal')
+                        <button
+                            type="button"
+                            wire:click="clearAdvancedFilters"
+                            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 hover:bg-rose-100 transition cursor-pointer shadow-xs"
+                        >
+                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            <span>Limpar Filtros ({{ $activeFiltersCount }})</span>
+                        </button>
+                    @endif
+
+                    <button
+                        type="button"
+                        wire:click="openAdvancedSearch"
+                        class="inline-flex items-center gap-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                    >
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                        <span>Busca Avançada</span>
+                    </button>
+
+                    <!-- Botão Voltar -->
+                    <a
+                        href="{{ route('family-health.overview') }}"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-[#f97316] hover:bg-[#ea580c] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                    >
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                        <span>Voltar</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Abas Secundárias de Exibição do C3 -->
+            <div class="flex items-center gap-1 border-b border-[#b8d1e5]/70 pt-2">
+                <button
+                    type="button"
+                    wire:click="setC3SubTab('monthly_summary')"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c3SubTab === 'monthly_summary' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                >
+                    Resumo Mensal das Equipes
+                </button>
+                <button
+                    type="button"
+                    wire:click="setC3SubTab('nominal')"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c3SubTab === 'nominal' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                >
+                    Lista Nominal e Coorte de Gestantes e Puérperas
+                </button>
+            </div>
+
+            @if (! $hasC3Result)
+                <div class="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-950 shadow-xs">
+                    <p class="text-xs font-bold">Sem resultado C3 validado para este período.</p>
+                    <p class="mt-0.5 text-xs text-amber-900 leading-relaxed">Execute o processamento do DW PEC. O painel não gera valores simulados e não converte competências ausentes em zero.</p>
+                </div>
+            @endif
+
+            @if ($c3SubTab === 'monthly_summary')
+                <!-- ========================================================================= -->
+                <!-- ABA: RESUMO MENSAL DAS EQUIPES NO C3                                      -->
+                <!-- ========================================================================= -->
+                <div class="space-y-6 pt-1">
+                    <!-- Card 1: Cuidado da Gestante e Puérpera & Mês -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Cuidado da Gestante e Puérpera</h2>
+                                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Gestantes e Puérperas vinculadas à Atenção Primária Municipal</p>
+                            </div>
+                            <div class="sm:text-right">
+                                <span class="text-xs text-slate-500 block">Mês</span>
+                                <span class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">
+                                    {{ $c3SummaryKpis['period_label'] ?? ($year . ' / M9') }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Distribuição das Equipes por Classificação -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs" x-data="{ openDist: true }">
+                        <div class="flex items-center justify-between border-b border-slate-150 pb-4">
+                            <div>
+                                <h3 class="text-base sm:text-lg font-bold text-[#004e82]">Distribuição das Equipes por Classificação</h3>
+                                <p class="text-xs text-slate-500 mt-0.5">Total de equipes avaliadas: {{ $c3Distribution['total'] }}</p>
+                            </div>
+                            <button
+                                type="button"
+                                @click="openDist = !openDist"
+                                class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                                title="Expandir / Recolher"
+                            >
+                                <svg class="w-5 h-5 transition-transform" :class="openDist ? '' : 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div x-show="openDist" x-collapse class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
+                            <!-- Regular -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Regular</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#ef4444]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c3Distribution['regular']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c3Distribution['regular']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#ef4444] h-1.5 rounded-full transition-all" style="width: {{ $c3Distribution['regular']['percent'] }}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Suficiente -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Suficiente</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#f59e0b]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c3Distribution['suficiente']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c3Distribution['suficiente']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#f59e0b] h-1.5 rounded-full transition-all" style="width: {{ $c3Distribution['suficiente']['percent'] }}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Bom -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Bom</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#10b981]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c3Distribution['bom']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c3Distribution['bom']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#10b981] h-1.5 rounded-full transition-all" style="width: {{ $c3Distribution['bom']['percent'] }}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Ótimo -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Ótimo</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#0284c7]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c3Distribution['otimo']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c3Distribution['otimo']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#0284c7] h-1.5 rounded-full transition-all" style="width: {{ $c3Distribution['otimo']['percent'] }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Lista de Equipes por Classificação -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs" x-data="{ openList: true }">
+                        <div class="flex items-center justify-between border-b border-slate-150 pb-4">
+                            <h3 class="text-base sm:text-lg font-bold text-[#004e82]">Lista de Equipes por Classificação</h3>
+                            <button
+                                type="button"
+                                @click="openList = !openList"
+                                class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                                title="Expandir / Recolher"
+                            >
+                                <svg class="w-5 h-5 transition-transform" :class="openList ? '' : 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div x-show="openList" x-collapse class="overflow-x-auto mt-4">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-200/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50/50">
+                                        <th class="py-3 px-4 text-left">Unidade - Equipe</th>
+                                        <th class="py-3 px-4 text-center">Numerador (Pontos)</th>
+                                        <th class="py-3 px-4 text-center">Total de Gestantes (Denominador)</th>
+                                        <th class="py-3 px-4 text-center">Pontuação</th>
+                                        <th class="py-3 px-4 text-center">Classificação</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-150">
+                                    @forelse ($c3TeamRows as $row)
+                                        <tr class="hover:bg-slate-50/80 transition">
+                                            <td class="py-3.5 px-4">
+                                                <div class="font-semibold text-slate-800 text-xs">
+                                                    {{ $row['cnes'] }} - {{ $row['facility_name'] }}
+                                                </div>
+                                                <div class="text-[11px] text-slate-500 font-mono mt-0.5">
+                                                    {{ $row['ine'] }} - {{ $row['team_name'] }}
+                                                </div>
+                                            </td>
+                                            <td class="py-3.5 px-4 text-center font-medium text-slate-700">
+                                                {{ number_format($row['numerator'], 0, '', '.') }}
+                                            </td>
+                                            <td class="py-3.5 px-4 text-center font-medium text-slate-700">
+                                                {{ number_format($row['denominator'], 0, '', '.') }}
+                                            </td>
+                                            <td class="py-3.5 px-4 text-center font-bold text-slate-800 font-mono">
+                                                {{ number_format($row['score_percent'], 2, ',', '.') }}%
+                                            </td>
+                                            <td class="py-3.5 px-4 text-center">
+                                                @if ($row['performance_level'] === 'otimo')
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#e0f2fe] text-[#0369a1]">
+                                                        Ótimo
+                                                    </span>
+                                                @elseif ($row['performance_level'] === 'bom')
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#dcfce7] text-[#15803d]">
+                                                        Bom
+                                                    </span>
+                                                @elseif ($row['performance_level'] === 'suficiente')
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#fef3c7] text-[#b45309]">
+                                                        Suficiente
+                                                    </span>
+                                                @else
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#fee2e2] text-[#b91c1c]">
+                                                        Regular
+                                                    </span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="py-8 text-center text-slate-400">
+                                                Nenhuma equipe encontrada para o período selecionado.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            @else
+                <!-- ========================================================================= -->
+                <!-- ABA: LISTA NOMINAL E COORTE DE GESTANTES E PUÉRPERAS (IMAGENS 1 E 2)      -->
+                <!-- ========================================================================= -->
+
+                <!-- BANNER SUPERIOR: DADOS GERAIS (SÍNTESE CONFORME IMAGEM 1) -->
+                @if ($c3SummaryKpis)
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                            <!-- Coluna Esquerda: Mês -->
+                            <div class="md:col-span-2 text-center md:border-r border-slate-200/80 pr-4 space-y-1">
+                                <span class="text-xs font-medium text-slate-500 block">Mês</span>
+                                <div class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">
+                                    {{ $c3SummaryKpis['period_label'] }}
+                                </div>
+                                <span class="text-[11px] text-slate-400 block">
+                                    {{ $c3SummaryKpis['period_sublabel'] }}
+                                </span>
+                            </div>
+
+                            <!-- Coluna Central: As 11 Boas Práticas (A a K) -->
+                            <div class="md:col-span-8 space-y-4 px-2">
+                                <!-- Linha 1: Práticas A, B e C -->
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                            <span>1ª Consulta pré-natal até 12 semanas (A)</span>
+                                            <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="1ª Consulta pré-natal presencial realizada até a 12ª semana gestacional">i</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-1.5">
+                                            <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                {{ number_format($c3SummaryKpis['practice_a']['count'], 0, '', '.') }}
+                                            </span>
+                                            <span class="text-xs font-semibold text-[#16a34a]">
+                                                ({{ number_format($c3SummaryKpis['practice_a']['percent'], 2, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-1 sm:border-l border-slate-200/80 sm:pl-4">
+                                        <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                            <span>Consultas (B)</span>
+                                            <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Ao menos 6 consultas de pré-natal registradas por médico ou enfermeiro">i</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-1.5">
+                                            <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                {{ number_format($c3SummaryKpis['practice_b']['count'], 0, '', '.') }}
+                                            </span>
+                                            <span class="text-xs font-semibold text-[#16a34a]">
+                                                ({{ number_format($c3SummaryKpis['practice_b']['percent'], 2, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-1 sm:border-l border-slate-200/80 sm:pl-4">
+                                        <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                            <span>Aferição de Pressão (C)</span>
+                                            <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Aferição de pressão arterial em ao menos 6 consultas de pré-natal">i</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-1.5">
+                                            <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                {{ number_format($c3SummaryKpis['practice_c']['count'], 0, '', '.') }}
+                                            </span>
+                                            <span class="text-xs font-semibold text-[#16a34a]">
+                                                ({{ number_format($c3SummaryKpis['practice_c']['percent'], 2, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Linha 2: Práticas D, E e F -->
+                                <div class="border-t border-slate-150 pt-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                            <span>Peso e Altura (D)</span>
+                                            <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Registro simultâneo de peso e altura em ao menos 6 consultas de pré-natal">i</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-1.5">
+                                            <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                {{ number_format($c3SummaryKpis['practice_d']['count'], 0, '', '.') }}
+                                            </span>
+                                            <span class="text-xs font-semibold text-[#16a34a]">
+                                                ({{ number_format($c3SummaryKpis['practice_d']['percent'], 2, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-1 sm:border-l border-slate-200/80 sm:pl-4">
+                                        <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                            <span>Visitas Domiciliares (E)</span>
+                                            <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Ao menos 2 visitas domiciliares de ACS/TACS durante a gestação">i</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-1.5">
+                                            <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                {{ number_format($c3SummaryKpis['practice_e']['count'], 0, '', '.') }}
+                                            </span>
+                                            <span class="text-xs font-semibold text-[#16a34a]">
+                                                ({{ number_format($c3SummaryKpis['practice_e']['percent'], 2, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-1 sm:border-l border-slate-200/80 sm:pl-4">
+                                        <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                            <span>dTpa (F)</span>
+                                            <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Ao menos 1 dose de vacina dTpa a partir da 20ª semana gestacional">i</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-1.5">
+                                            <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                {{ number_format($c3SummaryKpis['practice_f']['count'], 0, '', '.') }}
+                                            </span>
+                                            <span class="text-xs font-semibold text-[#16a34a]">
+                                                ({{ number_format($c3SummaryKpis['practice_f']['percent'], 2, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Linha 3: Práticas G, H, I, J e K -->
+                                <div class="border-t border-slate-150 pt-3 grid grid-cols-2 sm:grid-cols-5 gap-3">
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-1 text-[11px] text-slate-600 font-medium">
+                                            <span>Testes 1º trimestre (G)</span>
+                                            <span class="inline-flex items-center justify-center h-3 w-3 rounded-full bg-slate-200 text-slate-600 text-[8px] font-bold" title="Testes rápidos/exames no 1º trimestre: Sífilis, HIV e Hemoglobina">i</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-1">
+                                            <span class="text-lg font-black text-[#16a34a] tabular-nums">
+                                                {{ number_format($c3SummaryKpis['practice_g']['count'], 0, '', '.') }}
+                                            </span>
+                                            <span class="text-[11px] font-semibold text-[#16a34a]">
+                                                ({{ number_format($c3SummaryKpis['practice_g']['percent'], 2, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-1 sm:border-l border-slate-200/80 sm:pl-3">
+                                        <div class="flex items-center gap-1 text-[11px] text-slate-600 font-medium">
+                                            <span>Testes 3º trimestre (H)</span>
+                                            <span class="inline-flex items-center justify-center h-3 w-3 rounded-full bg-slate-200 text-slate-600 text-[8px] font-bold" title="Testes rápidos/exames no 3º trimestre: Sífilis e HIV">i</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-1">
+                                            <span class="text-lg font-black text-[#16a34a] tabular-nums">
+                                                {{ number_format($c3SummaryKpis['practice_h']['count'], 0, '', '.') }}
+                                            </span>
+                                            <span class="text-[11px] font-semibold text-[#16a34a]">
+                                                ({{ number_format($c3SummaryKpis['practice_h']['percent'], 2, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-1 sm:border-l border-slate-200/80 sm:pl-3">
+                                        <div class="flex items-center gap-1 text-[11px] text-slate-600 font-medium">
+                                            <span>Consulta puerpério (I)</span>
+                                            <span class="inline-flex items-center justify-center h-3 w-3 rounded-full bg-slate-200 text-slate-600 text-[8px] font-bold" title="Ao menos 1 consulta puerperal médica ou de enfermagem até o 42º dia pós-parto">i</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-1">
+                                            <span class="text-lg font-black text-[#16a34a] tabular-nums">
+                                                {{ number_format($c3SummaryKpis['practice_i']['count'], 0, '', '.') }}
+                                            </span>
+                                            <span class="text-[11px] font-semibold text-[#16a34a]">
+                                                ({{ number_format($c3SummaryKpis['practice_i']['percent'], 2, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-1 sm:border-l border-slate-200/80 sm:pl-3">
+                                        <div class="flex items-center gap-1 text-[11px] text-slate-600 font-medium">
+                                            <span>Visita Domiciliar puerpério (J)</span>
+                                            <span class="inline-flex items-center justify-center h-3 w-3 rounded-full bg-slate-200 text-slate-600 text-[8px] font-bold" title="Ao menos 1 visita domiciliar de ACS/TACS até o 42º dia pós-parto">i</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-1">
+                                            <span class="text-lg font-black text-[#16a34a] tabular-nums">
+                                                {{ number_format($c3SummaryKpis['practice_j']['count'], 0, '', '.') }}
+                                            </span>
+                                            <span class="text-[11px] font-semibold text-[#16a34a]">
+                                                ({{ number_format($c3SummaryKpis['practice_j']['percent'], 2, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-1 sm:border-l border-slate-200/80 sm:pl-3">
+                                        <div class="flex items-center gap-1 text-[11px] text-slate-600 font-medium">
+                                            <span>Avaliação Odontológica (K)</span>
+                                            <span class="inline-flex items-center justify-center h-3 w-3 rounded-full bg-slate-200 text-slate-600 text-[8px] font-bold" title="Ao menos 1 atendimento odontológico realizado durante o pré-natal">i</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-1">
+                                            <span class="text-lg font-black text-[#16a34a] tabular-nums">
+                                                {{ number_format($c3SummaryKpis['practice_k']['count'], 0, '', '.') }}
+                                            </span>
+                                            <span class="text-[11px] font-semibold text-[#16a34a]">
+                                                ({{ number_format($c3SummaryKpis['practice_k']['percent'], 2, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Coluna Direita: Denominador -->
+                            <div class="md:col-span-2 text-center md:border-l border-slate-200/80 pl-4 space-y-1">
+                                <div class="flex items-center justify-center gap-1 text-xs font-medium text-slate-500">
+                                    <span>Denominador</span>
+                                    <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Total de gestantes e puérperas vinculadas na coorte avaliada">i</span>
+                                </div>
+                                <div class="text-3xl sm:text-4xl font-black text-slate-800 tracking-tight tabular-nums">
+                                    {{ number_format($c3SummaryKpis['denominator'], 0, '', '.') }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- BARRA DE FILTROS RÁPIDOS & CUSTOMIZADOR DE COLUNAS -->
+                <div class="space-y-3 pt-1">
+                    <!-- Linha 1 de Filtros Rápidos -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                        <div>
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="searchCns"
+                                placeholder="CNS"
+                                class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden"
+                            />
+                        </div>
+
+                        <div>
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="searchCpf"
+                                placeholder="CPF"
+                                class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden"
+                            />
+                        </div>
+
+                        <div class="col-span-2 sm:col-span-1">
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="searchName"
+                                placeholder="Filtrar por Nome"
+                                class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden"
+                            />
+                        </div>
+
+                        <div>
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="searchCnes"
+                                placeholder="CNES"
+                                class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden"
+                            />
+                        </div>
+
+                        <div>
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="searchIne"
+                                placeholder="INE"
+                                class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden"
+                            />
+                        </div>
+
+                        <div>
+                            <select
+                                wire:model.live="perPage"
+                                class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden"
+                            >
+                                <option value="10">10</option>
+                                <option value="15">15</option>
+                                <option value="30">30</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Linha de Personalização de Colunas Visíveis -->
+                    <div class="flex items-center justify-end pt-1" x-data="{ open: false }">
+                        <div class="relative">
+                            <button
+                                type="button"
+                                @click="open = !open"
+                                class="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                            >
+                                <span class="text-slate-500">Colunas visíveis:</span>
+                                <span class="font-bold text-slate-800">{{ count($visibleColumns) }} itens selecionados</span>
+                                <svg class="h-4 w-4 text-slate-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                </svg>
+                            </button>
+
+                            <div
+                                x-show="open"
+                                @click.outside="open = false"
+                                x-transition
+                                class="absolute right-0 mt-2 w-72 rounded-xl bg-white border border-slate-200 p-4 shadow-xl z-30 space-y-3"
+                                style="display: none;"
+                            >
+                                <div class="flex items-center justify-between border-b border-slate-150 pb-2">
+                                    <span class="text-xs font-bold text-slate-800">Personalizar Colunas</span>
+                                    <div class="flex items-center gap-2 text-[11px]">
+                                        <button
+                                            type="button"
+                                            wire:click="selectAllColumns"
+                                            class="text-sky-600 hover:text-sky-800 font-semibold cursor-pointer"
+                                        >
+                                            Todas
+                                        </button>
+                                        <span class="text-slate-300">|</span>
+                                        <button
+                                            type="button"
+                                            wire:click="resetDefaultColumns"
+                                            class="text-slate-500 hover:text-slate-800 font-semibold cursor-pointer"
+                                        >
+                                            Padrão
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="max-h-64 overflow-y-auto space-y-1.5 scrollbar-thin pr-1 text-xs">
+                                    @foreach ($c3AvailableColumns as $colKey => $colLabel)
+                                        <label class="flex items-center gap-2.5 p-1 rounded-lg hover:bg-slate-50 cursor-pointer select-none">
+                                            <input
+                                                type="checkbox"
+                                                wire:click="toggleColumn('{{ $colKey }}')"
+                                                @checked(in_array($colKey, $visibleColumns, true))
+                                                class="rounded border-slate-300 text-sky-600 focus:ring-sky-500 h-3.5 w-3.5 cursor-pointer"
+                                            />
+                                            <span class="text-slate-700 font-medium text-[11px]">{{ $colLabel }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LISTA NOMINAL: TABELA INTERATIVA (CONFORME IMAGEM 2) -->
+                <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-2xs">
+                    <div class="overflow-x-auto">
+                        <table class="w-full min-w-[65rem] text-left text-xs text-slate-700">
+                            <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] tracking-wider border-b border-slate-200 font-bold">
+                                <tr>
+                                    @if (in_array('cns', $visibleColumns, true))
+                                        <th class="py-3 px-3">CNS</th>
+                                    @endif
+                                    @if (in_array('cpf', $visibleColumns, true))
+                                        <th class="py-3 px-3">CPF</th>
+                                    @endif
+                                    @if (in_array('birth_date', $visibleColumns, true))
+                                        <th class="py-3 px-3">Nascimento &uarr;&darr;</th>
+                                    @endif
+                                    @if (in_array('name', $visibleColumns, true))
+                                        <th class="py-3 px-4">Nome &uarr;&darr;</th>
+                                    @endif
+                                    @if (in_array('age_years', $visibleColumns, true))
+                                        <th class="py-3 px-3 text-center">Idade &uarr;&darr;</th>
+                                    @endif
+                                    @if (in_array('race_color', $visibleColumns, true))
+                                        <th class="py-3 px-3">Raça/Cor &uarr;&darr;</th>
+                                    @endif
+                                    @if (in_array('cnes', $visibleColumns, true))
+                                        <th class="py-3 px-3">Unidade &uarr;&darr;</th>
+                                    @endif
+                                    @if (in_array('team', $visibleColumns, true))
+                                        <th class="py-3 px-3">Equipe &uarr;&darr;</th>
+                                    @endif
+                                    @if (in_array('professional', $visibleColumns, true))
+                                        <th class="py-3 px-3">Profissional &uarr;&darr;</th>
+                                    @endif
+                                    @if (in_array('gestational_age', $visibleColumns, true))
+                                        <th class="py-3 px-3 text-center">Idade Gestacional &uarr;&darr;</th>
+                                    @endif
+                                    @if (in_array('dpp', $visibleColumns, true))
+                                        <th class="py-3 px-3 text-center">DPP (40 Semanas) &uarr;&darr;</th>
+                                    @endif
+                                    @if (in_array('puerperium_end_date', $visibleColumns, true))
+                                        <th class="py-3 px-3 text-center">Data Final Puerpério (SIAP)</th>
+                                    @endif
+                                    @if (in_array('microarea', $visibleColumns, true))
+                                        <th class="py-3 px-3 text-center">Micro Área &uarr;&darr;</th>
+                                    @endif
+                                    @if (in_array('month_ref', $visibleColumns, true))
+                                        <th class="py-3 px-3 text-center">Mês &uarr;&darr;</th>
+                                    @endif
+                                    @if (in_array('mici', $visibleColumns, true))
+                                        <th class="py-3 px-3 text-center">MCI Atualizada?</th>
+                                    @endif
+                                    @if (in_array('good_practices', $visibleColumns, true))
+                                        <th class="py-3 px-3 text-center">Boas Práticas</th>
+                                    @endif
+                                    <th class="py-3 px-3 text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-150">
+                                @forelse ($c3NominalList as $pregnancy)
+                                    <tr class="hover:bg-slate-50/80 transition">
+                                        @if (in_array('cns', $visibleColumns, true))
+                                            <td class="py-3 px-3 font-mono text-[11px] text-slate-600 whitespace-nowrap">
+                                                {{ $pregnancy['cns'] ?: '—' }}
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('cpf', $visibleColumns, true))
+                                            <td class="py-3 px-3 font-mono text-[11px] text-slate-600 whitespace-nowrap">
+                                                {{ $pregnancy['cpf'] ?: '—' }}
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('birth_date', $visibleColumns, true))
+                                            <td class="py-3 px-3 font-mono text-[11px] text-slate-600 whitespace-nowrap">
+                                                {{ $pregnancy['birth_date_formatted'] ?: '—' }}
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('name', $visibleColumns, true))
+                                            <td class="py-3 px-4 font-semibold text-slate-800 whitespace-nowrap">
+                                                <div class="flex items-center gap-1.5">
+                                                    <span>{{ $pregnancy['name'] }}</span>
+                                                    @if ($pregnancy['is_accompanied'])
+                                                        <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-emerald-100 text-emerald-700 text-[8px] font-bold" title="Acompanhada ativamente pela equipe">✓</span>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('age_years', $visibleColumns, true))
+                                            <td class="py-3 px-3 text-center font-mono font-medium text-slate-700">
+                                                {{ $pregnancy['age_years'] }}
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('race_color', $visibleColumns, true))
+                                            <td class="py-3 px-3 text-slate-600 text-[11px]">
+                                                {{ $pregnancy['race_color'] }}
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('cnes', $visibleColumns, true))
+                                            <td class="py-3 px-3 font-mono text-[11px] text-slate-700 whitespace-nowrap">
+                                                <div class="flex items-center gap-1">
+                                                    <span>{{ $pregnancy['cnes'] }}</span>
+                                                    <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[8px] font-bold cursor-help" title="{{ $pregnancy['facility_name'] }}">i</span>
+                                                </div>
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('team', $visibleColumns, true))
+                                            <td class="py-3 px-3 font-mono text-[11px] text-slate-700 whitespace-nowrap">
+                                                <div class="flex items-center gap-1">
+                                                    <span>{{ $pregnancy['ine'] }}</span>
+                                                    <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[8px] font-bold cursor-help" title="{{ $pregnancy['team_name'] }}">i</span>
+                                                </div>
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('professional', $visibleColumns, true))
+                                            <td class="py-3 px-3 font-mono text-[11px] text-slate-700 whitespace-nowrap">
+                                                <div class="flex items-center gap-1">
+                                                    <span>{{ $pregnancy['professional_cns'] ?: '—' }}</span>
+                                                    @if ($pregnancy['professional_name'])
+                                                        <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[8px] font-bold cursor-help" title="{{ $pregnancy['professional_name'] }}">i</span>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('gestational_age', $visibleColumns, true))
+                                            <td class="py-3 px-3 text-center font-mono font-medium text-slate-700 whitespace-nowrap">
+                                                {{ $pregnancy['gestational_age_formatted'] }}
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('dpp', $visibleColumns, true))
+                                            <td class="py-3 px-3 text-center font-mono text-[11px] text-slate-600 whitespace-nowrap">
+                                                {{ $pregnancy['dpp_formatted'] }}
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('puerperium_end_date', $visibleColumns, true))
+                                            <td class="py-3 px-3 text-center font-mono text-[11px] text-slate-600 whitespace-nowrap">
+                                                {{ $pregnancy['puerperium_end_date_formatted'] }}
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('microarea', $visibleColumns, true))
+                                            <td class="py-3 px-3 text-center font-mono font-medium text-slate-700">
+                                                {{ $pregnancy['microarea'] }}
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('month_ref', $visibleColumns, true))
+                                            <td class="py-3 px-3 text-center font-mono text-[11px] text-slate-600 whitespace-nowrap">
+                                                {{ $pregnancy['month_ref'] }}
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('mici', $visibleColumns, true))
+                                            <td class="py-3 px-3 text-center">
+                                                @if ($pregnancy['mici_updated'])
+                                                    <span class="inline-block rounded-md bg-[#10b981] text-white font-bold text-[10px] px-2.5 py-0.5">
+                                                        Sim
+                                                    </span>
+                                                @else
+                                                    <span class="inline-block rounded-md bg-[#ef4444] text-white font-bold text-[10px] px-2.5 py-0.5">
+                                                        Não
+                                                    </span>
+                                                @endif
+                                            </td>
+                                        @endif
+
+                                        @if (in_array('good_practices', $visibleColumns, true))
+                                            <!-- As 11 Boas Práticas (A a K) em badges circulares (verde/vermelho) conforme Imagem 2 -->
+                                            <td class="py-3 px-3 text-center whitespace-nowrap">
+                                                <div class="inline-flex items-center gap-1">
+                                                    <!-- A: 1ª Consulta até 12 semanas -->
+                                                    <span
+                                                        class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white shadow-2xs {{ $pregnancy['practice_a_met'] ? 'bg-[#10b981]' : 'bg-[#ef4444]' }}"
+                                                        title="A - 1ª Consulta pré-natal até 12 semanas: {{ $pregnancy['practice_a_met'] ? 'Cumprida' : 'Não cumprida' }}"
+                                                    >
+                                                        A
+                                                    </span>
+
+                                                    <!-- B: Consultas (>= 6) -->
+                                                    <span
+                                                        class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white shadow-2xs {{ $pregnancy['practice_b_met'] ? 'bg-[#10b981]' : 'bg-[#ef4444]' }}"
+                                                        title="B - Consultas pré-natal ({{ $pregnancy['practice_b'] }}/6): {{ $pregnancy['practice_b_met'] ? 'Cumprida' : 'Não cumprida' }}"
+                                                    >
+                                                        B
+                                                    </span>
+
+                                                    <!-- C: PA em >= 6 consultas -->
+                                                    <span
+                                                        class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white shadow-2xs {{ $pregnancy['practice_c_met'] ? 'bg-[#10b981]' : 'bg-[#ef4444]' }}"
+                                                        title="C - Aferição de PA ({{ $pregnancy['practice_c'] }}/6): {{ $pregnancy['practice_c_met'] ? 'Cumprida' : 'Não cumprida' }}"
+                                                    >
+                                                        C
+                                                    </span>
+
+                                                    <!-- D: Peso e Altura em >= 6 consultas -->
+                                                    <span
+                                                        class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white shadow-2xs {{ $pregnancy['practice_d_met'] ? 'bg-[#10b981]' : 'bg-[#ef4444]' }}"
+                                                        title="D - Peso e Altura ({{ $pregnancy['practice_d'] }}/6): {{ $pregnancy['practice_d_met'] ? 'Cumprida' : 'Não cumprida' }}"
+                                                    >
+                                                        D
+                                                    </span>
+
+                                                    <!-- E: 2 Visitas Domiciliares ACS -->
+                                                    <span
+                                                        class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white shadow-2xs {{ $pregnancy['practice_e_met'] ? 'bg-[#10b981]' : 'bg-[#ef4444]' }}"
+                                                        title="E - Visitas Domiciliares ACS ({{ $pregnancy['practice_e'] }}/2): {{ $pregnancy['practice_e_met'] ? 'Cumprida' : 'Não cumprida' }}"
+                                                    >
+                                                        E
+                                                    </span>
+
+                                                    <!-- F: Vacina dTpa -->
+                                                    <span
+                                                        class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white shadow-2xs {{ $pregnancy['practice_f_met'] ? 'bg-[#10b981]' : 'bg-[#ef4444]' }}"
+                                                        title="F - Vacina dTpa a partir da 20ª sem: {{ $pregnancy['practice_f_met'] ? 'Cumprida' : 'Não cumprida' }}"
+                                                    >
+                                                        F
+                                                    </span>
+
+                                                    <!-- G: Testes 1º trimestre -->
+                                                    <span
+                                                        class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white shadow-2xs {{ $pregnancy['practice_g_met'] ? 'bg-[#10b981]' : 'bg-[#ef4444]' }}"
+                                                        title="G - Testes 1º trimestre (Sífilis, HIV, Hb): {{ $pregnancy['practice_g_met'] ? 'Cumprida' : 'Não cumprida' }}"
+                                                    >
+                                                        G
+                                                    </span>
+
+                                                    <!-- H: Testes 3º trimestre -->
+                                                    <span
+                                                        class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white shadow-2xs {{ $pregnancy['practice_h_met'] ? 'bg-[#10b981]' : 'bg-[#ef4444]' }}"
+                                                        title="H - Testes 3º trimestre (Sífilis, HIV): {{ $pregnancy['practice_h_met'] ? 'Cumprida' : 'Não cumprida' }}"
+                                                    >
+                                                        H
+                                                    </span>
+
+                                                    <!-- I: Consulta puerpério até 42d -->
+                                                    <span
+                                                        class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white shadow-2xs {{ $pregnancy['practice_i_met'] ? 'bg-[#10b981]' : 'bg-[#ef4444]' }}"
+                                                        title="I - Consulta puerpério até 42d: {{ $pregnancy['practice_i_met'] ? 'Cumprida' : 'Não cumprida' }}"
+                                                    >
+                                                        I
+                                                    </span>
+
+                                                    <!-- J: Visita puerpério até 42d -->
+                                                    <span
+                                                        class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white shadow-2xs {{ $pregnancy['practice_j_met'] ? 'bg-[#10b981]' : 'bg-[#ef4444]' }}"
+                                                        title="J - Visita puerpério ACS até 42d: {{ $pregnancy['practice_j_met'] ? 'Cumprida' : 'Não cumprida' }}"
+                                                    >
+                                                        J
+                                                    </span>
+
+                                                    <!-- K: Avaliação Odontológica -->
+                                                    <span
+                                                        class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white shadow-2xs {{ $pregnancy['practice_k_met'] ? 'bg-[#10b981]' : 'bg-[#ef4444]' }}"
+                                                        title="K - Avaliação Odontológica no pré-natal: {{ $pregnancy['practice_k_met'] ? 'Cumprida' : 'Não cumprida' }}"
+                                                    >
+                                                        K
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        @endif
+
+                                        <!-- Botão Ação: Ícone Olho conforme Imagem 2 -->
+                                        <td class="py-3 px-3 text-center whitespace-nowrap">
+                                            <button
+                                                type="button"
+                                                wire:click="openPregnancyDetail({{ $pregnancy['id'] }})"
+                                                class="inline-flex items-center justify-center w-8 h-8 rounded-full text-white bg-[#0284c7] hover:bg-[#0369a1] shadow-2xs transition cursor-pointer"
+                                                title="Ver Ficha da Gestante / Puérpera"
+                                            >
+                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="20" class="py-12 text-center text-slate-500">
+                                            <div class="space-y-2">
+                                                <p class="text-sm font-semibold">Nenhuma gestante ou puérpera encontrada para os filtros aplicados.</p>
+                                                <button
+                                                    type="button"
+                                                    wire:click="clearAdvancedFilters"
+                                                    class="text-xs font-bold text-sky-700 hover:text-sky-900 underline cursor-pointer"
+                                                >
+                                                    Limpar filtros de busca
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginação Interativa -->
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border-t border-slate-150 bg-slate-50/50 text-xs text-slate-600">
+                        <div>
+                            Mostrando
+                            <span class="font-bold text-slate-800">{{ min($c3TotalItems, ($c3Page - 1) * $perPage + 1) }}</span>
+                            a
+                            <span class="font-bold text-slate-800">{{ min($c3TotalItems, $c3Page * $perPage) }}</span>
+                            de
+                            <span class="font-bold text-slate-800">{{ $c3TotalItems }}</span>
+                            gestantes e puérperas
+                        </div>
+
+                        @if ($c3TotalPages > 1)
+                            <div class="flex items-center gap-1">
+                                <button
+                                    type="button"
+                                    wire:click="gotoC3Page({{ $c3Page - 1 }})"
+                                    @disabled($c3Page <= 1)
+                                    class="px-2.5 py-1 rounded-lg border border-slate-300 bg-white font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-2xs"
+                                >
+                                    &larr; Anterior
+                                </button>
+
+                                @for ($p = max(1, $c3Page - 2); $p <= min($c3TotalPages, $c3Page + 2); $p++)
+                                    <button
+                                        type="button"
+                                        wire:click="gotoC3Page({{ $p }})"
+                                        class="px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer {{ $p === $c3Page ? 'bg-sky-600 text-white shadow-2xs' : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs' }}"
+                                    >
+                                        {{ $p }}
+                                    </button>
+                                @endfor
+
+                                <button
+                                    type="button"
+                                    wire:click="gotoC3Page({{ $c3Page + 1 }})"
+                                    @disabled($c3Page >= $c3TotalPages)
+                                    class="px-2.5 py-1 rounded-lg border border-slate-300 bg-white font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-2xs"
+                                >
+                                    Próximo &rarr;
+                                </button>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
+            <!-- MODAL DE BUSCA AVANÇADA (CONFORME IMAGENS 3 E 4) -->
+            @if ($showAdvancedModal)
+                <div
+                    class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/60 p-3 backdrop-blur-xs animate-fade-in sm:p-4"
+                    role="dialog"
+                    aria-modal="true"
+                >
+                    <div
+                        class="app-modal-panel relative my-3 w-full max-w-4xl space-y-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl sm:my-8 sm:rounded-3xl sm:p-8"
+                        @click.outside="$wire.closeAdvancedSearch()"
+                    >
+                        <!-- Modal Header -->
+                        <div class="flex items-center justify-between border-b border-slate-150 pb-4">
+                            <h3 class="text-lg sm:text-xl font-bold text-slate-800 tracking-tight">
+                                Busca Avançada
+                            </h3>
+                            <button
+                                type="button"
+                                wire:click="closeAdvancedSearch"
+                                class="rounded-xl p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                            >
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Modal Body (Campos e Switches SIM/NÃO conforme Imagens 3 e 4) -->
+                        <div class="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+                            <!-- Linha 1: Distrito, Unidade, Equipes, Microárea -->
+                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Distrito</label>
+                                    <select
+                                        wire:model="advDistrict"
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                    >
+                                        <option value="">Selecione a opção desejada</option>
+                                        @foreach ($c3FilterOptions['districts'] ?? [] as $district)
+                                            <option value="{{ $district }}">{{ $district }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Unidade</label>
+                                    <select
+                                        wire:model="advFacility"
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                    >
+                                        <option value="">Selecione a opção desejada</option>
+                                        @foreach ($c3FilterOptions['facilities'] ?? [] as $f)
+                                            <option value="{{ $f['cnes'] }}">{{ $f['name'] }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Equipes</label>
+                                    <select
+                                        wire:model="advTeam"
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                    >
+                                        <option value="">Selecione a opção desejada</option>
+                                        @foreach ($c3FilterOptions['teams'] ?? [] as $t)
+                                            <option value="{{ $t['ine'] }}">{{ $t['name'] }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Microárea</label>
+                                    <select
+                                        wire:model="advMicroarea"
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                    >
+                                        <option value="">Selecione a opção desejada</option>
+                                        @foreach ($c3FilterOptions['microareas'] ?? [] as $ma)
+                                            <option value="{{ $ma }}">Microárea {{ $ma }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Linha 2: Nome do Cidadão e Nome da Mãe -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nome do Cidadão</label>
+                                    <input
+                                        type="text"
+                                        wire:model="advCitizenName"
+                                        placeholder=""
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nome da Mãe</label>
+                                    <input
+                                        type="text"
+                                        wire:model="advMotherName"
+                                        placeholder=""
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- Linha 3: CPF, CNS, Mês, Opção Mês -->
+                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">CPF Cidadão</label>
+                                    <input
+                                        type="text"
+                                        wire:model="advCitizenCpf"
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">CNS Cidadão</label>
+                                    <input
+                                        type="text"
+                                        wire:model="advCitizenCns"
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Mês</label>
+                                    <input
+                                        type="text"
+                                        wire:model="advMonth"
+                                        placeholder="09 / 2026"
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Opção Mês</label>
+                                    <select
+                                        wire:model="advMonthOption"
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                    >
+                                        <option value="">Mês Selecionado e Próx...</option>
+                                        <option value="selected_only">Apenas Mês Selecionado</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Linha 4: Quadrimestre, CNS Profissional, Nome Profissional -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Quadrimestre</label>
+                                    <select
+                                        wire:model="advQuarter"
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                    >
+                                        <option value="">Selecione o Quadrimestre</option>
+                                        <option value="1">1º Quadrimestre</option>
+                                        <option value="2">2º Quadrimestre</option>
+                                        <option value="3">3º Quadrimestre</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">CNS Profissional (ACS/TACS)</label>
+                                    <input
+                                        type="text"
+                                        wire:model="advProfessionalCns"
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nome do Profissional (ACS/TACS)</label>
+                                    <input
+                                        type="text"
+                                        wire:model="advProfessionalName"
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- Linha 5: Raça/Cor e DPP -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Raça/Cor</label>
+                                    <select
+                                        wire:model="advRaceColor"
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                    >
+                                        <option value="">Selecione as opções desejadas</option>
+                                        <option value="Branca">Branca</option>
+                                        <option value="Preta">Preta</option>
+                                        <option value="Parda">Parda</option>
+                                        <option value="Amarela">Amarela</option>
+                                        <option value="Indígena">Indígena</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">DPP</label>
+                                    <input
+                                        type="text"
+                                        wire:model="advDpp"
+                                        placeholder="Selecione a opção desejada"
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- Linhas de Botões de Alternância SIM / NÃO (Conforme Imagens 3 e 4) -->
+                            <div class="border-t border-slate-150 pt-4 space-y-4">
+                                <!-- Grupo 1: MICI, MICDT, Pessoa Acompanhada, Registro Aborto -->
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                    <div>
+                                        <span class="block text-xs font-semibold text-slate-700 mb-1.5">MICI Atualizada?</span>
+                                        <div class="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advMici', 'sim')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advMici === 'sim' ? 'bg-[#10b981] text-white border-[#10b981]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                SIM
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advMici', 'nao')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advMici === 'nao' ? 'bg-[#ef4444] text-white border-[#ef4444]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                NÃO
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <span class="block text-xs font-semibold text-slate-700 mb-1.5">MICDT Atualizada?</span>
+                                        <div class="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advMicdt', 'sim')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advMicdt === 'sim' ? 'bg-[#10b981] text-white border-[#10b981]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                SIM
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advMicdt', 'nao')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advMicdt === 'nao' ? 'bg-[#ef4444] text-white border-[#ef4444]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                NÃO
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <span class="block text-xs font-semibold text-slate-700 mb-1.5">Pessoa Acompanhada?</span>
+                                        <div class="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advAccompanied', 'sim')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advAccompanied === 'sim' ? 'bg-[#10b981] text-white border-[#10b981]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                SIM
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advAccompanied', 'nao')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advAccompanied === 'nao' ? 'bg-[#ef4444] text-white border-[#ef4444]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                NÃO
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <span class="block text-xs font-semibold text-slate-700 mb-1.5">Registro Aborto</span>
+                                        <div class="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advAbortion', 'sim')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advAbortion === 'sim' ? 'bg-[#10b981] text-white border-[#10b981]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                SIM
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advAbortion', 'nao')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advAbortion === 'nao' ? 'bg-[#ef4444] text-white border-[#ef4444]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                NÃO
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Grupo 2: DUM com Divergência, 1ª Consulta até 12s, Consultas (B) -->
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div>
+                                        <span class="block text-xs font-semibold text-slate-700 mb-1.5">DUM com Divergência</span>
+                                        <div class="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advDumDivergence', 'sim')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advDumDivergence === 'sim' ? 'bg-[#10b981] text-white border-[#10b981]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                SIM
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advDumDivergence', 'nao')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advDumDivergence === 'nao' ? 'bg-[#ef4444] text-white border-[#ef4444]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                NÃO
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <span class="block text-xs font-semibold text-slate-700 mb-1.5">1ª Consulta pré-natal até 12 semanas (A)</span>
+                                        <div class="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeA', 'sim')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeA === 'sim' ? 'bg-[#10b981] text-white border-[#10b981]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                SIM
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeA', 'nao')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeA === 'nao' ? 'bg-[#ef4444] text-white border-[#ef4444]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                NÃO
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <span class="block text-xs font-semibold text-slate-700 mb-1.5">Consultas (B)</span>
+                                        <div class="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeB', 'sim')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeB === 'sim' ? 'bg-[#10b981] text-white border-[#10b981]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                SIM
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeB', 'nao')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeB === 'nao' ? 'bg-[#ef4444] text-white border-[#ef4444]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                NÃO
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Grupo 3: PA (C), Peso e Altura (D), Visitas (E), dTpa (F) -->
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                    <div>
+                                        <span class="block text-xs font-semibold text-slate-700 mb-1.5">Aferição de Pressão (C)</span>
+                                        <div class="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeC', 'sim')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeC === 'sim' ? 'bg-[#10b981] text-white border-[#10b981]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                SIM
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeC', 'nao')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeC === 'nao' ? 'bg-[#ef4444] text-white border-[#ef4444]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                NÃO
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <span class="block text-xs font-semibold text-slate-700 mb-1.5">Peso e Altura (D)</span>
+                                        <div class="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeD', 'sim')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeD === 'sim' ? 'bg-[#10b981] text-white border-[#10b981]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                SIM
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeD', 'nao')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeD === 'nao' ? 'bg-[#ef4444] text-white border-[#ef4444]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                NÃO
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <span class="block text-xs font-semibold text-slate-700 mb-1.5">Visitas Domiciliares (E)</span>
+                                        <div class="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeE', 'sim')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeE === 'sim' ? 'bg-[#10b981] text-white border-[#10b981]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                SIM
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeE', 'nao')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeE === 'nao' ? 'bg-[#ef4444] text-white border-[#ef4444]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                NÃO
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <span class="block text-xs font-semibold text-slate-700 mb-1.5">dTpa (F)</span>
+                                        <div class="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeF', 'sim')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeF === 'sim' ? 'bg-[#10b981] text-white border-[#10b981]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                SIM
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeF', 'nao')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeF === 'nao' ? 'bg-[#ef4444] text-white border-[#ef4444]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                NÃO
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Grupo 4: Testes 1º tri (G), Testes 3º tri (H), Consulta puerpério (I), Visita puerpério (J) -->
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                    <div>
+                                        <span class="block text-xs font-semibold text-slate-700 mb-1.5">Testes 1º trimestre (G)</span>
+                                        <div class="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeG', 'sim')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeG === 'sim' ? 'bg-[#10b981] text-white border-[#10b981]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                SIM
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeG', 'nao')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeG === 'nao' ? 'bg-[#ef4444] text-white border-[#ef4444]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                NÃO
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <span class="block text-xs font-semibold text-slate-700 mb-1.5">Testes 3º trimestre (H)</span>
+                                        <div class="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeH', 'sim')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeH === 'sim' ? 'bg-[#10b981] text-white border-[#10b981]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                SIM
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeH', 'nao')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeH === 'nao' ? 'bg-[#ef4444] text-white border-[#ef4444]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                NÃO
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <span class="block text-xs font-semibold text-slate-700 mb-1.5">Consulta puerpério (I)</span>
+                                        <div class="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeI', 'sim')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeI === 'sim' ? 'bg-[#10b981] text-white border-[#10b981]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                SIM
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeI', 'nao')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeI === 'nao' ? 'bg-[#ef4444] text-white border-[#ef4444]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                NÃO
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <span class="block text-xs font-semibold text-slate-700 mb-1.5">Visita Domiciliar puerpério (J)</span>
+                                        <div class="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeJ', 'sim')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeJ === 'sim' ? 'bg-[#10b981] text-white border-[#10b981]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                SIM
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeJ', 'nao')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeJ === 'nao' ? 'bg-[#ef4444] text-white border-[#ef4444]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                NÃO
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Grupo 5: Avaliação Odontológica (K) -->
+                                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                                    <div>
+                                        <span class="block text-xs font-semibold text-slate-700 mb-1.5">Avaliação Odontológica (K)</span>
+                                        <div class="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeK', 'sim')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeK === 'sim' ? 'bg-[#10b981] text-white border-[#10b981]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                SIM
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeK', 'nao')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeK === 'nao' ? 'bg-[#ef4444] text-white border-[#ef4444]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                NÃO
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal Footer -->
+                        <div class="flex items-center justify-end gap-3 border-t border-slate-150 pt-4">
+                            <button
+                                type="button"
+                                wire:click="closeAdvancedSearch"
+                                class="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                            >
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                <span>Fechar</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                wire:click="applyAdvancedSearch"
+                                class="inline-flex items-center gap-1.5 rounded-xl bg-[#008a4f] hover:bg-[#007342] px-6 py-2.5 text-xs font-bold text-white shadow-xs transition cursor-pointer"
+                            >
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                </svg>
+                                <span>Enviar</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- MODAL DE DETALHES DA GESTANTE / PUÉRPERA (FICHA CLÍNICA) -->
+            @if ($showPregnancyDetailModal && $selectedPregnancy)
+                <div
+                    class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/60 p-3 backdrop-blur-xs animate-fade-in sm:p-4"
+                    role="dialog"
+                    aria-modal="true"
+                >
+                    <div
+                        class="app-modal-panel relative my-3 w-full max-w-4xl space-y-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl sm:my-8 sm:rounded-3xl sm:p-8"
+                        @click.outside="$wire.closePregnancyDetail()"
+                    >
+                        <!-- Modal Header -->
+                        <div class="flex items-center justify-between border-b border-slate-150 pb-4">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold {{ ($selectedPregnancy['current_status'] ?? '') === 'gestante' ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800' }}">
+                                        {{ ucfirst($selectedPregnancy['current_status'] ?? 'Gestante') }}
+                                    </span>
+                                    <h3 class="text-lg sm:text-xl font-bold text-slate-800 tracking-tight">
+                                        {{ $selectedPregnancy['name'] }}
+                                    </h3>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-1">
+                                    CPF: {{ $selectedPregnancy['cpf'] ?: '—' }} · CNS: {{ $selectedPregnancy['cns'] ?: '—' }} · Nascimento: {{ $selectedPregnancy['birth_date_formatted'] ?: '—' }} ({{ $selectedPregnancy['age_years'] }} anos)
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                wire:click="closePregnancyDetail"
+                                class="rounded-xl p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                            >
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Modal Body -->
+                        <div class="space-y-5 max-h-[70vh] overflow-y-auto pr-1">
+                            <!-- Informações Gerais da Gestação / Puerpério -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
+                                <div>
+                                    <span class="text-slate-500 block">DUM:</span>
+                                    <span class="font-bold text-slate-800 font-mono">{{ $selectedPregnancy['dum_formatted'] ?: '—' }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500 block">DPP (40 Semanas):</span>
+                                    <span class="font-bold text-slate-800 font-mono">{{ $selectedPregnancy['dpp_formatted'] ?: '—' }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500 block">Idade Gestacional Atual:</span>
+                                    <span class="font-bold text-slate-800">{{ $selectedPregnancy['gestational_age_formatted'] }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500 block">Término do Puerpério:</span>
+                                    <span class="font-bold text-slate-800 font-mono">{{ $selectedPregnancy['puerperium_end_date_formatted'] ?: '—' }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500 block">Unidade:</span>
+                                    <span class="font-bold text-slate-800">{{ $selectedPregnancy['cnes'] }} - {{ $selectedPregnancy['facility_name'] }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500 block">Equipe:</span>
+                                    <span class="font-bold text-slate-800">{{ $selectedPregnancy['ine'] }} - {{ $selectedPregnancy['team_name'] }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500 block">Microárea:</span>
+                                    <span class="font-bold text-slate-800">{{ $selectedPregnancy['microarea'] }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500 block">MCI Atualizada:</span>
+                                    <span class="font-bold {{ $selectedPregnancy['mici_updated'] ? 'text-emerald-700' : 'text-rose-700' }}">
+                                        {{ $selectedPregnancy['mici_updated'] ? 'Sim' : 'Não' }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Tabela das 11 Boas Práticas Clínicas com Status -->
+                            <div class="rounded-xl border border-slate-200 overflow-hidden text-xs">
+                                <table class="w-full text-left border-collapse">
+                                    <thead class="bg-slate-100 text-slate-600 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
+                                        <tr>
+                                            <th class="py-2.5 px-3">Prática</th>
+                                            <th class="py-2.5 px-3">Critério Metodológico (NT 30/2025 & NT 08/2026)</th>
+                                            <th class="py-2.5 px-3 text-center">Registros Identificados</th>
+                                            <th class="py-2.5 px-3 text-center">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-150">
+                                        <tr>
+                                            <td class="py-2.5 px-3 font-semibold text-slate-800">1ª Consulta pré-natal até 12 semanas (A)</td>
+                                            <td class="py-2.5 px-3 text-slate-600 text-[11px]">1ª Consulta médica ou de enfermagem presencial realizada até a 12ª semana</td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-medium">{{ $selectedPregnancy['practice_a'] }}</td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedPregnancy['practice_a_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                    {{ $selectedPregnancy['practice_a_met'] ? 'Cumprida' : 'Pendente' }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2.5 px-3 font-semibold text-slate-800">Consultas de Pré-Natal (B)</td>
+                                            <td class="py-2.5 px-3 text-slate-600 text-[11px]">Ao menos 6 consultas registradas por médico ou enfermeiro durante a gestação</td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-medium">{{ $selectedPregnancy['practice_b'] }}/6</td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedPregnancy['practice_b_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                    {{ $selectedPregnancy['practice_b_met'] ? 'Cumprida' : 'Pendente' }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2.5 px-3 font-semibold text-slate-800">Aferição de Pressão Arterial (C)</td>
+                                            <td class="py-2.5 px-3 text-slate-600 text-[11px]">Registro de PA em ao menos 6 consultas de pré-natal</td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-medium">{{ $selectedPregnancy['practice_c'] }}/6</td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedPregnancy['practice_c_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                    {{ $selectedPregnancy['practice_c_met'] ? 'Cumprida' : 'Pendente' }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2.5 px-3 font-semibold text-slate-800">Peso e Altura (D)</td>
+                                            <td class="py-2.5 px-3 text-slate-600 text-[11px]">Registro simultâneo de peso e altura em ao menos 6 consultas</td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-medium">{{ $selectedPregnancy['practice_d'] }}/6</td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedPregnancy['practice_d_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                    {{ $selectedPregnancy['practice_d_met'] ? 'Cumprida' : 'Pendente' }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2.5 px-3 font-semibold text-slate-800">Visitas Domiciliares ACS (E)</td>
+                                            <td class="py-2.5 px-3 text-slate-600 text-[11px]">Ao menos 2 visitas domiciliares de ACS/TACS durante o período gestacional</td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-medium">{{ $selectedPregnancy['practice_e'] }}/2</td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedPregnancy['practice_e_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                    {{ $selectedPregnancy['practice_e_met'] ? 'Cumprida' : 'Pendente' }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2.5 px-3 font-semibold text-slate-800">Vacinação dTpa (F)</td>
+                                            <td class="py-2.5 px-3 text-slate-600 text-[11px]">Ao menos 1 dose de dTpa aplicada a partir da 20ª semana de gestação</td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-medium">{{ $selectedPregnancy['practice_f'] }}</td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedPregnancy['practice_f_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                    {{ $selectedPregnancy['practice_f_met'] ? 'Cumprida' : 'Pendente' }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2.5 px-3 font-semibold text-slate-800">Testes 1º Trimestre (G)</td>
+                                            <td class="py-2.5 px-3 text-slate-600 text-[11px]">Exames/testes de Sífilis, HIV e Hemoglobina realizados até 13 semanas e 6 dias</td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-medium">{{ $selectedPregnancy['practice_g'] }}</td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedPregnancy['practice_g_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                    {{ $selectedPregnancy['practice_g_met'] ? 'Cumprida' : 'Pendente' }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2.5 px-3 font-semibold text-slate-800">Testes 3º Trimestre (H)</td>
+                                            <td class="py-2.5 px-3 text-slate-600 text-[11px]">Exames/testes de Sífilis e HIV realizados a partir de 27 semanas de gestação</td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-medium">{{ $selectedPregnancy['practice_h'] }}</td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedPregnancy['practice_h_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                    {{ $selectedPregnancy['practice_h_met'] ? 'Cumprida' : 'Pendente' }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2.5 px-3 font-semibold text-slate-800">Consulta de Puerpério (I)</td>
+                                            <td class="py-2.5 px-3 text-slate-600 text-[11px]">Ao menos 1 consulta puerperal médica ou de enfermagem até 42 dias após o parto</td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-medium">{{ $selectedPregnancy['practice_i'] }}</td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedPregnancy['practice_i_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                    {{ $selectedPregnancy['practice_i_met'] ? 'Cumprida' : 'Pendente' }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2.5 px-3 font-semibold text-slate-800">Visita Domiciliar no Puerpério (J)</td>
+                                            <td class="py-2.5 px-3 text-slate-600 text-[11px]">Ao menos 1 visita domiciliar de ACS/TACS até 42 dias após o parto</td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-medium">{{ $selectedPregnancy['practice_j'] }}</td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedPregnancy['practice_j_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                    {{ $selectedPregnancy['practice_j_met'] ? 'Cumprida' : 'Pendente' }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2.5 px-3 font-semibold text-slate-800">Avaliação Odontológica (K)</td>
+                                            <td class="py-2.5 px-3 text-slate-600 text-[11px]">Ao menos 1 consulta odontológica registrada durante o período pré-natal</td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-medium">{{ $selectedPregnancy['practice_k'] }}</td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedPregnancy['practice_k_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                    {{ $selectedPregnancy['practice_k_met'] ? 'Cumprida' : 'Pendente' }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Modal Footer -->
+                        <div class="flex items-center justify-between border-t border-slate-150 pt-4">
+                            <div class="text-xs font-medium text-slate-500">
+                                Pontuação Individual: <span class="font-bold text-slate-800 font-mono text-sm">{{ number_format($selectedPregnancy['score_percent'] ?? 0, 2, ',', '.') }}%</span>
+                            </div>
+                            <button
+                                type="button"
+                                wire:click="closePregnancyDetail"
                                 class="px-5 py-2 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition cursor-pointer"
                             >
                                 Fechar Ficha

@@ -240,10 +240,10 @@ class EsusDataProcessingService
         $eligibleTeamsByIne = collect($teamsExtracted)->keyBy('ine')->all();
 
         // ETAPA 3: tb_fat_atendimento_individual · Indicador C1 Mais Acesso Mês a Mês (65%)
-        if ($scope === 'c2') {
+        if ($scope === 'c2' || $scope === 'c3') {
             $tablesReport['tb_fat_atendimento_individual']['status'] = 'info';
             $tablesReport['tb_fat_atendimento_individual']['rows'] = 0;
-            $tablesReport['tb_fat_atendimento_individual']['message'] = 'Não processado (Foco selecionado: Indicador C2 Desenvolvimento Infantil).';
+            $tablesReport['tb_fat_atendimento_individual']['message'] = sprintf('Não processado (Foco selecionado: %s).', $scopeDesc);
         } else {
             $this->notifyProgress($progressCallback, 65, 'Processando tb_fat_atendimento_individual (Cálculo mensal C1)...', $tablesReport);
 
@@ -579,6 +579,14 @@ class EsusDataProcessingService
                 }
                 $c2FailureMessage = $message;
             }
+        } else {
+            $tablesReport['c2_dw'] = [
+                'name' => 'C2 · DW PEC',
+                'description' => 'Coorte de crianças de 0 a 24 meses (7 quadrimestres: atual + 6 futuros), boas práticas A–E e lista nominal',
+                'status' => 'info',
+                'rows' => 0,
+                'message' => sprintf('Não processado (Foco selecionado: %s).', $scopeDesc),
+            ];
         }
 
         // ETAPA 3.6: Indicador C3 Cuidado na Gestação e Puerpério (11 Boas Práticas e Lista Nominal)
@@ -662,6 +670,14 @@ class EsusDataProcessingService
                 }
                 $c3FailureMessage = $message;
             }
+        } else {
+            $tablesReport['c3_dw'] = [
+                'name' => 'C3 · DW PEC',
+                'description' => 'Coorte de gestantes e puérperas, 11 boas práticas A–K e lista nominal de busca ativa',
+                'status' => 'info',
+                'rows' => 0,
+                'message' => sprintf('Não processado (Foco selecionado: %s).', $scopeDesc),
+            ];
         }
 
         // ETAPA 4: tb_fat_cad_individual e tb_fat_cad_domiciliar

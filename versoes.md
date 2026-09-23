@@ -2,6 +2,19 @@
 
 Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento (*Release Notes*) da plataforma **Monitora Fácil · Gestão da Atenção Primária à Saúde**.
 
+## [v1.23.15] - 23/09/2026
+
+### Indicador C3 (Gestação e Puerpério), Processamento e Deploy Automatizado
+- **Indicador C3 com 11 Boas Práticas Clínicas (A–K) e Multiplicador 2.0×**: Implementação completa das 11 boas práticas oficiais da gestação e puerpério somando 100 pontos (A: Captação precoce até 12ª sem [10 pts]; B: Consultas de pré-natal >= 6 [10 pts]; C: Puerpério até 42d [10 pts]; D: Atendimento Odontológico [10 pts]; E: Hemograma completo [9 pts]; F: Glicemia de jejum [9 pts]; G: Testes rápidos Sífilis/HIV [9 pts]; H: Urocultura e EAS [9 pts]; I: Vacina dTpa [9 pts]; J: Ultrassonografia obstétrica [9 pts]; K: Visitas domiciliares de ACS >= 2 [6 pts]), com multiplicador ministerial 2.0× conforme Nota Metodológica C3 e NT 08/2026.
+- **Lista Nominal e Coorte de Gestantes e Puérperas com Busca Ativa**: Tabela nominal completa de 17 colunas de acompanhamento individual com cálculo de idade gestacional precisa (`19s,5d`), DUM, DPP, fim do puerpério, dados sociodemográficos, CNS profissional, microárea, status MICI e badges temáticos para cada uma das 11 práticas.
+- **Modais de Busca Avançada e Ficha Clínica**: Modal interativo com filtros por equipe, microárea, faixas de idade gestacional, status de cada uma das 11 práticas; modal de detalhes com ficha territorial e cadastral completa da gestante/puérpera.
+- **Subaba Resumo Mensal das Equipes no C3**: Visualização executiva consolidada de todas as 19 equipes ativas do município na competência mensal, com cards estatísticos de Distribuição das Equipes (Regular, Suficiente, Bom e Ótimo) e tabela expansível detalhando CNES, INE, Numerador de pontuação, Denominador de gestantes, Pontuação percentual e Badge oficial.
+- **Comando Artisan `esus:process-data` com Suporte ao Escopo C3**: Validação e isolamento do escopo `--scope=c3` no comando CLI, garantindo que o C3 possa ser executado sob demanda sem disparar cálculos desnecessários de outros indicadores.
+- **Auditoria Visual no Módulo "Processar Dados"**: Aprimoramento da interface em Configurações com suporte assíncrono para o Indicador C3, novos badges com ícones informativos de Sucesso (verde), Falha (vermelho) e Ignorado (neutro) para componentes fora do escopo selecionado.
+- **Scripts de Deploy Atualizados (14 Etapas)**: Inclusão oficial do passo de consolidação do C3 (`artisan esus:process-data --scope=c3`) em `deploy.sh` e `scripts/deploy.sh` com suporte a bypass em flags `--quick`/`--no-sync` e verificação do worker `monitorafacil-queue.service`.
+
+---
+
 ## [v1.23.14] - 23/09/2026
 
 ### Resumo Mensal das Equipes nos Indicadores C1 e C2 da Saúde da Família

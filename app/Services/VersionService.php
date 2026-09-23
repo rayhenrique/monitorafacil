@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.23.14';
+    public const CURRENT_VERSION = 'v1.23.15';
 
     public const CURRENT_RELEASE_DATE = '23/09/2026';
 
@@ -61,9 +61,24 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.23.14',
+                'version' => 'v1.23.15',
                 'date' => '23/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Indicador C3 (Gestação e Puerpério), Processamento e Deploy Automatizado',
+                'summary' => 'Implementação integral do Indicador C3 (Cuidado na Gestação e Puerpério) da Saúde da Família com 11 Boas Práticas Clínicas oficiais (A–K) somando 100 pontos e multiplicador 2.0×, lista nominal de busca ativa com coorte real de gestantes/puérperas, resumo mensal das equipes por classificação ministerial, além de suporte ao escopo C3 no comando CLI esus:process-data, auditoria no módulo Processar Dados e inclusão da etapa no deploy automatizado.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Indicador C3 com 11 Boas Práticas Clínicas (A a K, 100 pontos) e multiplicador 2.0× conforme Nota Metodológica C3 e NT 08/2026.'],
+                    ['type' => 'novo', 'text' => 'Lista Nominal e Coorte de Gestantes e Puérperas com busca ativa, filtros avançados, 17 colunas de boas práticas e modal clínico de detalhes individuais.'],
+                    ['type' => 'novo', 'text' => 'Subaba Resumo Mensal das Equipes no C3 da Saúde da Família com distribuição analítica por classificação ministerial e tabela expansível por equipe.'],
+                    ['type' => 'melhoria', 'text' => 'Comando Artisan esus:process-data com suporte explícito ao escopo --scope=c3 e isolamento da rotina para evitar execução desnecessária de outros indicadores.'],
+                    ['type' => 'interface', 'text' => 'Módulo "Processar Dados" em Configurações com card C3 assíncrono e auditoria detalhada com badges de status e ícones para sucesso, falha e ignorado.'],
+                    ['type' => 'melhoria', 'text' => 'Scripts de deploy (deploy.sh e scripts/deploy.sh) atualizados para 14 etapas com consolidação automática dos dados reais do C3.'],
+                ],
+            ],
+            [
+                'version' => 'v1.23.14',
+                'date' => '23/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Resumo Mensal das Equipes nos Indicadores C1 e C2 da Saúde da Família',
                 'summary' => 'Implementação da aba de Resumo Mensal das Equipes no detalhe dos indicadores C1 (Mais Acesso) e C2 (Cuidado no Desenvolvimento Infantil) da Saúde da Família, apresentando hero card da competência mensal, distribuição analítica das 19 equipes por classificação (Regular, Suficiente, Bom e Ótimo) e tabela expansível com desempenho de todas as equipes avaliadas com dados 100% reais.',
                 'highlights' => [
