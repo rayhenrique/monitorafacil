@@ -2,6 +2,16 @@
 
 Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento (*Release Notes*) da plataforma **Monitora Fácil · Gestão da Atenção Primária à Saúde**.
 
+## [v1.23.14] - 23/09/2026
+
+### Resumo Mensal das Equipes nos Indicadores C1 e C2 da Saúde da Família
+- **Aba "Resumo Mensal das Equipes" no Indicador C1 (Mais Acesso)**: Implementação de visualização consolidada do desempenho de todas as 19 equipes ativas do município na competência mensal (`2026 / M9`), contendo Hero Card do indicador, bloco de Distribuição das Equipes com 4 cards estatísticos (Regular 0 [0.0%], Suficiente 0 [0.0%], Bom 3 [15.8%] e Ótimo 16 [84.2%] com barras de progresso proporcionais) e tabela expansível com Unidade (CNES), Equipe (INE), Numerador de atendimentos programados, Total de atendimentos, Pontuação e Badge de classificação ministerial.
+- **Aba "Resumo Mensal das Equipes" no Indicador C2 (Cuidado no Desenvolvimento Infantil)**: Implementação de visualização consolidada do desempenho de todas as 19 equipes ativas para o cuidado infantil na competência mensal (`2026 / M9`), contendo Hero Card do indicador, bloco de Distribuição das Equipes com 4 cards estatísticos (Regular 0 [0.0%], Suficiente 8 [42.1%], Bom 11 [57.9%] e Ótimo 0 [0.0%] com barras de progresso proporcionais) e tabela expansível com Unidade (CNES), Equipe (INE), Numerador de pontuação, Denominador de crianças na coorte (1.042 crianças reais), Pontuação percentual calculada e Badge de classificação ministerial.
+- **Alternância Fluida entre Subabas**: Navegação com persistência de estado e transição suave entre a visualização de Resumo Mensal Consolidado e as visões analíticas por equipe e nominal (C1: Resumo Mensal das Equipes / Resumo por Equipe / Sem Equipe; C2: Resumo Mensal das Equipes / Lista Nominal).
+- **Dados 100% Reais e Validados**: Alimentação dos dados exclusivamente a partir dos snapshots e registros reais do PostgreSQL do e-SUS PEC / DW municipal, sem valores simulados ou dados mockados.
+
+---
+
 ## [v1.23.13] - 23/09/2026
 
 ### Painel do Indicador C2 (Cuidado no Desenvolvimento Infantil) com Microdados Reais do PEC DW

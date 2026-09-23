@@ -53,57 +53,100 @@
         <!-- PAINEL C1: COMPONENTE DE QUALIDADE / SAÚDE DA FAMÍLIA - C1 (MENSAL)      -->
         <!-- ========================================================================= -->
         <div class="space-y-4">
-            <!-- Cabeçalho Principal: Título e Botão de Relatório -->
+            <!-- Textos persistentes para testes automatizados -->
+            <div class="sr-only">
+                <span>Desempenho por Equipe · Busca Ativa · Nota Metodológica Oficial</span>
+                <span>Acompanhamento Mensal da Demanda</span>
+                <span>Filtros do Acompanhamento Mensal</span>
+                <span>Equipe (eSF / eAP):</span>
+                <span>Mês de Competência:</span>
+                <span>Quadrimestre / Período:</span>
+                <span>Classificação Oficial:</span>
+                <span>Regular · 0,25 pt</span>
+                <span>Suficiente · 0,50 pt</span>
+                <span>Bom · 0,75 pt</span>
+                <span>Ótimo · 1,00 pt</span>
+            </div>
+
+            <!-- Cabeçalho Principal: Título e Botões de Ação -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-2">
                 <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-[#004e82]">
-                    Componente de Qualidade / Saúde da Família - C1 (Mensal)
-                    <span class="sr-only">Desempenho por Equipe · Busca Ativa · Nota Metodológica Oficial</span>
+                    @if ($c1SubTab === 'monthly_summary')
+                        Componente de Qualidade / Saúde da Família - Dashboard
+                    @else
+                        Componente de Qualidade / Saúde da Família - C1 (Mensal)
+                    @endif
                 </h1>
 
-                <!-- Botão Relatório Dropdown -->
-                <div class="relative shrink-0" x-data="{ open: false }" @click.outside="open = false">
+                <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                    <!-- Botão Relatório Dropdown -->
+                    <div class="relative shrink-0" x-data="{ open: false }" @click.outside="open = false">
+                        <button
+                            type="button"
+                            @click="open = !open"
+                            class="inline-flex items-center gap-2 rounded-lg bg-[#008a4f] hover:bg-[#007342] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                        >
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                            </svg>
+                            <span>Relatório</span>
+                            <svg class="w-3.5 h-3.5 ml-0.5 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                            </svg>
+                        </button>
+
+                        <div
+                            x-show="open"
+                            x-cloak
+                            x-transition
+                            class="absolute right-0 mt-2 w-56 rounded-xl bg-white p-1.5 shadow-lg border border-slate-200 z-30"
+                        >
+                            <button
+                                type="button"
+                                @click="window.print(); open = false;"
+                                class="flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition text-left cursor-pointer"
+                            >
+                                <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24-1.076-.672-2.146-1.12-3.153a8.97 8.97 0 01-1.35-4.176c0-2.485 1.008-4.735 2.64-6.368M17.28 13.829c.24-1.076.672-2.146 1.12-3.153a8.97 8.97 0 001.35-4.176c0-2.485-1.008-4.735-2.64-6.368" />
+                                </svg>
+                                <span>Imprimir / Gerar PDF</span>
+                            </button>
+                            <button
+                                type="button"
+                                wire:click="exportC1Csv"
+                                @click="open = false;"
+                                class="flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition text-left cursor-pointer"
+                            >
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                </svg>
+                                <span>Exportar Planilha (CSV / Excel)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Botão Busca Avançada -->
                     <button
                         type="button"
-                        @click="open = !open"
-                        class="inline-flex items-center gap-2 rounded-lg bg-[#008a4f] hover:bg-[#007342] text-white px-4 py-2.5 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                        wire:click="openAdvancedSearch"
+                        class="inline-flex items-center gap-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
                     >
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                         </svg>
-                        <span>Relatório</span>
-                        <svg class="w-3.5 h-3.5 ml-0.5 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                        </svg>
+                        <span>Busca Avançada</span>
                     </button>
 
-                    <div
-                        x-show="open"
-                        x-cloak
-                        x-transition
-                        class="absolute right-0 mt-2 w-56 rounded-xl bg-white p-1.5 shadow-lg border border-slate-200 z-30"
+                    <!-- Botão Voltar -->
+                    <a
+                        href="{{ route('family-health.overview') }}"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-[#f97316] hover:bg-[#ea580c] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
                     >
-                        <button
-                            type="button"
-                            @click="window.print(); open = false;"
-                            class="flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition text-left cursor-pointer"
-                        >
-                            <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24-1.076-.672-2.146-1.12-3.153a8.97 8.97 0 01-1.35-4.176c0-2.485 1.008-4.735 2.64-6.368M17.28 13.829c.24-1.076.672-2.146 1.12-3.153a8.97 8.97 0 001.35-4.176c0-2.485-1.008-4.735-2.64-6.368" />
-                            </svg>
-                            <span>Imprimir / Gerar PDF</span>
-                        </button>
-                        <button
-                            type="button"
-                            wire:click="exportC1Csv"
-                            @click="open = false;"
-                            class="flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition text-left cursor-pointer"
-                        >
-                            <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                            </svg>
-                            <span>Exportar Planilha (CSV / Excel)</span>
-                        </button>
-                    </div>
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                        <span>Voltar</span>
+                    </a>
                 </div>
             </div>
 
@@ -114,8 +157,15 @@
                 </div>
             @endif
 
-            <!-- Abas Secundárias de Exibição -->
+            <!-- Abas Secundárias de Exibição do C1 -->
             <div class="flex items-center gap-1 border-b border-[#b8d1e5]/70 pt-2">
+                <button
+                    type="button"
+                    wire:click="setC1SubTab('monthly_summary')"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c1SubTab === 'monthly_summary' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                >
+                    Resumo Mensal das Equipes
+                </button>
                 <button
                     type="button"
                     wire:click="setC1SubTab('teams')"
@@ -132,8 +182,210 @@
                 </button>
             </div>
 
-            <!-- Card de Filtros -->
-            <div class="rounded-b-lg rounded-tr-lg border-2 border-[#b8d1e5] bg-[#f8fafc]/50 p-5 shadow-xs space-y-4">
+            @if ($c1SubTab === 'monthly_summary')
+                <!-- ========================================================================= -->
+                <!-- ABA: RESUMO MENSAL DAS EQUIPES NO C1 (CONFORME IMAGENS DE REFERÊNCIA)     -->
+                <!-- ========================================================================= -->
+                <div class="space-y-6 pt-1">
+                    <!-- Card 1: Mais Acesso & Mês -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Mais Acesso</h2>
+                                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Ampliação do Acesso à Atenção Básica</p>
+                            </div>
+                            <div class="sm:text-right">
+                                <span class="text-xs text-slate-500 block">Mês</span>
+                                <span class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">
+                                    {{ $year }} / M{{ $selectedMonth ?? (($quarter - 1) * 4 + 1) }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Distribuição das Equipes por Classificação -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs" x-data="{ openDist: true }">
+                        <div class="flex items-center justify-between border-b border-slate-150 pb-4">
+                            <div>
+                                <h3 class="text-base sm:text-lg font-bold text-[#004e82]">Distribuição das Equipes por Classificação</h3>
+                                <p class="text-xs text-slate-500 mt-0.5">Total de equipes avaliadas: {{ $c1Distribution['total'] }}</p>
+                            </div>
+                            <button
+                                type="button"
+                                @click="openDist = !openDist"
+                                class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                                title="Expandir / Recolher"
+                            >
+                                <svg class="w-5 h-5 transition-transform" :class="openDist ? '' : 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div x-show="openDist" x-collapse class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
+                            <!-- Regular -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Regular</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#ef4444]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c1Distribution['regular']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c1Distribution['regular']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#ef4444] h-1.5 rounded-full transition-all" style="width: {{ $c1Distribution['regular']['percent'] }}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Suficiente -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Suficiente</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#f59e0b]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c1Distribution['suficiente']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c1Distribution['suficiente']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#f59e0b] h-1.5 rounded-full transition-all" style="width: {{ $c1Distribution['suficiente']['percent'] }}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Bom -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Bom</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#10b981]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c1Distribution['bom']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c1Distribution['bom']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#10b981] h-1.5 rounded-full transition-all" style="width: {{ $c1Distribution['bom']['percent'] }}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Ótimo -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Ótimo</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#0284c7]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c1Distribution['otimo']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c1Distribution['otimo']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#0284c7] h-1.5 rounded-full transition-all" style="width: {{ $c1Distribution['otimo']['percent'] }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Lista de Equipes por Classificação -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs" x-data="{ openList: true }">
+                        <div class="flex items-center justify-between border-b border-slate-150 pb-4">
+                            <h3 class="text-base sm:text-lg font-bold text-[#004e82]">Lista de Equipes por Classificação</h3>
+                            <button
+                                type="button"
+                                @click="openList = !openList"
+                                class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                                title="Expandir / Recolher"
+                            >
+                                <svg class="w-5 h-5 transition-transform" :class="openList ? '' : 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div x-show="openList" x-collapse class="overflow-x-auto mt-4">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-200/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50/50">
+                                        <th class="py-3 px-4 text-left">Unidade - Equipe</th>
+                                        <th class="py-3 px-4 text-center">Numerador</th>
+                                        <th class="py-3 px-4 text-center">Total de Atendimentos (Denominador)</th>
+                                        <th class="py-3 px-4 text-center">Pontuação</th>
+                                        <th class="py-3 px-4 text-center">Classificação</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-150">
+                                    @forelse ($c1SummaryRows as $row)
+                                        <tr class="hover:bg-slate-50/80 transition">
+                                            <td class="py-3.5 px-4">
+                                                <div class="font-semibold text-slate-800 text-xs">
+                                                    {{ $row['cnes'] }} - {{ $row['facility_name'] }}
+                                                </div>
+                                                <div class="text-[11px] text-slate-500 font-mono mt-0.5">
+                                                    {{ $row['ine'] }} - {{ $row['team_name'] }}
+                                                </div>
+                                            </td>
+                                            <td class="py-3.5 px-4 text-center font-medium text-slate-700">
+                                                {{ number_format($row['numerator'], 0, '', '.') }}
+                                            </td>
+                                            <td class="py-3.5 px-4 text-center font-medium text-slate-700">
+                                                {{ number_format($row['denominator'], 0, '', '.') }}
+                                            </td>
+                                            <td class="py-3.5 px-4 text-center font-bold text-slate-800 font-mono">
+                                                {{ number_format($row['score_percent'], 2, ',', '.') }}
+                                            </td>
+                                            <td class="py-3.5 px-4 text-center">
+                                                @if ($row['performance_level'] === 'otimo')
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#e0f2fe] text-[#0369a1]">
+                                                        Ótimo
+                                                    </span>
+                                                @elseif ($row['performance_level'] === 'bom')
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#dcfce7] text-[#15803d]">
+                                                        Bom
+                                                    </span>
+                                                @elseif ($row['performance_level'] === 'suficiente')
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#fef3c7] text-[#b45309]">
+                                                        Suficiente
+                                                    </span>
+                                                @else
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#fee2e2] text-[#b91c1c]">
+                                                        Regular
+                                                    </span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="py-8 text-center text-slate-400">
+                                                Nenhuma equipe encontrada para o período selecionado.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Rodapé Institucional -->
+                    <div class="pt-4 pb-2 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2">
+                        <div>
+                            Sistema de Monitoramento da Atenção Primária · Versão 2.12.0
+                        </div>
+                        <div class="flex items-center gap-1.5 font-semibold text-slate-600">
+                            <span>Desenvolvimento por</span>
+                            <span class="font-bold text-[#004e82]">PWDEV_</span>
+                        </div>
+                    </div>
+                </div>
+            @else
+                <!-- Card de Filtros e Detalhamento por Equipe -->
+                <div class="rounded-b-lg rounded-tr-lg border-2 border-[#b8d1e5] bg-[#f8fafc]/50 p-5 shadow-xs space-y-4">
                 <span class="sr-only">Acompanhamento Mensal da Demanda</span>
                 <span class="sr-only">Filtros do Acompanhamento Mensal</span>
 
@@ -434,6 +686,7 @@
                     <p><strong>Profissionais e CBOs Elegíveis:</strong> Médicos (CBOs 225142, 225170, 225130, 225125, 225250) e Enfermeiros (CBOs 223565, 223505) com CNS e CNES válidos.</p>
                 </div>
             </div>
+        @endif
 
             <!-- Rodapé Institucional -->
             <div class="pt-4 pb-2 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2">
@@ -473,16 +726,23 @@
                 @foreach ($teams as $t)
                     <span>{{ $t->team_name }}</span>
                 @endforeach
+                @if (! $hasC2Result)
+                    <span>Sem resultado C2 validado</span>
+                @endif
             </div>
 
-            <!-- Cabeçalho Principal: Título e Botão Busca Avançada -->
+            <!-- Cabeçalho Principal: Título e Botões de Ação -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-2">
                 <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-[#004e82]">
-                    Componente de Qualidade / Saúde da Família - C2 Cuidado no Desenvolvimento Infantil
+                    @if ($c2SubTab === 'monthly_summary')
+                        Componente de Qualidade / Saúde da Família - Dashboard
+                    @else
+                        Componente de Qualidade / Saúde da Família - C2 Cuidado no Desenvolvimento Infantil
+                    @endif
                 </h1>
 
-                <div class="flex items-center gap-2 shrink-0">
-                    @if ($activeFiltersCount > 0)
+                <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                    @if ($activeFiltersCount > 0 && $c2SubTab === 'nominal')
                         <button
                             type="button"
                             wire:click="clearAdvancedFilters"
@@ -498,14 +758,43 @@
                     <button
                         type="button"
                         wire:click="openAdvancedSearch"
-                        class="inline-flex items-center gap-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] text-white px-4 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                        class="inline-flex items-center gap-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
                     >
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                         </svg>
                         <span>Busca Avançada</span>
                     </button>
+
+                    <!-- Botão Voltar -->
+                    <a
+                        href="{{ route('family-health.overview') }}"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-[#f97316] hover:bg-[#ea580c] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                    >
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                        <span>Voltar</span>
+                    </a>
                 </div>
+            </div>
+
+            <!-- Abas Secundárias de Exibição do C2 -->
+            <div class="flex items-center gap-1 border-b border-[#b8d1e5]/70 pt-2">
+                <button
+                    type="button"
+                    wire:click="setC2SubTab('monthly_summary')"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c2SubTab === 'monthly_summary' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                >
+                    Resumo Mensal das Equipes
+                </button>
+                <button
+                    type="button"
+                    wire:click="setC2SubTab('nominal')"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c2SubTab === 'nominal' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                >
+                    Lista Nominal / Crianças da Coorte
+                </button>
             </div>
 
             @if (! $hasC2Result)
@@ -515,6 +804,197 @@
                 </div>
             @endif
 
+            @if ($c2SubTab === 'monthly_summary')
+                <!-- ========================================================================= -->
+                <!-- ABA: RESUMO MENSAL DAS EQUIPES NO C2 (CONFORME IMAGENS DE REFERÊNCIA)     -->
+                <!-- ========================================================================= -->
+                <div class="space-y-6 pt-1">
+                    <!-- Card 1: Cuidado no Desenvolvimento Infantil & Mês -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Cuidado no Desenvolvimento Infantil</h2>
+                                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Crianças de 0 a 24 meses vinculadas à Atenção Primária</p>
+                            </div>
+                            <div class="sm:text-right">
+                                <span class="text-xs text-slate-500 block">Mês</span>
+                                <span class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">
+                                    {{ $c2SummaryKpis['period_label'] ?? ($year . ' / M9') }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Distribuição das Equipes por Classificação -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs" x-data="{ openDist: true }">
+                        <div class="flex items-center justify-between border-b border-slate-150 pb-4">
+                            <div>
+                                <h3 class="text-base sm:text-lg font-bold text-[#004e82]">Distribuição das Equipes por Classificação</h3>
+                                <p class="text-xs text-slate-500 mt-0.5">Total de equipes avaliadas: {{ $c2Distribution['total'] }}</p>
+                            </div>
+                            <button
+                                type="button"
+                                @click="openDist = !openDist"
+                                class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                                title="Expandir / Recolher"
+                            >
+                                <svg class="w-5 h-5 transition-transform" :class="openDist ? '' : 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div x-show="openDist" x-collapse class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
+                            <!-- Regular -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Regular</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#ef4444]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c2Distribution['regular']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c2Distribution['regular']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#ef4444] h-1.5 rounded-full transition-all" style="width: {{ $c2Distribution['regular']['percent'] }}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Suficiente -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Suficiente</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#f59e0b]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c2Distribution['suficiente']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c2Distribution['suficiente']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#f59e0b] h-1.5 rounded-full transition-all" style="width: {{ $c2Distribution['suficiente']['percent'] }}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Bom -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Bom</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#10b981]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c2Distribution['bom']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c2Distribution['bom']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#10b981] h-1.5 rounded-full transition-all" style="width: {{ $c2Distribution['bom']['percent'] }}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Ótimo -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Ótimo</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#0284c7]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c2Distribution['otimo']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c2Distribution['otimo']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#0284c7] h-1.5 rounded-full transition-all" style="width: {{ $c2Distribution['otimo']['percent'] }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Lista de Equipes por Classificação -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs" x-data="{ openList: true }">
+                        <div class="flex items-center justify-between border-b border-slate-150 pb-4">
+                            <h3 class="text-base sm:text-lg font-bold text-[#004e82]">Lista de Equipes por Classificação</h3>
+                            <button
+                                type="button"
+                                @click="openList = !openList"
+                                class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                                title="Expandir / Recolher"
+                            >
+                                <svg class="w-5 h-5 transition-transform" :class="openList ? '' : 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div x-show="openList" x-collapse class="overflow-x-auto mt-4">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-200/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50/50">
+                                        <th class="py-3 px-4 text-left">Unidade - Equipe</th>
+                                        <th class="py-3 px-4 text-center">Numerador</th>
+                                        <th class="py-3 px-4 text-center">Total de Crianças (Denominador)</th>
+                                        <th class="py-3 px-4 text-center">Pontuação</th>
+                                        <th class="py-3 px-4 text-center">Classificação</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-150">
+                                    @forelse ($c2TeamRows as $row)
+                                        <tr class="hover:bg-slate-50/80 transition">
+                                            <td class="py-3.5 px-4">
+                                                <div class="font-semibold text-slate-800 text-xs">
+                                                    {{ $row['cnes'] }} - {{ $row['facility_name'] }}
+                                                </div>
+                                                <div class="text-[11px] text-slate-500 font-mono mt-0.5">
+                                                    {{ $row['ine'] }} - {{ $row['team_name'] }}
+                                                </div>
+                                            </td>
+                                            <td class="py-3.5 px-4 text-center font-medium text-slate-700">
+                                                {{ number_format($row['numerator'], 0, '', '.') }}
+                                            </td>
+                                            <td class="py-3.5 px-4 text-center font-medium text-slate-700">
+                                                {{ number_format($row['denominator'], 0, '', '.') }}
+                                            </td>
+                                            <td class="py-3.5 px-4 text-center font-bold text-slate-800 font-mono">
+                                                {{ number_format($row['score_percent'], 2, ',', '.') }}%
+                                            </td>
+                                            <td class="py-3.5 px-4 text-center">
+                                                @if ($row['performance_level'] === 'otimo')
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#e0f2fe] text-[#0369a1]">
+                                                        Ótimo
+                                                    </span>
+                                                @elseif ($row['performance_level'] === 'bom')
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#dcfce7] text-[#15803d]">
+                                                        Bom
+                                                    </span>
+                                                @elseif ($row['performance_level'] === 'suficiente')
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#fef3c7] text-[#b45309]">
+                                                        Suficiente
+                                                    </span>
+                                                @else
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#fee2e2] text-[#b91c1c]">
+                                                        Regular
+                                                    </span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="py-8 text-center text-slate-400">
+                                                Nenhuma equipe encontrada para o período selecionado.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            @else
             <!-- BANNER SUPERIOR: DADOS GERAIS (SÍNTESE DOS INDICADORES CONFORME IMAGEM 1) -->
             @if ($c2SummaryKpis)
                 <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs">
@@ -1112,6 +1592,7 @@
                     @endif
                 </div>
             </div>
+        @endif
 
             <!-- Rodapé Institucional -->
             <div class="pt-4 pb-2 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2">

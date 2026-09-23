@@ -360,3 +360,11 @@ Os checklists históricos das fases 32 a 38 registram a implementação da époc
 - [x] Modais de Busca Avançada e de Detalhes Clínicos da Criança interativos com suporte a fechamento e ações de busca ativa.
 - [x] 100% de testes verdes em `FamilyHealthTest` (26/26) e `VersionControlTest` (5/5).
 
+## Resumo Mensal das Equipes nos Indicadores C1 e C2 da Saúde da Família (v1.23.14 - 23/09/2026)
+
+- [x] Criação da subaba "Resumo Mensal das Equipes" no Indicador C1 (Mais Acesso), contendo Hero Card da competência (`2026 / M9`), 4 cards de distribuição das 19 equipes por faixa (Regular 0 [0.0%], Suficiente 0 [0.0%], Bom 3 [15.8%], Ótimo 16 [84.2%] com barras de progresso proporcionais) e tabela expansível com todas as 19 equipes avaliadas.
+- [x] Criação da subaba "Resumo Mensal das Equipes" no Indicador C2 (Cuidado no Desenvolvimento Infantil), contendo Hero Card da competência (`2026 / M9`), 4 cards de distribuição das 19 equipes por faixa (Regular 0 [0.0%], Suficiente 8 [42.1%], Bom 11 [57.9%], Ótimo 0 [0.0%] com barras de progresso proporcionais) e tabela expansível com todas as 19 equipes avaliadas.
+- [x] Alternância fluida e reativa entre subabas (C1: Resumo Mensal das Equipes / Resumo por Equipe / Sem Equipe; C2: Resumo Mensal das Equipes / Lista Nominal / Crianças da Coorte).
+- [x] Dados 100% reais alimentados do MySQL / DW PEC municipal, com precisão estatística idêntica aos relatórios de referência.
+- [x] Validação visual via browser subagent e 100% de cobertura nos testes automatizados (`FamilyHealthTest` 26/26 e `VersionControlTest` 5/5).
+

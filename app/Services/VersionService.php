@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.23.13';
+    public const CURRENT_VERSION = 'v1.23.14';
 
     public const CURRENT_RELEASE_DATE = '23/09/2026';
 
@@ -61,9 +61,22 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.23.13',
+                'version' => 'v1.23.14',
                 'date' => '23/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Resumo Mensal das Equipes nos Indicadores C1 e C2 da Saúde da Família',
+                'summary' => 'Implementação da aba de Resumo Mensal das Equipes no detalhe dos indicadores C1 (Mais Acesso) e C2 (Cuidado no Desenvolvimento Infantil) da Saúde da Família, apresentando hero card da competência mensal, distribuição analítica das 19 equipes por classificação (Regular, Suficiente, Bom e Ótimo) e tabela expansível com desempenho de todas as equipes avaliadas com dados 100% reais.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Aba "Resumo Mensal das Equipes" no C1 e C2 da Saúde da Família com visualização executiva consolidada de todas as 19 equipes ativas.'],
+                    ['type' => 'interface', 'text' => 'Cards analíticos de Distribuição das Equipes por Classificação com percentuais proporcionais, contadores e barras de progresso temáticas por nível ministerial.'],
+                    ['type' => 'melhoria', 'text' => 'Tabela expansível de Lista de Equipes por Classificação detalhando Unidade (CNES), Equipe (INE), Numerador, Denominador, Pontuação calculada e Badge oficial.'],
+                    ['type' => 'recurso', 'text' => 'Alternância fluida entre visão de resumo mensal consolidado e visões analíticas por equipe e coorte nominal.'],
+                ],
+            ],
+            [
+                'version' => 'v1.23.13',
+                'date' => '23/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Painel do Indicador C2 (Cuidado no Desenvolvimento Infantil) com Microdados Reais do PEC DW',
                 'summary' => 'Reestruturação e alinhamento visual e de dados da tela /saude-da-familia/c2 para o Indicador C2 (Desenvolvimento Infantil) com 1.042 crianças reais extraídas do PostgreSQL do PEC e-SUS municipal, exibindo síntese das 5 Boas Práticas Clínicas (A, B, C, D, E), filtros rápidos, personalizador de colunas, busca avançada e modal de detalhes clínicos individuais.',
                 'highlights' => [
