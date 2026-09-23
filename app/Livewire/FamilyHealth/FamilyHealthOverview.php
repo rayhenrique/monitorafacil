@@ -2,6 +2,7 @@
 
 namespace App\Livewire\FamilyHealth;
 
+use App\Models\FamilyHealthIndicatorSnapshot;
 use App\Services\DashboardSnapshotService;
 use App\Services\FamilyHealthService;
 use Illuminate\View\View;
@@ -20,18 +21,50 @@ class FamilyHealthOverview extends Component
 
     public function mount(DashboardSnapshotService $snapshots): void
     {
-        $latest = $snapshots->periods()[0] ?? [
-            'year' => (int) now()->year,
-            'quarter' => min(3, (int) ceil(now()->month / 4)),
-        ];
+        // Define por padrão o quadrimestre avaliado atual do calendário
+        $evaluatedYear = (int) now()->year;
+        $evaluatedQuarter = min(3, max(1, (int) ceil(now()->month / 4)));
+
+        // Se o período do calendário não tiver snapshots, busca o período avaliado mais recente disponível
+        $hasCurrentData = FamilyHealthIndicatorSnapshot::query()
+            ->where('year', $evaluatedYear)
+            ->where('quarter', $evaluatedQuarter)
+            ->exists();
+
+        if (! $hasCurrentData) {
+            $latestWithData = FamilyHealthIndicatorSnapshot::query()
+                ->where('year', '<=', $evaluatedYear)
+                ->orderByDesc('year')
+                ->orderByDesc('quarter')
+                ->first();
+
+            if ($latestWithData) {
+                $evaluatedYear = (int) $latestWithData->year;
+                $evaluatedQuarter = (int) $latestWithData->quarter;
+            }
+        }
 
         if ($this->year < 2020 || $this->year > 2100) {
-            $this->year = $latest['year'];
+            $this->year = $evaluatedYear;
         }
 
         if ($this->quarter < 1 || $this->quarter > 3) {
-            $this->quarter = $latest['quarter'];
+            $this->quarter = $evaluatedQuarter;
         }
+    }
+
+    public bool $advancedSearchOpen = false;
+    public string $searchTeamQuery = '';
+
+    public function toggleAdvancedSearch(): void
+    {
+        $this->advancedSearchOpen = ! $this->advancedSearchOpen;
+    }
+
+    public function closeAdvancedSearch(): void
+    {
+        $this->advancedSearchOpen = false;
+        $this->searchTeamQuery = '';
     }
 
     public function setPeriod(int $year, int $quarter): void
@@ -40,14 +73,38 @@ class FamilyHealthOverview extends Component
         $this->quarter = $quarter;
     }
 
+    public function selectPeriod(int $year, int $quarter): void
+    {
+        $this->year = $year;
+        $this->quarter = $quarter;
+        $this->advancedSearchOpen = false;
+    }
+
     public function render(FamilyHealthService $service, DashboardSnapshotService $snapshots): View
     {
         $overview = $service->getMunicipalOverview($this->year, $this->quarter);
-        $periods = $snapshots->periods();
+        
+        $periods = collect($snapshots->periods())
+            ->filter(fn ($p) => $p['year'] <= (int) now()->year)
+            ->values()
+            ->all();
+
+        if (empty($periods)) {
+            $periods = $snapshots->periods();
+        }
+
+        $teams = $overview['available_teams'] ?? [];
+        if (! empty(trim($this->searchTeamQuery))) {
+            $term = mb_strtolower(trim($this->searchTeamQuery));
+            $teams = array_values(array_filter($teams, function ($team) use ($term) {
+                return str_contains(mb_strtolower($team['name'] ?? ''), $term) || str_contains((string) ($team['ine'] ?? ''), $term);
+            }));
+        }
 
         return view('livewire.family-health.overview', [
             'overview' => $overview,
             'periods' => $periods,
+            'teams' => $teams,
         ]);
     }
 }

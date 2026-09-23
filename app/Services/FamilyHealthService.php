@@ -24,6 +24,8 @@ class FamilyHealthService
                 'code' => 'C1',
                 'slug' => 'c1',
                 'short_title' => 'Mais Acesso',
+                'panel_title' => 'Mais Acesso',
+                'panel_subtitle' => 'Ampliação do Acesso à Atenção Básica',
                 'full_title' => 'Mais Acesso à Atenção Primária à Saúde (APS)',
                 'category' => 'Acesso e Acolhimento',
                 'target_population' => 'População Geral Atendida',
@@ -54,6 +56,8 @@ class FamilyHealthService
                 'code' => 'C2',
                 'slug' => 'c2',
                 'short_title' => 'Desenvolvimento Infantil',
+                'panel_title' => 'Crianças',
+                'panel_subtitle' => 'Cuidado no Desenvolvimento Infantil',
                 'full_title' => 'Cuidado no Desenvolvimento Infantil na Atenção Primária à Saúde',
                 'category' => 'Saúde da Criança',
                 'target_population' => 'Crianças com até 2 anos de idade (0 a 24 meses)',
@@ -86,6 +90,8 @@ class FamilyHealthService
                 'code' => 'C3',
                 'slug' => 'c3',
                 'short_title' => 'Gestação e Puerpério',
+                'panel_title' => 'Cuidado da Gestante e Puérpera',
+                'panel_subtitle' => 'Cuidado à Gestante e Puérpera na Atenção Primária à Saúde (APS).',
                 'full_title' => 'Cuidado na Gestação e Puerpério na Atenção Primária à Saúde (APS)',
                 'category' => 'Saúde Materna',
                 'target_population' => 'Gestantes e Puérperas (até 42 dias pós-parto)',
@@ -124,6 +130,8 @@ class FamilyHealthService
                 'code' => 'C4',
                 'slug' => 'c4',
                 'short_title' => 'Pessoas com Diabetes',
+                'panel_title' => 'Pessoas com Diabetes',
+                'panel_subtitle' => 'Cuidado da Pessoa com Diabetes na Atenção Primária à Saúde',
                 'full_title' => 'Cuidado da Pessoa com Diabetes na Atenção Primária à Saúde',
                 'category' => 'Condições Crônicas',
                 'target_population' => 'Pessoas diagnosticadas com Diabetes (CIAP-2 T89/T90 ou CID-10 E10/E11/E14)',
@@ -157,6 +165,8 @@ class FamilyHealthService
                 'code' => 'C5',
                 'slug' => 'c5',
                 'short_title' => 'Pessoas com Hipertensão',
+                'panel_title' => 'Pessoas com Hipertensão',
+                'panel_subtitle' => 'Cuidado da Pessoa com Hipertensão na Atenção Primária à Saúde',
                 'full_title' => 'Cuidado da Pessoa com Hipertensão na Atenção Primária à Saúde',
                 'category' => 'Condições Crônicas',
                 'target_population' => 'Pessoas diagnosticadas com Hipertensão (CIAP-2 K86/K87 ou CID-10 I10 a I15, O10, O11)',
@@ -188,6 +198,8 @@ class FamilyHealthService
                 'code' => 'C6',
                 'slug' => 'c6',
                 'short_title' => 'Pessoa Idosa',
+                'panel_title' => 'Pessoa Idosa',
+                'panel_subtitle' => 'Cuidado Integral à Pessoa Idosa na Atenção Primária à Saúde (APS)',
                 'full_title' => 'Cuidado Integral à Pessoa Idosa na Atenção Primária à Saúde (APS)',
                 'category' => 'Ciclos de Vida',
                 'target_population' => 'Pessoas com idade igual ou superior a 60 anos (≥ 60 anos)',
@@ -219,6 +231,8 @@ class FamilyHealthService
                 'code' => 'C7',
                 'slug' => 'c7',
                 'short_title' => 'Prevenção do Câncer',
+                'panel_title' => 'Saúde das Mulheres',
+                'panel_subtitle' => 'Atenção Integral e Cuidados Preventivos à Saúde das Mulheres',
                 'full_title' => 'Cuidado da Mulher e do Homem Transgênero na Prevenção do Câncer na APS',
                 'category' => 'Saúde da Mulher & Prevenção',
                 'target_population' => 'Mulheres e homens trans de 9 a 69 anos de idade',
@@ -338,6 +352,13 @@ class FamilyHealthService
             ->get()
             ->keyBy(fn ($item) => strtolower($item->indicator_code));
 
+        $teamSnapshots = FamilyHealthIndicatorSnapshot::query()
+            ->where('year', $year)
+            ->where('quarter', $quarter)
+            ->whereNotNull('ine') // Snapshots individuais por equipe
+            ->get()
+            ->groupBy(fn ($item) => strtolower($item->indicator_code));
+
         $cards = [];
         $totalScoreSum = 0.0;
         $count = 0;
@@ -356,12 +377,45 @@ class FamilyHealthService
             $score = $snap ? (float) $snap->score_percent : (in_array($slug, ['c1', 'c2', 'c3'], true) ? null : 0.0);
             $level = $score !== null ? self::calculatePerformanceLevel($slug, $score) : null;
 
+            // Agregação real das classificações de equipes
+            $teamsForIndicator = $teamSnapshots->get($slug, collect());
+            if ($slug === 'c1') {
+                $teamsForIndicator = $teamsForIndicator->filter(fn ($s) => ($s->good_practices_breakdown['calculation_version'] ?? null) === C1DwService::VERSION);
+            } elseif ($slug === 'c2') {
+                $teamsForIndicator = $teamsForIndicator->filter(fn ($s) => ($s->good_practices_breakdown['calculation_version'] ?? null) === C2DwService::VERSION);
+            } elseif ($slug === 'c3') {
+                $teamsForIndicator = $teamsForIndicator->filter(fn ($s) => ($s->good_practices_breakdown['calculation_version'] ?? null) === C3DwService::VERSION);
+            }
+
+            $classifications = [
+                'otimo' => 0,
+                'bom' => 0,
+                'suficiente' => 0,
+                'regular' => 0,
+                'total' => 0,
+            ];
+
+            foreach ($teamsForIndicator as $teamSnap) {
+                $rawLevel = $teamSnap->performance_level ?: self::calculatePerformanceLevel($slug, (float) $teamSnap->score_percent);
+                $normalized = match (strtolower((string) $rawLevel)) {
+                    'otimo', 'optimal' => 'otimo',
+                    'bom', 'good' => 'bom',
+                    'suficiente', 'sufficient' => 'suficiente',
+                    default => 'regular',
+                };
+                if (isset($classifications[$normalized])) {
+                    $classifications[$normalized]++;
+                    $classifications['total']++;
+                }
+            }
+
             $cards[$slug] = [
                 'meta' => $meta,
                 'numerator' => $snap ? $snap->numerator : 0,
                 'denominator' => $snap ? $snap->denominator : 0,
                 'score_percent' => $score,
                 'performance_level' => $level,
+                'classifications' => $classifications,
                 'active_search_count' => $snap ? $snap->active_search_count : 0,
                 'has_data' => $snap !== null,
                 'cohort_total' => $slug === 'c2' ? $c2Cohort?->cohort_total : ($slug === 'c3' ? $c3Cohort?->cohort_total : null),
@@ -400,11 +454,28 @@ class FamilyHealthService
                 ->count();
         }
 
+        $availableTeams = FamilyHealthIndicatorSnapshot::query()
+            ->where('year', $year)
+            ->where('quarter', $quarter)
+            ->whereNotNull('ine')
+            ->select('ine', 'team_name', 'team_type')
+            ->distinct()
+            ->orderBy('team_name')
+            ->get()
+            ->map(fn ($t) => [
+                'ine' => $t->ine,
+                'name' => $t->team_name ?: 'Equipe '.$t->ine,
+                'type' => $t->team_type,
+            ])
+            ->values()
+            ->toArray();
+
         return [
             'year' => $year,
             'quarter' => $quarter,
             'municipal_average_score' => $municipalAverageScore,
-            'active_teams_count' => $teamsCount > 0 ? $teamsCount : 12,
+            'active_teams_count' => $teamsCount > 0 ? $teamsCount : count($availableTeams),
+            'available_teams' => $availableTeams,
             'indicators' => $cards,
         ];
     }

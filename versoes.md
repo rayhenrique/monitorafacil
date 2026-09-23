@@ -4,6 +4,16 @@ Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento 
 
 ---
 
+## [v1.23.11] - 23/09/2026
+
+### Painel Municipal da Saúde da Família e Busca Avançada
+- **Exibição Dinâmica das Faixas de Desempenho (C1 ao C7)**: Adequação visual da tela municipal de Saúde da Família com a distribuição real de equipes homologadas nas faixas *Ótimo*, *Bom*, *Suficiente* e *Regular*, calculadas diretamente a partir das avaliações e notas técnicas oficiais (Portaria GM/MS nº 3.493/2024 e NTs 08/2026).
+- **Hero Card Centralizado**: Cartão principal com ícone de cuidado e identificação direta do quadrimestre avaliado.
+- **Padrão Automático do Quadrimestre Avaliado**: Ao acessar o módulo sem parâmetros na URL, o sistema seleciona automaticamente o quadrimestre avaliado do período corrente.
+- **Seleção de Quadrimestres na Busca Avançada**: Remoção de seletores redundantes no Hero Card e centralização da escolha e alternância de quadrimestres exclusivamente no modal de Busca Avançada.
+
+---
+
 ## [v1.23.10] - 22/09/2026
 
 ### Correção de Métricas por Equipe e Busca Avançada na Relação Nominal

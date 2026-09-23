@@ -328,3 +328,12 @@ Os checklists históricos das fases 32 a 38 registram a implementação da époc
 - [x] Processamento CVAT via fila assíncrona com prazo de reentrega superior ao timeout; deploy reinicia workers e verifica o serviço.
 - [x] Mostrar ausência explícita de BPC, bônus e classificação, sem tratar ausência de dado como zero.
 - [ ] Obter BPC/PBF, satisfação e quatro snapshots mensais completos, validar com Siaps e habilitar classificação quadrimestral.
+
+## Ajuste do Painel Municipal da Saúde da Família e Busca Avançada (v1.23.11 - 23/09/2026)
+
+- [x] Agregação real de equipes por faixa de desempenho (Ótimo, Bom, Suficiente, Regular) nos 7 indicadores clínicos oficiais (C1 a C7) no `FamilyHealthService`.
+- [x] Reestruturação da tela de visão geral municipal com Hero Card centralizado e grade de 3 colunas de indicadores conforme layout de referência.
+- [x] Definição padrão do quadrimestre avaliado corrente no carregamento do painel.
+- [x] Centralização da seleção e troca de quadrimestre exclusivamente via modal de Busca Avançada.
+- [x] Testes de regressão e validação com microdados reais do município.
+

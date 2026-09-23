@@ -6,9 +6,9 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.23.10';
+    public const CURRENT_VERSION = 'v1.23.11';
 
-    public const CURRENT_RELEASE_DATE = '22/09/2026';
+    public const CURRENT_RELEASE_DATE = '23/09/2026';
 
     /**
      * Retorna a versão mais recente do sistema.
@@ -61,9 +61,22 @@ class VersionService
     {
         return [
             [
+                'version' => 'v1.23.11',
+                'date' => '23/09/2026',
+                'badge' => 'Versão Atual',
+                'title' => 'Painel Municipal da Saúde da Família e Busca Avançada',
+                'summary' => 'Reestruturação visual do Painel Municipal da Saúde da Família (C1 a C7) com agregação real de equipes por faixas de desempenho (Ótimo, Bom, Suficiente, Regular), seleção padrão do quadrimestre avaliado e seleção de períodos via Busca Avançada.',
+                'highlights' => [
+                    ['type' => 'melhoria', 'text' => 'Exibição dos indicadores C1 a C7 com contagem dinâmica real de equipes classificadas em Ótimo, Bom, Suficiente e Regular conforme notas técnicas do Ministério da Saúde.'],
+                    ['type' => 'melhoria', 'text' => 'Hero card centralizado com ícone de cuidado e identificação direta do quadrimestre avaliado.'],
+                    ['type' => 'melhoria', 'text' => 'Definição automática do quadrimestre avaliado por padrão ao acessar a tela.'],
+                    ['type' => 'melhoria', 'text' => 'Seleção e alternância de quadrimestres centralizada exclusivamente no modal de Busca Avançada.'],
+                ],
+            ],
+            [
                 'version' => 'v1.23.10',
                 'date' => '22/09/2026',
-                'badge' => 'Versão Atual',
+                'badge' => 'Versão Anterior',
                 'title' => 'Correção de Métricas por Equipe e Busca Avançada',
                 'summary' => 'Correção de exceção interna (Undefined property stdClass::$benefit_data_available) ao selecionar equipes na Relação Nominal e abrir a Busca Avançada.',
                 'highlights' => [
