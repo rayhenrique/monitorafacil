@@ -113,17 +113,11 @@ class C2ActiveSearchService
             'month_ref' => 'Mês de Referência',
             'microarea' => 'Microárea',
             'mici' => 'MICI Atualizada?',
-            'practice_a' => 'Consulta até 30d (A)',
-            'practice_b' => '9 Consultas (B)',
-            'practice_c' => 'Peso e Altura (C)',
-            'practice_d' => 'Visitas ACS (D)',
-            'practice_e' => 'Vacinas (E)',
-            'actions' => 'Ações',
         ];
     }
 
     /**
-     * Colunas selecionadas por padrão (12 itens conforme as imagens).
+     * Colunas selecionadas por padrão (10 itens de dados conforme as imagens de referência).
      *
      * @return list<string>
      */
@@ -136,18 +130,10 @@ class C2ActiveSearchService
             'name',
             'age_months',
             'race_color',
-            'facility',
-            'team',
             'professional',
             'month_ref',
             'microarea',
             'mici',
-            'practice_a',
-            'practice_b',
-            'practice_c',
-            'practice_d',
-            'practice_e',
-            'actions',
         ];
     }
 
@@ -1037,9 +1023,9 @@ class C2ActiveSearchService
             return '***.***.***-**';
         }
 
-        // Formato da imagem: ***.303.70*-**
+        // Formato da imagem: ***.303.70*.-**
         return sprintf(
-            '***.%s.%s*-**',
+            '***.%s.%s*.-**',
             substr($clean, 3, 3),
             substr($clean, 6, 2),
         );

@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.23.12';
+    public const CURRENT_VERSION = 'v1.23.13';
 
     public const CURRENT_RELEASE_DATE = '23/09/2026';
 
@@ -61,9 +61,25 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.23.12',
+                'version' => 'v1.23.13',
                 'date' => '23/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Painel do Indicador C2 (Cuidado no Desenvolvimento Infantil) com Microdados Reais do PEC DW',
+                'summary' => 'Reestruturação e alinhamento visual e de dados da tela /saude-da-familia/c2 para o Indicador C2 (Desenvolvimento Infantil) com 1.042 crianças reais extraídas do PostgreSQL do PEC e-SUS municipal, exibindo síntese das 5 Boas Práticas Clínicas (A, B, C, D, E), filtros rápidos, personalizador de colunas, busca avançada e modal de detalhes clínicos individuais.',
+                'highlights' => [
+                    ['type' => 'melhoria', 'text' => 'Microdados 100% reais da coorte municipal de crianças (0 a 24 meses) extraídos do PostgreSQL do e-SUS PEC e processados conforme Nota Metodológica C2 e NT 08/2026.'],
+                    ['type' => 'interface', 'text' => 'Banner superior com 3 blocos: Mês da coorte (2026 / M9), Síntese das 5 Boas Práticas Clínicas (A, B, C, D, E com quantitativos e percentuais em verde) e Denominador Total da coorte.'],
+                    ['type' => 'recurso', 'text' => 'Barra de filtros de consulta rápida por CNS, CPF, Nome, CNES, INE e seletor de paginação (30 itens por padrão).'],
+                    ['type' => 'recurso', 'text' => 'Menu suspenso de colunas visíveis exibindo "Colunas visíveis: 10 itens selecionados" por padrão, com suporte a toggle e restauração de colunas padrão.'],
+                    ['type' => 'recurso', 'text' => 'Tabela nominal com máscaras oficiais de CNS e CPF, visualização/cópia, idade em meses, raça/cor, CNS profissional com tooltip de nome, mês da coorte, microárea, status MICI e badges coloridos para as 5 práticas (verde para cumprida, vermelho para pendente).'],
+                    ['type' => 'recurso', 'text' => 'Modal de Busca Avançada interativo com filtros de equipe, microárea, cidadão, responsável, competência, profissional, faixa etária e status de cada prática clínica.'],
+                    ['type' => 'recurso', 'text' => 'Modal de Detalhes Clínicos da Criança exibindo ficha completa de vínculo territorial, dados cadastrais e status individualizado das 5 boas práticas conforme Portaria GM/MS nº 3.493/2024.'],
+                ],
+            ],
+            [
+                'version' => 'v1.23.12',
+                'date' => '23/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Painel do Indicador C1 (Mais Acesso Mensal) com Microdados Reais',
                 'summary' => 'Reestruturação da tela de detalhe do Indicador C1 (Mais Acesso à Atenção Primária) em /saude-da-familia/c1 com microdados reais do município, abas de equipes, filtros analíticos, cabeçalho de classificação ministerial e exportação CSV/Relatório.',
                 'highlights' => [

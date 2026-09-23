@@ -348,3 +348,15 @@ Os checklists históricos das fases 32 a 38 registram a implementação da époc
 - [x] Menu suspenso de Relatório com impressão em PDF e exportação de planilha CSV (UTF-8 BOM, ponto-e-vírgula).
 - [x] Testes de regressão automatizados cobrindo versão, integridade de rotas e cálculo de indicadores.
 
+## Painel do Indicador C2 (Desenvolvimento Infantil) com Microdados Reais do PEC DW (v1.23.13 - 23/09/2026)
+
+- [x] Extração e cálculo integral de 1.042 crianças reais (0 a 24 meses) da coorte municipal de Saúde da Família a partir do banco de dados PostgreSQL do PEC e-SUS municipal no `C2DwService`.
+- [x] Mapeamento dos campos do PEC DW: microárea (`nu_micro_area_tb_cidadao`), raça/cor (`no_raca_cor`), responsável/mãe (`no_responsavel`), CNES (`nu_cnes_vinc_equipe`) e profissional CNS/nome vinculado às consultas/visitas.
+- [x] Reestruturação da tela `/saude-da-familia/c2` alinhada aos painéis de referência, eliminando abas genéricas na visualização do C2.
+- [x] Banner de síntese em 3 blocos: Mês da coorte (`2026 / M9`), 5 Boas Práticas Clínicas (A: Consulta 30d, B: Consultas Puericultura >= 9, C: Peso/Altura >= 9, D: Visitas ACS >= 2, E: Vacinas completas com quantitativos e percentuais em verde) e Denominador Total da coorte.
+- [x] Filtros analíticos rápidos por CNS, CPF, Nome, CNES, INE e seleção de paginação (padrão de 30 itens por página).
+- [x] Dropdown customizador de colunas exibindo por padrão "Colunas visíveis: 10 itens selecionados" com toggles individuais.
+- [x] Tabela nominal interativa com dados mascarados oficiais, botão de revelar/copiar, tooltip de profissional, status de MICI e badges coloridos para as 5 práticas clínicas.
+- [x] Modais de Busca Avançada e de Detalhes Clínicos da Criança interativos com suporte a fechamento e ações de busca ativa.
+- [x] 100% de testes verdes em `FamilyHealthTest` (26/26) e `VersionControlTest` (5/5).
+

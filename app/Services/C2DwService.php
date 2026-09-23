@@ -71,23 +71,29 @@ class C2DwService
             if (isset($availableColumns['nu_cns_cidadao'])) {
                 $columnsSql .= ", COALESCE(nu_cns_cidadao::text, '') AS cns";
             }
-            if (isset($availableColumns['nu_micro_area'])) {
+            if (isset($availableColumns['nu_micro_area_tb_cidadao']) || isset($availableColumns['nu_micro_area_domicilio'])) {
+                $columnsSql .= ", COALESCE(NULLIF(TRIM(nu_micro_area_tb_cidadao::text), ''), NULLIF(TRIM(nu_micro_area_domicilio::text), ''), '') AS microarea";
+            } elseif (isset($availableColumns['nu_micro_area'])) {
                 $columnsSql .= ", COALESCE(nu_micro_area::text, '') AS microarea";
             } elseif (isset($availableColumns['nu_microarea'])) {
                 $columnsSql .= ", COALESCE(nu_microarea::text, '') AS microarea";
             }
-            if (isset($availableColumns['nu_cnes_vinc_unidade'])) {
-                $columnsSql .= ", COALESCE(nu_cnes_vinc_unidade::text, '') AS cnes";
-            } elseif (isset($availableColumns['nu_cnes_vinc_equipe'])) {
+            if (isset($availableColumns['nu_cnes_vinc_equipe'])) {
                 $columnsSql .= ", COALESCE(nu_cnes_vinc_equipe::text, '') AS cnes";
+            } elseif (isset($availableColumns['nu_cnes_vinc_unidade'])) {
+                $columnsSql .= ", COALESCE(nu_cnes_vinc_unidade::text, '') AS cnes";
             }
             if (isset($availableColumns['no_unidade_vinc'])) {
                 $columnsSql .= ", COALESCE(no_unidade_vinc::text, '') AS facility_name";
             }
-            if (isset($availableColumns['ds_raca_cor_cidadao'])) {
+            if (isset($availableColumns['no_raca_cor'])) {
+                $columnsSql .= ", COALESCE(NULLIF(TRIM(no_raca_cor::text), ''), 'Não informada') AS race_color";
+            } elseif (isset($availableColumns['ds_raca_cor_cidadao'])) {
                 $columnsSql .= ", COALESCE(ds_raca_cor_cidadao::text, 'Não informada') AS race_color";
             }
-            if (isset($availableColumns['no_mae_cidadao'])) {
+            if (isset($availableColumns['no_responsavel'])) {
+                $columnsSql .= ", COALESCE(NULLIF(TRIM(no_responsavel::text), ''), '') AS mother_name";
+            } elseif (isset($availableColumns['no_mae_cidadao'])) {
                 $columnsSql .= ", COALESCE(no_mae_cidadao::text, '') AS mother_name";
             } elseif (isset($availableColumns['no_mae'])) {
                 $columnsSql .= ", COALESCE(no_mae::text, '') AS mother_name";
@@ -150,6 +156,8 @@ class C2DwService
                 'measurements' => [],
                 'visits' => [],
                 'vaccines' => [],
+                'professional_cns' => '',
+                'professional_name' => '',
             ];
         }
 
@@ -164,6 +172,7 @@ class C2DwService
             $consultations = $connection->select(<<<SQL
                 SELECT DISTINCT a.co_fat_cidadao_pec AS id, a.co_seq_fat_atd_ind AS event_id,
                        t.dt_registro AS event_date, COALESCE(l.ds_local_atendimento, '') AS location,
+                       prof.nu_cns AS prof_cns, prof.no_profissional AS prof_name,
                        EXISTS (
                            SELECT 1 FROM tb_fat_atd_ind_procedimentos ap
                            JOIN tb_dim_procedimento dp ON dp.co_seq_dim_procedimento = ap.co_dim_procedimento_avaliado
@@ -185,11 +194,16 @@ class C2DwService
                   AND p.st_avaliado::text IN ('1','t','true')
             SQL, [...$ids, $eventCutoff]);
             foreach ($consultations as $row) {
-                $byId[(int) $row->id]['consultations'][(string) $row->event_id] = [
+                $cid = (int) $row->id;
+                $byId[$cid]['consultations'][(string) $row->event_id] = [
                     'date' => (string) $row->event_date,
                     'remote' => in_array((string) $row->teleprocedure, ['1', 't', 'true'], true)
                         || preg_match('/tele|remot|virtual/i', (string) $row->location) === 1,
                 ];
+                if (! empty($row->prof_cns)) {
+                    $byId[$cid]['professional_cns'] = (string) $row->prof_cns;
+                    $byId[$cid]['professional_name'] = (string) ($row->prof_name ?? '');
+                }
             }
 
             // Registros reais de peso/altura nas três tabelas fato individualizadas.
@@ -263,7 +277,8 @@ class C2DwService
             }
 
             $visits = $connection->select(<<<SQL
-                SELECT v.co_fat_cidadao_pec AS id, t.dt_registro AS event_date
+                SELECT v.co_fat_cidadao_pec AS id, t.dt_registro AS event_date,
+                       prof.nu_cns AS prof_cns, prof.no_profissional AS prof_name
                 FROM tb_fat_visita_domiciliar v
                 JOIN tb_dim_tempo t ON t.co_seq_dim_tempo = v.co_dim_tempo
                 JOIN tb_dim_cbo c ON c.co_seq_dim_cbo = v.co_dim_cbo
@@ -275,7 +290,12 @@ class C2DwService
                        OR v.st_acomp_crianca::text IN ('1','t','true'))
             SQL, [...$ids, $eventCutoff]);
             foreach ($visits as $row) {
-                $byId[(int) $row->id]['visits'][(string) $row->event_date] = true;
+                $cid = (int) $row->id;
+                $byId[$cid]['visits'][(string) $row->event_date] = true;
+                if (empty($byId[$cid]['professional_cns']) && ! empty($row->prof_cns)) {
+                    $byId[$cid]['professional_cns'] = (string) $row->prof_cns;
+                    $byId[$cid]['professional_name'] = (string) ($row->prof_name ?? '');
+                }
             }
 
             $vaccines = $connection->select(<<<SQL
@@ -351,6 +371,8 @@ class C2DwService
                 'team_name' => $teams[$ine]['name'] ?? ('eSF '.$ine),
                 'month_ref' => $child['birthday']->format('m/Y'),
                 'microarea' => $child['microarea'],
+                'professional_cns' => $child['professional_cns'] ?? '',
+                'professional_name' => $child['professional_name'] ?? '',
                 'mici_updated' => true,
                 'micdt_updated' => true,
                 'is_accompanied' => true,

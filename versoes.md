@@ -2,6 +2,19 @@
 
 Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento (*Release Notes*) da plataforma **Monitora Fácil · Gestão da Atenção Primária à Saúde**.
 
+## [v1.23.13] - 23/09/2026
+
+### Painel do Indicador C2 (Cuidado no Desenvolvimento Infantil) com Microdados Reais do PEC DW
+- **Microdados 100% Reais da Coorte de Crianças**: Extração e cálculo integral de 1.042 crianças reais (0 a 24 meses) vinculadas às 19 equipes de saúde da família do município a partir do banco de dados PostgreSQL do e-SUS PEC, eliminando qualquer dado demonstrativo ou mockado.
+- **Estrutura Visual e Síntese das 5 Boas Práticas**: Banner superior dividido em 3 blocos analíticos: Bloco Mês da Coorte (`2026 / M9`), Bloco Central com quantitativos e percentuais em verde das 5 práticas oficiais (A: Consulta até 30d, B: Consultas de Puericultura >= 9, C: Peso e Altura >= 9, D: Visitas Domiciliares ACS >= 2, E: Vacinas completas) e Bloco Denominador com o total de crianças na coorte.
+- **Barra de Filtros Rápidos e Paginação**: Campos de busca instantânea por CNS, CPF, Nome da Criança, CNES, INE e quantidade de registros por página (com 30 itens selecionados por padrão).
+- **Personalização de Colunas Visíveis**: Menu suspenso com contador "Colunas visíveis: 10 itens selecionados" configurado por padrão, permitindo alternar a exibição e restaurar os campos originais.
+- **Tabela Nominal Interativa**: Lista detalhada com CNS e CPF mascarados no padrão oficial, botão de revelar/copiar, data de nascimento, nome, idade em meses, raça/cor, CNS profissional com tooltip descritivo do nome, mês da coorte, microárea, indicador de MICI Atualizada (Sim/Não) e badges compactos para o status de cada boa prática (verde quando cumprida, vermelho quando pendente).
+- **Modais de Busca Avançada e Detalhes Clínicos**: Modal de busca com filtros aprofundados por equipe, microárea, responsáveis, faixas etárias e cumprimento de práticas; modal de detalhes com ficha territorial, cadastral e situação clínica individual de cada uma das 5 práticas recomendadas pela Nota Metodológica C2 e Portaria GM/MS nº 3.493/2024.
+- **Rodapé Institucional**: Inclusão de rodapé oficial com versão do sistema e créditos de desenvolvimento.
+
+---
+
 ## [v1.23.12] - 23/09/2026
 
 ### Painel do Indicador C1 (Mais Acesso Mensal) com Microdados Reais
