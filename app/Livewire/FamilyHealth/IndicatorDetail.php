@@ -2,14 +2,18 @@
 
 namespace App\Livewire\FamilyHealth;
 
+use App\Models\CvatTeamEvaluation;
+use App\Models\FamilyHealthMonthlySnapshot;
 use App\Services\C2ActiveSearchService;
 use App\Services\C3ActiveSearchService;
 use App\Services\DashboardSnapshotService;
 use App\Services\FamilyHealthService;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 #[Layout('layouts.app')]
 class IndicatorDetail extends Component
@@ -28,8 +32,16 @@ class IndicatorDetail extends Component
     #[Url(as: 'mes', history: true)]
     public ?int $selectedMonth = null; // null = todos os 4 meses, ou 1, 2, 3, 4 (mês no quadrimestre)
 
+    #[Url(as: 'cnes', history: true)]
+    public ?string $selectedCnes = null;
+
+    #[Url(as: 'distrito', history: true)]
+    public ?string $selectedDistrict = null;
+
     #[Url(as: 'classificacao', history: true)]
     public ?string $selectedClassification = null; // null = todas, ou 'regular', 'suficiente', 'bom', 'otimo'
+
+    public string $c1SubTab = 'teams'; // 'teams' or 'unassigned'
 
     public string $activeTab = 'dashboard'; // 'dashboard', 'teams', 'active_search', 'rules'
 
@@ -139,23 +151,46 @@ class IndicatorDetail extends Component
             abort(404, 'Indicador de Saúde da Família não encontrado.');
         }
 
-        $latest = $snapshots->periods()[0] ?? [
-            'year' => (int) now()->year,
-            'quarter' => min(3, (int) ceil(now()->month / 4)),
-        ];
+        // Define por padrão o período avaliado atual do calendário (ou com dados disponíveis)
+        $evaluatedYear = (int) now()->year;
+        $evaluatedQuarter = min(3, max(1, (int) ceil(now()->month / 4)));
+
+        $hasCurrentData = FamilyHealthMonthlySnapshot::query()
+            ->where('indicator_code', $this->indicator)
+            ->where('year', $evaluatedYear)
+            ->where('quarter', $evaluatedQuarter)
+            ->exists();
+
+        if (! $hasCurrentData) {
+            $latestWithData = FamilyHealthMonthlySnapshot::query()
+                ->where('indicator_code', $this->indicator)
+                ->where('year', '<=', $evaluatedYear)
+                ->orderByDesc('year')
+                ->orderByDesc('quarter')
+                ->first();
+
+            if ($latestWithData) {
+                $evaluatedYear = (int) $latestWithData->year;
+                $evaluatedQuarter = (int) $latestWithData->quarter;
+            }
+        }
 
         if ($this->year < 2020 || $this->year > 2100) {
-            $this->year = $latest['year'];
+            $this->year = $evaluatedYear;
         }
 
         if ($this->quarter < 1 || $this->quarter > 3) {
-            $this->quarter = $latest['quarter'];
+            $this->quarter = $evaluatedQuarter;
         }
 
         if ($this->indicator === 'c3') {
             $this->visibleColumns = C3ActiveSearchService::getDefaultVisibleColumns();
         } else {
             $this->visibleColumns = C2ActiveSearchService::getDefaultVisibleColumns();
+        }
+
+        if ($this->indicator === 'c1' && $this->selectedMonth === null) {
+            $this->selectedMonth = ($this->quarter - 1) * 4 + 1;
         }
     }
 
@@ -453,6 +488,132 @@ class IndicatorDetail extends Component
         $this->selectedClassification = null;
     }
 
+    public function setC1SubTab(string $tab): void
+    {
+        $this->c1SubTab = in_array($tab, ['teams', 'unassigned'], true) ? $tab : 'teams';
+    }
+
+    public function updatedQuarter(): void
+    {
+        if ($this->indicator === 'c1') {
+            $this->selectedMonth = ($this->quarter - 1) * 4 + 1;
+        }
+    }
+
+    public function updatedSelectedCnes(): void
+    {
+        $this->selectedIne = null;
+    }
+
+    public function clearMonth(): void
+    {
+        $this->selectedMonth = null;
+    }
+
+    public function applyC1Filters(): void
+    {
+        // Livewire re-renders automatically
+    }
+
+    public function resetC1Filters(): void
+    {
+        $this->selectedDistrict = null;
+        $this->selectedCnes = null;
+        $this->selectedIne = null;
+        $this->selectedClassification = null;
+        if ($this->indicator === 'c1') {
+            $this->selectedMonth = ($this->quarter - 1) * 4 + 1;
+        } else {
+            $this->selectedMonth = null;
+        }
+    }
+
+    public function exportC1Csv(): StreamedResponse
+    {
+        $hasCvat = Schema::hasTable('cvat_team_evaluations');
+        $facilityMap = $hasCvat ? CvatTeamEvaluation::select('ine', 'cnes', 'facility_name')->get()->keyBy('ine') : collect();
+
+        $monthlyQuery = FamilyHealthMonthlySnapshot::query()
+            ->where('indicator_code', 'c1')
+            ->where('year', $this->year)
+            ->where('quarter', $this->quarter)
+            ->whereNotNull('ine')
+            ->where('ine', '!=', '')
+            ->where('team_name', 'not like', 'ESB%')
+            ->where('team_name', 'not like', 'esb%')
+            ->where('team_name', 'not like', '%E-MULTI%')
+            ->where('team_name', 'not like', '%e-multi%')
+            ->where('team_name', 'not like', '%SEM EQUIPE%');
+
+        if ($this->selectedMonth !== null) {
+            $monthlyQuery->where('month', $this->selectedMonth);
+        }
+
+        if ($this->selectedIne) {
+            $monthlyQuery->where('ine', $this->selectedIne);
+        }
+
+        $rawRows = $monthlyQuery->get();
+
+        $rows = $rawRows->map(function ($snap) use ($facilityMap) {
+            $facility = $facilityMap->get($snap->ine);
+            $cnes = $facility?->cnes ?? '—';
+            $facilityName = $facility?->facility_name ?? 'Não identificado';
+            $num = (int) $snap->numerator;
+            $den = (int) $snap->denominator;
+            $esp = max(0, $den - $num);
+            $score = (float) $snap->score_percent;
+            $level = $snap->performance_level ?: FamilyHealthService::calculatePerformanceLevel('c1', $score);
+
+            return [
+                'cnes' => $cnes,
+                'facility_name' => $facilityName,
+                'ine' => $snap->ine,
+                'team_name' => $snap->team_name,
+                'month_label' => sprintf('%02d/%d', $snap->month, $snap->year),
+                'numerator' => $num,
+                'spontaneous' => $esp,
+                'denominator' => $den,
+                'is_evaluated' => true,
+                'score_percent' => $score,
+                'performance_level' => $level,
+            ];
+        });
+
+        if ($this->selectedCnes) {
+            $rows = $rows->filter(fn ($r) => $r['cnes'] === $this->selectedCnes);
+        }
+
+        if ($this->selectedClassification) {
+            $rows = $rows->filter(fn ($r) => $r['performance_level'] === $this->selectedClassification);
+        }
+
+        $rows = $rows->sortByDesc('score_percent')->values();
+
+        $fileName = sprintf('relatorio_c1_%d_%s.csv', $this->year, $this->selectedMonth ? 'mes_'.$this->selectedMonth : 'q'.$this->quarter);
+
+        return response()->streamDownload(function () use ($rows) {
+            $handle = fopen('php://output', 'w');
+            fputs($handle, "\xEF\xBB\xBF");
+            fputcsv($handle, ['#', 'UNIDADE', 'EQUIPE', 'MÊS', 'PROGRAMADO (NUMERADOR)', 'ESPONTÂNEO', 'TOTAL DE ATENDIMENTOS (DENOMINADOR)', 'AVALIADA', 'INDICADOR (%)', 'CLASSIFICAÇÃO'], ';');
+            foreach ($rows as $idx => $r) {
+                fputcsv($handle, [
+                    $idx + 1,
+                    $r['cnes'] . ' - ' . $r['facility_name'],
+                    $r['ine'] . ' - ' . $r['team_name'],
+                    $r['month_label'],
+                    $r['numerator'],
+                    $r['spontaneous'],
+                    $r['denominator'],
+                    'Sim',
+                    number_format($r['score_percent'], 2, ',', '') . '%',
+                    ucfirst($r['performance_level']),
+                ], ';');
+            }
+            fclose($handle);
+        }, $fileName, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     public function render(
         FamilyHealthService $service,
         DashboardSnapshotService $snapshots,
@@ -621,7 +782,133 @@ class IndicatorDetail extends Component
             $c3NominalList = $c3FilteredCohort->forPage($this->c3Page, $this->perPage);
         }
 
+        // Preparação específica para C1 (Mensal)
+        $c1TableRows = collect();
+        $availableUnits = collect();
+        $availableTeams = collect();
+        $quarterMonths = [];
+        $unassignedAttendances = 0;
+
+        if ($this->indicator === 'c1') {
+            $firstM = ($this->quarter - 1) * 4 + 1;
+            $quarterMonths = [
+                $firstM => sprintf('%02d / %d', $firstM, $this->year),
+                $firstM + 1 => sprintf('%02d / %d', $firstM + 1, $this->year),
+                $firstM + 2 => sprintf('%02d / %d', $firstM + 2, $this->year),
+                $firstM + 3 => sprintf('%02d / %d', $firstM + 3, $this->year),
+            ];
+
+            $hasCvat = Schema::hasTable('cvat_team_evaluations');
+
+            $facilityMap = $hasCvat ? CvatTeamEvaluation::select('ine', 'cnes', 'facility_name')
+                ->whereNotNull('ine')
+                ->get()
+                ->keyBy('ine') : collect();
+
+            $availableUnits = $hasCvat ? CvatTeamEvaluation::select('cnes', 'facility_name')
+                ->distinct()
+                ->whereNotNull('cnes')
+                ->orderBy('facility_name')
+                ->get()
+                ->map(fn ($item) => [
+                    'cnes' => $item->cnes,
+                    'name' => $item->facility_name,
+                ]) : collect();
+
+            $teamsQuery = $hasCvat ? CvatTeamEvaluation::select('ine', 'team_name', 'cnes')
+                ->distinct()
+                ->whereNotNull('ine')
+                ->orderBy('team_name') : null;
+
+            if ($teamsQuery && $this->selectedCnes) {
+                $teamsQuery->where('cnes', $this->selectedCnes);
+            }
+
+            $availableTeams = $teamsQuery ? $teamsQuery->get()->map(fn ($item) => [
+                'ine' => $item->ine,
+                'name' => $item->team_name,
+                'cnes' => $item->cnes,
+            ]) : collect();
+
+            $monthlyQuery = FamilyHealthMonthlySnapshot::query()
+                ->where('indicator_code', 'c1')
+                ->where('year', $this->year)
+                ->where('quarter', $this->quarter)
+                ->whereNotNull('ine')
+                ->where('ine', '!=', '')
+                ->where('team_name', 'not like', 'ESB%')
+                ->where('team_name', 'not like', 'esb%')
+                ->where('team_name', 'not like', '%E-MULTI%')
+                ->where('team_name', 'not like', '%e-multi%')
+                ->where('team_name', 'not like', '%SEM EQUIPE%');
+
+            if ($this->selectedMonth !== null) {
+                $monthlyQuery->where('month', $this->selectedMonth);
+            }
+
+            if ($this->selectedIne) {
+                $monthlyQuery->where('ine', $this->selectedIne);
+            }
+
+            $rawRows = $monthlyQuery->get();
+
+            $c1TableRows = $rawRows->map(function ($snap) use ($facilityMap) {
+                $facility = $facilityMap->get($snap->ine);
+                $cnes = $facility?->cnes ?? '—';
+                $facilityName = $facility?->facility_name ?? 'Unidade Básica de Saúde';
+                $numerator = (int) $snap->numerator;
+                $denominator = (int) $snap->denominator;
+                $spontaneous = max(0, $denominator - $numerator);
+                $score = (float) $snap->score_percent;
+                $level = $snap->performance_level ?: FamilyHealthService::calculatePerformanceLevel('c1', $score);
+
+                return [
+                    'ine' => $snap->ine,
+                    'team_name' => $snap->team_name,
+                    'cnes' => $cnes,
+                    'facility_name' => $facilityName,
+                    'month' => (int) $snap->month,
+                    'year' => (int) $snap->year,
+                    'month_label' => sprintf('%02d/%d', $snap->month, $snap->year),
+                    'numerator' => $numerator,
+                    'spontaneous' => $spontaneous,
+                    'denominator' => $denominator,
+                    'is_evaluated' => true,
+                    'score_percent' => $score,
+                    'performance_level' => $level,
+                ];
+            });
+
+            if ($this->selectedCnes) {
+                $c1TableRows = $c1TableRows->filter(fn ($row) => $row['cnes'] === $this->selectedCnes);
+            }
+
+            if ($this->selectedClassification) {
+                $c1TableRows = $c1TableRows->filter(fn ($row) => $row['performance_level'] === $this->selectedClassification);
+            }
+
+            $c1TableRows = $c1TableRows->sortByDesc('score_percent')->values();
+
+            $unassignedSnap = FamilyHealthMonthlySnapshot::query()
+                ->where('indicator_code', 'c1')
+                ->where('year', $this->year)
+                ->where('quarter', $this->quarter)
+                ->when($this->selectedMonth, fn ($q) => $q->where('month', $this->selectedMonth))
+                ->where(fn ($q) => $q->whereNull('ine')->orWhere('ine', ''))
+                ->first();
+            $unassignedAttendances = $unassignedSnap ? (int) $unassignedSnap->denominator : 0;
+        }
+
         return view('livewire.family-health.indicator-detail', [
+            'indicator' => $this->indicator,
+            'year' => $this->year,
+            'quarter' => $this->quarter,
+            'selectedMonth' => $this->selectedMonth,
+            'selectedIne' => $this->selectedIne,
+            'selectedCnes' => $this->selectedCnes,
+            'selectedDistrict' => $this->selectedDistrict,
+            'selectedClassification' => $this->selectedClassification,
+            'activeTab' => $this->activeTab,
             'data' => $data,
             'meta' => $data['meta'],
             'current' => $data['current'],
@@ -631,6 +918,12 @@ class IndicatorDetail extends Component
             'c2Teams' => $filteredTeams,
             'c3Teams' => $filteredTeams,
             'filteredTeams' => $filteredTeams,
+            'c1TableRows' => $c1TableRows,
+            'availableUnits' => $availableUnits,
+            'availableTeams' => $availableTeams,
+            'quarterMonths' => $quarterMonths,
+            'unassignedAttendances' => $unassignedAttendances,
+            'c1SubTab' => $this->c1SubTab,
             'activeSearchList' => $data['active_search_list'],
             'periods' => $periods,
             'c2NominalList' => $c2NominalList,

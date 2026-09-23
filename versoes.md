@@ -2,6 +2,15 @@
 
 Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento (*Release Notes*) da plataforma **Monitora Fácil · Gestão da Atenção Primária à Saúde**.
 
+## [v1.23.12] - 23/09/2026
+
+### Painel do Indicador C1 (Mais Acesso Mensal) com Microdados Reais
+- **Alinhamento Fiel ao Painel Oficial de Mais Acesso**: Reestruturação completa da tela `/saude-da-familia/c1` para apresentação detalhada dos atendimentos individuais da atenção primária, respeitando integralmente os dados reais consolidados de todas as 19 equipes homologadas do município.
+- **Tabela Analítica por Equipe**: Visualização com colunas de Unidade (CNES e Nome), Equipe (INE e Nome), Mês de competência, Atendimentos Programados (Numerador), Atendimentos Espontâneos, Total de Atendimentos (Denominador), Indicador de Avaliação Homologada, Barra de Progresso com Percentual e Badge de Classificação.
+- **Cabeçalho com Legenda de Parâmetros Ministeriais**: Apresentação das faixas de classificação com cores padronizadas da Atenção Primária: *Regular* (<= 10% ou > 70%), *Suficiente* (> 10% e <= 30%), *Bom* (> 30% ou <= 50%) e *Ótimo* (> 50% ou <= 70%).
+- **Subabas Resumo por Equipe e Sem Equipe**: Possibilidade de navegação entre o resumo individualizado por equipes de saúde da família e atendimentos não vinculados a equipes.
+- **Filtros Dinâmicos e Exportação**: Filtros por Distrito, Unidade, Equipe, Mês, Quadrimestre e Classificação com botão Carregar, além de menu suspenso de Relatório com impressão em PDF e download de planilha CSV (UTF-8 BOM, ponto-e-vírgula).
+
 ---
 
 ## [v1.23.11] - 23/09/2026

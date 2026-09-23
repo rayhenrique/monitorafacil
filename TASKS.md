@@ -337,3 +337,14 @@ Os checklists históricos das fases 32 a 38 registram a implementação da époc
 - [x] Centralização da seleção e troca de quadrimestre exclusivamente via modal de Busca Avançada.
 - [x] Testes de regressão e validação com microdados reais do município.
 
+## Painel do Indicador C1 (Mais Acesso Mensal) com Microdados Reais (v1.23.12 - 23/09/2026)
+
+- [x] Reestruturação completa do detalhe do Indicador C1 em `/saude-da-familia/c1` para apresentação alinhada ao painel oficial municipal.
+- [x] Microdados 100% reais carregados dos snapshots mensais de todas as 19 equipes ativas do município, sem valores mockados.
+- [x] Exibição de colunas Unidade (CNES e Nome), Equipe (INE e Nome), Mês, Programado (Numerador), Espontâneo, Total (Denominador), Avaliada?, Indicador e Classificação.
+- [x] Cabeçalho com legenda das 4 faixas oficiais do Ministério da Saúde: Regular, Suficiente, Bom e Ótimo.
+- [x] Subabas Resumo por Equipe e Sem Equipe.
+- [x] Filtros analíticos por Distrito, Unidade, Equipe, Mês, Quadrimestre e Classificação com ação Carregar.
+- [x] Menu suspenso de Relatório com impressão em PDF e exportação de planilha CSV (UTF-8 BOM, ponto-e-vírgula).
+- [x] Testes de regressão automatizados cobrindo versão, integridade de rotas e cálculo de indicadores.
+

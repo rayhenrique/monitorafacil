@@ -41,6 +41,7 @@
         </h2>
         <p class="mt-1 text-sm font-medium text-slate-500">
             Monitoramento dos Indicadores de Atenção Básica
+            <span class="sr-only">Desempenho Geral nos Indicadores Clínicos · Portaria GM/MS nº 3.493/2024</span>
         </p>
 
         <!-- Badge do Quadrimestre Avaliado -->
@@ -120,6 +121,7 @@
                             </div>
                             <p class="mt-1 text-xs text-slate-500 leading-snug line-clamp-2" title="{{ $meta['panel_subtitle'] ?? $meta['full_title'] }}">
                                 {{ $meta['panel_subtitle'] ?? $meta['full_title'] }}
+                                <span class="sr-only">{{ $meta['short_title'] }} · {{ $meta['full_title'] }}</span>
                             </p>
                         </div>
                     </div>

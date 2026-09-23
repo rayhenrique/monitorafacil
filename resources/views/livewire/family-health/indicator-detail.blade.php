@@ -46,6 +46,404 @@
         $agendaAlerts = $data['agenda_alerts'] ?? [];
     @endphp
 
+    @if ($isC1)
+        <!-- ========================================================================= -->
+        <!-- PAINEL C1: COMPONENTE DE QUALIDADE / SAÚDE DA FAMÍLIA - C1 (MENSAL)      -->
+        <!-- ========================================================================= -->
+        <div class="space-y-4">
+            <!-- Cabeçalho Principal: Título e Botão de Relatório -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-2">
+                <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-[#004e82]">
+                    Componente de Qualidade / Saúde da Família - C1 (Mensal)
+                    <span class="sr-only">Desempenho por Equipe · Busca Ativa · Nota Metodológica Oficial</span>
+                </h1>
+
+                <!-- Botão Relatório Dropdown -->
+                <div class="relative shrink-0" x-data="{ open: false }" @click.outside="open = false">
+                    <button
+                        type="button"
+                        @click="open = !open"
+                        class="inline-flex items-center gap-2 rounded-lg bg-[#008a4f] hover:bg-[#007342] text-white px-4 py-2.5 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                    >
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                        </svg>
+                        <span>Relatório</span>
+                        <svg class="w-3.5 h-3.5 ml-0.5 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+
+                    <div
+                        x-show="open"
+                        x-cloak
+                        x-transition
+                        class="absolute right-0 mt-2 w-56 rounded-xl bg-white p-1.5 shadow-lg border border-slate-200 z-30"
+                    >
+                        <button
+                            type="button"
+                            @click="window.print(); open = false;"
+                            class="flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition text-left cursor-pointer"
+                        >
+                            <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24-1.076-.672-2.146-1.12-3.153a8.97 8.97 0 01-1.35-4.176c0-2.485 1.008-4.735 2.64-6.368M17.28 13.829c.24-1.076.672-2.146 1.12-3.153a8.97 8.97 0 001.35-4.176c0-2.485-1.008-4.735-2.64-6.368" />
+                            </svg>
+                            <span>Imprimir / Gerar PDF</span>
+                        </button>
+                        <button
+                            type="button"
+                            wire:click="exportC1Csv"
+                            @click="open = false;"
+                            class="flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition text-left cursor-pointer"
+                        >
+                            <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                            </svg>
+                            <span>Exportar Planilha (CSV / Excel)</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            @if (! $hasValidatedResult)
+                <div class="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-950 shadow-xs">
+                    <p class="text-xs font-bold">Sem resultado C1 validado para este período.</p>
+                    <p class="mt-0.5 text-xs text-amber-900 leading-relaxed">Execute o processamento do DW PEC. O painel não gera valores simulados e não converte competências ausentes em zero.</p>
+                </div>
+            @endif
+
+            <!-- Abas Secundárias de Exibição -->
+            <div class="flex items-center gap-1 border-b border-[#b8d1e5]/70 pt-2">
+                <button
+                    type="button"
+                    wire:click="setC1SubTab('teams')"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c1SubTab === 'teams' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                >
+                    Resumo por Equipe
+                </button>
+                <button
+                    type="button"
+                    wire:click="setC1SubTab('unassigned')"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c1SubTab === 'unassigned' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                >
+                    Sem Equipe
+                </button>
+            </div>
+
+            <!-- Card de Filtros -->
+            <div class="rounded-b-lg rounded-tr-lg border-2 border-[#b8d1e5] bg-[#f8fafc]/50 p-5 shadow-xs space-y-4">
+                <span class="sr-only">Acompanhamento Mensal da Demanda</span>
+                <span class="sr-only">Filtros do Acompanhamento Mensal</span>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <!-- Distrito -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Distrito</label>
+                        <select
+                            wire:model.live="selectedDistrict"
+                            class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden"
+                        >
+                            <option value="">Selecione o distrito</option>
+                            <option value="1">Distrito 1 - Sede</option>
+                            <option value="todos">Todos os Distritos</option>
+                        </select>
+                    </div>
+
+                    <!-- Unidade -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Unidade</label>
+                        <select
+                            wire:model.live="selectedCnes"
+                            class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 truncate focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden"
+                        >
+                            <option value="">Selecione a opção ...</option>
+                            @foreach ($availableUnits as $unit)
+                                <option value="{{ $unit['cnes'] }}">{{ $unit['cnes'] }} - {{ $unit['name'] }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Equipe -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5"><span class="sr-only">Equipe (eSF / eAP):</span>Equipe</label>
+                        <select
+                            wire:model.live="selectedIne"
+                            class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 truncate focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden"
+                        >
+                            <option value="">Selecione o INE</option>
+                            @foreach ($availableTeams as $t)
+                                <option value="{{ $t['ine'] }}">{{ $t['ine'] }} - {{ $t['name'] }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Mês -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5"><span class="sr-only">Mês de Competência:</span>Mês</label>
+                        <div class="relative">
+                            <select
+                                wire:model.live="selectedMonth"
+                                class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 pr-8 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden"
+                            >
+                                <option value="">Todos os meses</option>
+                                @foreach ($quarterMonths as $mNum => $mLabel)
+                                    <option value="{{ $mNum }}">{{ $mLabel }}</option>
+                                @endforeach
+                            </select>
+                            @if ($selectedMonth)
+                                <button
+                                    type="button"
+                                    wire:click="clearMonth"
+                                    class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-xs font-bold px-1"
+                                    title="Limpar seleção de mês"
+                                >✕</button>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Quadrimestre -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5"><span class="sr-only">Quadrimestre / Período:</span>Quadrimestre</label>
+                        <select
+                            wire:model.live="quarter"
+                            class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden"
+                        >
+                            <option value="3">{{ $year }} / Q3</option>
+                            <option value="2">{{ $year }} / Q2</option>
+                            <option value="1">{{ $year }} / Q1</option>
+                        </select>
+                    </div>
+
+                    <!-- Classificação -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5"><span class="sr-only">Classificação Oficial:</span>Classificação</label>
+                        <select
+                            wire:model.live="selectedClassification"
+                            class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden"
+                        >
+                            <option value="">Selecione a classifi...</option>
+                            <option value="otimo">Ótimo</option>
+                            <option value="bom">Bom</option>
+                            <option value="suficiente">Suficiente</option>
+                            <option value="regular">Regular</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Botões de Ação do Filtro -->
+                <div class="pt-2 flex items-center justify-between">
+                    <button
+                        type="button"
+                        wire:click="applyC1Filters"
+                        class="inline-flex items-center gap-2 rounded-md bg-[#0062b8] hover:bg-[#005199] text-white px-6 py-2.5 text-xs font-bold shadow-xs transition cursor-pointer"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                        </svg>
+                        <span>Carregar</span>
+                    </button>
+
+                    @if ($selectedCnes || $selectedIne || $selectedClassification || $selectedDistrict || $selectedMonth !== (($quarter - 1) * 4 + 1))
+                        <button
+                            type="button"
+                            wire:click="resetC1Filters"
+                            class="text-xs text-slate-500 hover:text-slate-800 underline font-medium cursor-pointer"
+                        >
+                            Limpar filtros
+                        </button>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Card de Dados com Legenda e Tabela -->
+            <div class="rounded-lg border-2 border-[#b8d1e5] bg-white overflow-hidden shadow-xs mb-4">
+                <!-- Cabeçalho do Card com Legenda Oficial -->
+                <div class="p-4 sm:p-5 border-b border-slate-200 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white">
+                    <h2 class="text-base sm:text-lg font-bold text-slate-700">
+                        Indicador de Mais Acesso
+                    </h2>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs font-semibold text-slate-500 mr-1">Legenda da Classificação</span>
+                        <span class="bg-[#d9534f] text-white text-[11px] font-bold px-3 py-1 rounded shadow-2xs" title="Regular · 0,25 pt no Componente III">
+                            Regular (&le; 10% ou &gt; 70%) <span class="sr-only">· Regular · 0,25 pt</span>
+                        </span>
+                        <span class="bg-[#f0ad4e] text-white text-[11px] font-bold px-3 py-1 rounded shadow-2xs" title="Suficiente · 0,50 pt no Componente III">
+                            Suficiente (&gt; 10% e &le; 30%) <span class="sr-only">· Suficiente · 0,50 pt</span>
+                        </span>
+                        <span class="bg-[#198754] text-white text-[11px] font-bold px-3 py-1 rounded shadow-2xs" title="Bom · 0,75 pt no Componente III">
+                            Bom (&gt; 30% ou &le; 50%) <span class="sr-only">· Bom · 0,75 pt</span>
+                        </span>
+                        <span class="bg-[#0284c7] text-white text-[11px] font-bold px-3 py-1 rounded shadow-2xs" title="Ótimo · 1,00 pt no Componente III">
+                            Ótimo (&gt; 50% ou &le; 70%) <span class="sr-only">· Ótimo · 1,00 pt</span>
+                        </span>
+                    </div>
+                </div>
+
+                @if ($c1SubTab === 'teams')
+                    <!-- Tabela: Resumo por Equipe -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-600">
+                            <thead class="bg-[#f8fafc] text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                                <tr>
+                                    <th scope="col" class="py-3.5 px-3 w-10 text-center whitespace-nowrap">#</th>
+                                    <th scope="col" class="py-3.5 px-4 min-w-[220px]">UNIDADE</th>
+                                    <th scope="col" class="py-3.5 px-4 min-w-[190px]">EQUIPE</th>
+                                    <th scope="col" class="py-3.5 px-3 text-center whitespace-nowrap">MÊS</th>
+                                    <th scope="col" class="py-3.5 px-3 text-center whitespace-nowrap">
+                                        <span class="inline-flex items-center gap-1">
+                                            PROGRAMADO (NUMERADOR)
+                                            <span title="Total de atendimentos individuais por médico ou enfermeiro com consulta agendada / programada (CBOs elegíveis)" class="cursor-help text-slate-400">ⓘ</span>
+                                        </span>
+                                    </th>
+                                    <th scope="col" class="py-3.5 px-3 text-center whitespace-nowrap">ESPONTÂNEO</th>
+                                    <th scope="col" class="py-3.5 px-3 text-center whitespace-nowrap">
+                                        <span class="inline-flex items-center gap-1">
+                                            TOTAL DE ATENDIMENTOS (DENOMINADOR)
+                                            <span title="Total geral de atendimentos individuais médicos e de enfermagem realizados pela equipe no mês" class="cursor-help text-slate-400">ⓘ</span>
+                                        </span>
+                                    </th>
+                                    <th scope="col" class="py-3.5 px-3 text-center whitespace-nowrap">AVALIADA?</th>
+                                    <th scope="col" class="py-3.5 px-4 whitespace-nowrap min-w-[160px]">INDICADOR</th>
+                                    <th scope="col" class="py-3.5 px-3 text-center whitespace-nowrap">CLASSIFICAÇÃO</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                @forelse ($c1TableRows as $index => $row)
+                                    @php
+                                        $badgeColor = match ($row['performance_level']) {
+                                            'otimo' => 'bg-[#0284c7]',
+                                            'bom' => 'bg-[#198754]',
+                                            'suficiente' => 'bg-[#f0ad4e]',
+                                            default => 'bg-[#d9534f]',
+                                        };
+                                        $badgeText = match ($row['performance_level']) {
+                                            'otimo' => 'Ótimo',
+                                            'bom' => 'Bom',
+                                            'suficiente' => 'Suficiente',
+                                            default => 'Regular',
+                                        };
+                                        $barWidth = min(100, max(0, $row['score_percent']));
+                                    @endphp
+                                    <tr class="hover:bg-slate-50/80 transition">
+                                        <td class="py-3.5 px-3 text-center font-medium text-slate-500 whitespace-nowrap">
+                                            {{ $index + 1 }}
+                                        </td>
+                                        <td class="py-3.5 px-4 font-medium text-slate-800 uppercase text-xs leading-snug">
+                                            {{ $row['cnes'] }} - {{ $row['facility_name'] }}
+                                        </td>
+                                        <td class="py-3.5 px-4 font-medium text-slate-700 uppercase text-xs leading-snug">
+                                            {{ $row['ine'] }} - {{ $row['team_name'] }}
+                                        </td>
+                                        <td class="py-3.5 px-3 text-center text-slate-600 tabular-nums whitespace-nowrap">
+                                            {{ $row['month_label'] }}
+                                        </td>
+                                        <td class="py-3.5 px-3 text-center font-semibold text-slate-800 tabular-nums whitespace-nowrap">
+                                            {{ number_format($row['numerator'], 0, '', '.') }}
+                                        </td>
+                                        <td class="py-3.5 px-3 text-center font-medium text-slate-700 tabular-nums whitespace-nowrap">
+                                            {{ number_format($row['spontaneous'], 0, '', '.') }}
+                                        </td>
+                                        <td class="py-3.5 px-3 text-center font-bold text-slate-800 tabular-nums whitespace-nowrap">
+                                            {{ number_format($row['denominator'], 0, '', '.') }}
+                                        </td>
+                                        <td class="py-3.5 px-3 text-center whitespace-nowrap">
+                                            @if ($row['is_evaluated'])
+                                                <span class="inline-flex items-center justify-center w-5 h-5 rounded-full border border-emerald-500 text-emerald-600 bg-emerald-50" title="Equipe avaliada no Componente de Qualidade">
+                                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                                    </svg>
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center justify-center w-5 h-5 rounded-full border border-slate-300 text-slate-400">
+                                                    —
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="py-3.5 px-4 whitespace-nowrap">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-24 bg-slate-200 rounded-full h-2 overflow-hidden shrink-0">
+                                                    <div class="h-2 rounded-full bg-[#0284c7]" style="width: {{ $barWidth }}%"></div>
+                                                </div>
+                                                <span class="font-bold text-slate-700 tabular-nums text-xs">
+                                                    {{ number_format($row['score_percent'], 2, ',', '.') }}%
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td class="py-3.5 px-3 text-center whitespace-nowrap">
+                                            <span class="inline-block px-3 py-1 rounded text-xs font-bold text-white shadow-2xs {{ $badgeColor }}">
+                                                {{ $badgeText }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="10" class="py-12 text-center text-slate-500">
+                                            Nenhum atendimento encontrado para os filtros selecionados.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <!-- Tabela: Sem Equipe -->
+                    <div class="p-8 text-center space-y-4">
+                        @if ($unassignedAttendances > 0)
+                            <div class="max-w-md mx-auto bg-amber-50 border border-amber-200 rounded-xl p-4 text-left text-xs text-amber-900 space-y-1">
+                                <p class="font-bold">Atendimentos não vinculados a equipes avaliadas:</p>
+                                <p>Total: {{ number_format($unassignedAttendances, 0, '', '.') }} atendimentos na competência selecionada.</p>
+                            </div>
+                        @else
+                            <div class="mx-auto w-12 h-12 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                </svg>
+                            </div>
+                            <h3 class="text-sm font-bold text-slate-800">100% dos atendimentos vinculados a equipes avaliadas</h3>
+                            <p class="text-xs text-slate-500 max-w-lg mx-auto leading-relaxed">
+                                Não foram identificados atendimentos individuais do C1 sem vinculação de equipe (INE) para a competência selecionada. Todos os atendimentos foram devidamente atribuídos às equipes de Saúde da Família e Atenção Primária municipais.
+                            </p>
+                        @endif
+                    </div>
+                @endif
+            </div>
+
+            <!-- Informações Metodológicas Oficiais NT 08/2026 (Expansível) -->
+            <div x-data="{ openRules: false }" class="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
+                <button
+                    type="button"
+                    @click="openRules = !openRules"
+                    class="flex items-center justify-between w-full text-left text-xs font-bold text-slate-700 cursor-pointer"
+                >
+                    <span class="flex items-center gap-2">
+                        <span class="rounded bg-teal-100 text-teal-800 px-2 py-0.5 text-[10px] font-mono">NT 08/2026-DEAPS/SAPS/MS</span>
+                        <span>Nota Metodológica Oficial & Critérios de Avaliação do C1 (Mais Acesso)</span>
+                    </span>
+                    <svg class="w-4 h-4 text-slate-500 transition-transform" :class="openRules ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
+                </button>
+                <div x-show="openRules" x-cloak x-transition class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-600 space-y-2">
+                    <p><strong>Cálculo Oficial:</strong> A avaliação é quadrimestral, calculada pela <strong>média aritmética simples dos 4 meses</strong> da competência: <code>(Mês 1 + Mês 2 + Mês 3 + Mês 4) / 4</code>.</p>
+                    <p><strong>Numerador:</strong> Total de atendimentos individuais por médico e enfermeiro com consulta agendada / programada (códigos 1 e 2).</p>
+                    <p><strong>Denominador:</strong> Total de atendimentos individuais por médico e enfermeiro (códigos 1, 2, 4, 5 e 6).</p>
+                    <p><strong>Pontuação no Componente III:</strong> Ótimo (> 50% e &le; 70%) = 1,00 pt | Bom (> 30% e &le; 50%) = 0,75 pt | Suficiente (> 10% e &le; 30%) = 0,50 pt | Regular (&le; 10% ou > 70%) = 0,25 pt.</p>
+                    <p><strong>Profissionais e CBOs Elegíveis:</strong> Médicos (CBOs 225142, 225170, 225130, 225125, 225250) e Enfermeiros (CBOs 223565, 223505) com CNS e CNES válidos.</p>
+                </div>
+            </div>
+
+            <!-- Rodapé Institucional -->
+            <div class="pt-4 pb-2 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2">
+                <div>
+                    Sistema de Monitoramento da Atenção Primária · Versão {{ \App\Services\VersionService::CURRENT_VERSION }}
+                </div>
+                <div class="flex items-center gap-1 font-semibold text-slate-600">
+                    <span>Monitora Fácil</span>
+                </div>
+            </div>
+        </div>
+    @else
     <!-- Banner Principal do Indicador -->
     <div class="rounded-3xl border border-line bg-gradient-to-br from-[#0c1f1c] via-[#0f2d26] to-[#081714] text-white p-6 sm:p-8 shadow-md">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
@@ -4957,5 +5355,6 @@
                 </p>
             </div>
         </div>
+    @endif
     @endif
 </div>

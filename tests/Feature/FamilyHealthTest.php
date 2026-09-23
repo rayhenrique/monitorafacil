@@ -649,6 +649,9 @@ class FamilyHealthTest extends TestCase
 
     public function test_c2_command_does_not_generate_scores_without_pec(): void
     {
+        config(['database.connections.pgsql_esus.host' => '127.0.0.1', 'database.connections.pgsql_esus.port' => 54339]);
+        \Illuminate\Support\Facades\DB::purge('pgsql_esus');
+
         $this->artisan('esus:process-data', ['--scope' => 'c2', '--year' => 2026, '--quarter' => 1])
             ->assertExitCode(1);
 

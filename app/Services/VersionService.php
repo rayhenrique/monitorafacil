@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.23.11';
+    public const CURRENT_VERSION = 'v1.23.12';
 
     public const CURRENT_RELEASE_DATE = '23/09/2026';
 
@@ -61,9 +61,23 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.23.11',
+                'version' => 'v1.23.12',
                 'date' => '23/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Painel do Indicador C1 (Mais Acesso Mensal) com Microdados Reais',
+                'summary' => 'Reestruturação da tela de detalhe do Indicador C1 (Mais Acesso à Atenção Primária) em /saude-da-familia/c1 com microdados reais do município, abas de equipes, filtros analíticos, cabeçalho de classificação ministerial e exportação CSV/Relatório.',
+                'highlights' => [
+                    ['type' => 'melhoria', 'text' => 'Exibição fiel da tela do Indicador C1 (Mensal) com todas as 19 equipes ativas do município, atendimentos programados, atendimentos espontâneos, denominador total, status de avaliação e barras de progresso.'],
+                    ['type' => 'interface', 'text' => 'Cabeçalho com legenda oficial das 4 faixas de classificação (Regular <= 10% ou > 70%, Suficiente > 10% e <= 30%, Bom > 30% ou <= 50%, Ótimo > 50% ou <= 70%).'],
+                    ['type' => 'recurso', 'text' => 'Subabas "Resumo por Equipe" e "Sem Equipe", permitindo acompanhamento individualizado por equipe ou de atendimentos desvinculados.'],
+                    ['type' => 'recurso', 'text' => 'Filtros analíticos por Distrito, Unidade (CNES), Equipe (INE), Mês de competência, Quadrimestre e Classificação de desempenho, com botão Carregar.'],
+                    ['type' => 'recurso', 'text' => 'Menu suspenso de Relatório com opções de Imprimir / Salvar em PDF e Exportação de planilha em formato CSV com codificação UTF-8 BOM e delimitador ponto-e-vírgula.'],
+                ],
+            ],
+            [
+                'version' => 'v1.23.11',
+                'date' => '23/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Painel Municipal da Saúde da Família e Busca Avançada',
                 'summary' => 'Reestruturação visual do Painel Municipal da Saúde da Família (C1 a C7) com agregação real de equipes por faixas de desempenho (Ótimo, Bom, Suficiente, Regular), seleção padrão do quadrimestre avaliado e seleção de períodos via Busca Avançada.',
                 'highlights' => [
