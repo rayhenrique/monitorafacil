@@ -72,6 +72,7 @@ class VersionService
                     ['type' => 'melhoria', 'text' => 'Auditoria de vacina Influenza nos últimos 12 meses a partir de tb_fat_vacinacao_vacina e registro de peso e altura simultâneos em atendimentos individuais.'],
                     ['type' => 'novo', 'text' => 'Busca Ativa Nominal da Pessoa Idosa com 5.780 registros 100% reais, filtros por faixa etária (60-69, 70-79, 80+), raça/cor, status de cada prática, exportação em CSV com BOM UTF-8 e ficha clínica individual.'],
                     ['type' => 'novo', 'text' => 'Modal de Auditoria Clínica Individual da Pessoa Idosa com detalhamento das 4 práticas, dados antropométricos, vacina e visitas de ACS.'],
+                    ['type' => 'melhoria', 'text' => 'Módulo Processar Dados com card dedicado e acionamento pontual do C6, e scripts de deploy (deploy.sh e scripts/deploy.sh) expandidos para 17 etapas completas e documentação atualizada em deploy.md.'],
                     ['type' => 'melhoria', 'text' => 'Processamento analítico integrado via `php artisan esus:process-data --scope=c6` e consolidação no Painel Executivo e Visão Geral.'],
                 ],
             ],

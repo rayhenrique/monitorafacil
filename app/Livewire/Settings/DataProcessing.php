@@ -29,13 +29,13 @@ class DataProcessing extends Component
     /** @var array<string, array{name: string, description: string, status: string, rows: int, message: string}> */
     public array $tablesReport = [];
 
-    public string $selectedScope = 'all'; // 'c1', 'c2', 'c3', 'c4', 'c5', 'cvat' ou 'all' (Geral Completo)
+    public string $selectedScope = 'all'; // 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'cvat' ou 'all' (Geral Completo)
 
     public ?float $executionTimeMs = null;
 
     public function setScope(string $scope): void
     {
-        $this->selectedScope = in_array($scope, ['c1', 'c2', 'c3', 'c4', 'c5', 'cvat', 'all'], true) ? $scope : 'all';
+        $this->selectedScope = in_array($scope, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'cvat', 'all'], true) ? $scope : 'all';
     }
 
     public function processC1(EsusDataProcessingService $service): void
@@ -66,6 +66,12 @@ class DataProcessing extends Component
     {
         $this->selectedScope = 'c5';
         $this->executeProcessing($service, 'c5');
+    }
+
+    public function processC6(EsusDataProcessingService $service): void
+    {
+        $this->selectedScope = 'c6';
+        $this->executeProcessing($service, 'c6');
     }
 
     public function processCvat(): void
@@ -128,6 +134,9 @@ class DataProcessing extends Component
             'c1' => 'Indicador C1 (Mais Acesso)',
             'c2' => 'Indicador C2 (Desenvolvimento Infantil)',
             'c3' => 'Indicador C3 (Gestação e Puerpério)',
+            'c4' => 'Indicador C4 (Diabetes Mellitus)',
+            'c5' => 'Indicador C5 (Hipertensão Arterial)',
+            'c6' => 'Indicador C6 (Cuidado da Pessoa Idosa)',
             default => 'Geral Completo',
         };
         $this->updateProgress(10, "Iniciando verificação do banco de dados e-SUS PEC [{$scopeDesc}]...");

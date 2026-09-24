@@ -274,7 +274,7 @@ cd /home/kltecnologia-monitorafacil/htdocs/monitorafacil.kltecnologia.com
 ```
 
 > **Opções úteis do deploy:**
-> - `./deploy.sh`: Executa todas as 16 etapas completas (incluindo migrações, compilação Vite e sincronização de dados de C1, C2, C3, C4, C5 e CVAT).
+> - `./deploy.sh`: Executa todas as 17 etapas completas (incluindo migrações, compilação Vite e sincronização de dados de C1, C2, C3, C4, C5, C6 e CVAT).
 > - `./deploy.sh --quick`: Executa o deploy rápido (atualiza código, dependências, Vite, migrações e limpa caches, pulando a sincronização demorada do PEC).
 
 *(Ou executar manualmente os comandos equivalentes contidos no script):*
@@ -291,6 +291,7 @@ php8.5 -d memory_limit=1024M artisan esus:process-data --scope=c2
 php8.5 -d memory_limit=1024M artisan esus:process-data --scope=c3
 php8.5 -d memory_limit=1024M artisan esus:process-data --scope=c4
 php8.5 -d memory_limit=1024M artisan esus:process-data --scope=c5
+php8.5 -d memory_limit=1024M artisan esus:process-data --scope=c6
 php8.5 artisan livewire:publish --assets
 php8.5 artisan optimize:clear
 php8.5 artisan config:cache
