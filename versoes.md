@@ -2,6 +2,19 @@
 
 Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento (*Release Notes*) da plataforma **Monitora Fácil · Gestão da Atenção Primária à Saúde**.
 
+## [v1.23.16] - 23/09/2026
+
+### Indicador C4 (Diabetes Mellitus), Extração Real de Exames, Resumo de 19 Equipes e Deploy Atualizado
+- **Indicador C4 com 6 Boas Práticas Clínicas (A–F) e 100 Pontos**: Implementação completa do Indicador C4 (Cuidado da Pessoa com Diabetes Mellitus na APS) com as 6 boas práticas oficiais somando 100 pontos (A: Consulta médica ou de enfermagem nos últimos 6 meses [15 pts]; B: Aferição de Pressão Arterial nos últimos 6 meses [15 pts]; C: Avaliação dos pés nos últimos 12 meses [20 pts]; D: Atendimento Odontológico nos últimos 12 meses [15 pts]; E: Hemoglobina Glicada nos últimos 6 meses [25 pts]; F: Visitas domiciliares de ACS nos últimos 6 meses [10 pts]), conforme Nota Metodológica C4 e Nota Técnica nº 08/2026.
+- **Extração Real de Exames Laboratoriais de Hemoglobina Glicada (HbA1c)**: Integração avançada no DW do e-SUS PEC consultando as tabelas `tb_fat_atd_ind_exames` e `tb_fat_atd_ind_procedimentos`, capturando exames laboratoriais avaliados e elevando a cobertura real da Prática E para 81,67% (4.664 de 5.711 pessoas com diabetes).
+- **Lista Nominal e Coorte de Diabéticos com Busca Ativa**: Tabela nominal detalhada com busca rápida, paginação, personalização de colunas, badges temáticos para cada uma das 6 práticas, modal de busca avançada com filtros clínicos e modal com ficha individual completa.
+- **Correção no Agrupamento de Equipes no C2, C3 e C4 (19 Equipes Oficiais)**: Agrupamento estrito por código INE (`groupBy('ine')`) com agregações `MAX()` em C2, C3 e C4, eliminando duplicações resultantes de divergências históricas de CNES (como ESF 006) e assegurando exatamente as 19 equipes ativas do município.
+- **Botão "Processar Tudo" com Agendamento do CVAT**: Aprimoramento do módulo "Processar Dados" para consolidar todos os indicadores da APS (C1 a C4, MICI e MICDT) e despachar o job assíncrono `SyncCvatNominalJob` na fila (`monitorafacil-queue.service`).
+- **Scripts e Documentação de Deploy Padronizados (15 Etapas)**: Atualização de `deploy.sh` e `scripts/deploy.sh` com 15 etapas de execução, alocação de memória `-d memory_limit=1024M` e inclusão do Passo 13 no `deploy.md` para gerenciamento do serviço systemd de filas.
+- **Correção Livewire**: Implementação do método `applyAdvancedFilters` no componente `IndicatorDetail`, solucionando erro de chamada no modal de busca avançada.
+
+---
+
 ## [v1.23.15] - 23/09/2026
 
 ### Indicador C3 (Gestação e Puerpério), Processamento e Deploy Automatizado

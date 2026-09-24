@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.23.15';
+    public const CURRENT_VERSION = 'v1.23.16';
 
     public const CURRENT_RELEASE_DATE = '23/09/2026';
 
@@ -61,9 +61,24 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.23.15',
+                'version' => 'v1.23.16',
                 'date' => '23/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Indicador C4 (Diabetes Mellitus), Extração Real de Exames, Resumo de 19 Equipes e Deploy Atualizado',
+                'summary' => 'Implementação integral do Indicador C4 (Cuidado da Pessoa com Diabetes Mellitus na APS) com 6 Boas Práticas Clínicas (A–F, 100 pontos), extração no e-SUS PEC DW de exames laboratoriais de Hemoglobina Glicada (HbA1c) e procedimentos clínicos, correção do agrupamento de equipes por INE (19 equipes oficiais sem duplicidade), botão Processar Tudo com agendamento do CVAT e deploy padronizado em 15 etapas.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Indicador C4 com 6 Boas Práticas Clínicas oficiais (A a F somando 100 pontos) conforme Nota Metodológica C4 e Nota Técnica nº 08/2026.'],
+                    ['type' => 'melhoria', 'text' => 'Captura de exames laboratoriais de Hemoglobina Glicada no DW (tb_fat_atd_ind_exames e tb_fat_atd_ind_procedimentos), elevando a cobertura real para 81,67% na coorte municipal.'],
+                    ['type' => 'correcao', 'text' => 'Agrupamento estrito de equipes por INE no C2, C3 e C4, eliminando duplicações decorrentes de CNES histórico divergente e consolidando exatamente as 19 equipes ativas.'],
+                    ['type' => 'novo', 'text' => 'Lista Nominal e Coorte de Diabéticos com busca rápida, modal de busca avançada com filtros por práticas e modal da ficha clínica individual.'],
+                    ['type' => 'melhoria', 'text' => 'Botão "Processar Tudo" no módulo Processar Dados executa consolidação geral (C1 a C4, MICI e MICDT) e agenda a sincronização nominal do CVAT na fila.'],
+                    ['type' => 'melhoria', 'text' => 'Scripts de deploy (deploy.sh e scripts/deploy.sh) com 15 etapas, -d memory_limit=1024M e documentação do serviço systemd de fila em deploy.md.'],
+                ],
+            ],
+            [
+                'version' => 'v1.23.15',
+                'date' => '23/09/2026',
+                'badge' => 'Versão Anterior',
                 'title' => 'Indicador C3 (Gestação e Puerpério), Processamento e Deploy Automatizado',
                 'summary' => 'Implementação integral do Indicador C3 (Cuidado na Gestação e Puerpério) da Saúde da Família com 11 Boas Práticas Clínicas oficiais (A–K) somando 100 pontos e multiplicador 2.0×, lista nominal de busca ativa com coorte real de gestantes/puérperas, resumo mensal das equipes por classificação ministerial, além de suporte ao escopo C3 no comando CLI esus:process-data, auditoria no módulo Processar Dados e inclusão da etapa no deploy automatizado.',
                 'highlights' => [
