@@ -396,7 +396,10 @@ class FamilyHealthService
             if ($slug === 'c5' && ($snap?->good_practices_breakdown['calculation_version'] ?? null) !== C5DwService::VERSION) {
                 $snap = null;
             }
-            $score = $snap ? (float) $snap->score_percent : (in_array($slug, ['c1', 'c2', 'c3', 'c4', 'c5'], true) ? null : 0.0);
+            if ($slug === 'c6' && ($snap?->good_practices_breakdown['calculation_version'] ?? null) !== C6DwService::VERSION) {
+                $snap = null;
+            }
+            $score = $snap ? (float) $snap->score_percent : (in_array($slug, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'], true) ? null : 0.0);
             $level = $score !== null ? self::calculatePerformanceLevel($slug, $score) : null;
 
             // Agregação real das classificações de equipes
@@ -411,6 +414,8 @@ class FamilyHealthService
                 $teamsForIndicator = $teamsForIndicator->filter(fn ($s) => ($s->good_practices_breakdown['calculation_version'] ?? null) === C4DwService::VERSION);
             } elseif ($slug === 'c5') {
                 $teamsForIndicator = $teamsForIndicator->filter(fn ($s) => ($s->good_practices_breakdown['calculation_version'] ?? null) === C5DwService::VERSION);
+            } elseif ($slug === 'c6') {
+                $teamsForIndicator = $teamsForIndicator->filter(fn ($s) => ($s->good_practices_breakdown['calculation_version'] ?? null) === C6DwService::VERSION);
             }
 
             $classifications = [
@@ -546,7 +551,7 @@ class FamilyHealthService
     public function getIndicatorDetail(string $code, int $year, int $quarter, ?string $selectedIne = null): array
     {
         $code = strtolower($code);
-        if (! in_array($code, ['c1', 'c2', 'c3'], true)) {
+        if (! in_array($code, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'], true)) {
             $this->ensureBaselineSnapshots($year, $quarter);
         }
 

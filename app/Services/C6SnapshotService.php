@@ -84,6 +84,8 @@ class C6SnapshotService
                     'calculation_version' => C6DwService::VERSION,
                 ]);
 
+                $compPoints = FamilyHealthService::calculateComponentIIIPoints($scoreData['performance_level'], 1.0);
+
                 // Grava Snapshots Mensais (4 meses)
                 foreach ($monthsInQuarter as $m) {
                     FamilyHealthMonthlySnapshot::query()->create([
@@ -99,25 +101,99 @@ class C6SnapshotService
                         'denominator' => $total,
                         'score_percent' => $scoreData['score_percent'],
                         'performance_level' => $scoreData['performance_level'],
+                        'component_iii_points' => $compPoints,
+                        'is_evaluated' => true,
                         'calculation_version' => C6DwService::VERSION,
                     ]);
                 }
+
+                // Grava Snapshot Quadrimestral do Indicador por Equipe
+                FamilyHealthIndicatorSnapshot::query()->create([
+                    'year' => $year,
+                    'quarter' => $quarter,
+                    'indicator_code' => 'c6',
+                    'ine' => $ine,
+                    'team_name' => $scoreData['team_name'],
+                    'team_type' => $teams[$ine]['type'] ?? '70',
+                    'numerator' => (int) round(($scoreData['score_percent'] * $total) / 100),
+                    'denominator' => $total,
+                    'score_percent' => $scoreData['score_percent'],
+                    'performance_level' => $scoreData['performance_level'],
+                    'component_iii_points' => $compPoints,
+                    'good_practices_breakdown' => [
+                        'calculation_version' => C6DwService::VERSION,
+                        'as_of' => $extraction['as_of'],
+                    ],
+                    'is_evaluated' => true,
+                    'as_of' => $extraction['as_of'],
+                    'calculation_version' => C6DwService::VERSION,
+                ]);
             }
 
-            // Grava o Consolidado Municipal no Quadrimestre
-            $municipalAvg = $municipalTotalCohort > 0 ? round($municipalScoreSum / $municipalTotalCohort, 2) : 0.0;
-            $municipalLevel = FamilyHealthService::calculatePerformanceLevel('c6', $municipalAvg);
+            // Consolidado Municipal
+            $municipalAvgScore = $municipalTotalCohort > 0 ? round($municipalScoreSum / $municipalTotalCohort, 2) : 0.0;
+            $municipalLevel = FamilyHealthService::calculatePerformanceLevel('c6', $municipalAvgScore);
+            $municipalC3Points = FamilyHealthService::calculateComponentIIIPoints($municipalLevel, 1.0);
 
+            $municipalMonthly = [];
+            foreach ($monthsInQuarter as $m) {
+                $municipalMonthly[$m] = $municipalTotalCohort;
+            }
+
+            C6CohortSnapshot::query()->create([
+                'year' => $year,
+                'quarter' => $quarter,
+                'ine' => null,
+                'team_name' => 'Consolidado Municipal',
+                'team_type' => '70',
+                'cohort_total' => $municipalTotalCohort,
+                'evaluated_total' => $municipalTotalCohort,
+                'monthly_counts' => $municipalMonthly,
+                'as_of' => $extraction['as_of'],
+                'calculation_version' => C6DwService::VERSION,
+            ]);
+
+            // Snapshots Mensais Municipais
+            foreach ($monthsInQuarter as $m) {
+                FamilyHealthMonthlySnapshot::query()->create([
+                    'year' => $year,
+                    'quarter' => $quarter,
+                    'month' => $m,
+                    'month_in_quarter' => (($m - 1) % 4) + 1,
+                    'indicator_code' => 'c6',
+                    'ine' => null,
+                    'team_name' => 'Consolidado Municipal',
+                    'team_type' => '70',
+                    'numerator' => (int) round(($municipalAvgScore * $municipalTotalCohort) / 100),
+                    'denominator' => $municipalTotalCohort,
+                    'score_percent' => $municipalAvgScore,
+                    'performance_level' => $municipalLevel,
+                    'component_iii_points' => $municipalC3Points,
+                    'is_evaluated' => true,
+                    'calculation_version' => C6DwService::VERSION,
+                ]);
+            }
+
+            // Snapshot Quadrimestral Municipal
             FamilyHealthIndicatorSnapshot::query()->create([
                 'year' => $year,
                 'quarter' => $quarter,
                 'indicator_code' => 'c6',
                 'ine' => null,
-                'team_name' => null,
-                'numerator' => (int) round(($municipalAvg * $municipalTotalCohort) / 100),
+                'team_name' => 'Consolidado Municipal',
+                'team_type' => '70',
+                'numerator' => (int) round(($municipalAvgScore * $municipalTotalCohort) / 100),
                 'denominator' => $municipalTotalCohort,
-                'score_percent' => $municipalAvg,
+                'score_percent' => $municipalAvgScore,
                 'performance_level' => $municipalLevel,
+                'component_iii_points' => $municipalC3Points,
+                'good_practices_breakdown' => [
+                    'calculation_version' => C6DwService::VERSION,
+                    'as_of' => $extraction['as_of'],
+                    'practices_citywide' => $extraction['practices_citywide'] ?? [],
+                ],
+                'is_evaluated' => true,
+                'as_of' => $extraction['as_of'],
                 'calculation_version' => C6DwService::VERSION,
             ]);
         });
