@@ -7,14 +7,17 @@ use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
-#[Signature('esus:process-data {--scope=all : Escopo de processamento: all (geral completo), c1 (indicador C1), c2 (indicador C2) ou c3 (indicador C3)} {--year= : Ano de competência (padrão: atual)} {--quarter= : Quadrimestre de competência (padrão: atual)}')]
+#[Signature('esus:process-data {--scope=all : Escopo de processamento: all (geral completo), c1 (indicador C1), c2 (indicador C2), c3 (indicador C3) ou c4 (indicador C4)} {--year= : Ano de competência (padrão: atual)} {--quarter= : Quadrimestre de competência (padrão: atual)}')]
 #[Description('Executa o processamento e consolidação das tabelas do e-SUS PEC para os Indicadores da APS.')]
 class EsusProcessData extends Command
 {
     public function handle(EsusDataProcessingService $service): int
     {
+        @ini_set('memory_limit', '1024M');
+        @set_time_limit(0);
+
         $scope = strtolower((string) ($this->option('scope') ?: 'all'));
-        if (! in_array($scope, ['all', 'c1', 'c2', 'c3'], true)) {
+        if (! in_array($scope, ['all', 'c1', 'c2', 'c3', 'c4'], true)) {
             $scope = 'all';
         }
 

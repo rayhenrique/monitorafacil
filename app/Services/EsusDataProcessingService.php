@@ -31,6 +31,9 @@ class EsusDataProcessingService
      */
     public function process(?callable $progressCallback = null, ?int $targetYear = null, ?int $targetQuarter = null, string $scope = 'all'): array
     {
+        @ini_set('memory_limit', '1024M');
+        @set_time_limit(0);
+
         $startTime = microtime(true);
 
         $now = Carbon::now();
@@ -109,6 +112,7 @@ class EsusDataProcessingService
             'c1' => 'Indicador C1 (Mais Acesso)',
             'c2' => 'Indicador C2 (Desenvolvimento Infantil)',
             'c3' => 'Indicador C3 (Gestação e Puerpério)',
+            'c4' => 'Indicador C4 (Pessoas com Diabetes)',
             default => 'Geral Completo',
         };
         $this->notifyProgress($progressCallback, 10, "Iniciando conexão e validação com o e-SUS PEC [{$scopeDesc}]...", $tablesReport);
@@ -240,7 +244,7 @@ class EsusDataProcessingService
         $eligibleTeamsByIne = collect($teamsExtracted)->keyBy('ine')->all();
 
         // ETAPA 3: tb_fat_atendimento_individual · Indicador C1 Mais Acesso Mês a Mês (65%)
-        if ($scope === 'c2' || $scope === 'c3') {
+        if (in_array($scope, ['c2', 'c3', 'c4'], true)) {
             $tablesReport['tb_fat_atendimento_individual']['status'] = 'info';
             $tablesReport['tb_fat_atendimento_individual']['rows'] = 0;
             $tablesReport['tb_fat_atendimento_individual']['message'] = sprintf('Não processado (Foco selecionado: %s).', $scopeDesc);
@@ -680,8 +684,72 @@ class EsusDataProcessingService
             ];
         }
 
+        // ETAPA 3.7: Indicador C4 Cuidado da Pessoa com Diabetes (6 Boas Práticas e Lista Nominal)
+        $c4FailureMessage = null;
+        if ($scope === 'all' || $scope === 'c4') {
+            $this->notifyProgress($progressCallback, 84, 'Processando Indicador C4 (Pessoas com Diabetes e Boas Práticas A–F)...', $tablesReport);
+            try {
+                if (! $isLivePecConnected || ! $connection) {
+                    throw new \RuntimeException('A leitura do C4 exige conexão com o DW do PEC. Nenhum resultado foi gerado.');
+                }
+
+                $connection->statement("SET statement_timeout TO '30s'");
+
+                $c4Stats = app(C4SnapshotService::class)->process($connection, $year, $quarter, $eligibleTeamsByIne);
+
+                $tablesReport['c4_dw'] = [
+                    'name' => 'C4 · DW PEC',
+                    'description' => 'Coorte de pessoas com diabetes, 6 boas práticas A–F e lista nominal de busca ativa',
+                    'status' => 'success',
+                    'rows' => $c4Stats['diabetics'],
+                    'message' => sprintf(
+                        '%d pessoas com diabetes ativas gravadas; %d equipes com lista nominal pronta para busca ativa.',
+                        $c4Stats['diabetics'],
+                        $c4Stats['teams']
+                    ),
+                ];
+                $connection->statement("SET statement_timeout TO '10s'");
+            } catch (Throwable $e) {
+                if ($connection) {
+                    try {
+                        $connection->statement("SET statement_timeout TO '10s'");
+                    } catch (Throwable) {
+                    }
+                }
+                $message = 'C4 não processado: '.$e->getMessage();
+                $tablesReport['c4_dw'] = [
+                    'name' => 'C4 · DW PEC',
+                    'description' => 'Coorte de pessoas com diabetes e 6 boas práticas A–F',
+                    'status' => 'error',
+                    'rows' => 0,
+                    'message' => $message,
+                ];
+                $syncLog->update(['status' => SyncStatus::Failed, 'finished_at' => now(), 'error_message' => $message]);
+                if ($scope === 'c4') {
+                    $this->notifyProgress($progressCallback, 100, $message, $tablesReport);
+
+                    return [
+                        'success' => false,
+                        'message' => $message,
+                        'progress' => 100,
+                        'tables' => $tablesReport,
+                        'execution_time_ms' => round((microtime(true) - $startTime) * 1000, 2),
+                    ];
+                }
+                $c4FailureMessage = $message;
+            }
+        } else {
+            $tablesReport['c4_dw'] = [
+                'name' => 'C4 · DW PEC',
+                'description' => 'Coorte de pessoas com diabetes, 6 boas práticas A–F e lista nominal de busca ativa',
+                'status' => 'info',
+                'rows' => 0,
+                'message' => sprintf('Não processado (Foco selecionado: %s).', $scopeDesc),
+            ];
+        }
+
         // ETAPA 4: tb_fat_cad_individual e tb_fat_cad_domiciliar
-        if (in_array($scope, ['c1', 'c2', 'c3'], true)) {
+        if (in_array($scope, ['c1', 'c2', 'c3', 'c4'], true)) {
             $tablesReport['tb_fat_cad_individual']['status'] = 'info';
             $tablesReport['tb_fat_cad_individual']['rows'] = 0;
             $tablesReport['tb_fat_cad_individual']['message'] = sprintf('Não processado (Foco selecionado: %s).', $scopeDesc);
@@ -805,10 +873,11 @@ class EsusDataProcessingService
             'c1' => 'Indicador C1 (Mais Acesso)',
             'c2' => 'Indicador C2 (Desenvolvimento Infantil)',
             'c3' => 'Indicador C3 (Gestação e Puerpério)',
+            'c4' => 'Indicador C4 (Pessoas com Diabetes)',
             default => 'Geral Completo',
         };
 
-        $combinedFailureMessage = trim(($c2FailureMessage ? $c2FailureMessage.' ' : '').($c3FailureMessage ? $c3FailureMessage.' ' : ''));
+        $combinedFailureMessage = trim(($c2FailureMessage ? $c2FailureMessage.' ' : '').($c3FailureMessage ? $c3FailureMessage.' ' : '').($c4FailureMessage ? $c4FailureMessage.' ' : ''));
 
         $syncLog->update([
             'status' => $combinedFailureMessage !== '' ? SyncStatus::Failed : SyncStatus::Success,

@@ -282,7 +282,7 @@
             Monitora Fácil · Sistema de Gestão e Monitoramento da Atenção Primária à Saúde | Relatório gerado em {{ now()->format('d/m/Y \à\s H:i:s') }}
         </div>
         <div class="footer-right">
-            Total listado: {{ count($citizens) }} de {{ number_format($totalCount ?? count($citizens), 0, ',', '.') }} registros@if(isset($totalCount) && $totalCount > count($citizens)) (amostra de 200 no PDF · exporte em CSV para base completa)@endif
+            Total listado: {{ count($citizens) }} de {{ number_format($totalCount ?? count($citizens), 0, ',', '.') }} registros @if(isset($totalCount) && $totalCount > count($citizens)) (amostra de 200 no PDF · exporte em CSV para base completa) @endif
         </div>
     </div>
 </body>

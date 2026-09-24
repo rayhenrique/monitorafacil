@@ -1,0 +1,100 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class C4NominalDiabetic extends Model
+{
+    protected $table = 'c4_nominal_diabetics';
+
+    protected $fillable = [
+        'year',
+        'quarter',
+        'cidadao_pec_id',
+        'cns',
+        'cpf',
+        'name',
+        'social_name',
+        'birth_date',
+        'age_years',
+        'phone',
+        'race_color',
+        'cnes',
+        'facility_name',
+        'district',
+        'ine',
+        'team_name',
+        'professional_cns',
+        'professional_name',
+        'microarea',
+        'ciap_codes',
+        'cid_codes',
+        'first_diagnosis_date',
+        'last_diagnosis_date',
+        'condition_status',
+        'month_ref',
+        'mici_updated',
+        'is_accompanied',
+        'practice_a',
+        'practice_a_met',
+        'last_consultation_date',
+        'practice_b',
+        'practice_b_met',
+        'last_pa_date',
+        'last_pa_value',
+        'practice_c',
+        'practice_c_met',
+        'last_anthropometry_date',
+        'last_weight',
+        'last_height',
+        'practice_d',
+        'practice_d_met',
+        'last_visit_date',
+        'practice_e',
+        'practice_e_met',
+        'last_hba1c_date',
+        'last_hba1c_type',
+        'practice_f',
+        'practice_f_met',
+        'last_foot_exam_date',
+        'score_percent',
+        'calculation_version',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'year' => 'integer',
+            'quarter' => 'integer',
+            'cidadao_pec_id' => 'integer',
+            'birth_date' => 'date',
+            'first_diagnosis_date' => 'date',
+            'last_diagnosis_date' => 'date',
+            'last_consultation_date' => 'date',
+            'last_pa_date' => 'date',
+            'last_anthropometry_date' => 'date',
+            'last_visit_date' => 'date',
+            'last_hba1c_date' => 'date',
+            'last_foot_exam_date' => 'date',
+            'age_years' => 'integer',
+            'mici_updated' => 'boolean',
+            'is_accompanied' => 'boolean',
+            'practice_a' => 'integer',
+            'practice_a_met' => 'boolean',
+            'practice_b' => 'integer',
+            'practice_b_met' => 'boolean',
+            'practice_c' => 'integer',
+            'practice_c_met' => 'boolean',
+            'practice_d' => 'integer',
+            'practice_d_met' => 'boolean',
+            'practice_e' => 'integer',
+            'practice_e_met' => 'boolean',
+            'practice_f' => 'integer',
+            'practice_f_met' => 'boolean',
+            'last_weight' => 'float',
+            'last_height' => 'float',
+            'score_percent' => 'float',
+        ];
+    }
+}

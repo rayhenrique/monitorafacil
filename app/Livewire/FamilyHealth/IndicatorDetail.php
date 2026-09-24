@@ -4,11 +4,13 @@ namespace App\Livewire\FamilyHealth;
 
 use App\Models\C2NominalChild;
 use App\Models\C3NominalPregnancy;
+use App\Models\C4NominalDiabetic;
 use App\Models\CvatTeamEvaluation;
 use App\Models\FamilyHealthIndicatorSnapshot;
 use App\Models\FamilyHealthMonthlySnapshot;
 use App\Services\C2ActiveSearchService;
 use App\Services\C3ActiveSearchService;
+use App\Services\C4ActiveSearchService;
 use App\Services\DashboardSnapshotService;
 use App\Services\FamilyHealthService;
 use Illuminate\Support\Collection;
@@ -51,9 +53,11 @@ class IndicatorDetail extends Component
 
     public string $c3SubTab = 'monthly_summary'; // 'monthly_summary', 'nominal'
 
+    public string $c4SubTab = 'monthly_summary'; // 'monthly_summary', 'nominal'
+
     public string $activeTab = 'dashboard'; // 'dashboard', 'teams', 'active_search', 'rules'
 
-    // --- PROPRIEDADES DA ABA BUSCA ATIVA C2 / C3 ---
+    // --- PROPRIEDADES DA ABA BUSCA ATIVA C2 / C3 / C4 ---
     public string $searchCns = '';
 
     public string $searchCpf = '';
@@ -69,6 +73,8 @@ class IndicatorDetail extends Component
     public int $c2Page = 1;
 
     public int $c3Page = 1;
+
+    public int $c4Page = 1;
 
     public array $visibleColumns = [];
 
@@ -161,6 +167,11 @@ class IndicatorDetail extends Component
 
     public ?array $selectedPregnancy = null;
 
+    // Modal Detalhes Clínicos Pessoa com Diabetes (C4)
+    public bool $showDiabeticDetailModal = false;
+
+    public ?array $selectedDiabetic = null;
+
     public function mount(string $indicator, DashboardSnapshotService $snapshots): void
     {
         $this->indicator = strtolower($indicator);
@@ -201,7 +212,9 @@ class IndicatorDetail extends Component
             $this->quarter = $evaluatedQuarter;
         }
 
-        if ($this->indicator === 'c3') {
+        if ($this->indicator === 'c4') {
+            $this->visibleColumns = C4ActiveSearchService::getDefaultVisibleColumns();
+        } elseif ($this->indicator === 'c3') {
             $this->visibleColumns = C3ActiveSearchService::getDefaultVisibleColumns();
         } else {
             $this->visibleColumns = C2ActiveSearchService::getDefaultVisibleColumns();
@@ -216,36 +229,42 @@ class IndicatorDetail extends Component
     {
         $this->c2Page = 1;
         $this->c3Page = 1;
+        $this->c4Page = 1;
     }
 
     public function updatedSearchCpf(): void
     {
         $this->c2Page = 1;
         $this->c3Page = 1;
+        $this->c4Page = 1;
     }
 
     public function updatedSearchName(): void
     {
         $this->c2Page = 1;
         $this->c3Page = 1;
+        $this->c4Page = 1;
     }
 
     public function updatedSearchCnes(): void
     {
         $this->c2Page = 1;
         $this->c3Page = 1;
+        $this->c4Page = 1;
     }
 
     public function updatedSearchIne(): void
     {
         $this->c2Page = 1;
         $this->c3Page = 1;
+        $this->c4Page = 1;
     }
 
     public function updatedPerPage(): void
     {
         $this->c2Page = 1;
         $this->c3Page = 1;
+        $this->c4Page = 1;
     }
 
     public function toggleColumn(string $column): void
@@ -259,7 +278,9 @@ class IndicatorDetail extends Component
 
     public function selectAllColumns(): void
     {
-        if ($this->indicator === 'c3') {
+        if ($this->indicator === 'c4') {
+            $this->visibleColumns = array_keys(C4ActiveSearchService::getAvailableColumns());
+        } elseif ($this->indicator === 'c3') {
             $this->visibleColumns = array_keys(C3ActiveSearchService::getAvailableColumns());
         } else {
             $this->visibleColumns = array_keys(C2ActiveSearchService::getAvailableColumns());
@@ -268,7 +289,9 @@ class IndicatorDetail extends Component
 
     public function resetDefaultColumns(): void
     {
-        if ($this->indicator === 'c3') {
+        if ($this->indicator === 'c4') {
+            $this->visibleColumns = C4ActiveSearchService::getDefaultVisibleColumns();
+        } elseif ($this->indicator === 'c3') {
             $this->visibleColumns = C3ActiveSearchService::getDefaultVisibleColumns();
         } else {
             $this->visibleColumns = C2ActiveSearchService::getDefaultVisibleColumns();
@@ -299,6 +322,7 @@ class IndicatorDetail extends Component
     {
         $this->c2Page = 1;
         $this->c3Page = 1;
+        $this->c4Page = 1;
         $this->showAdvancedModal = false;
     }
 
@@ -342,11 +366,17 @@ class IndicatorDetail extends Component
         $this->advPracticeK = null;
         $this->c2Page = 1;
         $this->c3Page = 1;
+        $this->c4Page = 1;
     }
 
     public function switchC3SubTab(string $tab): void
     {
         $this->c3SubTab = in_array($tab, ['monthly_summary', 'nominal'], true) ? $tab : 'monthly_summary';
+    }
+
+    public function switchC4SubTab(string $tab): void
+    {
+        $this->c4SubTab = in_array($tab, ['monthly_summary', 'nominal'], true) ? $tab : 'monthly_summary';
     }
 
     public function setAgeGroup(string $group): void
@@ -475,6 +505,28 @@ class IndicatorDetail extends Component
         $this->selectedPregnancy = null;
     }
 
+    public function gotoC4Page(int $page): void
+    {
+        $this->c4Page = max(1, $page);
+    }
+
+    public function openDiabeticDetail(int $diabeticId, C4ActiveSearchService $c4Service): void
+    {
+        $cohort = $c4Service->getBaseCohort($this->year, $this->quarter, $this->selectedIne);
+        $found = $cohort->firstWhere('id', $diabeticId);
+
+        if ($found) {
+            $this->selectedDiabetic = $found;
+            $this->showDiabeticDetailModal = true;
+        }
+    }
+
+    public function closeDiabeticDetail(): void
+    {
+        $this->showDiabeticDetailModal = false;
+        $this->selectedDiabetic = null;
+    }
+
     public function setTab(string $tab): void
     {
         $this->activeTab = $tab;
@@ -531,6 +583,11 @@ class IndicatorDetail extends Component
         $this->c3SubTab = in_array($tab, ['monthly_summary', 'nominal'], true) ? $tab : 'monthly_summary';
     }
 
+    public function setC4SubTab(string $tab): void
+    {
+        $this->c4SubTab = in_array($tab, ['monthly_summary', 'nominal'], true) ? $tab : 'monthly_summary';
+    }
+
     public function updatedActiveTab(string $tab): void
     {
         if ($this->indicator === 'c2' && $tab === 'active_search') {
@@ -538,6 +595,9 @@ class IndicatorDetail extends Component
         }
         if ($this->indicator === 'c3' && $tab === 'active_search') {
             $this->c3SubTab = 'nominal';
+        }
+        if ($this->indicator === 'c4' && $tab === 'active_search') {
+            $this->c4SubTab = 'nominal';
         }
     }
 
@@ -666,7 +726,8 @@ class IndicatorDetail extends Component
         FamilyHealthService $service,
         DashboardSnapshotService $snapshots,
         C2ActiveSearchService $c2Service,
-        C3ActiveSearchService $c3Service
+        C3ActiveSearchService $c3Service,
+        C4ActiveSearchService $c4Service
     ): View {
         $data = $service->getIndicatorDetail($this->indicator, $this->year, $this->quarter, $this->selectedIne);
         $periods = $snapshots->periods();
@@ -675,10 +736,12 @@ class IndicatorDetail extends Component
         $c1Data = $this->prepareC1Data();
         $c2Data = $this->prepareC2Data($c2Service);
         $c3Data = $this->prepareC3Data($c3Service);
+        $c4Data = $this->prepareC4Data($c4Service);
 
         $activeFiltersCount = match ($this->indicator) {
             'c2' => $c2Data['activeFiltersCount'],
             'c3' => $c3Data['activeFiltersCount'],
+            'c4' => $c4Data['activeFiltersCount'],
             default => 0,
         };
 
@@ -689,6 +752,10 @@ class IndicatorDetail extends Component
         $c3SubTabEffective = ($this->indicator === 'c3' && $this->activeTab === 'active_search')
             ? 'nominal'
             : $this->c3SubTab;
+
+        $c4SubTabEffective = ($this->indicator === 'c4' && $this->activeTab === 'active_search')
+            ? 'nominal'
+            : $this->c4SubTab;
 
         return view('livewire.family-health.indicator-detail', array_merge([
             'indicator' => $this->indicator,
@@ -708,10 +775,12 @@ class IndicatorDetail extends Component
             'c1Teams' => $filteredTeams,
             'c2Teams' => $filteredTeams,
             'c3Teams' => $filteredTeams,
+            'c4Teams' => $filteredTeams,
             'filteredTeams' => $filteredTeams,
             'c1SubTab' => $this->c1SubTab,
             'c2SubTab' => $c2SubTabEffective,
             'c3SubTab' => $c3SubTabEffective,
+            'c4SubTab' => $c4SubTabEffective,
             'activeSearchList' => $data['active_search_list'],
             'periods' => $periods,
             'activeFiltersCount' => $activeFiltersCount,
@@ -719,12 +788,14 @@ class IndicatorDetail extends Component
             'realChildrenCount' => $this->indicator === 'c2' ? C2ActiveSearchService::getRealChildrenCount($this->year, $this->quarter, $this->selectedIne) : 0,
             'isRealC3DataAvailable' => $this->indicator === 'c3' ? C3ActiveSearchService::isRealDataAvailable($this->year, $this->quarter) : false,
             'realPregnanciesCount' => $this->indicator === 'c3' ? C3ActiveSearchService::getRealPregnanciesCount($this->year, $this->quarter, $this->selectedIne) : 0,
-        ], $c1Data, $c2Data['viewVars'], $c3Data['viewVars']));
+            'isRealC4DataAvailable' => $this->indicator === 'c4' ? C4ActiveSearchService::isRealDataAvailable($this->year, $this->quarter) : false,
+            'realDiabeticsCount' => $this->indicator === 'c4' ? C4ActiveSearchService::getRealDiabeticsCount($this->year, $this->quarter, $this->selectedIne) : 0,
+        ], $c1Data, $c2Data['viewVars'], $c3Data['viewVars'], $c4Data['viewVars']));
     }
 
     private function getFilteredTeams(Collection $teams): Collection
     {
-        if (! in_array($this->indicator, ['c1', 'c2', 'c3'], true)) {
+        if (! in_array($this->indicator, ['c1', 'c2', 'c3', 'c4'], true)) {
             return $teams;
         }
 
@@ -1326,4 +1397,206 @@ class IndicatorDetail extends Component
         ];
     }
 
+    private function prepareC4Data(C4ActiveSearchService $c4Service): array
+    {
+        $c4NominalList = collect();
+        $c4SummaryKpis = null;
+        $c4FilterOptions = [];
+        $c4AvailableColumns = C4ActiveSearchService::getAvailableColumns();
+        $c4TotalItems = 0;
+        $c4TotalPages = 1;
+        $activeFiltersCount = 0;
+        $c4TeamRows = collect();
+        $c4Distribution = [
+            'total' => 0,
+            'regular' => ['count' => 0, 'percent' => 0.0],
+            'suficiente' => ['count' => 0, 'percent' => 0.0],
+            'bom' => ['count' => 0, 'percent' => 0.0],
+            'otimo' => ['count' => 0, 'percent' => 0.0],
+        ];
+
+        if ($this->indicator !== 'c4') {
+            return [
+                'activeFiltersCount' => 0,
+                'viewVars' => [
+                    'c4NominalList' => $c4NominalList,
+                    'c4SummaryKpis' => $c4SummaryKpis,
+                    'c4FilterOptions' => $c4FilterOptions,
+                    'c4AvailableColumns' => $c4AvailableColumns,
+                    'c4TotalItems' => $c4TotalItems,
+                    'c4TotalPages' => $c4TotalPages,
+                    'c4TeamRows' => $c4TeamRows,
+                    'c4Distribution' => $c4Distribution,
+                ],
+            ];
+        }
+
+        $c4BaseCohort = $c4Service->getBaseCohort($this->year, $this->quarter, $this->selectedIne);
+
+        $filters = [
+            'searchCns' => $this->searchCns,
+            'searchCpf' => $this->searchCpf,
+            'searchName' => $this->searchName,
+            'searchCnes' => $this->searchCnes,
+            'searchIne' => $this->searchIne,
+            'advDistrict' => $this->advDistrict,
+            'advFacility' => $this->advFacility,
+            'advTeam' => $this->advTeam,
+            'advMicroarea' => $this->advMicroarea,
+            'advCitizenName' => $this->advCitizenName,
+            'advCitizenCpf' => $this->advCitizenCpf,
+            'advCitizenCns' => $this->advCitizenCns,
+            'advRaceColor' => $this->advRaceColor,
+            'advPracticeA' => $this->advPracticeA,
+            'advPracticeB' => $this->advPracticeB,
+            'advPracticeC' => $this->advPracticeC,
+            'advPracticeD' => $this->advPracticeD,
+            'advPracticeE' => $this->advPracticeE,
+            'advPracticeF' => $this->advPracticeF,
+        ];
+
+        foreach ($filters as $k => $val) {
+            if (in_array($k, ['searchCns', 'searchCpf', 'searchName', 'searchCnes', 'searchIne'], true)) {
+                continue;
+            }
+            if ($val !== '' && $val !== null && $val !== []) {
+                $activeFiltersCount++;
+            }
+        }
+
+        $c4FilteredCohort = $c4Service->filterCohort($c4BaseCohort, $filters);
+        $c4SummaryKpis = $c4Service->getSummaryKpis($c4FilteredCohort, $this->year, $this->quarter);
+        $c4FilterOptions = $c4Service->getFilterOptions($this->year, $this->quarter);
+
+        $c4TotalItems = $c4FilteredCohort->count();
+        $c4TotalPages = max(1, (int) ceil($c4TotalItems / max(1, $this->perPage)));
+        $this->c4Page = min(max(1, $this->c4Page), $c4TotalPages);
+
+        $c4NominalList = $c4FilteredCohort->forPage($this->c4Page, $this->perPage);
+
+        $hasCvat = Schema::hasTable('cvat_team_evaluations');
+        $facilityMap = $hasCvat ? CvatTeamEvaluation::select('ine', 'cnes', 'facility_name')
+            ->whereNotNull('ine')
+            ->get()
+            ->keyBy('ine') : collect();
+
+        $c4DiabeticsGrouped = collect();
+        if (Schema::hasTable('c4_nominal_diabetics')) {
+            $c4DiabeticsGrouped = C4NominalDiabetic::query()
+                ->where('year', $this->year)
+                ->where('quarter', $this->quarter)
+                ->whereNotNull('ine')
+                ->where('ine', '!=', '')
+                ->selectRaw('ine, team_name, cnes, facility_name, count(*) as total_diabetics, sum(score_percent) as sum_score, avg(score_percent) as avg_score')
+                ->groupBy('ine', 'team_name', 'cnes', 'facility_name')
+                ->get();
+        }
+
+        if ($c4DiabeticsGrouped->isNotEmpty()) {
+            $c4TeamRows = $c4DiabeticsGrouped->map(function ($group) use ($facilityMap) {
+                $facility = $facilityMap->get($group->ine);
+                $cnes = $group->cnes ?: ($facility?->cnes ?? '—');
+                $facilityName = $group->facility_name ?: ($facility?->facility_name ?? 'Unidade Básica de Saúde');
+                $score = round((float) $group->avg_score, 2);
+                $level = FamilyHealthService::calculatePerformanceLevel('c4', $score);
+
+                return [
+                    'ine' => $group->ine,
+                    'team_name' => $group->team_name,
+                    'cnes' => $cnes,
+                    'facility_name' => $facilityName,
+                    'numerator' => (int) round((float) $group->sum_score),
+                    'denominator' => (int) $group->total_diabetics,
+                    'score_percent' => $score,
+                    'performance_level' => $level,
+                ];
+            })->sortByDesc('score_percent')->values();
+        } elseif (Schema::hasTable('family_health_indicator_snapshots')) {
+            $c4Snaps = FamilyHealthIndicatorSnapshot::query()
+                ->where('indicator_code', 'c4')
+                ->where('year', $this->year)
+                ->where('quarter', $this->quarter)
+                ->whereNotNull('ine')
+                ->where('ine', '!=', '')
+                ->get();
+
+            $c4TeamRows = $c4Snaps->map(function ($snap) use ($facilityMap) {
+                $facility = $facilityMap->get($snap->ine);
+                $cnes = $facility?->cnes ?? '—';
+                $facilityName = $facility?->facility_name ?? 'Unidade Básica de Saúde';
+                $denominator = (int) $snap->denominator;
+                $numerator = (int) $snap->numerator;
+                $score = (float) $snap->score_percent;
+                $level = $snap->performance_level ?: FamilyHealthService::calculatePerformanceLevel('c4', $score);
+
+                return [
+                    'ine' => $snap->ine,
+                    'team_name' => $snap->team_name,
+                    'cnes' => $cnes,
+                    'facility_name' => $facilityName,
+                    'numerator' => $numerator,
+                    'denominator' => $denominator,
+                    'score_percent' => $score,
+                    'performance_level' => $level,
+                ];
+            })->sortByDesc('score_percent')->values();
+        }
+
+        $c4Total = $c4TeamRows->count();
+        $c4Reg = $c4TeamRows->filter(fn ($r) => $r['performance_level'] === 'regular')->count();
+        $c4Suf = $c4TeamRows->filter(fn ($r) => $r['performance_level'] === 'suficiente')->count();
+        $c4Bom = $c4TeamRows->filter(fn ($r) => $r['performance_level'] === 'bom')->count();
+        $c4Oti = $c4TeamRows->filter(fn ($r) => $r['performance_level'] === 'otimo')->count();
+
+        $c4Distribution = [
+            'total' => $c4Total,
+            'regular' => ['count' => $c4Reg, 'percent' => $c4Total > 0 ? round(($c4Reg / $c4Total) * 100, 1) : 0.0],
+            'suficiente' => ['count' => $c4Suf, 'percent' => $c4Total > 0 ? round(($c4Suf / $c4Total) * 100, 1) : 0.0],
+            'bom' => ['count' => $c4Bom, 'percent' => $c4Total > 0 ? round(($c4Bom / $c4Total) * 100, 1) : 0.0],
+            'otimo' => ['count' => $c4Oti, 'percent' => $c4Total > 0 ? round(($c4Oti / $c4Total) * 100, 1) : 0.0],
+        ];
+
+        return [
+            'activeFiltersCount' => $activeFiltersCount,
+            'viewVars' => [
+                'c4NominalList' => $c4NominalList,
+                'c4SummaryKpis' => $c4SummaryKpis,
+                'c4FilterOptions' => $c4FilterOptions,
+                'c4AvailableColumns' => $c4AvailableColumns,
+                'c4TotalItems' => $c4TotalItems,
+                'c4TotalPages' => $c4TotalPages,
+                'c4TeamRows' => $c4TeamRows,
+                'c4Distribution' => $c4Distribution,
+            ],
+        ];
+    }
+
+    public function exportC4Csv(C4ActiveSearchService $c4Service): StreamedResponse
+    {
+        $cohort = $c4Service->getBaseCohort($this->year, $this->quarter, $this->selectedIne);
+        $filters = [
+            'searchCns' => $this->searchCns,
+            'searchCpf' => $this->searchCpf,
+            'searchName' => $this->searchName,
+            'searchCnes' => $this->searchCnes,
+            'searchIne' => $this->searchIne,
+            'advDistrict' => $this->advDistrict,
+            'advFacility' => $this->advFacility,
+            'advTeam' => $this->advTeam,
+            'advMicroarea' => $this->advMicroarea,
+            'advCitizenName' => $this->advCitizenName,
+            'advCitizenCpf' => $this->advCitizenCpf,
+            'advCitizenCns' => $this->advCitizenCns,
+            'advRaceColor' => $this->advRaceColor,
+            'advPracticeA' => $this->advPracticeA,
+            'advPracticeB' => $this->advPracticeB,
+            'advPracticeC' => $this->advPracticeC,
+            'advPracticeD' => $this->advPracticeD,
+            'advPracticeE' => $this->advPracticeE,
+            'advPracticeF' => $this->advPracticeF,
+        ];
+        $filtered = $c4Service->filterCohort($cohort, $filters);
+
+        return $c4Service->exportCsv($filtered);
+    }
 }

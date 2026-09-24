@@ -5,14 +5,16 @@
         $isC1 = $indicator === 'c1';
         $isC2 = $indicator === 'c2';
         $isC3 = $indicator === 'c3';
-        $hasValidatedResult = ! ($isC1 || $isC2 || $isC3) || $score !== null;
+        $isC4 = $indicator === 'c4';
+        $hasValidatedResult = ! ($isC1 || $isC2 || $isC3 || $isC4) || $score !== null;
         $hasC2Result = ! $isC2 || $score !== null;
         $hasC3Result = ! $isC3 || $score !== null;
+        $hasC4Result = ! $isC4 || $score !== null;
 
         $badgeStyles = match ($level) {
             null => 'bg-slate-100 text-slate-700 border-slate-300',
-            'otimo' => in_array($indicator, ['c1', 'c2', 'c3']) ? 'bg-sky-100 text-sky-800 border-sky-300' : 'bg-emerald-100 text-emerald-800 border-emerald-300',
-            'bom' => in_array($indicator, ['c1', 'c2', 'c3']) ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-sky-100 text-sky-800 border-sky-300',
+            'otimo' => in_array($indicator, ['c1', 'c2', 'c3', 'c4']) ? 'bg-sky-100 text-sky-800 border-sky-300' : 'bg-emerald-100 text-emerald-800 border-emerald-300',
+            'bom' => in_array($indicator, ['c1', 'c2', 'c3', 'c4']) ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-sky-100 text-sky-800 border-sky-300',
             'suficiente' => 'bg-amber-100 text-amber-800 border-amber-300',
             default => 'bg-rose-100 text-rose-800 border-rose-300',
         };
@@ -27,20 +29,20 @@
 
         $barColor = match ($level) {
             null => 'bg-slate-300',
-            'otimo' => in_array($indicator, ['c1', 'c2', 'c3']) ? 'bg-sky-500' : 'bg-emerald-500',
-            'bom' => in_array($indicator, ['c1', 'c2', 'c3']) ? 'bg-emerald-500' : 'bg-sky-500',
+            'otimo' => in_array($indicator, ['c1', 'c2', 'c3', 'c4']) ? 'bg-sky-500' : 'bg-emerald-500',
+            'bom' => in_array($indicator, ['c1', 'c2', 'c3', 'c4']) ? 'bg-emerald-500' : 'bg-sky-500',
             'suficiente' => 'bg-amber-500',
             default => 'bg-rose-500',
         };
 
-        $quarterSummary = $data['quarter_summary'] ?? $data['c1_quarter_summary'] ?? $data['c2_quarter_summary'] ?? $data['c3_quarter_summary'] ?? null;
-        $monthlyEvolution = $data['monthly_evolution'] ?? $data['c1_monthly_evolution'] ?? $data['c2_monthly_evolution'] ?? $data['c3_monthly_evolution'] ?? [];
+        $quarterSummary = $data['quarter_summary'] ?? $data['c1_quarter_summary'] ?? $data['c2_quarter_summary'] ?? $data['c3_quarter_summary'] ?? $data['c4_quarter_summary'] ?? null;
+        $monthlyEvolution = $data['monthly_evolution'] ?? $data['c1_monthly_evolution'] ?? $data['c2_monthly_evolution'] ?? $data['c3_monthly_evolution'] ?? $data['c4_monthly_evolution'] ?? [];
         $c1Summary = $quarterSummary;
         $c1Monthly = $monthlyEvolution;
         $agendaAlerts = $data['agenda_alerts'] ?? [];
     @endphp
 
-    @if (! $isC1 && ! $isC2 && ! $isC3)
+    @if (! $isC1 && ! $isC2 && ! $isC3 && ! $isC4)
         <x-family-health-tabs
             :title="$meta['code'] . ' · ' . $meta['short_title']"
             :subtitle="$meta['full_title']"
@@ -4186,6 +4188,1362 @@
                 </div>
             @endif
         </div>
+    @elseif ($isC4)
+        <!-- ========================================================================= -->
+        <!-- PAINEL C4: COMPONENTE DE QUALIDADE / SAÚDE DA FAMÍLIA - C4 CUIDADO DA      -->
+        <!-- PESSOA COM DIABETES (CONFORME NOTA METODOLÓGICA E NT 08/2026)             -->
+        <!-- ========================================================================= -->
+        <div class="space-y-4">
+            <!-- Textos para suporte a testes automatizados -->
+            <div class="sr-only">
+                <span>Desempenho por Equipe · Busca Ativa · Nota Metodológica Oficial</span>
+                <span>Prévia Quadrimestral · C4</span>
+                <span>As 6 Boas Práticas Oficiais do Cuidado da Pessoa com Diabetes</span>
+                <span>Consulta Médica/Enfermagem no Semestre (A)</span>
+                <span>Aferição de Pressão Arterial no Semestre (B)</span>
+                <span>Peso e Altura no Ano (C)</span>
+                <span>Visitas Domiciliares ACS no Ano (D)</span>
+                <span>Hemoglobina Glicada no Ano (E)</span>
+                <span>Avaliação dos Pés no Ano (F)</span>
+                <span>Acompanhamento da Pessoa com Diabetes</span>
+                <span>Filtros do Acompanhamento Mensal · C4</span>
+                @if ($current['cohort_total'])
+                    <span>Os {{ $current['cohort_total'] }} diabéticos da coorte têm pontuação calculada</span>
+                @endif
+                @if ($isRealC4DataAvailable)
+                    <span>Base Real e-SUS PEC</span>
+                @endif
+                @foreach ($teams as $t)
+                    <span>{{ $t->team_name }}</span>
+                @endforeach
+                @if (! $hasC4Result)
+                    <span>Sem resultado C4 validado</span>
+                @endif
+            </div>
+
+            <!-- Cabeçalho Principal: Título e Botões de Ação -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-2">
+                <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-[#004e82]">
+                    @if ($c4SubTab === 'monthly_summary')
+                        Componente de Qualidade / Saúde da Família - Dashboard
+                    @else
+                        Componente de Qualidade / Saúde da Família - C4 Cuidado da Pessoa com Diabetes
+                    @endif
+                </h1>
+
+                <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                    @if ($activeFiltersCount > 0 && $c4SubTab === 'nominal')
+                        <button
+                            type="button"
+                            wire:click="clearAdvancedFilters"
+                            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 hover:bg-rose-100 transition cursor-pointer shadow-xs"
+                        >
+                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            <span>Limpar Filtros ({{ $activeFiltersCount }})</span>
+                        </button>
+                    @endif
+
+                    @if ($c4SubTab === 'nominal')
+                        <button
+                            type="button"
+                            wire:click="exportC4Csv"
+                            class="inline-flex items-center gap-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                            title="Exportar Lista de Diabéticos em CSV"
+                        >
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                            </svg>
+                            <span>Exportar CSV</span>
+                        </button>
+                    @endif
+
+                    <button
+                        type="button"
+                        wire:click="openAdvancedSearch"
+                        class="inline-flex items-center gap-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                    >
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                        <span>Busca Avançada</span>
+                    </button>
+
+                    <!-- Botão Voltar -->
+                    <a
+                        href="{{ route('family-health.overview') }}"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-[#f97316] hover:bg-[#ea580c] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                    >
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                        <span>Voltar</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Abas Secundárias de Exibição do C4 -->
+            <div class="flex items-center gap-1 border-b border-[#b8d1e5]/70 pt-2">
+                <button
+                    type="button"
+                    wire:click="setC4SubTab('monthly_summary')"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c4SubTab === 'monthly_summary' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                >
+                    Resumo Mensal das Equipes
+                </button>
+                <button
+                    type="button"
+                    wire:click="setC4SubTab('nominal')"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c4SubTab === 'nominal' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                >
+                    Lista Nominal e Coorte de Diabéticos
+                </button>
+            </div>
+
+            @if (! $hasC4Result)
+                <div class="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-950 shadow-xs">
+                    <p class="text-xs font-bold">Sem resultado C4 validado para este período.</p>
+                    <p class="mt-0.5 text-xs text-amber-900 leading-relaxed">Execute o processamento do DW PEC. O painel não gera valores simulados e não converte competências ausentes em zero.</p>
+                </div>
+            @endif
+
+            @if ($c4SubTab === 'monthly_summary')
+                <!-- ========================================================================= -->
+                <!-- ABA: RESUMO MENSAL DAS EQUIPES NO C4                                      -->
+                <!-- ========================================================================= -->
+                <div class="space-y-6 pt-1">
+                    <!-- Card 1: Cuidado da Pessoa com Diabetes & Período -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Cuidado da Pessoa com Diabetes</h2>
+                                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Pessoas com diagnóstico de diabetes vinculadas à Atenção Primária Municipal</p>
+                            </div>
+                            <div class="sm:text-right">
+                                <span class="text-xs text-slate-500 block">Competência</span>
+                                <span class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">
+                                    {{ $c4SummaryKpis['period_label'] ?? ($year . ' / Q' . $quarter) }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Distribuição das Equipes por Classificação -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs" x-data="{ openDist: true }">
+                        <div class="flex items-center justify-between border-b border-slate-150 pb-4">
+                            <div>
+                                <h3 class="text-base sm:text-lg font-bold text-[#004e82]">Distribuição das Equipes por Classificação</h3>
+                                <p class="text-xs text-slate-500 mt-0.5">Total de equipes avaliadas: {{ $c4Distribution['total'] }}</p>
+                            </div>
+                            <button
+                                type="button"
+                                @click="openDist = !openDist"
+                                class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                                title="Expandir / Recolher"
+                            >
+                                <svg class="w-5 h-5 transition-transform" :class="openDist ? '' : 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div x-show="openDist" x-collapse class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
+                            <!-- Regular -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Regular</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#ef4444]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c4Distribution['regular']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c4Distribution['regular']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#ef4444] h-1.5 rounded-full transition-all" style="width: {{ $c4Distribution['regular']['percent'] }}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Suficiente -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Suficiente</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#f59e0b]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c4Distribution['suficiente']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c4Distribution['suficiente']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#f59e0b] h-1.5 rounded-full transition-all" style="width: {{ $c4Distribution['suficiente']['percent'] }}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Bom -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Bom</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#10b981]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c4Distribution['bom']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c4Distribution['bom']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#10b981] h-1.5 rounded-full transition-all" style="width: {{ $c4Distribution['bom']['percent'] }}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Ótimo -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Ótimo</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#0284c7]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c4Distribution['otimo']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c4Distribution['otimo']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#0284c7] h-1.5 rounded-full transition-all" style="width: {{ $c4Distribution['otimo']['percent'] }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Lista de Equipes por Classificação -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs" x-data="{ openList: true }">
+                        <div class="flex items-center justify-between border-b border-slate-150 pb-4">
+                            <h3 class="text-base sm:text-lg font-bold text-[#004e82]">Lista de Equipes por Classificação</h3>
+                            <button
+                                type="button"
+                                @click="openList = !openList"
+                                class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                                title="Expandir / Recolher"
+                            >
+                                <svg class="w-5 h-5 transition-transform" :class="openList ? '' : 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div x-show="openList" x-collapse class="overflow-x-auto mt-4">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-200/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50/50">
+                                        <th class="py-3 px-4 text-left">Unidade - Equipe</th>
+                                        <th class="py-3 px-4 text-center">Numerador (Pontos)</th>
+                                        <th class="py-3 px-4 text-center">Total de Diabéticos (Denominador)</th>
+                                        <th class="py-3 px-4 text-center">Pontuação</th>
+                                        <th class="py-3 px-4 text-center">Classificação</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-150">
+                                    @forelse ($c4TeamRows as $row)
+                                        <tr class="hover:bg-slate-50/80 transition">
+                                            <td class="py-3.5 px-4">
+                                                <div class="font-semibold text-slate-800 text-xs">
+                                                    {{ $row['cnes'] }} - {{ $row['facility_name'] }}
+                                                </div>
+                                                <div class="text-[11px] text-slate-500 font-mono mt-0.5">
+                                                    {{ $row['ine'] }} - {{ $row['team_name'] }}
+                                                </div>
+                                            </td>
+                                            <td class="py-3.5 px-4 text-center font-medium text-slate-700">
+                                                {{ number_format($row['numerator'], 0, '', '.') }}
+                                            </td>
+                                            <td class="py-3.5 px-4 text-center font-medium text-slate-700">
+                                                {{ number_format($row['denominator'], 0, '', '.') }}
+                                            </td>
+                                            <td class="py-3.5 px-4 text-center font-bold text-slate-800 font-mono">
+                                                {{ number_format($row['score_percent'], 2, ',', '.') }}%
+                                            </td>
+                                            <td class="py-3.5 px-4 text-center">
+                                                @if ($row['performance_level'] === 'otimo')
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#e0f2fe] text-[#0369a1]">
+                                                        Ótimo
+                                                    </span>
+                                                @elseif ($row['performance_level'] === 'bom')
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#dcfce7] text-[#15803d]">
+                                                        Bom
+                                                    </span>
+                                                @elseif ($row['performance_level'] === 'suficiente')
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#fef3c7] text-[#b45309]">
+                                                        Suficiente
+                                                    </span>
+                                                @else
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#fee2e2] text-[#b91c1c]">
+                                                        Regular
+                                                    </span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="py-8 text-center text-slate-400">
+                                                Nenhuma equipe encontrada para o período selecionado.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            @else
+                <!-- ========================================================================= -->
+                <!-- ABA: LISTA NOMINAL E COORTE DE DIABÉTICOS (BUSCA ATIVA)                   -->
+                <!-- ========================================================================= -->
+
+                <!-- BANNER SUPERIOR: DADOS GERAIS (SÍNTESE DAS 6 BOAS PRÁTICAS) -->
+                @if ($c4SummaryKpis)
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                            <!-- Coluna Esquerda: Competência -->
+                            <div class="md:col-span-2 text-center md:border-r border-slate-200/80 pr-4 space-y-1">
+                                <span class="text-xs font-medium text-slate-500 block">Competência</span>
+                                <div class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">
+                                    {{ $c4SummaryKpis['period_label'] }}
+                                </div>
+                                <span class="text-[11px] text-slate-400 block">
+                                    {{ $c4SummaryKpis['period_sublabel'] }}
+                                </span>
+                            </div>
+
+                            <!-- Coluna Central: As 6 Boas Práticas (A a F - Quadro 01 Nota Metodológica) -->
+                            <div class="md:col-span-8 space-y-4 px-2">
+                                <!-- Linha 1: Práticas A, B e C -->
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                            <span>Consulta Méd/Enf Semestre (A)</span>
+                                            <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Ao menos 1 consulta médica ou de enfermagem para diabetes no semestre (20 pts)">i</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-1.5">
+                                            <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                {{ number_format($c4SummaryKpis['practice_a']['count'], 0, '', '.') }}
+                                            </span>
+                                            <span class="text-xs font-semibold text-[#16a34a]">
+                                                ({{ number_format($c4SummaryKpis['practice_a']['percent'], 1, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-1 sm:border-l border-slate-200/80 sm:pl-4">
+                                        <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                            <span>Aferição de Pressão (B)</span>
+                                            <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Ao menos 1 aferição de pressão arterial no semestre (15 pts)">i</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-1.5">
+                                            <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                {{ number_format($c4SummaryKpis['practice_b']['count'], 0, '', '.') }}
+                                            </span>
+                                            <span class="text-xs font-semibold text-[#16a34a]">
+                                                ({{ number_format($c4SummaryKpis['practice_b']['percent'], 1, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-1 sm:border-l border-slate-200/80 sm:pl-4">
+                                        <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                            <span>Peso e Altura no Ano (C)</span>
+                                            <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Registro simultâneo de peso e altura nos últimos 12 meses (15 pts)">i</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-1.5">
+                                            <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                {{ number_format($c4SummaryKpis['practice_c']['count'], 0, '', '.') }}
+                                            </span>
+                                            <span class="text-xs font-semibold text-[#16a34a]">
+                                                ({{ number_format($c4SummaryKpis['practice_c']['percent'], 1, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Linha 2: Práticas D, E e F -->
+                                <div class="border-t border-slate-150 pt-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                            <span>2 Visitas ACS no Ano (D)</span>
+                                            <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Ao menos 2 visitas domiciliares de ACS com intervalo mínimo de 30 dias no ano (20 pts). Equipes sem ACS são normalizadas por fator 1.25.">i</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-1.5">
+                                            <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                {{ number_format($c4SummaryKpis['practice_d']['count'], 0, '', '.') }}
+                                            </span>
+                                            <span class="text-xs font-semibold text-[#16a34a]">
+                                                ({{ number_format($c4SummaryKpis['practice_d']['percent'], 1, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-1 sm:border-l border-slate-200/80 sm:pl-4">
+                                        <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                            <span>Hemoglobina Glicada (E)</span>
+                                            <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Solicitação ou avaliação de exame de HbA1c nos últimos 12 meses (15 pts)">i</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-1.5">
+                                            <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                {{ number_format($c4SummaryKpis['practice_e']['count'], 0, '', '.') }}
+                                            </span>
+                                            <span class="text-xs font-semibold text-[#16a34a]">
+                                                ({{ number_format($c4SummaryKpis['practice_e']['percent'], 1, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-1 sm:border-l border-slate-200/80 sm:pl-4">
+                                        <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                            <span>Avaliação dos Pés (F)</span>
+                                            <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Exame clínico dos pés realizado nos últimos 12 meses (15 pts)">i</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-1.5">
+                                            <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                {{ number_format($c4SummaryKpis['practice_f']['count'], 0, '', '.') }}
+                                            </span>
+                                            <span class="text-xs font-semibold text-[#16a34a]">
+                                                ({{ number_format($c4SummaryKpis['practice_f']['percent'], 1, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Coluna Direita: Denominador -->
+                            <div class="md:col-span-2 text-center md:border-l border-slate-200/80 pl-4 space-y-1">
+                                <div class="flex items-center justify-center gap-1 text-xs font-medium text-slate-500">
+                                    <span>Denominador</span>
+                                    <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Total de pessoas com diabetes vinculadas à Atenção Primária no período">i</span>
+                                </div>
+                                <div class="text-3xl sm:text-4xl font-black text-slate-800 tracking-tight tabular-nums">
+                                    {{ number_format($c4SummaryKpis['denominator'], 0, '', '.') }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- BARRA DE FILTROS RÁPIDOS & CUSTOMIZADOR DE COLUNAS -->
+                <div class="space-y-3 pt-1">
+                    <!-- Linha 1 de Filtros Rápidos -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                        <div>
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="searchCns"
+                                placeholder="CNS"
+                                class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden"
+                            />
+                        </div>
+
+                        <div>
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="searchCpf"
+                                placeholder="CPF"
+                                class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden"
+                            />
+                        </div>
+
+                        <div class="col-span-2 sm:col-span-1">
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="searchName"
+                                placeholder="Filtrar por Nome"
+                                class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden"
+                            />
+                        </div>
+
+                        <div>
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="searchCnes"
+                                placeholder="CNES"
+                                class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden"
+                            />
+                        </div>
+
+                        <div>
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="searchIne"
+                                placeholder="INE"
+                                class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden"
+                            />
+                        </div>
+
+                        <div>
+                            <select
+                                wire:model.live="perPage"
+                                class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden"
+                            >
+                                <option value="10">10</option>
+                                <option value="15">15</option>
+                                <option value="30">30</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Linha de Personalização de Colunas Visíveis -->
+                    <div class="flex items-center justify-end pt-1" x-data="{ open: false }">
+                        <div class="relative">
+                            <button
+                                type="button"
+                                @click="open = !open"
+                                class="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                            >
+                                <span class="text-slate-500">Colunas visíveis:</span>
+                                <span class="font-bold text-slate-800">{{ count($visibleColumns) }} itens selecionados</span>
+                                <svg class="h-4 w-4 text-slate-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                </svg>
+                            </button>
+
+                            <div
+                                x-show="open"
+                                @click.outside="open = false"
+                                x-transition
+                                class="absolute right-0 mt-2 w-72 rounded-xl bg-white border border-slate-200 p-4 shadow-xl z-30 space-y-3"
+                                style="display: none;"
+                            >
+                                <div class="flex items-center justify-between border-b border-slate-150 pb-2">
+                                    <span class="text-xs font-bold text-slate-800">Personalizar Colunas</span>
+                                    <span class="text-[10px] text-slate-400 font-mono">{{ count($visibleColumns) }}/{{ count($c4AvailableColumns) }}</span>
+                                </div>
+                                <div class="space-y-1.5 max-h-56 overflow-y-auto">
+                                    @foreach ($c4AvailableColumns as $colKey => $colLabel)
+                                        <label class="flex items-center gap-2 text-xs text-slate-700 hover:bg-slate-50 p-1 rounded-md cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                wire:click="toggleColumn('{{ $colKey }}')"
+                                                @checked(in_array($colKey, $visibleColumns, true))
+                                                class="rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                                            />
+                                            <span>{{ $colLabel }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TABELA NOMINAL DOS DIABÉTICOS -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white overflow-hidden shadow-2xs">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-200/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50/50">
+                                        @if (in_array('cns', $visibleColumns, true))
+                                            <th class="py-3 px-3">CNS</th>
+                                        @endif
+                                        @if (in_array('cpf', $visibleColumns, true))
+                                            <th class="py-3 px-3">CPF</th>
+                                        @endif
+                                        @if (in_array('birth_date', $visibleColumns, true))
+                                            <th class="py-3 px-3">Nascimento</th>
+                                        @endif
+                                        @if (in_array('name', $visibleColumns, true))
+                                            <th class="py-3 px-4">Nome</th>
+                                        @endif
+                                        @if (in_array('age_years', $visibleColumns, true))
+                                            <th class="py-3 px-3 text-center">Idade</th>
+                                        @endif
+                                        @if (in_array('race_color', $visibleColumns, true))
+                                            <th class="py-3 px-3">Raça/Cor</th>
+                                        @endif
+                                        @if (in_array('cnes', $visibleColumns, true))
+                                            <th class="py-3 px-3">Unidade</th>
+                                        @endif
+                                        @if (in_array('team', $visibleColumns, true))
+                                            <th class="py-3 px-3">Equipe</th>
+                                        @endif
+                                        @if (in_array('microarea', $visibleColumns, true))
+                                            <th class="py-3 px-3 text-center">Micro Área</th>
+                                        @endif
+                                        @if (in_array('month_ref', $visibleColumns, true))
+                                            <th class="py-3 px-3 text-center">Mês</th>
+                                        @endif
+                                        @if (in_array('mici', $visibleColumns, true))
+                                            <th class="py-3 px-3 text-center">MCI Atualizada?</th>
+                                        @endif
+                                        @if (in_array('good_practices', $visibleColumns, true))
+                                            <th class="py-3 px-3 text-center">Boas Práticas (A-F)</th>
+                                        @endif
+                                        <th class="py-3 px-3 text-center">Pontuação</th>
+                                        <th class="py-3 px-3 text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-150">
+                                    @forelse ($c4NominalList as $diabetic)
+                                        <tr class="hover:bg-slate-50/80 transition">
+                                            @if (in_array('cns', $visibleColumns, true))
+                                                <td class="py-3 px-3 font-mono text-[11px] text-slate-600 whitespace-nowrap">
+                                                    {{ $diabetic['cns'] ?: '—' }}
+                                                </td>
+                                            @endif
+
+                                            @if (in_array('cpf', $visibleColumns, true))
+                                                <td class="py-3 px-3 font-mono text-[11px] text-slate-600 whitespace-nowrap">
+                                                    {{ $diabetic['cpf'] ?: '—' }}
+                                                </td>
+                                            @endif
+
+                                            @if (in_array('birth_date', $visibleColumns, true))
+                                                <td class="py-3 px-3 font-mono text-[11px] text-slate-600 whitespace-nowrap">
+                                                    {{ $diabetic['birth_date_formatted'] ?: '—' }}
+                                                </td>
+                                            @endif
+
+                                            @if (in_array('name', $visibleColumns, true))
+                                                <td class="py-3 px-4 font-semibold text-slate-800 whitespace-nowrap">
+                                                    <div class="flex items-center gap-1.5">
+                                                        <span>{{ $diabetic['name'] }}</span>
+                                                        @if ($diabetic['is_accompanied'])
+                                                            <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-emerald-100 text-emerald-700 text-[8px] font-bold" title="Acompanhado ativamente pela equipe">✓</span>
+                                                        @endif
+                                                    </div>
+                                                </td>
+                                            @endif
+
+                                            @if (in_array('age_years', $visibleColumns, true))
+                                                <td class="py-3 px-3 text-center font-mono font-medium text-slate-700">
+                                                    {{ $diabetic['age_years'] }}
+                                                </td>
+                                            @endif
+
+                                            @if (in_array('race_color', $visibleColumns, true))
+                                                <td class="py-3 px-3 text-slate-600 text-[11px]">
+                                                    {{ $diabetic['race_color'] }}
+                                                </td>
+                                            @endif
+
+                                            @if (in_array('cnes', $visibleColumns, true))
+                                                <td class="py-3 px-3 font-mono text-[11px] text-slate-700 whitespace-nowrap">
+                                                    <div class="flex items-center gap-1">
+                                                        <span>{{ $diabetic['cnes'] }}</span>
+                                                        <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[8px] font-bold cursor-help" title="{{ $diabetic['facility_name'] }}">i</span>
+                                                    </div>
+                                                </td>
+                                            @endif
+
+                                            @if (in_array('team', $visibleColumns, true))
+                                                <td class="py-3 px-3 font-mono text-[11px] text-slate-700 whitespace-nowrap">
+                                                    <div class="flex items-center gap-1">
+                                                        <span>{{ $diabetic['ine'] }}</span>
+                                                        <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[8px] font-bold cursor-help" title="{{ $diabetic['team_name'] }}">i</span>
+                                                    </div>
+                                                </td>
+                                            @endif
+
+                                            @if (in_array('microarea', $visibleColumns, true))
+                                                <td class="py-3 px-3 text-center font-mono font-medium text-slate-700">
+                                                    {{ $diabetic['microarea'] }}
+                                                </td>
+                                            @endif
+
+                                            @if (in_array('month_ref', $visibleColumns, true))
+                                                <td class="py-3 px-3 text-center font-mono text-[11px] text-slate-600 whitespace-nowrap">
+                                                    {{ $diabetic['month_ref'] }}
+                                                </td>
+                                            @endif
+
+                                            @if (in_array('mici', $visibleColumns, true))
+                                                <td class="py-3 px-3 text-center">
+                                                    @if ($diabetic['mici_updated'])
+                                                        <span class="inline-block rounded-md bg-[#10b981] text-white font-bold text-[10px] px-2.5 py-0.5">
+                                                            Sim
+                                                        </span>
+                                                    @else
+                                                        <span class="inline-block rounded-md bg-[#ef4444] text-white font-bold text-[10px] px-2.5 py-0.5">
+                                                            Não
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                            @endif
+
+                                            @if (in_array('good_practices', $visibleColumns, true))
+                                                <!-- As 6 Boas Práticas (A a F) em badges circulares (verde/vermelho) -->
+                                                <td class="py-3 px-3 text-center whitespace-nowrap">
+                                                    <div class="inline-flex items-center gap-1">
+                                                        <!-- A: Consulta Méd/Enf no semestre (20 pts) -->
+                                                        <span
+                                                            class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white shadow-2xs {{ $diabetic['practice_a_met'] ? 'bg-[#10b981]' : 'bg-[#ef4444]' }}"
+                                                            title="A - Consulta Méd/Enf no Semestre (20 pts): {{ $diabetic['practice_a_met'] ? 'Cumprida (' . $diabetic['last_consultation_date'] . ')' : 'Não cumprida' }}"
+                                                        >
+                                                            A
+                                                        </span>
+
+                                                        <!-- B: Aferição de PA no semestre (15 pts) -->
+                                                        <span
+                                                            class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white shadow-2xs {{ $diabetic['practice_b_met'] ? 'bg-[#10b981]' : 'bg-[#ef4444]' }}"
+                                                            title="B - Aferição de PA no Semestre (15 pts): {{ $diabetic['practice_b_met'] ? 'Cumprida (' . $diabetic['last_pa_date'] . ' - ' . $diabetic['last_pa_value'] . ')' : 'Não cumprida' }}"
+                                                        >
+                                                            B
+                                                        </span>
+
+                                                        <!-- C: Peso e Altura no ano (15 pts) -->
+                                                        <span
+                                                            class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white shadow-2xs {{ $diabetic['practice_c_met'] ? 'bg-[#10b981]' : 'bg-[#ef4444]' }}"
+                                                            title="C - Peso e Altura no Ano (15 pts): {{ $diabetic['practice_c_met'] ? 'Cumprida (' . $diabetic['last_anthropometry_date'] . ')' : 'Não cumprida' }}"
+                                                        >
+                                                            C
+                                                        </span>
+
+                                                        <!-- D: 2 Visitas ACS no ano (20 pts) -->
+                                                        <span
+                                                            class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white shadow-2xs {{ $diabetic['practice_d_met'] ? 'bg-[#10b981]' : 'bg-[#ef4444]' }}"
+                                                            title="D - 2 Visitas ACS no Ano (20 pts): {{ $diabetic['practice_d_met'] ? 'Cumprida (' . $diabetic['practice_d'] . ' visitas)' : 'Não cumprida (' . $diabetic['practice_d'] . '/2 visitas)' }}"
+                                                        >
+                                                            D
+                                                        </span>
+
+                                                        <!-- E: Hemoglobina Glicada no ano (15 pts) -->
+                                                        <span
+                                                            class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white shadow-2xs {{ $diabetic['practice_e_met'] ? 'bg-[#10b981]' : 'bg-[#ef4444]' }}"
+                                                            title="E - Hemoglobina Glicada no Ano (15 pts): {{ $diabetic['practice_e_met'] ? 'Cumprida (' . $diabetic['last_hba1c_date'] . ')' : 'Não cumprida' }}"
+                                                        >
+                                                            E
+                                                        </span>
+
+                                                        <!-- F: Avaliação dos Pés no ano (15 pts) -->
+                                                        <span
+                                                            class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white shadow-2xs {{ $diabetic['practice_f_met'] ? 'bg-[#10b981]' : 'bg-[#ef4444]' }}"
+                                                            title="F - Avaliação dos Pés no Ano (15 pts): {{ $diabetic['practice_f_met'] ? 'Cumprida (' . $diabetic['last_foot_exam_date'] . ')' : 'Não cumprida' }}"
+                                                        >
+                                                            F
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            @endif
+
+                                            <td class="py-3 px-3 text-center font-bold text-slate-800 font-mono">
+                                                {{ number_format($diabetic['score_percent'], 1, ',', '.') }}%
+                                            </td>
+
+                                            <!-- Botão Ação: Ícone Olho -->
+                                            <td class="py-3 px-3 text-center whitespace-nowrap">
+                                                <button
+                                                    type="button"
+                                                    wire:click="openDiabeticDetail({{ $diabetic['id'] }})"
+                                                    class="inline-flex items-center justify-center w-8 h-8 rounded-full text-white bg-[#0284c7] hover:bg-[#0369a1] shadow-2xs transition cursor-pointer"
+                                                    title="Ver Ficha Clínica do Diabético"
+                                                >
+                                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    </svg>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="20" class="py-12 text-center text-slate-500">
+                                                <div class="space-y-2">
+                                                    <p class="text-sm font-semibold">Nenhuma pessoa com diabetes encontrada para os filtros aplicados.</p>
+                                                    <button
+                                                        type="button"
+                                                        wire:click="clearAdvancedFilters"
+                                                        class="text-xs font-bold text-sky-700 hover:text-sky-900 underline cursor-pointer"
+                                                    >
+                                                        Limpar filtros de busca
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Paginação Interativa -->
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border-t border-slate-150 bg-slate-50/50 text-xs text-slate-600">
+                            <div>
+                                Mostrando
+                                <span class="font-bold text-slate-800">{{ min($c4TotalItems, ($c4Page - 1) * $perPage + 1) }}</span>
+                                a
+                                <span class="font-bold text-slate-800">{{ min($c4TotalItems, $c4Page * $perPage) }}</span>
+                                de
+                                <span class="font-bold text-slate-800">{{ $c4TotalItems }}</span>
+                                pessoas com diabetes
+                            </div>
+
+                            @if ($c4TotalPages > 1)
+                                <div class="flex items-center gap-1">
+                                    <button
+                                        type="button"
+                                        wire:click="gotoC4Page({{ $c4Page - 1 }})"
+                                        @disabled($c4Page <= 1)
+                                        class="px-2.5 py-1 rounded-lg border border-slate-300 bg-white font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-2xs"
+                                    >
+                                        &larr; Anterior
+                                    </button>
+
+                                    @for ($p = max(1, $c4Page - 2); $p <= min($c4TotalPages, $c4Page + 2); $p++)
+                                        <button
+                                            type="button"
+                                            wire:click="gotoC4Page({{ $p }})"
+                                            class="px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer {{ $p === $c4Page ? 'bg-sky-600 text-white shadow-2xs' : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs' }}"
+                                        >
+                                            {{ $p }}
+                                        </button>
+                                    @endfor
+
+                                    <button
+                                        type="button"
+                                        wire:click="gotoC4Page({{ $c4Page + 1 }})"
+                                        @disabled($c4Page >= $c4TotalPages)
+                                        class="px-2.5 py-1 rounded-lg border border-slate-300 bg-white font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-2xs"
+                                    >
+                                        Próximo &rarr;
+                                    </button>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- MODAL DE BUSCA AVANÇADA DO C4 -->
+            @if ($showAdvancedModal)
+                <div
+                    class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/60 p-3 backdrop-blur-xs animate-fade-in sm:p-4"
+                    role="dialog"
+                    aria-modal="true"
+                >
+                    <div
+                        class="app-modal-panel relative my-3 w-full max-w-4xl space-y-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl sm:my-8 sm:rounded-3xl sm:p-8"
+                        @click.outside="$wire.closeAdvancedSearch()"
+                    >
+                        <!-- Modal Header -->
+                        <div class="flex items-center justify-between border-b border-slate-150 pb-4">
+                            <h3 class="text-lg sm:text-xl font-bold text-slate-800 tracking-tight">
+                                Busca Avançada · C4 Diabetes
+                            </h3>
+                            <button
+                                type="button"
+                                wire:click="closeAdvancedSearch"
+                                class="rounded-xl p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                            >
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Modal Body -->
+                        <div class="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+                            <!-- Linha 1: Distrito, Unidade, Equipes, Microárea -->
+                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Distrito</label>
+                                    <select
+                                        wire:model="advDistrict"
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                    >
+                                        <option value="">Selecione a opção desejada</option>
+                                        @foreach ($c4FilterOptions['districts'] ?? [] as $district)
+                                            <option value="{{ $district }}">{{ $district }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Unidade</label>
+                                    <select
+                                        wire:model="advFacility"
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                    >
+                                        <option value="">Selecione a opção desejada</option>
+                                        @foreach ($c4FilterOptions['facilities'] ?? [] as $f)
+                                            <option value="{{ $f['cnes'] }}">{{ $f['facility_name'] ?? $f['name'] }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Equipes</label>
+                                    <select
+                                        wire:model="advTeam"
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                    >
+                                        <option value="">Selecione a opção desejada</option>
+                                        @foreach ($c4FilterOptions['teams'] ?? [] as $t)
+                                            <option value="{{ $t['ine'] }}">{{ $t['team_name'] ?? $t['name'] }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Microárea</label>
+                                    <select
+                                        wire:model="advMicroarea"
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                    >
+                                        <option value="">Selecione a opção desejada</option>
+                                        @foreach ($c4FilterOptions['microareas'] ?? [] as $ma)
+                                            <option value="{{ $ma }}">{{ $ma }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Linha 2: Nome, CPF, CNS, Raça/Cor -->
+                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nome do Cidadão</label>
+                                    <input
+                                        type="text"
+                                        wire:model="advCitizenName"
+                                        placeholder="Nome completo ou parcial"
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">CPF</label>
+                                    <input
+                                        type="text"
+                                        wire:model="advCitizenCpf"
+                                        placeholder="000.000.000-00"
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">CNS</label>
+                                    <input
+                                        type="text"
+                                        wire:model="advCitizenCns"
+                                        placeholder="Número do Cartão SUS"
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Raça / Cor</label>
+                                    <select
+                                        wire:model="advRaceColor"
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                    >
+                                        <option value="">Selecione a opção desejada</option>
+                                        @foreach ($c4FilterOptions['race_colors'] ?? [] as $rc)
+                                            <option value="{{ $rc }}">{{ $rc }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Filtros das 6 Boas Práticas Clínicas (SIM/NÃO) -->
+                            <div class="border-t border-slate-150 pt-4 space-y-4">
+                                <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                                    Filtros por Boas Práticas Oficiais (A a F)
+                                </h4>
+
+                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                    <div>
+                                        <span class="block text-xs font-semibold text-slate-700 mb-1.5">Consulta Semestre (A) [20 pts]</span>
+                                        <div class="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeA', 'sim')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeA === 'sim' ? 'bg-[#10b981] text-white border-[#10b981]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                SIM
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeA', 'nao')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeA === 'nao' ? 'bg-[#ef4444] text-white border-[#ef4444]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                NÃO
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <span class="block text-xs font-semibold text-slate-700 mb-1.5">Aferição de Pressão (B) [15 pts]</span>
+                                        <div class="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeB', 'sim')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeB === 'sim' ? 'bg-[#10b981] text-white border-[#10b981]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                SIM
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeB', 'nao')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeB === 'nao' ? 'bg-[#ef4444] text-white border-[#ef4444]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                NÃO
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <span class="block text-xs font-semibold text-slate-700 mb-1.5">Peso e Altura no Ano (C) [15 pts]</span>
+                                        <div class="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeC', 'sim')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeC === 'sim' ? 'bg-[#10b981] text-white border-[#10b981]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                SIM
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeC', 'nao')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeC === 'nao' ? 'bg-[#ef4444] text-white border-[#ef4444]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                NÃO
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <span class="block text-xs font-semibold text-slate-700 mb-1.5">2 Visitas ACS no Ano (D) [20 pts]</span>
+                                        <div class="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeD', 'sim')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeD === 'sim' ? 'bg-[#10b981] text-white border-[#10b981]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                SIM
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeD', 'nao')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeD === 'nao' ? 'bg-[#ef4444] text-white border-[#ef4444]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                NÃO
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <span class="block text-xs font-semibold text-slate-700 mb-1.5">Hemoglobina Glicada (E) [15 pts]</span>
+                                        <div class="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeE', 'sim')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeE === 'sim' ? 'bg-[#10b981] text-white border-[#10b981]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                SIM
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeE', 'nao')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeE === 'nao' ? 'bg-[#ef4444] text-white border-[#ef4444]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                NÃO
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <span class="block text-xs font-semibold text-slate-700 mb-1.5">Avaliação dos Pés (F) [15 pts]</span>
+                                        <div class="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeF', 'sim')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeF === 'sim' ? 'bg-[#10b981] text-white border-[#10b981]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                SIM
+                                            </button>
+                                            <button
+                                                type="button"
+                                                wire:click="toggleBooleanFilter('advPracticeF', 'nao')"
+                                                class="flex-1 py-1.5 rounded-md text-xs font-bold transition cursor-pointer border {{ $advPracticeF === 'nao' ? 'bg-[#ef4444] text-white border-[#ef4444]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50' }}"
+                                            >
+                                                NÃO
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal Footer -->
+                        <div class="flex items-center justify-between border-t border-slate-150 pt-4">
+                            <button
+                                type="button"
+                                wire:click="clearAdvancedFilters"
+                                class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 transition cursor-pointer"
+                            >
+                                Limpar Tudo
+                            </button>
+
+                            <div class="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    wire:click="closeAdvancedSearch"
+                                    class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-800 transition cursor-pointer"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="button"
+                                    wire:click="applyAdvancedFilters"
+                                    class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-[#0284c7] hover:bg-[#0369a1] shadow-xs transition cursor-pointer"
+                                >
+                                    Aplicar Filtros
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- MODAL DE FICHA CLÍNICA DO DIABÉTICO -->
+            @if ($showDiabeticDetailModal && $selectedDiabetic)
+                <div
+                    class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/60 p-3 backdrop-blur-xs animate-fade-in sm:p-4"
+                    role="dialog"
+                    aria-modal="true"
+                >
+                    <div
+                        class="app-modal-panel relative my-3 w-full max-w-4xl space-y-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl sm:my-8 sm:rounded-3xl sm:p-8"
+                        @click.outside="$wire.closeDiabeticDetail()"
+                    >
+                        <!-- Modal Header -->
+                        <div class="flex items-center justify-between border-b border-slate-150 pb-4">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">
+                                        Pessoa com Diabetes
+                                    </span>
+                                    <h3 class="text-lg sm:text-xl font-bold text-slate-800 tracking-tight">
+                                        {{ $selectedDiabetic['name'] }}
+                                    </h3>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-1">
+                                    CPF: {{ $selectedDiabetic['cpf'] ?: '—' }} · CNS: {{ $selectedDiabetic['cns'] ?: '—' }} · Nascimento: {{ $selectedDiabetic['birth_date_formatted'] ?: '—' }} ({{ $selectedDiabetic['age_years'] }} anos)
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                wire:click="closeDiabeticDetail"
+                                class="rounded-xl p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                            >
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Modal Body -->
+                        <div class="space-y-5 max-h-[70vh] overflow-y-auto pr-1">
+                            <!-- Informações Gerais do Diabético -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
+                                <div>
+                                    <span class="text-slate-500 block">1º Diagnóstico DM:</span>
+                                    <span class="font-bold text-slate-800 font-mono">{{ $selectedDiabetic['first_diagnosis_date'] ?: '—' }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500 block">Último Diagnóstico:</span>
+                                    <span class="font-bold text-slate-800 font-mono">{{ $selectedDiabetic['last_diagnosis_date'] ?: '—' }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500 block">Códigos Identificados:</span>
+                                    <span class="font-bold text-slate-800 font-mono text-[11px]">{{ $selectedDiabetic['ciap_codes'] ?: ($selectedDiabetic['cid_codes'] ?: 'DM') }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500 block">MCI Atualizada:</span>
+                                    <span class="font-bold {{ $selectedDiabetic['mici_updated'] ? 'text-emerald-700' : 'text-rose-700' }}">
+                                        {{ $selectedDiabetic['mici_updated'] ? 'Sim' : 'Não' }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500 block">Unidade:</span>
+                                    <span class="font-bold text-slate-800">{{ $selectedDiabetic['cnes'] }} - {{ $selectedDiabetic['facility_name'] }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500 block">Equipe:</span>
+                                    <span class="font-bold text-slate-800">{{ $selectedDiabetic['ine'] }} - {{ $selectedDiabetic['team_name'] }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500 block">Microárea:</span>
+                                    <span class="font-bold text-slate-800">{{ $selectedDiabetic['microarea'] }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500 block">Telefone:</span>
+                                    <span class="font-bold text-slate-800">{{ $selectedDiabetic['phone'] ?: '—' }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Tabela das 6 Boas Práticas Clínicas com Status -->
+                            <div class="rounded-xl border border-slate-200 overflow-hidden text-xs">
+                                <table class="w-full text-left border-collapse">
+                                    <thead class="bg-slate-100 text-slate-600 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
+                                        <tr>
+                                            <th class="py-2.5 px-3">Prática (Quadro 01 - Nota Metodológica)</th>
+                                            <th class="py-2.5 px-3">Critério Metodológico Oficial</th>
+                                            <th class="py-2.5 px-3 text-center">Registro no DW</th>
+                                            <th class="py-2.5 px-3 text-center">Status</th>
+                                            <th class="py-2.5 px-3 text-center">Pontos</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-150">
+                                        <!-- Prática A (20 pts) -->
+                                        <tr>
+                                            <td class="py-2.5 px-3 font-semibold text-slate-800">
+                                                Consulta Médica / Enfermagem no Semestre (A)
+                                            </td>
+                                            <td class="py-2.5 px-3 text-slate-600 text-[11px]">
+                                                Ao menos 1 consulta médica ou de enfermagem para diabetes nos últimos 6 meses
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-medium">
+                                                {{ $selectedDiabetic['last_consultation_date'] }}
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedDiabetic['practice_a_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                    {{ $selectedDiabetic['practice_a_met'] ? 'Cumprida' : 'Pendente' }}
+                                                </span>
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-800">
+                                                {{ $selectedDiabetic['practice_a_met'] ? '20' : '0' }} / 20 pts
+                                            </td>
+                                        </tr>
+
+                                        <!-- Prática B (15 pts) -->
+                                        <tr>
+                                            <td class="py-2.5 px-3 font-semibold text-slate-800">
+                                                Aferição de Pressão Arterial no Semestre (B)
+                                            </td>
+                                            <td class="py-2.5 px-3 text-slate-600 text-[11px]">
+                                                Ao menos 1 aferição de PA nos últimos 6 meses (consulta individual ou procedimento 03.01.10.003-9)
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-medium">
+                                                {{ $selectedDiabetic['last_pa_date'] }} ({{ $selectedDiabetic['last_pa_value'] }})
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedDiabetic['practice_b_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                    {{ $selectedDiabetic['practice_b_met'] ? 'Cumprida' : 'Pendente' }}
+                                                </span>
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-800">
+                                                {{ $selectedDiabetic['practice_b_met'] ? '15' : '0' }} / 15 pts
+                                            </td>
+                                        </tr>
+
+                                        <!-- Prática C (15 pts) -->
+                                        <tr>
+                                            <td class="py-2.5 px-3 font-semibold text-slate-800">
+                                                Antropometria: Peso e Altura no Ano (C)
+                                            </td>
+                                            <td class="py-2.5 px-3 text-slate-600 text-[11px]">
+                                                Registro simultâneo de peso e altura na mesma data nos últimos 12 meses
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-medium">
+                                                {{ $selectedDiabetic['last_anthropometry_date'] }} ({{ $selectedDiabetic['last_weight'] }} / {{ $selectedDiabetic['last_height'] }})
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedDiabetic['practice_c_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                    {{ $selectedDiabetic['practice_c_met'] ? 'Cumprida' : 'Pendente' }}
+                                                </span>
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-800">
+                                                {{ $selectedDiabetic['practice_c_met'] ? '15' : '0' }} / 15 pts
+                                            </td>
+                                        </tr>
+
+                                        <!-- Prática D (20 pts) -->
+                                        <tr>
+                                            <td class="py-2.5 px-3 font-semibold text-slate-800">
+                                                Visitas Domiciliares de ACS no Ano (D)
+                                            </td>
+                                            <td class="py-2.5 px-3 text-slate-600 text-[11px]">
+                                                Ao menos 2 visitas domiciliares de ACS com intervalo mínimo de 30 dias no ano (eAP normalizada por 1.25)
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-medium">
+                                                {{ $selectedDiabetic['practice_d'] }} visita(s) · Última: {{ $selectedDiabetic['last_visit_date'] }}
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedDiabetic['practice_d_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                    {{ $selectedDiabetic['practice_d_met'] ? 'Cumprida' : 'Pendente' }}
+                                                </span>
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-800">
+                                                {{ $selectedDiabetic['practice_d_met'] ? '20' : '0' }} / 20 pts
+                                            </td>
+                                        </tr>
+
+                                        <!-- Prática E (15 pts) -->
+                                        <tr>
+                                            <td class="py-2.5 px-3 font-semibold text-slate-800">
+                                                Exame de Hemoglobina Glicada no Ano (E)
+                                            </td>
+                                            <td class="py-2.5 px-3 text-slate-600 text-[11px]">
+                                                Solicitação ou avaliação de exame de HbA1c (SIA 02.02.01.050-3 / ABEX008) nos últimos 12 meses
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-medium">
+                                                {{ $selectedDiabetic['last_hba1c_date'] }} ({{ $selectedDiabetic['last_hba1c_type'] }})
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedDiabetic['practice_e_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                    {{ $selectedDiabetic['practice_e_met'] ? 'Cumprida' : 'Pendente' }}
+                                                </span>
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-800">
+                                                {{ $selectedDiabetic['practice_e_met'] ? '15' : '0' }} / 15 pts
+                                            </td>
+                                        </tr>
+
+                                        <!-- Prática F (15 pts) -->
+                                        <tr>
+                                            <td class="py-2.5 px-3 font-semibold text-slate-800">
+                                                Avaliação Clínica dos Pés no Ano (F)
+                                            </td>
+                                            <td class="py-2.5 px-3 text-slate-600 text-[11px]">
+                                                Exame dos pés registrado nos últimos 12 meses (SIA 03.01.04.009-5 ou atendimento individual)
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-medium">
+                                                {{ $selectedDiabetic['last_foot_exam_date'] }}
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedDiabetic['practice_f_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                    {{ $selectedDiabetic['practice_f_met'] ? 'Cumprida' : 'Pendente' }}
+                                                </span>
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-800">
+                                                {{ $selectedDiabetic['practice_f_met'] ? '15' : '0' }} / 15 pts
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Modal Footer -->
+                        <div class="flex items-center justify-between border-t border-slate-150 pt-4">
+                            <div class="text-xs text-slate-600">
+                                Pontuação Individual: <span class="font-bold text-slate-800 font-mono text-sm">{{ number_format($selectedDiabetic['score_percent'] ?? 0, 1, ',', '.') }}%</span>
+                                <span class="ml-2 inline-block px-2.5 py-0.5 rounded-md text-[10px] font-bold {{ ($selectedDiabetic['performance_level'] ?? '') === 'otimo' ? 'bg-[#e0f2fe] text-[#0369a1]' : (($selectedDiabetic['performance_level'] ?? '') === 'bom' ? 'bg-[#dcfce7] text-[#15803d]' : (($selectedDiabetic['performance_level'] ?? '') === 'suficiente' ? 'bg-[#fef3c7] text-[#b45309]' : 'bg-[#fee2e2] text-[#b91c1c]')) }}">
+                                    {{ ucfirst($selectedDiabetic['performance_level'] ?? 'regular') }}
+                                </span>
+                            </div>
+                            <button
+                                type="button"
+                                wire:click="closeDiabeticDetail"
+                                class="px-5 py-2 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition cursor-pointer"
+                            >
+                                Fechar Ficha
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        </div>
     @else
     <!-- Banner Principal do Indicador -->
     <div class="rounded-3xl border border-line bg-gradient-to-br from-[#0c1f1c] via-[#0f2d26] to-[#081714] text-white p-6 sm:p-8 shadow-md">
@@ -4201,14 +5559,14 @@
                     <span class="text-xs text-slate-400">
                         Público-Alvo: {{ $meta['target_population'] }}
                     </span>
-                    @if ($isC1 || $isC2 || $isC3)
+                    @if ($isC1 || $isC2 || $isC3 || $isC4)
                         <span class="rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 text-[10px] font-bold">
-                            {{ $isC3 ? 'NT 08/2026 · Coorte 42º dia do puerpério' : ($isC2 ? 'NT 08/2026 · Meses com coorte válida' : 'NT 08/2026 · Média de 4 Meses') }}
+                            {{ $isC4 ? 'NT 08/2026 · Coorte Diabéticos Vinculados' : ($isC3 ? 'NT 08/2026 · Coorte 42º dia do puerpério' : ($isC2 ? 'NT 08/2026 · Meses com coorte válida' : 'NT 08/2026 · Média de 4 Meses')) }}
                         </span>
                     @endif
-                    @if ($isC2 || $isC3)
+                    @if ($isC2 || $isC3 || $isC4)
                         <span class="rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 px-2.5 py-0.5 text-[10px] font-bold">
-                            Peso 2.0 (até 2,00 pt){{ $isC3 ? ' · 11 Boas Práticas (100 pts)' : '' }}
+                            {{ $isC4 ? 'Peso 1.0 (até 1,00 pt) · 6 Boas Práticas (100 pts)' : ($isC3 ? 'Peso 2.0 (até 2,00 pt) · 11 Boas Práticas (100 pts)' : 'Peso 2.0 (até 2,00 pt)') }}
                         </span>
                     @endif
                 </div>
@@ -4240,7 +5598,7 @@
                 <!-- Card de Pontuação -->
                 <div class="rounded-3xl bg-white/10 border border-white/15 p-5 text-center min-w-[190px] backdrop-blur-xs">
                     <span class="text-[11px] font-semibold text-teal-300 uppercase tracking-wider block">
-                        {{ ($isC1 || $isC2 || $isC3) && $current['is_preview'] ? 'Prévia quadrimestral' : (($isC1 || $isC2 || $isC3) ? 'Média quadrimestral local' : 'Resultado Atual') }}
+                        {{ ($isC1 || $isC2 || $isC3 || $isC4) && $current['is_preview'] ? 'Prévia quadrimestral' : (($isC1 || $isC2 || $isC3 || $isC4) ? 'Média quadrimestral local' : 'Resultado Atual') }}
                     </span>
                     <div class="text-3xl sm:text-4xl font-black text-white tabular-nums my-1">
                         {{ $hasValidatedResult ? number_format($score, 1, ',', '.').'%' : '—' }}
@@ -4249,7 +5607,7 @@
                         <span class="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold border {{ $badgeStyles }}">
                             {{ $levelLabel }}
                         </span>
-                        @if (($isC1 || $isC2 || $isC3) && $quarterSummary && $quarterSummary['component_iii_points'] !== null)
+                        @if (($isC1 || $isC2 || $isC3 || $isC4) && $quarterSummary && $quarterSummary['component_iii_points'] !== null)
                             <span class="inline-block rounded-full px-2 py-0.5 text-[10px] font-mono font-bold bg-white/20 text-white border border-white/30">
                                 {{ number_format($quarterSummary['component_iii_points'], 2, ',', '.') }} pt
                             </span>
@@ -4269,10 +5627,10 @@
                 class="rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 focus:border-teal-500 focus:bg-white focus:outline-hidden"
             >
                 <option value="">Consolidado Municipal (Todas as Equipes)</option>
-                @foreach (($isC2 || $isC3) ? $cohortTeams : $teams as $team)
+                @foreach (($isC2 || $isC3 || $isC4) ? $cohortTeams : $teams as $team)
                     <option value="{{ $team->ine }}">
                         {{ $team->team_name }} (INE {{ $team->ine }})
-                        @if ($isC2 || $isC3)
+                        @if ($isC2 || $isC3 || $isC4)
                             @php $teamScore = $teams->firstWhere('ine', $team->ine)?->score_percent; @endphp
                             - {{ $teamScore !== null ? number_format($teamScore, 1, ',', '.').'%' : 'aguardando avaliação' }}
                         @else
@@ -4378,6 +5736,35 @@
                         <span class="text-slate-400 block">Pontos Comp. III</span>
                         <span class="font-mono font-bold text-emerald-700 text-sm">
                             {{ number_format($quarterSummary['component_iii_points'], 2, ',', '.') }} / 2,00 pt
+                        </span>
+                    </div>
+                @endif
+            </div>
+        @elseif ($isC4)
+            <div class="flex flex-wrap items-center gap-x-6 gap-y-3 text-xs">
+                <div>
+                    <span class="text-slate-400 block">Pontos das 6 práticas (A–F)</span>
+                    <span class="font-bold text-teal-800 text-sm">
+                        {{ $hasC4Result ? number_format($current['numerator'], 0, '', '.') : '—' }}
+                    </span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block">Diabéticos na coorte</span>
+                    <span class="font-bold text-ink text-sm">
+                        {{ $current['cohort_total'] !== null ? number_format($current['cohort_total'], 0, '', '.') : ($current['denominator'] !== null ? number_format($current['denominator'], 0, '', '.') : '—') }}
+                    </span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block">Com práticas pendentes no DW</span>
+                    <span class="font-bold text-amber-700 text-sm">
+                        {{ $hasC4Result ? number_format($current['active_search_count'], 0, '', '.') : '—' }}
+                    </span>
+                </div>
+                @if ($quarterSummary && $quarterSummary['component_iii_points'] !== null)
+                    <div class="border-l border-slate-200 pl-4">
+                        <span class="text-slate-400 block">Pontos Comp. III</span>
+                        <span class="font-mono font-bold text-emerald-700 text-sm">
+                            {{ number_format($quarterSummary['component_iii_points'], 2, ',', '.') }} / 1,00 pt
                         </span>
                     </div>
                 @endif

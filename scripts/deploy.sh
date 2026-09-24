@@ -50,32 +50,35 @@ if [ "$SYNC_DATA" = true ]; then
     echo "==> [7/14] Consolidando dados reais do Indicador C2 (Desenvolvimento Infantil)..."
     $PHP_BIN artisan esus:process-data --scope=c2 || echo "AVISO: Falha na consolidação do C2. Continuando deploy..."
 
-    echo "==> [8/14] Consolidando dados reais do Indicador C3 (Gestação e Puerpério)..."
+    echo "==> [8/15] Consolidando dados reais do Indicador C3 (Gestação e Puerpério)..."
     $PHP_BIN artisan esus:process-data --scope=c3 || echo "AVISO: Falha na consolidação do C3. Continuando deploy..."
+
+    echo "==> [9/15] Consolidando dados reais do Indicador C4 (Pessoas com Diabetes)..."
+    $PHP_BIN artisan esus:process-data --scope=c4 || echo "AVISO: Falha na consolidação do C4. Continuando deploy..."
 else
-    echo "==> [5-8/14] Sincronização de dados do PEC ignorada (--quick / --no-sync ativo)."
+    echo "==> [5-9/15] Sincronização de dados do PEC ignorada (--quick / --no-sync ativo)."
 fi
 
-echo "==> [9/14] Publicando assets do Livewire..."
+echo "==> [10/15] Publicando assets do Livewire..."
 $PHP_BIN artisan livewire:publish --assets
 
-echo "==> [10/14] Limpando caches da aplicação..."
+echo "==> [11/15] Limpando caches da aplicação..."
 $PHP_BIN artisan optimize:clear
 
-echo "==> [11/14] Otimizando cache de configuração..."
+echo "==> [12/15] Otimizando cache de configuração..."
 $PHP_BIN artisan config:cache
 
-echo "==> [12/14] Reiniciando workers da fila com a versão nova..."
+echo "==> [13/15] Reiniciando workers da fila com a versão nova..."
 $PHP_BIN artisan queue:restart || true
 if command -v systemctl &> /dev/null && ! systemctl is-active --quiet monitorafacil-queue.service; then
     echo "ATENÇÃO: monitorafacil-queue.service não está ativo. O botão CVAT agenda jobs, mas eles precisam de um worker para executar." >&2
     echo "Veja scripts/monitorafacil-queue.service.example e as instruções no README.md." >&2
 fi
 
-echo "==> [13/14] Otimizando cache de rotas..."
+echo "==> [14/15] Otimizando cache de rotas..."
 $PHP_BIN artisan route:cache
 
-echo "==> [14/14] Otimizando cache de views..."
+echo "==> [15/15] Otimizando cache de views..."
 $PHP_BIN artisan view:cache
 
 echo "=============================================================================="

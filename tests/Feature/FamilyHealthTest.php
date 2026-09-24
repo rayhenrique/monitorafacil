@@ -39,6 +39,8 @@ class FamilyHealthTest extends TestCase
         Schema::dropIfExists('c2_nominal_children');
         Schema::dropIfExists('c3_cohort_snapshots');
         Schema::dropIfExists('c3_nominal_pregnancies');
+        Schema::dropIfExists('c4_cohort_snapshots');
+        Schema::dropIfExists('c4_nominal_diabetics');
 
         Schema::create('users', function (Blueprint $table): void {
             $table->id();
@@ -252,6 +254,80 @@ class FamilyHealthTest extends TestCase
             $table->unique(['year', 'month', 'ine', 'indicator_code'], 'unique_monthly_team_indicator');
         });
 
+        Schema::create('c4_cohort_snapshots', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedSmallInteger('year');
+            $table->unsignedTinyInteger('quarter');
+            $table->string('ine', 20)->nullable()->index();
+            $table->string('team_name', 150);
+            $table->string('team_type', 10);
+            $table->unsignedInteger('cohort_total');
+            $table->unsignedInteger('evaluated_total');
+            $table->json('monthly_counts');
+            $table->date('as_of');
+            $table->string('calculation_version', 40);
+            $table->timestamps();
+        });
+
+        Schema::create('c4_nominal_diabetics', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedSmallInteger('year');
+            $table->unsignedTinyInteger('quarter');
+            $table->unsignedBigInteger('cidadao_pec_id')->nullable()->index();
+            $table->string('cns', 20)->nullable()->index();
+            $table->string('cpf', 20)->nullable()->index();
+            $table->string('name', 200)->index();
+            $table->string('social_name', 200)->nullable();
+            $table->date('birth_date');
+            $table->unsignedTinyInteger('age_years')->default(0);
+            $table->string('phone', 30)->nullable();
+            $table->string('race_color', 50)->nullable();
+            $table->string('cnes', 20)->nullable()->index();
+            $table->string('facility_name', 200)->nullable();
+            $table->string('district', 100)->nullable();
+            $table->string('ine', 20)->nullable()->index();
+            $table->string('team_name', 200)->nullable();
+            $table->string('professional_cns', 20)->nullable();
+            $table->string('professional_name', 200)->nullable();
+            $table->string('microarea', 20)->nullable();
+            $table->string('ciap_codes', 100)->nullable();
+            $table->string('cid_codes', 100)->nullable();
+            $table->date('first_diagnosis_date')->nullable();
+            $table->date('last_diagnosis_date')->nullable();
+            $table->string('condition_status', 30)->default('ativo');
+            $table->string('month_ref', 10)->nullable();
+            $table->boolean('mici_updated')->default(false);
+            $table->boolean('is_accompanied')->default(false);
+            $table->unsignedSmallInteger('practice_a')->default(0);
+            $table->boolean('practice_a_met')->default(false);
+            $table->date('last_consultation_date')->nullable();
+            $table->unsignedSmallInteger('practice_b')->default(0);
+            $table->boolean('practice_b_met')->default(false);
+            $table->date('last_pa_date')->nullable();
+            $table->string('last_pa_value', 30)->nullable();
+            $table->unsignedSmallInteger('practice_c')->default(0);
+            $table->boolean('practice_c_met')->default(false);
+            $table->date('last_anthropometry_date')->nullable();
+            $table->decimal('last_weight', 5, 2)->nullable();
+            $table->decimal('last_height', 5, 2)->nullable();
+            $table->unsignedSmallInteger('practice_d')->default(0);
+            $table->boolean('practice_d_met')->default(false);
+            $table->date('last_acs_visit_date')->nullable();
+            $table->unsignedSmallInteger('practice_e')->default(0);
+            $table->boolean('practice_e_met')->default(false);
+            $table->date('last_hba1c_date')->nullable();
+            $table->decimal('last_hba1c_value', 4, 1)->nullable();
+            $table->unsignedSmallInteger('practice_f')->default(0);
+            $table->boolean('practice_f_met')->default(false);
+            $table->date('last_foot_exam_date')->nullable();
+            $table->decimal('score_percent', 5, 2)->default(0.00);
+            $table->string('performance_level', 20)->default('regular');
+            $table->text('clinical_alerts')->nullable();
+            $table->date('as_of');
+            $table->string('calculation_version', 40);
+            $table->timestamps();
+        });
+
         Schema::dropIfExists('sync_logs');
         Schema::create('sync_logs', function (Blueprint $table): void {
             $table->id();
@@ -331,9 +407,8 @@ class FamilyHealthTest extends TestCase
     {
         $this->authenticateUser();
 
-        Livewire::test(IndicatorDetail::class, ['indicator' => 'c4'])
+        Livewire::test(IndicatorDetail::class, ['indicator' => 'c5'])
             ->assertSet('activeTab', 'dashboard')
-            ->assertSee('Cuidado da Pessoa com Diabetes')
             ->call('setTab', 'teams')
             ->assertSet('activeTab', 'teams')
             ->assertSee('Desempenho por Equipe')
