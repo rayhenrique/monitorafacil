@@ -320,11 +320,11 @@
                     </div>
                 </button>
 
-                <!-- Card 5: Processamento Geral Completo -->
+                <!-- Card 6: Processamento Geral Completo -->
                 <button
                     type="button"
                     wire:click="processAll"
-                    x-on:click="startProgress('o processamento geral')"
+                    x-on:click="startProgress('o processamento geral completo')"
                     wire:loading.attr="disabled"
                     class="group relative flex flex-col justify-between p-4 sm:p-4.5 rounded-2xl border transition-all duration-200 text-left cursor-pointer bg-slate-900 border-slate-700/80 hover:bg-slate-800 hover:border-slate-600 hover:shadow-lg hover:shadow-slate-950/20 focus:outline-none focus:ring-2 focus:ring-slate-400 disabled:opacity-60 text-white"
                 >
@@ -344,7 +344,7 @@
                                 Processamento Geral
                             </h3>
                             <p class="text-[11px] text-slate-300 mt-0.5 leading-normal">
-                                Indicadores C1, C2 e C3 · CVAT separado
+                                Indicadores C1, C2, C3, C4, MICI, MICDT & CVAT
                             </p>
                         </div>
                     </div>

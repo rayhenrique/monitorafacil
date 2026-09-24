@@ -240,6 +240,30 @@ O Monitora Fácil executa a consolidação diária do e-SUS às **02:00**. Para 
 
 ---
 
+## Passo 13: Configurar o Serviço de Fila em Segundo Plano (Systemd)
+
+Para que as extrações do **CVAT (Vínculo & Território)** e tarefas assíncronas rodem em segundo plano sem travar a interface web:
+
+1. No arquivo `.env`, certifique-se de configurar:
+   ```env
+   QUEUE_CONNECTION=database
+   ```
+2. Copie o arquivo de serviço de exemplo como `root`:
+   ```bash
+   sudo cp scripts/monitorafacil-queue.service.example /etc/systemd/system/monitorafacil-queue.service
+   ```
+3. Recarregue o systemd e ative o serviço:
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl enable --now monitorafacil-queue.service
+   ```
+4. Verifique se o worker está ativo:
+   ```bash
+   sudo systemctl status monitorafacil-queue.service
+   ```
+
+---
+
 ## 🔄 Como Atualizar a Aplicação no Futuro (Deploy Contínuo)
 
 Sempre que fizer novas alterações e enviar para o GitHub (`git push`), basta executar o script de deploy automatizado no servidor:
@@ -249,6 +273,10 @@ cd /home/kltecnologia-monitorafacil/htdocs/monitorafacil.kltecnologia.com
 ./deploy.sh
 ```
 
+> **Opções úteis do deploy:**
+> - `./deploy.sh`: Executa todas as 15 etapas completas (incluindo migrações, compilação Vite e sincronização de dados de C1, C2, C3, C4 e CVAT).
+> - `./deploy.sh --quick`: Executa o deploy rápido (atualiza código, dependências, Vite, migrações e limpa caches, pulando a sincronização demorada do PEC).
+
 *(Ou executar manualmente os comandos equivalentes contidos no script):*
 
 ```bash
@@ -257,9 +285,15 @@ git pull origin main
 composer install --no-dev --optimize-autoloader
 npm run build
 php8.5 artisan migrate --force
+php8.5 -d memory_limit=1024M artisan cvat:sync-nominal
+php8.5 -d memory_limit=1024M artisan esus:process-data --scope=c1
+php8.5 -d memory_limit=1024M artisan esus:process-data --scope=c2
+php8.5 -d memory_limit=1024M artisan esus:process-data --scope=c3
+php8.5 -d memory_limit=1024M artisan esus:process-data --scope=c4
 php8.5 artisan livewire:publish --assets
 php8.5 artisan optimize:clear
 php8.5 artisan config:cache
+php8.5 artisan queue:restart || true
 php8.5 artisan route:cache
 php8.5 artisan view:cache
 ```

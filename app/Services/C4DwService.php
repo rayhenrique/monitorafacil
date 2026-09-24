@@ -31,7 +31,7 @@ class C4DwService
     private const SIGTAP_PESO = ['0101040083'];
     private const SIGTAP_ALTURA = ['0101040075'];
     private const SIGTAP_HBA1C = ['0202010503', 'ABEX008'];
-    private const SIGTAP_PE_DIABETICO = ['0301040095'];
+    private const SIGTAP_PE_DIABETICO = ['0301040095', 'ABPG011'];
     private const SIGTAP_CONSULTA = ['0301010064', '0301010030', '0301010250'];
 
     // CBOs habilitados
@@ -487,8 +487,125 @@ class C4DwService
             }
 
             // =========================================================================
-            // PRÁTICAS B, C, E, F via Tabela de Procedimentos (tb_fat_proced_atend_proced)
-            // SIGTAP: PA (0301100039), HbA1c (0202010503, ABEX008), Pé (0301040095), Antropo
+            // PRÁTICA E: Exames Laboratoriais de Hemoglobina Glicada (tb_fat_atd_ind_exames)
+            // Procedimentos: 0202010503 (SIGTAP) e ABEX008 (AB)
+            // =========================================================================
+            $examSql = <<<SQL
+                SELECT e.co_fat_cidadao_pec AS cidadao_id,
+                       COALESCE(e.dt_resultado, e.dt_realizacao, e.dt_solicitacao, t.dt_registro) AS dt_exame,
+                       e.nu_resultado_valor AS valor_resultado,
+                       dp.co_proced
+                FROM tb_fat_atd_ind_exames e
+                JOIN tb_dim_procedimento dp ON dp.co_seq_dim_procedimento = e.co_dim_procedimento
+                LEFT JOIN tb_dim_tempo t ON t.co_seq_dim_tempo = e.co_dim_tempo
+                WHERE e.co_fat_cidadao_pec IN ({$chunkMarks})
+                  AND dp.co_proced IN ('0202010503', 'ABEX008')
+                  AND (
+                      (e.dt_resultado >= ? AND e.dt_resultado <= ?)
+                      OR (e.dt_realizacao >= ? AND e.dt_realizacao <= ?)
+                      OR (e.dt_solicitacao >= ? AND e.dt_solicitacao <= ?)
+                      OR (t.dt_registro >= ? AND t.dt_registro <= ?)
+                  )
+                ORDER BY dt_exame DESC
+            SQL;
+
+            $examRows = $connection->select($examSql, array_merge(
+                $chunk,
+                [
+                    $twelveMonthsStart->toDateString(), $evalDate->toDateString(),
+                    $twelveMonthsStart->toDateString(), $evalDate->toDateString(),
+                    $twelveMonthsStart->toDateString(), $evalDate->toDateString(),
+                    $twelveMonthsStart->toDateString(), $evalDate->toDateString(),
+                ]
+            ));
+
+            foreach ($examRows as $r) {
+                $cId = (int) $r->cidadao_id;
+                if (! isset($diabetics[$cId]) || empty($r->dt_exame)) {
+                    continue;
+                }
+
+                $dt = Carbon::parse($r->dt_exame);
+                if ($dt->lt($twelveMonthsStart) || $dt->gt($evalDate)) {
+                    continue;
+                }
+
+                $diabetics[$cId]['practice_e_count']++;
+                $diabetics[$cId]['practice_e_met'] = true;
+
+                if (! $diabetics[$cId]['last_hba1c_date'] || $dt->gt($diabetics[$cId]['last_hba1c_date'])) {
+                    $diabetics[$cId]['last_hba1c_date'] = $dt;
+                    $val = (float) ($r->valor_resultado ?? 0);
+                    $code = trim((string) $r->co_proced);
+                    if ($val > 0) {
+                        $diabetics[$cId]['last_hba1c_type'] = number_format($val, 2, ',', '.') . '% (' . ($code === 'ABEX008' ? 'ABEX008' : 'SIGTAP') . ')';
+                    } else {
+                        $diabetics[$cId]['last_hba1c_type'] = $code === 'ABEX008' ? 'ABEX008' : 'SIGTAP 02.02.01.050-3';
+                    }
+                }
+            }
+
+            // =========================================================================
+            // PRÁTICA E & F: Procedimentos no Atendimento Individual (tb_fat_atd_ind_procedimentos)
+            // HbA1c (0202010503, ABEX008) e Avaliação do Pé Diabético (0301040095, ABPG011)
+            // =========================================================================
+            $indProcSql = <<<SQL
+                SELECT p.co_fat_cidadao_pec AS cidadao_id,
+                       t.dt_registro AS dt_procedimento,
+                       dp_av.co_proced AS proced_avaliado,
+                       dp_sol.co_proced AS proced_solicitado
+                FROM tb_fat_atd_ind_procedimentos p
+                LEFT JOIN tb_dim_procedimento dp_av ON dp_av.co_seq_dim_procedimento = p.co_dim_procedimento_avaliado
+                LEFT JOIN tb_dim_procedimento dp_sol ON dp_sol.co_seq_dim_procedimento = p.co_dim_procedimento_solicitado
+                LEFT JOIN tb_dim_tempo t ON t.co_seq_dim_tempo = p.co_dim_tempo
+                WHERE p.co_fat_cidadao_pec IN ({$chunkMarks})
+                  AND t.dt_registro >= ? AND t.dt_registro <= ?
+                  AND (
+                      dp_av.co_proced IN ('0202010503', 'ABEX008', '0301040095', 'ABPG011')
+                      OR dp_sol.co_proced IN ('0202010503', 'ABEX008', '0301040095', 'ABPG011')
+                  )
+                ORDER BY t.dt_registro DESC
+            SQL;
+
+            $indProcRows = $connection->select($indProcSql, array_merge($chunk, [
+                $twelveMonthsStart->toDateString(),
+                $evalDate->toDateString(),
+            ]));
+
+            foreach ($indProcRows as $r) {
+                $cId = (int) $r->cidadao_id;
+                if (! isset($diabetics[$cId]) || empty($r->dt_procedimento)) {
+                    continue;
+                }
+
+                $dt = Carbon::parse($r->dt_procedimento);
+                $procedAv = trim((string) ($r->proced_avaliado ?? ''));
+                $procedSol = trim((string) ($r->proced_solicitado ?? ''));
+
+                // Hemoglobina Glicada
+                if (in_array($procedAv, self::SIGTAP_HBA1C, true) || in_array($procedSol, self::SIGTAP_HBA1C, true)) {
+                    $code = in_array($procedAv, self::SIGTAP_HBA1C, true) ? $procedAv : $procedSol;
+                    $diabetics[$cId]['practice_e_count']++;
+                    $diabetics[$cId]['practice_e_met'] = true;
+                    if (! $diabetics[$cId]['last_hba1c_date'] || $dt->gt($diabetics[$cId]['last_hba1c_date'])) {
+                        $diabetics[$cId]['last_hba1c_date'] = $dt;
+                        $diabetics[$cId]['last_hba1c_type'] = $code === 'ABEX008' ? 'ABEX008' : 'SIGTAP 02.02.01.050-3';
+                    }
+                }
+
+                // Avaliação do Pé Diabético
+                if (in_array($procedAv, self::SIGTAP_PE_DIABETICO, true) || in_array($procedSol, self::SIGTAP_PE_DIABETICO, true)) {
+                    $diabetics[$cId]['practice_f_count']++;
+                    $diabetics[$cId]['practice_f_met'] = true;
+                    if (! $diabetics[$cId]['last_foot_exam_date'] || $dt->gt($diabetics[$cId]['last_foot_exam_date'])) {
+                        $diabetics[$cId]['last_foot_exam_date'] = $dt;
+                    }
+                }
+            }
+
+            // =========================================================================
+            // PRÁTICAS B, C, E, F via Ficha CDS de Procedimentos (tb_fat_proced_atend_proced)
+            // SIGTAP: PA (0301100039), HbA1c (0202010503, ABEX008), Pé (0301040095, ABPG011), Antropo
             // =========================================================================
             $procSql = <<<SQL
                 SELECT pp.co_fat_cidadao_pec AS cidadao_id,
@@ -499,7 +616,7 @@ class C4DwService
                 JOIN tb_dim_procedimento dp ON dp.co_seq_dim_procedimento = pp.co_dim_procedimento
                 WHERE pp.co_fat_cidadao_pec IN ({$chunkMarks})
                   AND t.dt_registro >= ? AND t.dt_registro <= ?
-                  AND dp.co_proced IN ('0301100039', '0202010503', 'ABEX008', '0301040095', '0101040024')
+                  AND dp.co_proced IN ('0301100039', '0202010503', 'ABEX008', '0301040095', 'ABPG011', '0101040024')
                 ORDER BY t.dt_registro DESC
             SQL;
 
@@ -617,8 +734,8 @@ class C4DwService
                 'age_years' => $d['age_years'],
                 'phone' => $d['phone'],
                 'race_color' => $d['race_color'],
-                'cnes' => $d['cnes'],
-                'facility_name' => $d['facility_name'],
+                'cnes' => ! empty($teams[$ine]['cnes']) ? $teams[$ine]['cnes'] : ($d['cnes'] ?: '—'),
+                'facility_name' => ! empty($teams[$ine]['facility_name']) ? $teams[$ine]['facility_name'] : ($d['facility_name'] ?: 'Unidade Básica de Saúde'),
                 'district' => 'Sede',
                 'ine' => $ine,
                 'team_name' => $teams[$ine]['name'] ?? 'Equipe APS',

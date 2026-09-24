@@ -25,13 +25,13 @@ for arg in "$@"; do
     fi
 done
 
-echo "==> [1/14] Atualizando repositório a partir da branch main..."
+echo "==> [1/15] Atualizando repositório a partir da branch main..."
 git pull origin main
 
-echo "==> [2/14] Instalando dependências de produção do Composer..."
+echo "==> [2/15] Instalando dependências de produção do Composer..."
 composer install --no-dev --optimize-autoloader
 
-echo "==> [3/14] Compilando assets do frontend (Vite)..."
+echo "==> [3/15] Compilando assets do frontend (Vite)..."
 npm run build
 
 # Detecção do binário PHP (preferência para php8.5 do CloudPanel)
@@ -41,24 +41,24 @@ else
     PHP_BIN="php"
 fi
 
-echo "==> [4/14] Executando migrações do banco de dados..."
+echo "==> [4/15] Executando migrações do banco de dados..."
 $PHP_BIN artisan migrate --force
 
 if [ "$SYNC_DATA" = true ]; then
-    echo "==> [5/14] Sincronizando dados nominais do PEC (CVAT Relação Nominal)..."
-    $PHP_BIN artisan cvat:sync-nominal || echo "AVISO: Falha na sincronização nominal do CVAT. Continuando deploy..."
+    echo "==> [5/15] Sincronizando dados nominais do PEC (CVAT Relação Nominal)..."
+    $PHP_BIN -d memory_limit=1024M artisan cvat:sync-nominal || echo "AVISO: Falha na sincronização nominal do CVAT. Continuando deploy..."
 
-    echo "==> [6/14] Consolidando dados reais do Indicador C1 (Mais Acesso)..."
-    $PHP_BIN artisan esus:process-data --scope=c1 || echo "AVISO: Falha na consolidação do C1. Continuando deploy..."
+    echo "==> [6/15] Consolidando dados reais do Indicador C1 (Mais Acesso)..."
+    $PHP_BIN -d memory_limit=1024M artisan esus:process-data --scope=c1 || echo "AVISO: Falha na consolidação do C1. Continuando deploy..."
 
-    echo "==> [7/14] Consolidando dados reais do Indicador C2 (Desenvolvimento Infantil)..."
-    $PHP_BIN artisan esus:process-data --scope=c2 || echo "AVISO: Falha na consolidação do C2. Continuando deploy..."
+    echo "==> [7/15] Consolidando dados reais do Indicador C2 (Desenvolvimento Infantil)..."
+    $PHP_BIN -d memory_limit=1024M artisan esus:process-data --scope=c2 || echo "AVISO: Falha na consolidação do C2. Continuando deploy..."
 
     echo "==> [8/15] Consolidando dados reais do Indicador C3 (Gestação e Puerpério)..."
-    $PHP_BIN artisan esus:process-data --scope=c3 || echo "AVISO: Falha na consolidação do C3. Continuando deploy..."
+    $PHP_BIN -d memory_limit=1024M artisan esus:process-data --scope=c3 || echo "AVISO: Falha na consolidação do C3. Continuando deploy..."
 
     echo "==> [9/15] Consolidando dados reais do Indicador C4 (Pessoas com Diabetes)..."
-    $PHP_BIN artisan esus:process-data --scope=c4 || echo "AVISO: Falha na consolidação do C4. Continuando deploy..."
+    $PHP_BIN -d memory_limit=1024M artisan esus:process-data --scope=c4 || echo "AVISO: Falha na consolidação do C4. Continuando deploy..."
 else
     echo "==> [5-9/15] Sincronização de dados do PEC ignorada (--quick / --no-sync ativo)."
 fi

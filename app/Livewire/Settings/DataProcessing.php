@@ -89,6 +89,16 @@ class DataProcessing extends Component
     {
         $this->selectedScope = 'all';
         $this->executeProcessing($service, 'all');
+
+        if (config('queue.default') !== 'sync') {
+            try {
+                SyncCvatNominalJob::dispatch((int) now()->year, (int) now()->month);
+                $this->processMessage = ($this->processMessage ? $this->processMessage."\n\n" : '')
+                    .'Extração nominal do CVAT também foi agendada na fila de processamento.';
+            } catch (Throwable $e) {
+                report($e);
+            }
+        }
     }
 
     public function processNow(EsusDataProcessingService $service, ?string $scope = null): void

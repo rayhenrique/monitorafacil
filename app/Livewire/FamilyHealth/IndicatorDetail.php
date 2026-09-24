@@ -1117,16 +1117,16 @@ class IndicatorDetail extends Component
                 ->where('quarter', $this->quarter)
                 ->whereNotNull('ine')
                 ->where('ine', '!=', '')
-                ->selectRaw('ine, team_name, cnes, facility_name, count(*) as total_children, sum(score_percent) as sum_score, avg(score_percent) as avg_score')
-                ->groupBy('ine', 'team_name', 'cnes', 'facility_name')
+                ->selectRaw('ine, MAX(team_name) as team_name, MAX(cnes) as cnes, MAX(facility_name) as facility_name, count(*) as total_children, sum(score_percent) as sum_score, avg(score_percent) as avg_score')
+                ->groupBy('ine')
                 ->get();
         }
 
         if ($c2ChildrenGrouped->isNotEmpty()) {
             $c2TeamRows = $c2ChildrenGrouped->map(function ($group) use ($facilityMap) {
                 $facility = $facilityMap->get($group->ine);
-                $cnes = $group->cnes ?: ($facility?->cnes ?? '—');
-                $facilityName = $group->facility_name ?: ($facility?->facility_name ?? 'Unidade Básica de Saúde');
+                $cnes = $facility?->cnes ?: ($group->cnes ?: '—');
+                $facilityName = $facility?->facility_name ?: ($group->facility_name ?: 'Unidade Básica de Saúde');
                 $score = round((float) $group->avg_score, 2);
                 $level = FamilyHealthService::calculatePerformanceLevel('c2', $score);
 
@@ -1313,16 +1313,16 @@ class IndicatorDetail extends Component
                 ->where('quarter', $this->quarter)
                 ->whereNotNull('ine')
                 ->where('ine', '!=', '')
-                ->selectRaw('ine, team_name, cnes, facility_name, count(*) as total_pregnancies, sum(score_percent) as sum_score, avg(score_percent) as avg_score')
-                ->groupBy('ine', 'team_name', 'cnes', 'facility_name')
+                ->selectRaw('ine, MAX(team_name) as team_name, MAX(cnes) as cnes, MAX(facility_name) as facility_name, count(*) as total_pregnancies, sum(score_percent) as sum_score, avg(score_percent) as avg_score')
+                ->groupBy('ine')
                 ->get();
         }
 
         if ($c3PregnanciesGrouped->isNotEmpty()) {
             $c3TeamRows = $c3PregnanciesGrouped->map(function ($group) use ($facilityMap) {
                 $facility = $facilityMap->get($group->ine);
-                $cnes = $group->cnes ?: ($facility?->cnes ?? '—');
-                $facilityName = $group->facility_name ?: ($facility?->facility_name ?? 'Unidade Básica de Saúde');
+                $cnes = $facility?->cnes ?: ($group->cnes ?: '—');
+                $facilityName = $facility?->facility_name ?: ($group->facility_name ?: 'Unidade Básica de Saúde');
                 $score = round((float) $group->avg_score, 2);
                 $level = FamilyHealthService::calculatePerformanceLevel('c3', $score);
 
@@ -1487,16 +1487,16 @@ class IndicatorDetail extends Component
                 ->where('quarter', $this->quarter)
                 ->whereNotNull('ine')
                 ->where('ine', '!=', '')
-                ->selectRaw('ine, team_name, cnes, facility_name, count(*) as total_diabetics, sum(score_percent) as sum_score, avg(score_percent) as avg_score')
-                ->groupBy('ine', 'team_name', 'cnes', 'facility_name')
+                ->selectRaw('ine, MAX(team_name) as team_name, MAX(cnes) as cnes, MAX(facility_name) as facility_name, count(*) as total_diabetics, sum(score_percent) as sum_score, avg(score_percent) as avg_score')
+                ->groupBy('ine')
                 ->get();
         }
 
         if ($c4DiabeticsGrouped->isNotEmpty()) {
             $c4TeamRows = $c4DiabeticsGrouped->map(function ($group) use ($facilityMap) {
                 $facility = $facilityMap->get($group->ine);
-                $cnes = $group->cnes ?: ($facility?->cnes ?? '—');
-                $facilityName = $group->facility_name ?: ($facility?->facility_name ?? 'Unidade Básica de Saúde');
+                $cnes = $facility?->cnes ?: ($group->cnes ?: '—');
+                $facilityName = $facility?->facility_name ?: ($group->facility_name ?: 'Unidade Básica de Saúde');
                 $score = round((float) $group->avg_score, 2);
                 $level = FamilyHealthService::calculatePerformanceLevel('c4', $score);
 
