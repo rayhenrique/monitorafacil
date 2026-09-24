@@ -8,15 +8,42 @@
     </div>
 
     @php
-        if ($snapshot !== null) {
-            $miciTotal = $snapshot->mici_updated_count + $snapshot->mici_outdated_count;
-            $miciPct = $miciTotal > 0 ? round(($snapshot->mici_updated_count / $miciTotal) * 100, 2) : 0;
+        $hasData = false;
+        $miciUpdated = 0;
+        $miciOutdated = 0;
+        $miciTotal = 0;
+        $miciPct = 0;
+        $micdtUpdated = 0;
+        $micdtOutdated = 0;
+        $micdtTotal = 0;
+        $micdtPct = 0;
+        $competenciaMes = '';
 
-            $micdtTotal = $snapshot->micdt_updated_count + $snapshot->micdt_outdated_count;
-            $micdtPct = $micdtTotal > 0 ? round(($snapshot->micdt_updated_count / $micdtTotal) * 100, 2) : 0;
+        if (isset($cvatMetrics) && $cvatMetrics !== null) {
+            $hasData = true;
+            $competenciaMes = $cvatMetrics->year . ' / M' . str_pad((string) $cvatMetrics->month, 2, '0', STR_PAD_LEFT);
+            $miciUpdated = (int) $cvatMetrics->mici_updated;
+            $miciOutdated = (int) $cvatMetrics->mici_outdated;
+            $miciTotal = (int) $cvatMetrics->mici_total;
+            $miciPct = $miciTotal > 0 ? round(($miciUpdated / $miciTotal) * 100, 2) : 0;
+
+            $micdtUpdated = (int) $cvatMetrics->mici_and_micdt_updated;
+            $micdtOutdated = (int) $cvatMetrics->mici_and_micdt_outdated;
+            $micdtTotal = (int) $cvatMetrics->mici_with_micdt_total;
+            $micdtPct = $micdtTotal > 0 ? round(($micdtUpdated / $micdtTotal) * 100, 2) : 0;
+        } elseif ($snapshot !== null) {
+            $hasData = true;
+            $competenciaMes = $year . ' / M' . str_pad($quarter * 4, 2, '0', STR_PAD_LEFT);
+            $miciUpdated = (int) $snapshot->mici_updated_count;
+            $miciOutdated = (int) $snapshot->mici_outdated_count;
+            $miciTotal = $miciUpdated + $miciOutdated;
+            $miciPct = $miciTotal > 0 ? round(($miciUpdated / $miciTotal) * 100, 2) : 0;
+
+            $micdtUpdated = (int) $snapshot->micdt_updated_count;
+            $micdtOutdated = (int) $snapshot->micdt_outdated_count;
+            $micdtTotal = $micdtUpdated + $micdtOutdated;
+            $micdtPct = $micdtTotal > 0 ? round(($micdtUpdated / $micdtTotal) * 100, 2) : 0;
         }
-
-        $competenciaMes = $year . ' / M' . str_pad($quarter * 4, 2, '0', STR_PAD_LEFT);
     @endphp
 
     <div class="grid gap-5 lg:grid-cols-3">
@@ -91,16 +118,16 @@
                                 <p class="text-xs text-muted">Cadastro Individual</p>
                             </div>
                         </div>
-                        @if ($snapshot !== null)
+                        @if ($hasData)
                             <span class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 border border-emerald-200">
                                 {{ number_format($miciPct, 2, ',', '.') }}%
                             </span>
                         @endif
                     </div>
 
-                    @if ($snapshot !== null)
+                    @if ($hasData)
                         <p class="mt-4 text-3xl font-bold tracking-tight tabular-nums text-ink">
-                            {{ number_format($snapshot->mici_updated_count, 0, ',', '.') }}
+                            {{ number_format($miciUpdated, 0, ',', '.') }}
                         </p>
                     @endif
 
@@ -109,7 +136,7 @@
                     </p>
                 </div>
 
-                @if ($snapshot !== null)
+                @if ($hasData)
                     <div class="mt-6 grid grid-cols-3 gap-2 border-t border-line pt-3 text-center">
                         <div>
                             <p class="text-[10px] font-medium text-muted uppercase">Mês</p>
@@ -121,7 +148,7 @@
                         </div>
                         <div class="border-l border-line/80">
                             <p class="text-[10px] font-medium text-muted uppercase">Desatualizados</p>
-                            <p class="mt-0.5 text-xs font-semibold text-amber-700">{{ number_format($snapshot->mici_outdated_count, 0, ',', '.') }}</p>
+                            <p class="mt-0.5 text-xs font-semibold text-amber-700">{{ number_format($miciOutdated, 0, ',', '.') }}</p>
                         </div>
                     </div>
                 @else
@@ -146,16 +173,16 @@
                                 <p class="text-xs text-muted">fichas/domicílios</p>
                             </div>
                         </div>
-                        @if ($snapshot !== null)
+                        @if ($hasData)
                             <span class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 border border-emerald-200">
                                 {{ number_format($micdtPct, 2, ',', '.') }}%
                             </span>
                         @endif
                     </div>
 
-                    @if ($snapshot !== null)
+                    @if ($hasData)
                         <p class="mt-4 text-3xl font-bold tracking-tight tabular-nums text-ink">
-                            {{ number_format($snapshot->micdt_updated_count, 0, ',', '.') }}
+                            {{ number_format($micdtUpdated, 0, ',', '.') }}
                         </p>
                     @endif
 
@@ -164,7 +191,7 @@
                     </p>
                 </div>
 
-                @if ($snapshot !== null)
+                @if ($hasData)
                     <div class="mt-6 grid grid-cols-3 gap-2 border-t border-line pt-3 text-center">
                         <div>
                             <p class="text-[10px] font-medium text-muted uppercase">Mês</p>
@@ -176,7 +203,7 @@
                         </div>
                         <div class="border-l border-line/80">
                             <p class="text-[10px] font-medium text-muted uppercase">Desatualizados</p>
-                            <p class="mt-0.5 text-xs font-semibold text-amber-700">{{ number_format($snapshot->micdt_outdated_count, 0, ',', '.') }}</p>
+                            <p class="mt-0.5 text-xs font-semibold text-amber-700">{{ number_format($micdtOutdated, 0, ',', '.') }}</p>
                         </div>
                     </div>
                 @else

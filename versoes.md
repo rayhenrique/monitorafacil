@@ -2,6 +2,26 @@
 
 Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento (*Release Notes*) da plataforma **Monitora Fácil · Gestão da Atenção Primária à Saúde**.
 
+## [v1.25.1] - 24/09/2026
+
+### Sincronização dos Cards de Vínculo e Acompanhamento na Visão Geral com o Módulo CVAT Nominal (NT 30/2025)
+- **Consistência Total entre Visão Geral e Módulo Vínculo e Acompanhamento**: Integração de `CvatNominalDwService` no componente `RegistrationsOverview` da Visão Geral, priorizando as métricas auditadas da Relação Nominal da NT 30/2025 (`cvat_nominal_metrics`).
+- **Competência Real e Contagens Auditadas no Card Total MICI**: Exibição da competência real `2026 / M09`, total de atualizados `36.705` (`99,20%`), total geral municipal `37.002` e desatualizados `297`.
+- **Contagens Auditadas no Card Total MICI + MICDT**: Exibição da competência real `2026 / M09`, total de atualizados `35.939` (`99,04%`), total geral com domicílio `36.289` e desatualizados `116`.
+- **Sincronização Bidirecional em ConsolidationRegistration**: Atualização automática da tabela `consolidation_registrations` nas rotinas de processamento de dados do e-SUS PEC e na consolidação local de métricas do CVAT.
+
+---
+
+## [v1.25.0] - 24/09/2026
+
+### Indicador C6 (Cuidado da Pessoa Idosa na APS), 4 Boas Práticas Clínicas (A–D, 100 pts) e Busca Ativa Nominal
+- **Indicador C6 com 4 Boas Práticas Clínicas (A–D) e 100 Pontos**: Implementação integral do Indicador C6 conforme Nota Metodológica oficial e NT nº 06/2025-CVAT. Coorte de 5.780 pessoas idosas (60+ anos) vinculadas às 19 equipes ativas da APS municipal.
+- **4 Boas Práticas Oficiais (25 pts cada = 100 pts)**: Prática A (Consulta médica ou de enfermagem nos últimos 12 meses [25 pts]); Prática B (Antropometria com Peso e Altura simultâneos na mesma data nos últimos 12 meses [25 pts]); Prática C (No mínimo 2 visitas domiciliares de ACS nos últimos 12 meses com intervalo mínimo de 30 dias [25 pts], com isenção eAP); Prática D (Vacinação contra Influenza nos últimos 12 meses [25 pts]).
+- **Busca Ativa Nominal e Modal de Auditoria Clínica Individual**: Relação nominal completa com filtros por faixa etária (60-69, 70-79, 80+), raça/cor e práticas cumpridas, exportação em CSV com BOM UTF-8 e modal de auditoria clínica.
+- **Módulo Processar Dados e Deploy Atualizado**: Card dedicado com suporte ao escopo `--scope=c6` e scripts de deploy em 17 etapas.
+
+---
+
 ## [v1.24.0] - 24/09/2026
 
 ### Indicador C5 (Hipertensão Arterial Sistêmica), 4 Boas Práticas Clínicas (A–D, 100 pts) e Busca Ativa Nominal

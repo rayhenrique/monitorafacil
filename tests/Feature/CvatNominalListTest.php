@@ -88,9 +88,8 @@ class CvatNominalListTest extends TestCase
             ->assertOk()
             ->assertSee('PESSOA REAL TESTE')
             ->assertDontSee('PESSOA EXCLUÍDA TESTE')
-            ->assertSee('PBF identificado no PEC')
-            ->assertSee('202602')
-            ->assertSee('índice Y')
+            ->assertSee('DIMENSÃO CADASTRO')
+            ->assertSee('DIMENSÃO ACOMPANHAMENTO')
             ->assertDontSee('Aferição Oficial');
 
         Livewire::actingAs($user)->test(NominalList::class)

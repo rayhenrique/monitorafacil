@@ -36,18 +36,18 @@ class DashboardRealDataTest extends TestCase
             ->assertSee('REGULAR')
             // Card 2: Total MICI
             ->assertSee('Total MICI atualizados')
-            ->assertSee('47.480')
-            ->assertSee('70,44%')
-            ->assertSee('67.403')
-            ->assertSee('19.923')
-            ->assertSee('2026 / M12')
+            ->assertSee('36.705')
+            ->assertSee('99,20%')
+            ->assertSee('37.002')
+            ->assertSee('297')
+            ->assertSee('2026 / M09')
             // Card 3: Total MICI + MICDT
             ->assertSee('Total MICI + MICDT atualizados')
-            ->assertSee('18.363')
-            ->assertSee('71,36%')
-            ->assertSee('25.732')
-            ->assertSee('7.369')
-            ->assertSee('2026 / M12');
+            ->assertSee('35.939')
+            ->assertSee('99,04%')
+            ->assertSee('36.289')
+            ->assertSee('116')
+            ->assertSee('2026 / M09');
 
         // 2. Equipes Homologadas (TeamsOverview)
         Livewire::test(TeamsOverview::class, ['year' => 2026, 'quarter' => 3])

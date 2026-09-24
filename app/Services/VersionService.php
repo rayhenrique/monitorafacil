@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.25.0';
+    public const CURRENT_VERSION = 'v1.25.1';
 
     public const CURRENT_RELEASE_DATE = '24/09/2026';
 
@@ -61,9 +61,22 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.25.0',
+                'version' => 'v1.25.1',
                 'date' => '24/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Sincronização dos Cards de Vínculo e Acompanhamento na Visão Geral com o Módulo CVAT Nominal (NT 30/2025)',
+                'summary' => 'Ajuste e sincronização da seção de Vínculo e Acompanhamento na tela Visão Geral com as métricas reais auditadas da Relação Nominal da NT 30/2025 (módulo Vínculo e Acompanhamento Territorial). Os cards passam a exibir a competência real (2026 / M09), Total MICI atualizados (36.705 com 99,20% de 37.002), Total MICI + MICDT atualizados (35.939 com 99,04% de 36.289 com MICDT) e contagem exata de desatualizados (297 e 116), eliminando dados legados divergentes e mantendo consistência total com a tabela oficial cvat_nominal_metrics e consolidation_registrations.',
+                'highlights' => [
+                    ['type' => 'correcao', 'text' => 'Consistência total entre os cards de Vínculo e Acompanhamento da Visão Geral e a Relação Nominal do CVAT (37.002 cidadãos reais no município).'],
+                    ['type' => 'melhoria', 'text' => 'Card Total MICI atualizados exibe 36.705 (99,20%) com 37.002 no total geral e 297 desatualizados na competência real 2026 / M09.'],
+                    ['type' => 'melhoria', 'text' => 'Card Total MICI + MICDT atualizados exibe 35.939 (99,04%) com 36.289 no total geral com domicílio e 116 desatualizados na competência real 2026 / M09.'],
+                    ['type' => 'correcao', 'text' => 'Atualização automática e bidirecional de ConsolidationRegistration nas rotinas de processamento de dados do e-SUS PEC e consolidação do CVAT.'],
+                ],
+            ],
+            [
+                'version' => 'v1.25.0',
+                'date' => '24/09/2026',
+                'badge' => 'Anterior',
                 'title' => 'Indicador C6 (Cuidado da Pessoa Idosa na APS), 4 Boas Práticas Clínicas (A–D, 100 pts) e Busca Ativa Nominal',
                 'summary' => 'Implementação integral do Indicador C6 (Cuidado da Pessoa Idosa na APS) conforme a Nota Metodológica oficial e Nota Técnica nº 06/2025-CVAT. O módulo contempla o acompanhamento da coorte de 5.780 pessoas com 60 anos ou mais vinculadas às 19 equipes ativas da APS municipal, aferição das 4 Boas Práticas Clínicas oficiais (25 pontos cada = 100 pontos): Consulta Médica/Enfermagem nos últimos 12 meses (A, 25 pts), Antropometria com Peso e Altura na mesma data (B, 25 pts), no mínimo 2 Visitas Domiciliares de ACS com intervalo mínimo de 30 dias (C, 25 pts, com isenção eAP) e Vacinação de Influenza nos últimos 12 meses (D, 25 pts). Inclui busca ativa nominal, auditoria clínica individual, filtros avançados e integração ao pipeline do e-SUS PEC DW.',
                 'highlights' => [

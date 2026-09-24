@@ -9,14 +9,14 @@
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-900 antialiased">
     <main class="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-4 py-8 sm:px-6 sm:py-12">
-        <div class="mb-8">
+        <div class="mb-8 text-center flex flex-col items-center">
             @if (filled($settings['logo_path'] ?? null))
-                <img src="{{ asset('storage/' . ltrim($settings['logo_path'], '/')) }}" alt="Logotipo de {{ trim($settings['municipio_nome'] ?? '') ?: 'município' }}" class="mb-5 h-12 w-12 rounded-xl object-contain">
+                <img src="{{ asset('storage/' . ltrim($settings['logo_path'], '/')) }}" alt="Logotipo de {{ trim($settings['municipio_nome'] ?? '') ?: 'município' }}" class="mb-4 h-12 w-12 rounded-xl object-contain shadow-xs">
             @else
-                <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-teal-800 text-lg font-bold text-white">MF</div>
+                <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-teal-800 text-lg font-bold text-white shadow-xs">MF</div>
             @endif
-            <p class="text-sm font-semibold uppercase tracking-widest text-teal-800">Monitora Fácil</p>
-            <h1 class="mt-2 text-3xl font-semibold tracking-tight">Acesso do gestor</h1>
+            <p class="text-sm font-bold uppercase tracking-widest text-teal-800">Monitora Fácil</p>
+            <h1 class="mt-2 text-3xl font-bold tracking-tight text-slate-900">Acesso do gestor</h1>
             <p class="mt-2 text-sm text-slate-600">Entre para acompanhar os dados consolidados do município.</p>
         </div>
 

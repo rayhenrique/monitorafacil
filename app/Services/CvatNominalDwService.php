@@ -2,12 +2,14 @@
 
 namespace App\Services;
 
+use App\Models\ConsolidationRegistration;
 use App\Models\CvatNominalCitizen;
 use App\Models\CvatNominalMetric;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use RuntimeException;
 use Throwable;
 
@@ -15,11 +17,22 @@ class CvatNominalDwService
 {
     public const SOURCE = 'pec_nt30_2025_v2';
 
-    public function getMetrics(?int $year = null, ?int $month = null, ?string $team = null): ?object
+    public function getMetrics(?int $year = null, ?int $month = null, ?string $team = null, ?int $quarter = null): ?object
     {
+        if (! Schema::hasTable('cvat_nominal_metrics')) {
+            return null;
+        }
+
         $baseMetric = CvatNominalMetric::query()->where('source', self::SOURCE);
-        if ($year !== null && $month !== null) {
-            $baseMetric->where('year', $year)->where('month', $month);
+        if ($year !== null) {
+            $baseMetric->where('year', $year);
+        }
+        if ($month !== null) {
+            $baseMetric->where('month', $month);
+        } elseif ($quarter !== null) {
+            $startMonth = ($quarter - 1) * 4 + 1;
+            $endMonth = $quarter * 4;
+            $baseMetric->whereBetween('month', [$startMonth, $endMonth]);
         }
         $metric = $baseMetric->orderByDesc('year')->orderByDesc('month')->first();
 
@@ -475,7 +488,7 @@ class CvatNominalDwService
         $both = (clone $base)->where('mici_updated', true)->where('micdt_updated', true)->count();
         $linked = (clone $base)->where('is_linked', true)->count();
 
-        return CvatNominalMetric::query()->updateOrCreate(['year' => $year, 'month' => $month], [
+        $nominalMetric = CvatNominalMetric::query()->updateOrCreate(['year' => $year, 'month' => $month], [
             'source' => self::SOURCE,
             'reference_date' => $referenceDate ?? now()->toDateString(),
             'benefit_data_available' => false,
@@ -508,5 +521,18 @@ class CvatNominalDwService
             'bpc_or_pbf_not_accompanied' => (clone $base)->where('vulnerability_type', 'sem_criterio')->whereIn('social_benefit', ['bpc', 'pbf', 'bpc_pbf'])->where('is_accompanied', false)->count(),
             'elderly_child_and_benefit_not_accompanied' => (clone $base)->whereIn('vulnerability_type', ['idoso', 'crianca'])->whereIn('social_benefit', ['bpc', 'pbf', 'bpc_pbf'])->where('is_accompanied', false)->count(),
         ]);
+
+        $quarter = (int) ceil($month / 4);
+        ConsolidationRegistration::query()->updateOrCreate(
+            ['year' => $year, 'quarter' => $quarter],
+            [
+                'mici_updated_count' => $nominalMetric->mici_updated,
+                'mici_outdated_count' => $nominalMetric->mici_outdated,
+                'micdt_updated_count' => $nominalMetric->mici_and_micdt_updated,
+                'micdt_outdated_count' => $nominalMetric->mici_and_micdt_outdated,
+            ]
+        );
+
+        return $nominalMetric;
     }
 }

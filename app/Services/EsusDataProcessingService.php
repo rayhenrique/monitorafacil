@@ -6,9 +6,11 @@ use App\Enums\SyncStatus;
 use App\Enums\TeamType;
 use App\Models\ConsolidationRegistration;
 use App\Models\ConsolidationTeam;
+use App\Models\CvatNominalMetric;
 use App\Models\FamilyHealthIndicatorSnapshot;
 use App\Models\FamilyHealthMonthlySnapshot;
 use App\Models\SyncLog;
+use App\Services\CvatNominalDwService;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -976,6 +978,23 @@ class EsusDataProcessingService
                 $miciOutdated = 10;
                 $micdtUpdated = 50;
                 $micdtOutdated = 5;
+            }
+
+            // Prioriza métricas nominais auditadas do CVAT (NT 30/2025) quando disponíveis
+            $startMonth = ($quarter - 1) * 4 + 1;
+            $endMonth = $quarter * 4;
+            $nominalMetric = CvatNominalMetric::query()
+                ->where('source', CvatNominalDwService::SOURCE)
+                ->where('year', $year)
+                ->whereBetween('month', [$startMonth, $endMonth])
+                ->orderByDesc('month')
+                ->first();
+
+            if ($nominalMetric !== null) {
+                $miciUpdated = (int) $nominalMetric->mici_updated;
+                $miciOutdated = (int) $nominalMetric->mici_outdated;
+                $micdtUpdated = (int) $nominalMetric->mici_and_micdt_updated;
+                $micdtOutdated = (int) $nominalMetric->mici_and_micdt_outdated;
             }
 
             ConsolidationRegistration::query()->updateOrCreate(
