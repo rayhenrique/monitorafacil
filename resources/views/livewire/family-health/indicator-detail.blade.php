@@ -1292,7 +1292,7 @@
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    @click="navigator.clipboard.writeText('{{ $child['cns'] }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                                                    @click="navigator.clipboard.writeText('{{ $child['cns'] }}'); copied = true; setTimeout(function() { copied = false; }, 2000)"
                                                     class="text-slate-400 hover:text-sky-700 transition cursor-pointer"
                                                     :title="copied ? 'Copiado!' : 'Copiar CNS'"
                                                 >
@@ -1324,7 +1324,7 @@
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    @click="navigator.clipboard.writeText('{{ $child['cpf'] }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                                                    @click="navigator.clipboard.writeText('{{ $child['cpf'] }}'); copied = true; setTimeout(function() { copied = false; }, 2000)"
                                                     class="text-slate-400 hover:text-sky-700 transition cursor-pointer"
                                                     :title="copied ? 'Copiado!' : 'Copiar CPF'"
                                                 >
@@ -6352,8 +6352,15 @@
             <!-- MODAL DE DETALHES CLÍNICOS DO HIPERTENSO (AUDITORIA DAS 4 PRÁTICAS)       -->
             <!-- ========================================================================= -->
             @if ($showHypertensiveModal && $selectedHypertensive)
-                <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-                    <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+                <div
+                    class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/60 p-3 backdrop-blur-xs animate-fade-in sm:p-4"
+                    role="dialog"
+                    aria-modal="true"
+                >
+                    <div
+                        class="app-modal-panel relative my-3 w-full max-w-4xl space-y-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl sm:my-8 sm:rounded-3xl sm:p-8"
+                        @click.outside="$wire.closeHypertensiveDetail()"
+                    >
                         <!-- Modal Header -->
                         <div class="flex items-center justify-between border-b border-slate-150 pb-4">
                             <div class="flex items-center gap-3">
@@ -6361,26 +6368,33 @@
                                     MF
                                 </div>
                                 <div>
-                                    <h3 class="text-lg font-bold text-slate-800">
-                                        {{ $selectedHypertensive['name'] }}
-                                    </h3>
-                                    <p class="text-xs text-slate-500 font-mono">
-                                        CNS: {{ $selectedHypertensive['cns'] ?: 'Não informado' }} · CPF: {{ $selectedHypertensive['cpf'] ?: 'Não informado' }}
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-100 text-teal-800">
+                                            Pessoa com Hipertensão
+                                        </span>
+                                        <h3 class="text-lg sm:text-xl font-bold text-slate-800 tracking-tight">
+                                            {{ $selectedHypertensive['name'] }}
+                                        </h3>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-1">
+                                        CPF: {{ $selectedHypertensive['cpf'] ?: 'Não informado' }} · CNS: {{ $selectedHypertensive['cns'] ?: 'Não informado' }} · Nascimento: {{ $selectedHypertensive['birth_date_formatted'] }} ({{ $selectedHypertensive['age_years'] }} anos)
                                     </p>
                                 </div>
                             </div>
                             <button
                                 type="button"
                                 wire:click="closeHypertensiveDetail"
-                                class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer"
+                                class="rounded-xl p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
                             >
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </button>
                         </div>
 
-                        <!-- Identificação & Dados de Cadastro -->
+                        <!-- Modal Body (Rolagem interna) -->
+                        <div class="space-y-5 max-h-[70vh] overflow-y-auto pr-1">
+                            <!-- Identificação & Dados de Cadastro -->
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-50/60 border border-slate-200/80 text-xs">
                             <div>
                                 <span class="text-slate-400 block text-[11px]">Data de Nascimento</span>
@@ -6524,6 +6538,7 @@
                                 </table>
                             </div>
                         </div>
+                    </div>
 
                         <!-- Modal Footer -->
                         <div class="flex items-center justify-between border-t border-slate-150 pt-4">
@@ -9087,7 +9102,7 @@
                                                     </button>
                                                     <button
                                                         type="button"
-                                                        @click="navigator.clipboard.writeText('{{ $child['cns'] }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                                                        @click="navigator.clipboard.writeText('{{ $child['cns'] }}'); copied = true; setTimeout(function() { copied = false; }, 2000)"
                                                         class="text-slate-400 hover:text-sky-700 transition cursor-pointer"
                                                         :title="copied ? 'Copiado!' : 'Copiar CNS'"
                                                     >
@@ -9119,7 +9134,7 @@
                                                     </button>
                                                     <button
                                                         type="button"
-                                                        @click="navigator.clipboard.writeText('{{ $child['cpf'] }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                                                        @click="navigator.clipboard.writeText('{{ $child['cpf'] }}'); copied = true; setTimeout(function() { copied = false; }, 2000)"
                                                         class="text-slate-400 hover:text-sky-700 transition cursor-pointer"
                                                         :title="copied ? 'Copiado!' : 'Copiar CPF'"
                                                     >

@@ -80,17 +80,29 @@ class C4ActiveSearchService
     }
 
     /**
+     * Cache em memória no escopo da requisição.
+     *
+     * @var array<string, Collection<int, array<string, mixed>>>
+     */
+    private array $cohortCache = [];
+
+    /**
      * Lista base de diabéticos da coorte. Consulta exclusivamente c4_nominal_diabetics.
      *
      * @return Collection<int, array<string, mixed>>
      */
     public function getBaseCohort(int $year, int $quarter, ?string $selectedIne = null): Collection
     {
+        $cacheKey = "{$year}_{$quarter}_" . ($selectedIne ?? 'all');
+        if (isset($this->cohortCache[$cacheKey])) {
+            return $this->cohortCache[$cacheKey];
+        }
+
         if (! Schema::hasTable('c4_nominal_diabetics')) {
             return collect();
         }
 
-        $dbQuery = C4NominalDiabetic::query()
+        $dbQuery = DB::table('c4_nominal_diabetics')
             ->where('year', $year)
             ->where('quarter', $quarter);
 
@@ -104,70 +116,110 @@ class C4ActiveSearchService
             return collect();
         }
 
-        return $records->map(function (C4NominalDiabetic $d) {
-            $formatDate = fn ($date) => $date ? Carbon::parse($date)->format('d/m/Y') : '—';
-            $birthDateFormatted = $formatDate($d->birth_date);
-            $birthDateString = $d->birth_date ? Carbon::parse($d->birth_date)->toDateString() : null;
-            $cns = trim((string) ($d->cns ?? ''));
-            $cpf = trim((string) ($d->cpf ?? ''));
+        $mapped = $records->map(fn ($d) => $this->formatDiabeticRecord($d));
+        $this->cohortCache[$cacheKey] = $mapped;
 
-            return [
-                'id' => $d->id,
-                'year' => (int) $d->year,
-                'quarter' => (int) $d->quarter,
-                'cidadao_pec_id' => $d->cidadao_pec_id,
-                'cns' => $cns,
-                'cpf' => $cpf,
-                'cns_masked' => $cns !== '' ? substr($cns, 0, 3) . ' **** **** ' . substr($cns, -4) : '—',
-                'cpf_masked' => $cpf !== '' ? substr($cpf, 0, 3) . '.***.***-' . substr($cpf, -2) : '—',
-                'name' => $d->name,
-                'social_name' => $d->social_name,
-                'birth_date' => $birthDateString,
-                'birth_date_formatted' => $birthDateFormatted,
-                'age_years' => (int) $d->age_years,
-                'phone' => $d->phone,
-                'race_color' => $d->race_color ?: 'Não informada',
-                'cnes' => $d->cnes,
-                'facility_name' => $d->facility_name,
-                'district' => $d->district,
-                'ine' => $d->ine,
-                'team_name' => $d->team_name,
-                'microarea' => $d->microarea ?: '—',
-                'condition_status' => $d->condition_status,
-                'ciap_codes' => $d->ciap_codes,
-                'cid_codes' => $d->cid_codes,
-                'first_diagnosis_date' => $formatDate($d->first_diagnosis_date),
-                'last_diagnosis_date' => $formatDate($d->last_diagnosis_date),
-                'month_ref' => $d->month_ref,
-                'mici_updated' => (bool) $d->mici_updated,
-                'is_accompanied' => (bool) $d->is_accompanied,
-                // Práticas
-                'practice_a' => (int) $d->practice_a,
-                'practice_a_met' => (bool) $d->practice_a_met,
-                'last_consultation_date' => $formatDate($d->last_consultation_date),
-                'practice_b' => (int) $d->practice_b,
-                'practice_b_met' => (bool) $d->practice_b_met,
-                'last_pa_date' => $formatDate($d->last_pa_date),
-                'last_pa_value' => $d->last_pa_value ?: '—',
-                'practice_c' => (int) $d->practice_c,
-                'practice_c_met' => (bool) $d->practice_c_met,
-                'last_anthropometry_date' => $formatDate($d->last_anthropometry_date),
-                'last_weight' => $d->last_weight ? number_format((float) $d->last_weight, 1, ',', '.') . ' kg' : '—',
-                'last_height' => $d->last_height ? number_format((float) $d->last_height, 1, ',', '.') . ' cm' : '—',
-                'practice_d' => (int) $d->practice_d,
-                'practice_d_met' => (bool) $d->practice_d_met,
-                'last_visit_date' => $formatDate($d->last_visit_date),
-                'practice_e' => (int) $d->practice_e,
-                'practice_e_met' => (bool) $d->practice_e_met,
-                'last_hba1c_date' => $formatDate($d->last_hba1c_date),
-                'last_hba1c_type' => $d->last_hba1c_type ?: '—',
-                'practice_f' => (int) $d->practice_f,
-                'practice_f_met' => (bool) $d->practice_f_met,
-                'last_foot_exam_date' => $formatDate($d->last_foot_exam_date),
-                'score_percent' => (float) $d->score_percent,
-                'performance_level' => FamilyHealthService::calculatePerformanceLevel('c4', (float) $d->score_percent),
-            ];
-        });
+        return $mapped;
+    }
+
+    /**
+     * Busca um único diabético por ID diretamente, sem carregar toda a coorte na memória.
+     */
+    public function getDiabeticById(int $id): ?array
+    {
+        $d = DB::table('c4_nominal_diabetics')->where('id', $id)->first();
+        if (! $d) {
+            return null;
+        }
+
+        return $this->formatDiabeticRecord($d);
+    }
+
+    /**
+     * Formata os campos de um registro de diabético em array para a UI.
+     *
+     * @param  C4NominalDiabetic|\stdClass|array  $d
+     * @return array<string, mixed>
+     */
+    public function formatDiabeticRecord(mixed $d): array
+    {
+        if (is_array($d)) {
+            $d = (object) $d;
+        }
+
+        $formatDate = function ($date) {
+            if (empty($date) || $date === '—') {
+                return '—';
+            }
+            if ($date instanceof \Carbon\CarbonInterface) {
+                return $date->format('d/m/Y');
+            }
+            $str = (string) $date;
+            $ts = strtotime($str);
+            return $ts !== false ? date('d/m/Y', $ts) : '—';
+        };
+
+        $birthDateFormatted = $formatDate($d->birth_date ?? null);
+        $birthDateString = ! empty($d->birth_date) ? substr((string) $d->birth_date, 0, 10) : null;
+        $cns = trim((string) ($d->cns ?? ''));
+        $cpf = trim((string) ($d->cpf ?? ''));
+
+        return [
+            'id' => (int) $d->id,
+            'year' => (int) $d->year,
+            'quarter' => (int) $d->quarter,
+            'cidadao_pec_id' => (int) $d->cidadao_pec_id,
+            'cns' => $cns,
+            'cpf' => $cpf,
+            'cns_masked' => $cns !== '' ? substr($cns, 0, 3) . ' **** **** ' . substr($cns, -4) : '—',
+            'cpf_masked' => $cpf !== '' ? substr($cpf, 0, 3) . '.***.***-' . substr($cpf, -2) : '—',
+            'name' => $d->name,
+            'social_name' => $d->social_name ?? null,
+            'birth_date' => $birthDateString,
+            'birth_date_formatted' => $birthDateFormatted,
+            'age_years' => (int) ($d->age_years ?? 0),
+            'phone' => $d->phone ?? null,
+            'race_color' => ($d->race_color ?? null) ?: 'Não informada',
+            'cnes' => $d->cnes ?? null,
+            'facility_name' => $d->facility_name ?? null,
+            'district' => $d->district ?? null,
+            'ine' => $d->ine ?? null,
+            'team_name' => $d->team_name ?? null,
+            'microarea' => ($d->microarea ?? null) ?: '—',
+            'condition_status' => $d->condition_status ?? 'Ativo',
+            'ciap_codes' => $d->ciap_codes ?? null,
+            'cid_codes' => $d->cid_codes ?? null,
+            'first_diagnosis_date' => $formatDate($d->first_diagnosis_date ?? null),
+            'last_diagnosis_date' => $formatDate($d->last_diagnosis_date ?? null),
+            'month_ref' => $d->month_ref ?? null,
+            'mici_updated' => (bool) ($d->mici_updated ?? false),
+            'is_accompanied' => (bool) ($d->is_accompanied ?? false),
+            // Práticas
+            'practice_a' => (int) ($d->practice_a ?? 0),
+            'practice_a_met' => (bool) ($d->practice_a_met ?? false),
+            'last_consultation_date' => $formatDate($d->last_consultation_date ?? null),
+            'practice_b' => (int) ($d->practice_b ?? 0),
+            'practice_b_met' => (bool) ($d->practice_b_met ?? false),
+            'last_pa_date' => $formatDate($d->last_pa_date ?? null),
+            'last_pa_value' => ($d->last_pa_value ?? null) ?: '—',
+            'practice_c' => (int) ($d->practice_c ?? 0),
+            'practice_c_met' => (bool) ($d->practice_c_met ?? false),
+            'last_anthropometry_date' => $formatDate($d->last_anthropometry_date ?? null),
+            'last_weight' => ! empty($d->last_weight) ? number_format((float) $d->last_weight, 1, ',', '.') . ' kg' : '—',
+            'last_height' => ! empty($d->last_height) ? number_format((float) $d->last_height, 1, ',', '.') . ' cm' : '—',
+            'practice_d' => (int) ($d->practice_d ?? 0),
+            'practice_d_met' => (bool) ($d->practice_d_met ?? false),
+            'last_visit_date' => $formatDate($d->last_visit_date ?? null),
+            'practice_e' => (int) ($d->practice_e ?? 0),
+            'practice_e_met' => (bool) ($d->practice_e_met ?? false),
+            'last_hba1c_date' => $formatDate($d->last_hba1c_date ?? null),
+            'last_hba1c_type' => ($d->last_hba1c_type ?? null) ?: '—',
+            'practice_f' => (int) ($d->practice_f ?? 0),
+            'practice_f_met' => (bool) ($d->practice_f_met ?? false),
+            'last_foot_exam_date' => $formatDate($d->last_foot_exam_date ?? null),
+            'score_percent' => (float) ($d->score_percent ?? 0.0),
+            'performance_level' => FamilyHealthService::calculatePerformanceLevel('c4', (float) ($d->score_percent ?? 0.0)),
+        ];
     }
 
     /**

@@ -547,8 +547,7 @@ class IndicatorDetail extends Component
 
     public function openDiabeticDetail(int $diabeticId, C4ActiveSearchService $c4Service): void
     {
-        $cohort = $c4Service->getBaseCohort($this->year, $this->quarter, $this->selectedIne);
-        $found = $cohort->firstWhere('id', $diabeticId);
+        $found = $c4Service->getDiabeticById($diabeticId);
 
         if ($found) {
             $this->selectedDiabetic = $found;
@@ -569,8 +568,7 @@ class IndicatorDetail extends Component
 
     public function openHypertensiveDetail(int $hypertensiveId, C5ActiveSearchService $c5Service): void
     {
-        $cohort = $c5Service->getBaseCohort($this->year, $this->quarter, $this->selectedIne);
-        $found = $cohort->firstWhere('id', $hypertensiveId);
+        $found = $c5Service->getHypertensiveById($hypertensiveId);
 
         if ($found) {
             $this->selectedHypertensive = $found;
