@@ -111,6 +111,7 @@ return [
             'prefix_indexes' => true,
             'search_path' => env('ESUS_DB_SCHEMA', 'public'),
             'sslmode' => env('ESUS_DB_SSLMODE', 'prefer'),
+            'connect_timeout' => env('ESUS_DB_CONNECT_TIMEOUT', 3),
         ],
 
         'sqlsrv' => [

@@ -14,6 +14,7 @@ use App\Services\CvatNominalDwService;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Throwable;
 
 class EsusDataProcessingService
@@ -1048,12 +1049,14 @@ class EsusDataProcessingService
             // Prioriza métricas nominais auditadas do CVAT (NT 30/2025) quando disponíveis
             $startMonth = ($quarter - 1) * 4 + 1;
             $endMonth = $quarter * 4;
-            $nominalMetric = CvatNominalMetric::query()
-                ->where('source', CvatNominalDwService::SOURCE)
-                ->where('year', $year)
-                ->whereBetween('month', [$startMonth, $endMonth])
-                ->orderByDesc('month')
-                ->first();
+            $nominalMetric = Schema::hasTable('cvat_nominal_metrics')
+                ? CvatNominalMetric::query()
+                    ->where('source', CvatNominalDwService::SOURCE)
+                    ->where('year', $year)
+                    ->whereBetween('month', [$startMonth, $endMonth])
+                    ->orderByDesc('month')
+                    ->first()
+                : null;
 
             if ($nominalMetric !== null) {
                 $miciUpdated = (int) $nominalMetric->mici_updated;

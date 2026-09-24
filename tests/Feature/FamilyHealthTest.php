@@ -408,16 +408,11 @@ class FamilyHealthTest extends TestCase
         $this->authenticateUser();
 
         Livewire::test(IndicatorDetail::class, ['indicator' => 'c7'])
-            ->assertSet('activeTab', 'dashboard')
-            ->call('setTab', 'teams')
-            ->assertSet('activeTab', 'teams')
-            ->assertSee('Desempenho por Equipe')
-            ->call('setTab', 'active_search')
-            ->assertSet('activeTab', 'active_search')
-            ->assertSee('Lista de Busca Ativa')
-            ->call('setTab', 'rules')
-            ->assertSet('activeTab', 'rules')
-            ->assertSee('Caderno Metodológico Oficial')
+            ->assertSet('c7SubTab', 'monthly_summary')
+            ->assertSee('Resumo Mensal por Equipe')
+            ->call('switchC7SubTab', 'nominal')
+            ->assertSet('c7SubTab', 'nominal')
+            ->assertSee('Busca Ativa Nominal')
             ->call('selectTeam', '0001234567')
             ->assertSet('selectedIne', '0001234567');
     }

@@ -27,7 +27,11 @@ class SettingsTest extends TestCase
         $sqliteConnection = DB::connection('sqlite');
         app('db')->extend('mysql', static fn () => $sqliteConnection);
 
-        config(['database.connections.pgsql_esus.host' => '127.0.0.1', 'database.connections.pgsql_esus.port' => 54339]);
+        config([
+            'database.connections.pgsql_esus.host' => '127.0.0.1',
+            'database.connections.pgsql_esus.port' => 54339,
+            'database.connections.pgsql_esus.connect_timeout' => 1,
+        ]);
         DB::purge('pgsql_esus');
 
         Schema::dropIfExists('users');
