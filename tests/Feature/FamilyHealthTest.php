@@ -407,7 +407,7 @@ class FamilyHealthTest extends TestCase
     {
         $this->authenticateUser();
 
-        Livewire::test(IndicatorDetail::class, ['indicator' => 'c5'])
+        Livewire::test(IndicatorDetail::class, ['indicator' => 'c7'])
             ->assertSet('activeTab', 'dashboard')
             ->call('setTab', 'teams')
             ->assertSet('activeTab', 'teams')

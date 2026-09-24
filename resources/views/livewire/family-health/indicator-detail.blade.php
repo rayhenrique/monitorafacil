@@ -7,16 +7,18 @@
         $isC3 = $indicator === 'c3';
         $isC4 = $indicator === 'c4';
         $isC5 = $indicator === 'c5';
-        $hasValidatedResult = ! ($isC1 || $isC2 || $isC3 || $isC4 || $isC5) || $score !== null;
+        $isC6 = $indicator === 'c6';
+        $hasValidatedResult = ! ($isC1 || $isC2 || $isC3 || $isC4 || $isC5 || $isC6) || $score !== null;
         $hasC2Result = ! $isC2 || $score !== null;
         $hasC3Result = ! $isC3 || $score !== null;
         $hasC4Result = ! $isC4 || $score !== null;
         $hasC5Result = ! $isC5 || $score !== null;
+        $hasC6Result = ! $isC6 || $score !== null;
 
         $badgeStyles = match ($level) {
             null => 'bg-slate-100 text-slate-700 border-slate-300',
-            'otimo' => in_array($indicator, ['c1', 'c2', 'c3', 'c4', 'c5']) ? 'bg-sky-100 text-sky-800 border-sky-300' : 'bg-emerald-100 text-emerald-800 border-emerald-300',
-            'bom' => in_array($indicator, ['c1', 'c2', 'c3', 'c4', 'c5']) ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-sky-100 text-sky-800 border-sky-300',
+            'otimo' => in_array($indicator, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']) ? 'bg-sky-100 text-sky-800 border-sky-300' : 'bg-emerald-100 text-emerald-800 border-emerald-300',
+            'bom' => in_array($indicator, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']) ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-sky-100 text-sky-800 border-sky-300',
             'suficiente' => 'bg-amber-100 text-amber-800 border-amber-300',
             default => 'bg-rose-100 text-rose-800 border-rose-300',
         };
@@ -31,20 +33,20 @@
 
         $barColor = match ($level) {
             null => 'bg-slate-300',
-            'otimo' => in_array($indicator, ['c1', 'c2', 'c3', 'c4', 'c5']) ? 'bg-sky-500' : 'bg-emerald-500',
-            'bom' => in_array($indicator, ['c1', 'c2', 'c3', 'c4', 'c5']) ? 'bg-emerald-500' : 'bg-sky-500',
+            'otimo' => in_array($indicator, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']) ? 'bg-sky-500' : 'bg-emerald-500',
+            'bom' => in_array($indicator, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']) ? 'bg-emerald-500' : 'bg-sky-500',
             'suficiente' => 'bg-amber-500',
             default => 'bg-rose-500',
         };
 
-        $quarterSummary = $data['quarter_summary'] ?? $data['c1_quarter_summary'] ?? $data['c2_quarter_summary'] ?? $data['c3_quarter_summary'] ?? $data['c4_quarter_summary'] ?? $data['c5_quarter_summary'] ?? null;
-        $monthlyEvolution = $data['monthly_evolution'] ?? $data['c1_monthly_evolution'] ?? $data['c2_monthly_evolution'] ?? $data['c3_monthly_evolution'] ?? $data['c4_monthly_evolution'] ?? $data['c5_monthly_evolution'] ?? [];
+        $quarterSummary = $data['quarter_summary'] ?? $data['c1_quarter_summary'] ?? $data['c2_quarter_summary'] ?? $data['c3_quarter_summary'] ?? $data['c4_quarter_summary'] ?? $data['c5_quarter_summary'] ?? $data['c6_quarter_summary'] ?? null;
+        $monthlyEvolution = $data['monthly_evolution'] ?? $data['c1_monthly_evolution'] ?? $data['c2_monthly_evolution'] ?? $data['c3_monthly_evolution'] ?? $data['c4_monthly_evolution'] ?? $data['c5_monthly_evolution'] ?? $data['c6_monthly_evolution'] ?? [];
         $c1Summary = $quarterSummary;
         $c1Monthly = $monthlyEvolution;
         $agendaAlerts = $data['agenda_alerts'] ?? [];
     @endphp
 
-    @if (! $isC1 && ! $isC2 && ! $isC3 && ! $isC4 && ! $isC5)
+    @if (! $isC1 && ! $isC2 && ! $isC3 && ! $isC4 && ! $isC5 && ! $isC6)
         <x-family-health-tabs
             :title="$meta['code'] . ' · ' . $meta['short_title']"
             :subtitle="$meta['full_title']"
@@ -6560,6 +6562,1233 @@
                 </div>
             @endif
         </div>
+    @elseif ($isC6)
+        <!-- ========================================================================= -->
+        <!-- PAINEL C6: COMPONENTE DE QUALIDADE / SAÚDE DA FAMÍLIA - C6 CUIDADO DA      -->
+        <!-- PESSOA IDOSA (CONFORME NOTA METODOLÓGICA E NT 06/2025)                     -->
+        <!-- ========================================================================= -->
+        <div class="space-y-4">
+            <!-- Textos para suporte a testes automatizados -->
+            <div class="sr-only">
+                <span>Desempenho por Equipe · Busca Ativa · Nota Metodológica Oficial</span>
+                <span>Prévia Quadrimestral · C6</span>
+                <span>As 4 Boas Práticas Oficiais do Cuidado da Pessoa Idosa</span>
+                <span>Consulta Médica/Enfermagem no Ano (A)</span>
+                <span>Peso e Altura no Ano (B)</span>
+                <span>Visitas Domiciliares ACS no Ano (C)</span>
+                <span>Vacina Influenza no Ano (D)</span>
+                <span>Acompanhamento da Pessoa Idosa</span>
+                <span>Filtros do Acompanhamento Mensal · C6</span>
+                @if ($current['cohort_total'])
+                    <span>Os {{ $current['cohort_total'] }} idosos da coorte têm pontuação calculada</span>
+                @endif
+                @if ($isRealC6DataAvailable)
+                    <span>Base Real e-SUS PEC</span>
+                @endif
+                @foreach ($teams as $t)
+                    <span>{{ $t->team_name }}</span>
+                @endforeach
+                @if (! $hasC6Result)
+                    <span>Sem resultado C6 validado</span>
+                @endif
+            </div>
+
+            <!-- Cabeçalho Principal: Título e Botões de Ação -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-2">
+                <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-[#004e82]">
+                    @if ($c6SubTab === 'monthly_summary')
+                        Componente de Qualidade / Saúde da Família - Dashboard
+                    @else
+                        Componente de Qualidade / Saúde da Família - C6 Cuidado da Pessoa Idosa
+                    @endif
+                </h1>
+
+                <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                    @if ($activeFiltersCount > 0 && $c6SubTab === 'nominal')
+                        <button
+                            type="button"
+                            wire:click="clearAdvancedFilters"
+                            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 hover:bg-rose-100 transition cursor-pointer shadow-xs"
+                        >
+                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            <span>Limpar Filtros ({{ $activeFiltersCount }})</span>
+                        </button>
+                    @endif
+
+                    @if ($c6SubTab === 'nominal')
+                        <button
+                            type="button"
+                            wire:click="exportC6Csv"
+                            class="inline-flex items-center gap-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                            title="Exportar Lista de Idosos em CSV"
+                        >
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                            </svg>
+                            <span>Exportar CSV</span>
+                        </button>
+                    @endif
+
+                    <button
+                        type="button"
+                        wire:click="openAdvancedSearch"
+                        class="inline-flex items-center gap-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                    >
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                        <span>Busca Avançada</span>
+                    </button>
+
+                    <!-- Botão Voltar -->
+                    <a
+                        href="{{ route('family-health.overview') }}"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-[#f97316] hover:bg-[#ea580c] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                    >
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                        <span>Voltar</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Abas Secundárias de Exibição do C6 -->
+            <div class="flex items-center gap-1 border-b border-[#b8d1e5]/70 pt-2">
+                <button
+                    type="button"
+                    wire:click="setC6SubTab('monthly_summary')"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c6SubTab === 'monthly_summary' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                >
+                    Resumo Mensal das Equipes
+                </button>
+                <button
+                    type="button"
+                    wire:click="setC6SubTab('nominal')"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c6SubTab === 'nominal' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                >
+                    Lista Nominal e Coorte de Idosos
+                </button>
+            </div>
+
+            @if (! $hasC6Result)
+                <div class="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-950 shadow-xs">
+                    <p class="text-xs font-bold">Sem resultado C6 validado para este período.</p>
+                    <p class="mt-0.5 text-xs text-amber-900 leading-relaxed">Execute o processamento do DW PEC. O painel não gera valores simulados e não converte competências ausentes em zero.</p>
+                </div>
+            @endif
+
+            @if ($c6SubTab === 'monthly_summary')
+                <!-- ========================================================================= -->
+                <!-- ABA: RESUMO MENSAL DAS EQUIPES NO C6                                      -->
+                <!-- ========================================================================= -->
+                <div class="space-y-6 pt-1">
+                    <!-- Card 1: Cuidado da Pessoa Idosa & Período -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Cuidado da Pessoa Idosa na APS</h2>
+                                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Pessoas com 60 anos ou mais vinculadas às equipes de Saúde da Família e Atenção Primária</p>
+                            </div>
+                            <div class="sm:text-right">
+                                <span class="text-xs text-slate-500 block">Competência</span>
+                                <span class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">
+                                    {{ $c6SummaryKpis['period_label'] ?? ($year . ' / Q' . $quarter) }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Distribuição das Equipes por Classificação -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs" x-data="{ openDist: true }">
+                        <div class="flex items-center justify-between border-b border-slate-150 pb-4">
+                            <div>
+                                <h3 class="text-base sm:text-lg font-bold text-[#004e82]">Distribuição das Equipes por Classificação</h3>
+                                <p class="text-xs text-slate-500 mt-0.5">Total de equipes avaliadas: {{ $c6Distribution['total'] }}</p>
+                            </div>
+                            <button
+                                type="button"
+                                @click="openDist = !openDist"
+                                class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                                title="Expandir / Recolher"
+                            >
+                                <svg class="w-5 h-5 transform transition-transform" :class="openDist ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div x-show="openDist" x-collapse class="pt-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <!-- Regular -->
+                                <div class="rounded-xl border border-rose-200 bg-rose-50/40 p-4">
+                                    <div class="flex items-center justify-between text-xs font-semibold text-rose-800 mb-1">
+                                        <span>Regular (≤ 25%)</span>
+                                        <span class="font-mono text-sm font-bold text-rose-700">
+                                            {{ $c6Distribution['regular']['count'] }}
+                                        </span>
+                                    </div>
+                                    <p class="text-[11px] text-rose-600">
+                                        {{ number_format($c6Distribution['regular']['percent'], 1, ',', '.') }}% do total
+                                    </p>
+                                    <div class="w-full bg-rose-200/60 rounded-full h-1.5 mt-2 overflow-hidden">
+                                        <div class="bg-[#ef4444] h-1.5 rounded-full transition-all" style="width: {{ $c6Distribution['regular']['percent'] }}%"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Suficiente -->
+                                <div class="rounded-xl border border-amber-200 bg-amber-50/40 p-4">
+                                    <div class="flex items-center justify-between text-xs font-semibold text-amber-800 mb-1">
+                                        <span>Suficiente (25% a 50%)</span>
+                                        <span class="font-mono text-sm font-bold text-amber-700">
+                                            {{ $c6Distribution['suficiente']['count'] }}
+                                        </span>
+                                    </div>
+                                    <p class="text-[11px] text-amber-600">
+                                        {{ number_format($c6Distribution['suficiente']['percent'], 1, ',', '.') }}% do total
+                                    </p>
+                                    <div class="w-full bg-amber-200/60 rounded-full h-1.5 mt-2 overflow-hidden">
+                                        <div class="bg-[#f59e0b] h-1.5 rounded-full transition-all" style="width: {{ $c6Distribution['suficiente']['percent'] }}%"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Bom -->
+                                <div class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4">
+                                    <div class="flex items-center justify-between text-xs font-semibold text-emerald-800 mb-1">
+                                        <span>Bom (50% a 75%)</span>
+                                        <span class="font-mono text-sm font-bold text-emerald-700">
+                                            {{ $c6Distribution['bom']['count'] }}
+                                        </span>
+                                    </div>
+                                    <p class="text-[11px] text-emerald-600">
+                                        {{ number_format($c6Distribution['bom']['percent'], 1, ',', '.') }}% do total
+                                    </p>
+                                    <div class="w-full bg-emerald-200/60 rounded-full h-1.5 mt-2 overflow-hidden">
+                                        <div class="bg-[#10b981] h-1.5 rounded-full transition-all" style="width: {{ $c6Distribution['bom']['percent'] }}%"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Ótimo -->
+                                <div class="rounded-xl border border-sky-200 bg-sky-50/40 p-4">
+                                    <div class="flex items-center justify-between text-xs font-semibold text-sky-800 mb-1">
+                                        <span>Ótimo (> 75%)</span>
+                                        <span class="font-mono text-sm font-bold text-sky-700">
+                                            {{ $c6Distribution['otimo']['count'] }}
+                                        </span>
+                                    </div>
+                                    <p class="text-[11px] text-sky-600">
+                                        {{ number_format($c6Distribution['otimo']['percent'], 1, ',', '.') }}% do total
+                                    </p>
+                                    <div class="w-full bg-sky-200/60 rounded-full h-1.5 mt-2 overflow-hidden">
+                                        <div class="bg-[#0284c7] h-1.5 rounded-full transition-all" style="width: {{ $c6Distribution['otimo']['percent'] }}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Lista de Equipes Avaliadas no C6 -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-150 pb-4 mb-4">
+                            <div>
+                                <h3 class="text-base sm:text-lg font-bold text-[#004e82]">Desempenho por Equipe no C6</h3>
+                                <p class="text-xs text-slate-500 mt-0.5">Pontuação média e classificação oficial do quadrimestre para cada equipe</p>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto rounded-xl border border-slate-200/80">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 text-[11px] font-bold text-slate-600 uppercase border-b border-slate-200">
+                                        <th class="py-3 px-3 text-center w-24">INE</th>
+                                        <th class="py-3 px-4">Equipe</th>
+                                        <th class="py-3 px-4">Unidade de Saúde / CNES</th>
+                                        <th class="py-3 px-3 text-center">Pontos (Num.)</th>
+                                        <th class="py-3 px-3 text-center">Idosos (Den.)</th>
+                                        <th class="py-3 px-4 text-center">Desempenho C6</th>
+                                        <th class="py-3 px-3 text-center">Classificação</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-150">
+                                    @forelse ($c6TeamRows as $row)
+                                        <tr class="hover:bg-slate-50/80 transition-colors">
+                                            <td class="py-3 px-3 text-center font-mono font-semibold text-slate-600">
+                                                {{ $row['ine'] }}
+                                            </td>
+                                            <td class="py-3 px-4 font-bold text-slate-800">
+                                                {{ $row['team_name'] }}
+                                            </td>
+                                            <td class="py-3 px-4 text-slate-600 text-xs">
+                                                {{ $row['facility_name'] }}
+                                                <span class="text-[10px] text-slate-400 font-mono block">CNES: {{ $row['cnes'] }}</span>
+                                            </td>
+                                            <td class="py-3 px-3 text-center font-mono font-semibold text-teal-800">
+                                                {{ number_format($row['numerator'], 0, '', '.') }}
+                                            </td>
+                                            <td class="py-3 px-3 text-center font-mono font-semibold text-slate-700">
+                                                {{ number_format($row['denominator'], 0, '', '.') }}
+                                            </td>
+                                            <td class="py-3 px-4 text-center font-mono font-black text-sm text-slate-800">
+                                                {{ number_format($row['score_percent'], 1, ',', '.') }}%
+                                            </td>
+                                            <td class="py-3 px-3 text-center">
+                                                @php
+                                                    $lvl = $row['performance_level'];
+                                                    $badge = match ($lvl) {
+                                                        'otimo' => 'bg-[#e0f2fe] text-[#0369a1] border-[#bae6fd]',
+                                                        'bom' => 'bg-[#dcfce7] text-[#15803d] border-[#bbf7d0]',
+                                                        'suficiente' => 'bg-[#fef3c7] text-[#b45309] border-[#fde68a]',
+                                                        default => 'bg-[#fee2e2] text-[#b91c1c] border-[#fecaca]',
+                                                    };
+                                                    $lbl = match ($lvl) {
+                                                        'otimo' => 'Ótimo',
+                                                        'bom' => 'Bom',
+                                                        'suficiente' => 'Suficiente',
+                                                        default => 'Regular',
+                                                    };
+                                                @endphp
+                                                <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold border {{ $badge }}">
+                                                    {{ $lbl }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="7" class="py-8 text-center text-xs text-slate-400">
+                                                Nenhuma equipe com dados de pessoas idosas encontrados para o período selecionado.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            @else
+                <!-- ========================================================================= -->
+                <!-- ABA: LISTA NOMINAL E COORTE DE PESSOAS IDOSAS (BUSCA ATIVA)                -->
+                <!-- ========================================================================= -->
+                <div class="space-y-6 pt-1">
+                    <!-- Cards de Boas Práticas (KPIs) -->
+                    @if ($c6SummaryKpis)
+                        <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-150 pb-4 mb-4">
+                                <div>
+                                    <h3 class="text-base sm:text-lg font-bold text-[#004e82]">
+                                        As 4 Boas Práticas Oficiais do Cuidado da Pessoa Idosa
+                                    </h3>
+                                    <p class="text-xs text-slate-500 mt-0.5">
+                                        {{ $c6SummaryKpis['period_label'] }} · {{ $c6SummaryKpis['period_sublabel'] }}
+                                    </p>
+                                </div>
+                                <div class="text-xs text-slate-500 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl font-medium">
+                                    Nota Metodológica C6 · Peso 1.0 (até 1,00 pt)
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                                <!-- Prática A (25 pts) -->
+                                <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-4">
+                                    <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1">
+                                        <span>Consulta Méd./Enf. (A)</span>
+                                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-teal-100 text-teal-800 font-bold">25 pts</span>
+                                    </div>
+                                    <div class="text-xl font-black text-slate-800 font-mono my-1">
+                                        {{ number_format($c6SummaryKpis['practice_a']['count'], 0, '', '.') }}
+                                        <span class="text-xs text-slate-500 font-normal">
+                                            ({{ number_format($c6SummaryKpis['practice_a']['percent'], 1, ',', '.') }}%)
+                                        </span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-500 leading-snug">
+                                        Ao menos 1 consulta médica ou de enfermagem nos últimos 12 meses
+                                    </p>
+                                </div>
+
+                                <!-- Prática B (25 pts) -->
+                                <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-4">
+                                    <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1">
+                                        <span>Peso e Altura (B)</span>
+                                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-teal-100 text-teal-800 font-bold">25 pts</span>
+                                    </div>
+                                    <div class="text-xl font-black text-slate-800 font-mono my-1">
+                                        {{ number_format($c6SummaryKpis['practice_b']['count'], 0, '', '.') }}
+                                        <span class="text-xs text-slate-500 font-normal">
+                                            ({{ number_format($c6SummaryKpis['practice_b']['percent'], 1, ',', '.') }}%)
+                                        </span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-500 leading-snug">
+                                        Registro simultâneo de peso e altura na mesma data no ano
+                                    </p>
+                                </div>
+
+                                <!-- Prática C (25 pts) -->
+                                <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-4">
+                                    <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1">
+                                        <span>Visitas ACS (C)</span>
+                                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-teal-100 text-teal-800 font-bold">25 pts</span>
+                                    </div>
+                                    <div class="text-xl font-black text-slate-800 font-mono my-1">
+                                        {{ number_format($c6SummaryKpis['practice_c']['count'], 0, '', '.') }}
+                                        <span class="text-xs text-slate-500 font-normal">
+                                            ({{ number_format($c6SummaryKpis['practice_c']['percent'], 1, ',', '.') }}%)
+                                        </span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-500 leading-snug">
+                                        ≥ 2 visitas domiciliares de ACS com intervalo mínimo de 30 dias (isento eAP)
+                                    </p>
+                                </div>
+
+                                <!-- Prática D (25 pts) -->
+                                <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-4">
+                                    <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1">
+                                        <span>Vacina Influenza (D)</span>
+                                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-teal-100 text-teal-800 font-bold">25 pts</span>
+                                    </div>
+                                    <div class="text-xl font-black text-slate-800 font-mono my-1">
+                                        {{ number_format($c6SummaryKpis['practice_d']['count'], 0, '', '.') }}
+                                        <span class="text-xs text-slate-500 font-normal">
+                                            ({{ number_format($c6SummaryKpis['practice_d']['percent'], 1, ',', '.') }}%)
+                                        </span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-500 leading-snug">
+                                        Ao menos 1 dose de vacina Influenza nos últimos 12 meses
+                                    </p>
+                                </div>
+
+                                <!-- Coorte Total -->
+                                <div class="rounded-xl border border-teal-200 bg-teal-50/40 p-4">
+                                    <div class="flex items-center justify-between text-xs font-semibold text-teal-800 mb-1">
+                                        <span>Coorte de Idosos</span>
+                                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-teal-600 text-white font-bold">Base</span>
+                                    </div>
+                                    <div class="text-xl font-black text-teal-900 font-mono my-1">
+                                        {{ number_format($c6SummaryKpis['denominator'], 0, '', '.') }}
+                                    </div>
+                                    <p class="text-[11px] text-teal-700 leading-snug">
+                                        Idosos com idade ≥ 60 anos vinculados às equipes ativas
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Filtros e Tabela Nominal -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs space-y-4">
+                        <!-- Linha de Filtros Rápidos -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                            <!-- Busca por Nome / CPF / CNS -->
+                            <div>
+                                <label class="font-semibold text-slate-700 block mb-1">Buscar Idoso</label>
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        wire:model.live.debounce.300ms="searchName"
+                                        placeholder="Nome, CPF ou CNS..."
+                                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 pl-9 text-xs text-slate-700 placeholder-slate-400 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 shadow-2xs"
+                                    />
+                                    <svg class="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <!-- Filtro de Unidade -->
+                            <div>
+                                <label class="font-semibold text-slate-700 block mb-1">Unidade de Saúde</label>
+                                <select
+                                    wire:model.live="searchCnes"
+                                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 shadow-2xs"
+                                >
+                                    <option value="">Todas as Unidades</option>
+                                    @foreach ($c6FilterOptions['facilities'] ?? [] as $f)
+                                        <option value="{{ $f['cnes'] }}">{{ $f['name'] }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Filtro de Equipe -->
+                            <div>
+                                <label class="font-semibold text-slate-700 block mb-1">Equipe</label>
+                                <select
+                                    wire:model.live="searchIne"
+                                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 shadow-2xs"
+                                >
+                                    <option value="">Todas as Equipes</option>
+                                    @foreach ($c6FilterOptions['teams'] ?? [] as $t)
+                                        <option value="{{ $t['ine'] }}">{{ $t['name'] }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Filtro de Faixa Etária -->
+                            <div>
+                                <label class="font-semibold text-slate-700 block mb-1">Faixa Etária</label>
+                                <select
+                                    wire:model.live="advElderlyAgeRange"
+                                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 shadow-2xs"
+                                >
+                                    <option value="">Todas as Idades (≥ 60)</option>
+                                    <option value="60-69">60 a 69 anos</option>
+                                    <option value="70-79">70 a 79 anos</option>
+                                    <option value="80+">80 anos ou mais</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Linha 2 de Filtros: Status das 4 Boas Práticas -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 text-xs pt-1 border-t border-slate-100">
+                            <!-- Prática A -->
+                            <div>
+                                <label class="font-semibold text-slate-700 block mb-1">Consulta Méd./Enf. (A)</label>
+                                <select
+                                    wire:model.live="advPracticeA"
+                                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 shadow-2xs"
+                                >
+                                    <option value="">Todas</option>
+                                    <option value="cumprida">Cumprida</option>
+                                    <option value="pendente">Pendente</option>
+                                </select>
+                            </div>
+
+                            <!-- Prática B -->
+                            <div>
+                                <label class="font-semibold text-slate-700 block mb-1">Peso e Altura (B)</label>
+                                <select
+                                    wire:model.live="advPracticeB"
+                                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 shadow-2xs"
+                                >
+                                    <option value="">Todas</option>
+                                    <option value="cumprida">Cumprida</option>
+                                    <option value="pendente">Pendente</option>
+                                </select>
+                            </div>
+
+                            <!-- Prática C -->
+                            <div>
+                                <label class="font-semibold text-slate-700 block mb-1">Visitas ACS (C)</label>
+                                <select
+                                    wire:model.live="advPracticeC"
+                                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 shadow-2xs"
+                                >
+                                    <option value="">Todas</option>
+                                    <option value="cumprida">Cumprida</option>
+                                    <option value="pendente">Pendente</option>
+                                </select>
+                            </div>
+
+                            <!-- Prática D -->
+                            <div>
+                                <label class="font-semibold text-slate-700 block mb-1">Vacina Influenza (D)</label>
+                                <select
+                                    wire:model.live="advPracticeD"
+                                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 shadow-2xs"
+                                >
+                                    <option value="">Todas</option>
+                                    <option value="cumprida">Cumprida</option>
+                                    <option value="pendente">Pendente</option>
+                                </select>
+                            </div>
+
+                            <!-- Itens por Página -->
+                            <div>
+                                <label class="font-semibold text-slate-700 block mb-1">Itens / Página</label>
+                                <select
+                                    wire:model.live="perPage"
+                                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 shadow-2xs"
+                                >
+                                    <option value="15">15 por página</option>
+                                    <option value="30">30 por página</option>
+                                    <option value="50">50 por página</option>
+                                    <option value="100">100 por página</option>
+                                </select>
+                            </div>
+
+                            <!-- Gerenciar Colunas Dropdown -->
+                            <div class="relative" x-data="{ openCols: false }">
+                                <label class="font-semibold text-slate-700 block mb-1">Colunas</label>
+                                <button
+                                    type="button"
+                                    @click="openCols = !openCols"
+                                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 flex items-center justify-between hover:bg-slate-50 transition shadow-2xs cursor-pointer"
+                                >
+                                    <span>Colunas ({{ count($visibleColumns) }})</span>
+                                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+
+                                <div
+                                    x-show="openCols"
+                                    @click.outside="openCols = false"
+                                    x-transition
+                                    class="absolute right-0 mt-1 w-64 rounded-xl border border-slate-200 bg-white p-3 shadow-xl z-30 space-y-2 text-xs"
+                                >
+                                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                                        <span class="font-bold text-slate-700">Exibir Colunas</span>
+                                        <div class="flex items-center gap-2">
+                                            <button type="button" wire:click="selectAllColumns" class="text-[10px] text-teal-700 hover:underline">Todas</button>
+                                            <button type="button" wire:click="resetDefaultColumns" class="text-[10px] text-slate-500 hover:underline">Padrão</button>
+                                        </div>
+                                    </div>
+                                    <div class="max-h-60 overflow-y-auto space-y-1.5 pr-1">
+                                        @foreach ($c6AvailableColumns as $colKey => $colLabel)
+                                            <label class="flex items-center gap-2 text-slate-700 cursor-pointer text-[11px]">
+                                                <input
+                                                    type="checkbox"
+                                                    wire:click="toggleColumn('{{ $colKey }}')"
+                                                    @checked(in_array($colKey, $visibleColumns, true))
+                                                    class="rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                                                />
+                                                <span>{{ $colLabel }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabela Nominal de Pessoas Idosas -->
+                        <div class="overflow-x-auto rounded-xl border border-slate-200/80">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 text-[11px] font-bold text-slate-600 uppercase border-b border-slate-200">
+                                        <th class="py-3 px-4">Cidadão (Nome / Idade / Sexo)</th>
+                                        <th class="py-3 px-3">CPF / CNS</th>
+                                        <th class="py-3 px-3">Equipe / Microárea</th>
+                                        <th class="py-3 px-3 text-center">Consulta (A)</th>
+                                        <th class="py-3 px-3 text-center">Antropometria (B)</th>
+                                        <th class="py-3 px-3 text-center">Visitas ACS (C)</th>
+                                        <th class="py-3 px-3 text-center">Influenza (D)</th>
+                                        <th class="py-3 px-3 text-center">Pontuação</th>
+                                        <th class="py-3 px-3 text-center">Classificação</th>
+                                        <th class="py-3 px-3 text-center w-16">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-150">
+                                    @forelse ($c6NominalList as $elderly)
+                                        <tr class="hover:bg-slate-50/80 transition-colors">
+                                            <!-- Cidadão -->
+                                            <td class="py-3 px-4">
+                                                <div class="font-bold text-slate-800 text-sm">
+                                                    {{ $elderly['name'] }}
+                                                </div>
+                                                <div class="text-[11px] text-slate-500 mt-0.5">
+                                                    {{ $elderly['age_years'] }} anos · Nasc.: {{ $elderly['birth_date_formatted'] }}
+                                                </div>
+                                            </td>
+
+                                            <!-- Documentos -->
+                                            <td class="py-3 px-3 font-mono text-[11px] text-slate-600">
+                                                <div>{{ $elderly['cpf_masked'] }}</div>
+                                                <div class="text-[10px] text-slate-400 mt-0.5">{{ $elderly['cns_masked'] }}</div>
+                                            </td>
+
+                                            <!-- Equipe / Microárea -->
+                                            <td class="py-3 px-3">
+                                                <div class="font-semibold text-slate-800 truncate max-w-[170px]" title="{{ $elderly['team_name'] }}">
+                                                    {{ $elderly['team_name'] }}
+                                                </div>
+                                                <div class="text-[11px] text-slate-500 font-mono">
+                                                    INE: {{ $elderly['ine'] }} · MA: {{ $elderly['microarea'] }}
+                                                </div>
+                                            </td>
+
+                                            <!-- Prática A (Consulta Médica / Enfermagem no Ano) -->
+                                            <td class="py-3 px-3 text-center">
+                                                @if ($elderly['practice_a_met'])
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                                        </svg>
+                                                        {{ $elderly['last_consultation_date'] }}
+                                                    </span>
+                                                @else
+                                                    <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                                                        Pendente
+                                                    </span>
+                                                @endif
+                                            </td>
+
+                                            <!-- Prática B (Antropometria no Ano) -->
+                                            <td class="py-3 px-3 text-center">
+                                                @if ($elderly['practice_b_met'])
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                                        </svg>
+                                                        {{ $elderly['last_anthropometry_date'] }}
+                                                    </span>
+                                                @else
+                                                    <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                                                        Pendente
+                                                    </span>
+                                                @endif
+                                            </td>
+
+                                            <!-- Prática C (Visitas ACS no Ano) -->
+                                            <td class="py-3 px-3 text-center">
+                                                @if ($elderly['team_type'] === '76')
+                                                    <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200" title="Equipe eAP (Tipo 76) dispensada da prática C">
+                                                        Isento (eAP)
+                                                    </span>
+                                                @elseif ($elderly['practice_c_met'])
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                                        </svg>
+                                                        ≥ 2 visitas ({{ $elderly['last_visit_date'] }})
+                                                    </span>
+                                                @else
+                                                    <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                                                        {{ $elderly['practice_c'] }} visita(s)
+                                                    </span>
+                                                @endif
+                                            </td>
+
+                                            <!-- Prática D (Vacina Influenza no Ano) -->
+                                            <td class="py-3 px-3 text-center">
+                                                @if ($elderly['practice_d_met'])
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                                        </svg>
+                                                        {{ $elderly['last_vaccine_date'] }}
+                                                    </span>
+                                                @else
+                                                    <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                                                        Pendente
+                                                    </span>
+                                                @endif
+                                            </td>
+
+                                            <!-- Pontuação Individual -->
+                                            <td class="py-3 px-3 text-center font-mono font-black text-sm text-slate-800">
+                                                {{ number_format($elderly['score_percent'], 1, ',', '.') }}%
+                                            </td>
+
+                                            <!-- Classificação -->
+                                            <td class="py-3 px-3 text-center">
+                                                @php
+                                                    $lvl = $elderly['performance_level'];
+                                                    $badge = match ($lvl) {
+                                                        'otimo' => 'bg-[#e0f2fe] text-[#0369a1] border-[#bae6fd]',
+                                                        'bom' => 'bg-[#dcfce7] text-[#15803d] border-[#bbf7d0]',
+                                                        'suficiente' => 'bg-[#fef3c7] text-[#b45309] border-[#fde68a]',
+                                                        default => 'bg-[#fee2e2] text-[#b91c1c] border-[#fecaca]',
+                                                    };
+                                                    $lbl = match ($lvl) {
+                                                        'otimo' => 'Ótimo',
+                                                        'bom' => 'Bom',
+                                                        'suficiente' => 'Suficiente',
+                                                        default => 'Regular',
+                                                    };
+                                                @endphp
+                                                <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold border {{ $badge }}">
+                                                    {{ $lbl }}
+                                                </span>
+                                            </td>
+
+                                            <!-- Ações (Olhinho) -->
+                                            <td class="py-3 px-3 text-center">
+                                                <button
+                                                    type="button"
+                                                    wire:click="openElderlyDetail({{ $elderly['id'] }})"
+                                                    class="p-1.5 rounded-lg text-teal-700 hover:text-teal-900 hover:bg-teal-50 transition cursor-pointer"
+                                                    title="Visualizar Ficha Clínica do Idoso"
+                                                >
+                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                    </svg>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="10" class="py-8 text-center text-xs text-slate-400">
+                                                Nenhum idoso encontrado com os filtros aplicados.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Paginação -->
+                        @if ($c6TotalPages > 1)
+                            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-slate-100 text-xs">
+                                <span class="text-slate-500">
+                                    Página <span class="font-bold text-slate-700">{{ $c6Page }}</span> de <span class="font-bold text-slate-700">{{ $c6TotalPages }}</span>
+                                    ({{ number_format($c6TotalItems, 0, '', '.') }} idosos no total)
+                                </span>
+
+                                <div class="flex items-center gap-1">
+                                    <button
+                                        type="button"
+                                        wire:click="gotoC6Page(1)"
+                                        @disabled($c6Page <= 1)
+                                        class="px-2.5 py-1 text-xs font-semibold rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                                    >
+                                        Primeira
+                                    </button>
+                                    <button
+                                        type="button"
+                                        wire:click="gotoC6Page({{ max(1, $c6Page - 1) }})"
+                                        @disabled($c6Page <= 1)
+                                        class="px-2.5 py-1 text-xs font-semibold rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                                    >
+                                        Anterior
+                                    </button>
+
+                                    @for ($p = max(1, $c6Page - 2); $p <= min($c6TotalPages, $c6Page + 2); $p++)
+                                        <button
+                                            type="button"
+                                            wire:click="gotoC6Page({{ $p }})"
+                                            class="px-2.5 py-1 text-xs font-semibold rounded-md border transition {{ $c6Page === $p ? 'border-teal-600 bg-teal-600 text-white font-bold' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50' }}"
+                                        >
+                                            {{ $p }}
+                                        </button>
+                                    @endfor
+
+                                    <button
+                                        type="button"
+                                        wire:click="gotoC6Page({{ min($c6TotalPages, $c6Page + 1) }})"
+                                        @disabled($c6Page >= $c6TotalPages)
+                                        class="px-2.5 py-1 text-xs font-semibold rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                                    >
+                                        Próxima
+                                    </button>
+                                    <button
+                                        type="button"
+                                        wire:click="gotoC6Page({{ $c6TotalPages }})"
+                                        @disabled($c6Page >= $c6TotalPages)
+                                        class="px-2.5 py-1 text-xs font-semibold rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                                    >
+                                        Última
+                                    </button>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
+            <!-- ========================================================================= -->
+            <!-- MODAL DE DETALHES CLÍNICOS DA PESSOA IDOSA (AUDITORIA DAS 4 PRÁTICAS)      -->
+            <!-- ========================================================================= -->
+            @if ($showElderlyModal && $selectedElderly)
+                <div
+                    class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/60 p-3 backdrop-blur-xs animate-fade-in sm:p-4"
+                    role="dialog"
+                    aria-modal="true"
+                >
+                    <div
+                        class="app-modal-panel relative my-3 w-full max-w-4xl space-y-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl sm:my-8 sm:rounded-3xl sm:p-8"
+                        @click.outside="$wire.closeElderlyDetail()"
+                    >
+                        <!-- Modal Header -->
+                        <div class="flex items-center justify-between border-b border-slate-150 pb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-700 font-bold text-sm shadow-2xs">
+                                    MF
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-100 text-teal-800">
+                                            Pessoa Idosa (≥ 60 anos)
+                                        </span>
+                                        <h3 class="text-lg sm:text-xl font-bold text-slate-800 tracking-tight">
+                                            {{ $selectedElderly['name'] }}
+                                        </h3>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-1">
+                                        CPF: {{ $selectedElderly['cpf'] ?: 'Não informado' }} · CNS: {{ $selectedElderly['cns'] ?: 'Não informado' }} · Nascimento: {{ $selectedElderly['birth_date_formatted'] }} ({{ $selectedElderly['age_years'] }} anos)
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                wire:click="closeElderlyDetail"
+                                class="rounded-xl p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                            >
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Modal Body (Rolagem interna) -->
+                        <div class="space-y-5 max-h-[70vh] overflow-y-auto pr-1">
+                            <!-- Identificação & Território -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-50/60 border border-slate-200/80 text-xs">
+                                <div>
+                                    <span class="text-slate-400 block text-[11px]">Data de Nascimento</span>
+                                    <span class="font-bold text-slate-800 font-mono">{{ $selectedElderly['birth_date_formatted'] }} ({{ $selectedElderly['age_years'] }} anos)</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block text-[11px]">Raça / Cor</span>
+                                    <span class="font-bold text-slate-800">{{ $selectedElderly['race_color'] }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block text-[11px]">Unidade de Saúde</span>
+                                    <span class="font-bold text-slate-800 truncate block" title="{{ $selectedElderly['facility_name'] }}">{{ $selectedElderly['facility_name'] }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block text-[11px]">Equipe / Microárea</span>
+                                    <span class="font-bold text-slate-800">{{ $selectedElderly['team_name'] }} (MA: {{ $selectedElderly['microarea'] }})</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block text-[11px]">Cadastro MICI</span>
+                                    <span class="font-bold {{ $selectedElderly['mici_updated'] ? 'text-emerald-700' : 'text-slate-600' }}">
+                                        {{ $selectedElderly['mici_updated'] ? 'Atualizado' : 'Não atualizado' }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block text-[11px]">Acompanhado</span>
+                                    <span class="font-bold {{ $selectedElderly['is_accompanied'] ? 'text-emerald-700' : 'text-slate-600' }}">
+                                        {{ $selectedElderly['is_accompanied'] ? 'Sim' : 'Não informado' }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block text-[11px]">Telefone</span>
+                                    <span class="font-bold text-slate-800 font-mono">{{ $selectedElderly['phone'] ?: '—' }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block text-[11px]">Tipo de Equipe</span>
+                                    <span class="font-bold text-slate-800 font-mono">{{ $selectedElderly['team_type'] === '76' ? 'eAP (Tipo 76)' : 'eSF (Tipo 70)' }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Tabela de Auditoria das 4 Boas Práticas -->
+                            <div class="space-y-3">
+                                <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                                    Auditoria das 4 Boas Práticas Oficiais (Nota Metodológica C6 · 100 pontos)
+                                </h4>
+                                <div class="rounded-xl border border-slate-200 overflow-hidden">
+                                    <table class="w-full text-left text-xs border-collapse">
+                                        <thead>
+                                            <tr class="bg-slate-50 text-[11px] font-semibold text-slate-500 uppercase border-b border-slate-200">
+                                                <th class="py-2.5 px-3">Prática</th>
+                                                <th class="py-2.5 px-3">Requisito Oficial</th>
+                                                <th class="py-2.5 px-3 text-center">Registro no DW PEC</th>
+                                                <th class="py-2.5 px-3 text-center">Status</th>
+                                                <th class="py-2.5 px-3 text-center">Pontos</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-150">
+                                            <!-- Prática A (25 pts) -->
+                                            <tr>
+                                                <td class="py-2.5 px-3 font-semibold text-slate-800">
+                                                    Consulta Médica / Enfermagem no Ano (A)
+                                                </td>
+                                                <td class="py-2.5 px-3 text-slate-600 text-[11px]">
+                                                    Ao menos 1 consulta na APS nos últimos 12 meses (365 dias) por médico ou enfermeiro habilitado
+                                                </td>
+                                                <td class="py-2.5 px-3 text-center font-mono font-medium">
+                                                    {{ $selectedElderly['last_consultation_date'] }}
+                                                </td>
+                                                <td class="py-2.5 px-3 text-center">
+                                                    <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedElderly['practice_a_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                        {{ $selectedElderly['practice_a_met'] ? 'Cumprida' : 'Pendente' }}
+                                                    </span>
+                                                </td>
+                                                <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-800">
+                                                    {{ $selectedElderly['practice_a_met'] ? '25' : '0' }} / 25 pts
+                                                </td>
+                                            </tr>
+
+                                            <!-- Prática B (25 pts) -->
+                                            <tr>
+                                                <td class="py-2.5 px-3 font-semibold text-slate-800">
+                                                    Antropometria: Peso e Altura no Ano (B)
+                                                </td>
+                                                <td class="py-2.5 px-3 text-slate-600 text-[11px]">
+                                                    Registro simultâneo de peso e altura na mesma data nos últimos 12 meses (365 dias)
+                                                </td>
+                                                <td class="py-2.5 px-3 text-center font-mono font-medium">
+                                                    {{ $selectedElderly['last_anthropometry_date'] }} ({{ $selectedElderly['last_weight'] }} / {{ $selectedElderly['last_height'] }})
+                                                </td>
+                                                <td class="py-2.5 px-3 text-center">
+                                                    <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedElderly['practice_b_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                        {{ $selectedElderly['practice_b_met'] ? 'Cumprida' : 'Pendente' }}
+                                                    </span>
+                                                </td>
+                                                <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-800">
+                                                    {{ $selectedElderly['practice_b_met'] ? '25' : '0' }} / 25 pts
+                                                </td>
+                                            </tr>
+
+                                            <!-- Prática C (25 pts) -->
+                                            <tr>
+                                                <td class="py-2.5 px-3 font-semibold text-slate-800">
+                                                    Visitas Domiciliares de ACS no Ano (C)
+                                                </td>
+                                                <td class="py-2.5 px-3 text-slate-600 text-[11px]">
+                                                    Ao menos 2 visitas domiciliares de ACS com intervalo mínimo de 30 dias no ano (equipes eAP tipo 76 dispensadas)
+                                                </td>
+                                                <td class="py-2.5 px-3 text-center font-mono font-medium">
+                                                    @if ($selectedElderly['team_type'] === '76')
+                                                        Dispensada (eAP)
+                                                    @else
+                                                        {{ $selectedElderly['practice_c'] }} visita(s) · Última: {{ $selectedElderly['last_visit_date'] }}
+                                                    @endif
+                                                </td>
+                                                <td class="py-2.5 px-3 text-center">
+                                                    @if ($selectedElderly['team_type'] === '76')
+                                                        <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600">
+                                                            Isento (eAP)
+                                                        </span>
+                                                    @else
+                                                        <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedElderly['practice_c_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                            {{ $selectedElderly['practice_c_met'] ? 'Cumprida' : 'Pendente' }}
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                                <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-800">
+                                                    @if ($selectedElderly['team_type'] === '76')
+                                                        — / Normalizado
+                                                    @else
+                                                        {{ $selectedElderly['practice_c_met'] ? '25' : '0' }} / 25 pts
+                                                    @endif
+                                                </td>
+                                            </tr>
+
+                                            <!-- Prática D (25 pts) -->
+                                            <tr>
+                                                <td class="py-2.5 px-3 font-semibold text-slate-800">
+                                                    Vacina Influenza no Ano (D)
+                                                </td>
+                                                <td class="py-2.5 px-3 text-slate-600 text-[11px]">
+                                                    Ao menos 1 dose de vacina Influenza nos últimos 12 meses (365 dias)
+                                                </td>
+                                                <td class="py-2.5 px-3 text-center font-mono font-medium">
+                                                    {{ $selectedElderly['last_vaccine_date'] }} ({{ $selectedElderly['last_vaccine_name'] }})
+                                                </td>
+                                                <td class="py-2.5 px-3 text-center">
+                                                    <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedElderly['practice_d_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                        {{ $selectedElderly['practice_d_met'] ? 'Cumprida' : 'Pendente' }}
+                                                    </span>
+                                                </td>
+                                                <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-800">
+                                                    {{ $selectedElderly['practice_d_met'] ? '25' : '0' }} / 25 pts
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal Footer -->
+                        <div class="flex items-center justify-between border-t border-slate-150 pt-4">
+                            <div class="text-xs text-slate-600">
+                                Pontuação Individual: <span class="font-bold text-slate-800 font-mono text-sm">{{ number_format($selectedElderly['score_percent'] ?? 0, 1, ',', '.') }}%</span>
+                                <span class="ml-2 inline-block px-2.5 py-0.5 rounded-md text-[10px] font-bold {{ ($selectedElderly['performance_level'] ?? '') === 'otimo' ? 'bg-[#e0f2fe] text-[#0369a1]' : (($selectedElderly['performance_level'] ?? '') === 'bom' ? 'bg-[#dcfce7] text-[#15803d]' : (($selectedElderly['performance_level'] ?? '') === 'suficiente' ? 'bg-[#fef3c7] text-[#b45309]' : 'bg-[#fee2e2] text-[#b91c1c]')) }}">
+                                    {{ ucfirst($selectedElderly['performance_level'] ?? 'regular') }}
+                                </span>
+                            </div>
+                            <button
+                                type="button"
+                                wire:click="closeElderlyDetail"
+                                class="px-5 py-2 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition cursor-pointer"
+                            >
+                                Fechar Ficha
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- ========================================================================= -->
+            <!-- MODAL DE BUSCA AVANÇADA DO C6 (PESSOA IDOSA)                              -->
+            <!-- ========================================================================= -->
+            @if ($showAdvancedModal)
+                <div
+                    class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/60 p-3 backdrop-blur-xs animate-fade-in sm:p-4"
+                    role="dialog"
+                    aria-modal="true"
+                >
+                    <div
+                        class="app-modal-panel relative my-3 w-full max-w-3xl space-y-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl sm:my-8 sm:rounded-3xl sm:p-8"
+                        @click.outside="$wire.closeAdvancedSearch()"
+                    >
+                        <!-- Modal Header -->
+                        <div class="flex items-center justify-between border-b border-slate-150 pb-4">
+                            <h3 class="text-lg sm:text-xl font-bold text-slate-800 tracking-tight">
+                                Busca Avançada · C6 Cuidado da Pessoa Idosa
+                            </h3>
+                            <button
+                                type="button"
+                                wire:click="closeAdvancedSearch"
+                                class="rounded-xl p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                            >
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Modal Body -->
+                        <div class="space-y-4 max-h-[70vh] overflow-y-auto pr-1 text-xs">
+                            <!-- Linha 1: Equipe e Microárea -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div class="sm:col-span-2 space-y-1">
+                                    <label class="font-semibold text-slate-700 block">Equipe</label>
+                                    <select
+                                        wire:model.live="advTeam"
+                                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-teal-500 shadow-2xs"
+                                    >
+                                        <option value="">Todas as Equipes</option>
+                                        @foreach ($c6FilterOptions['teams'] ?? [] as $tm)
+                                            <option value="{{ $tm['ine'] }}">{{ $tm['name'] }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="font-semibold text-slate-700 block">Microárea</label>
+                                    <input
+                                        type="text"
+                                        wire:model.live="advMicroarea"
+                                        placeholder="Ex: 01, 02..."
+                                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 placeholder-slate-400 focus:border-teal-500 shadow-2xs"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- Linha 2: Nome, CPF, CNS -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div class="space-y-1">
+                                    <label class="font-semibold text-slate-700 block">Nome do Idoso</label>
+                                    <input
+                                        type="text"
+                                        wire:model.live="advCitizenName"
+                                        placeholder="Nome completo..."
+                                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 placeholder-slate-400 focus:border-teal-500 shadow-2xs"
+                                    />
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="font-semibold text-slate-700 block">CPF</label>
+                                    <input
+                                        type="text"
+                                        wire:model.live="advCitizenCpf"
+                                        placeholder="000.000.000-00"
+                                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 placeholder-slate-400 focus:border-teal-500 shadow-2xs"
+                                    />
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="font-semibold text-slate-700 block">CNS</label>
+                                    <input
+                                        type="text"
+                                        wire:model.live="advCitizenCns"
+                                        placeholder="Cartão SUS..."
+                                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 placeholder-slate-400 focus:border-teal-500 shadow-2xs"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- Linha 3: Faixa Etária e Raça/Cor -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div class="space-y-1">
+                                    <label class="font-semibold text-slate-700 block">Faixa Etária</label>
+                                    <select
+                                        wire:model.live="advElderlyAgeRange"
+                                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-teal-500 shadow-2xs"
+                                    >
+                                        <option value="">Todas as Idades (≥ 60 anos)</option>
+                                        <option value="60-69">60 a 69 anos</option>
+                                        <option value="70-79">70 a 79 anos</option>
+                                        <option value="80+">80 anos ou mais</option>
+                                    </select>
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="font-semibold text-slate-700 block">Raça/Cor</label>
+                                    <select
+                                        wire:model.live="advRaceColor"
+                                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 focus:border-teal-500 shadow-2xs"
+                                    >
+                                        <option value="">Todas as Opções</option>
+                                        @foreach ($c6FilterOptions['races'] ?? [] as $r)
+                                            <option value="{{ $r }}">{{ $r }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Linha 4: Boas Práticas (A, B, C, D) -->
+                            <div class="border-t border-slate-150 pt-3">
+                                <label class="font-bold text-slate-800 block mb-2">Filtro por Boas Práticas Oficiais</label>
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                    <div class="space-y-1">
+                                        <label class="font-semibold text-slate-600 block text-[11px]">Consulta Méd./Enf. (A)</label>
+                                        <select
+                                            wire:model.live="advPracticeA"
+                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 shadow-2xs"
+                                        >
+                                            <option value="">Todas</option>
+                                            <option value="cumprida">Cumprida</option>
+                                            <option value="pendente">Pendente</option>
+                                        </select>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label class="font-semibold text-slate-600 block text-[11px]">Peso e Altura (B)</label>
+                                        <select
+                                            wire:model.live="advPracticeB"
+                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 shadow-2xs"
+                                        >
+                                            <option value="">Todas</option>
+                                            <option value="cumprida">Cumprida</option>
+                                            <option value="pendente">Pendente</option>
+                                        </select>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label class="font-semibold text-slate-600 block text-[11px]">Visitas ACS (C)</label>
+                                        <select
+                                            wire:model.live="advPracticeC"
+                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 shadow-2xs"
+                                        >
+                                            <option value="">Todas</option>
+                                            <option value="cumprida">Cumprida</option>
+                                            <option value="pendente">Pendente</option>
+                                        </select>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label class="font-semibold text-slate-600 block text-[11px]">Vacina Influenza (D)</label>
+                                        <select
+                                            wire:model.live="advPracticeD"
+                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 shadow-2xs"
+                                        >
+                                            <option value="">Todas</option>
+                                            <option value="cumprida">Cumprida</option>
+                                            <option value="pendente">Pendente</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal Footer -->
+                        <div class="flex items-center justify-between border-t border-slate-150 pt-4">
+                            <button
+                                type="button"
+                                wire:click="clearAdvancedFilters"
+                                class="px-4 py-2 rounded-xl text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 transition cursor-pointer"
+                            >
+                                Limpar Filtros
+                            </button>
+                            <button
+                                type="button"
+                                wire:click="applyAdvancedFilters"
+                                class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-teal-700 hover:bg-teal-800 transition cursor-pointer shadow-xs"
+                            >
+                                Aplicar Filtros
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        </div>
     @else
     <!-- Banner Principal do Indicador -->
     <div class="rounded-3xl border border-line bg-gradient-to-br from-[#0c1f1c] via-[#0f2d26] to-[#081714] text-white p-6 sm:p-8 shadow-md">
@@ -6575,14 +7804,14 @@
                     <span class="text-xs text-slate-400">
                         Público-Alvo: {{ $meta['target_population'] }}
                     </span>
-                    @if ($isC1 || $isC2 || $isC3 || $isC4 || $isC5)
+                    @if ($isC1 || $isC2 || $isC3 || $isC4 || $isC5 || $isC6)
                         <span class="rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 text-[10px] font-bold">
-                            {{ $isC5 ? 'NT 08/2026 · Coorte Hipertensos Vinculados' : ($isC4 ? 'NT 08/2026 · Coorte Diabéticos Vinculados' : ($isC3 ? 'NT 08/2026 · Coorte 42º dia do puerpério' : ($isC2 ? 'NT 08/2026 · Meses com coorte válida' : 'NT 08/2026 · Média de 4 Meses'))) }}
+                            {{ $isC6 ? 'NT 06/2025 · Coorte Pessoas Idosas Vinculadas' : ($isC5 ? 'NT 08/2026 · Coorte Hipertensos Vinculados' : ($isC4 ? 'NT 08/2026 · Coorte Diabéticos Vinculados' : ($isC3 ? 'NT 08/2026 · Coorte 42º dia do puerpério' : ($isC2 ? 'NT 08/2026 · Meses com coorte válida' : 'NT 08/2026 · Média de 4 Meses')))) }}
                         </span>
                     @endif
-                    @if ($isC2 || $isC3 || $isC4 || $isC5)
+                    @if ($isC2 || $isC3 || $isC4 || $isC5 || $isC6)
                         <span class="rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 px-2.5 py-0.5 text-[10px] font-bold">
-                            {{ $isC5 ? 'Peso 1.0 (até 1,00 pt) · 4 Boas Práticas (100 pts)' : ($isC4 ? 'Peso 1.0 (até 1,00 pt) · 6 Boas Práticas (100 pts)' : ($isC3 ? 'Peso 2.0 (até 2,00 pt) · 11 Boas Práticas (100 pts)' : 'Peso 2.0 (até 2,00 pt)')) }}
+                            {{ $isC6 ? 'Peso 1.0 (até 1,00 pt) · 4 Boas Práticas (100 pts)' : ($isC5 ? 'Peso 1.0 (até 1,00 pt) · 4 Boas Práticas (100 pts)' : ($isC4 ? 'Peso 1.0 (até 1,00 pt) · 6 Boas Práticas (100 pts)' : ($isC3 ? 'Peso 2.0 (até 2,00 pt) · 11 Boas Práticas (100 pts)' : 'Peso 2.0 (até 2,00 pt)'))) }}
                         </span>
                     @endif
                 </div>
@@ -6614,7 +7843,7 @@
                 <!-- Card de Pontuação -->
                 <div class="rounded-3xl bg-white/10 border border-white/15 p-5 text-center min-w-[190px] backdrop-blur-xs">
                     <span class="text-[11px] font-semibold text-teal-300 uppercase tracking-wider block">
-                        {{ ($isC1 || $isC2 || $isC3 || $isC4 || $isC5) && $current['is_preview'] ? 'Prévia quadrimestral' : (($isC1 || $isC2 || $isC3 || $isC4 || $isC5) ? 'Média quadrimestral local' : 'Resultado Atual') }}
+                        {{ ($isC1 || $isC2 || $isC3 || $isC4 || $isC5 || $isC6) && $current['is_preview'] ? 'Prévia quadrimestral' : (($isC1 || $isC2 || $isC3 || $isC4 || $isC5 || $isC6) ? 'Média quadrimestral local' : 'Resultado Atual') }}
                     </span>
                     <div class="text-3xl sm:text-4xl font-black text-white tabular-nums my-1">
                         {{ $hasValidatedResult ? number_format($score, 1, ',', '.').'%' : '—' }}
@@ -6623,7 +7852,7 @@
                         <span class="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold border {{ $badgeStyles }}">
                             {{ $levelLabel }}
                         </span>
-                        @if (($isC1 || $isC2 || $isC3 || $isC4 || $isC5) && $quarterSummary && $quarterSummary['component_iii_points'] !== null)
+                        @if (($isC1 || $isC2 || $isC3 || $isC4 || $isC5 || $isC6) && $quarterSummary && $quarterSummary['component_iii_points'] !== null)
                             <span class="inline-block rounded-full px-2 py-0.5 text-[10px] font-mono font-bold bg-white/20 text-white border border-white/30">
                                 {{ number_format($quarterSummary['component_iii_points'], 2, ',', '.') }} pt
                             </span>
@@ -6803,6 +8032,35 @@
                     <span class="text-slate-400 block">Com práticas pendentes no DW</span>
                     <span class="font-bold text-amber-700 text-sm">
                         {{ $hasC5Result ? number_format($current['active_search_count'], 0, '', '.') : '—' }}
+                    </span>
+                </div>
+                @if ($quarterSummary && $quarterSummary['component_iii_points'] !== null)
+                    <div class="border-l border-slate-200 pl-4">
+                        <span class="text-slate-400 block">Pontos Comp. III</span>
+                        <span class="font-mono font-bold text-emerald-700 text-sm">
+                            {{ number_format($quarterSummary['component_iii_points'], 2, ',', '.') }} / 1,00 pt
+                        </span>
+                    </div>
+                @endif
+            </div>
+        @elseif ($isC6)
+            <div class="flex flex-wrap items-center gap-x-6 gap-y-3 text-xs">
+                <div>
+                    <span class="text-slate-400 block">Pontos das 4 práticas (A–D)</span>
+                    <span class="font-bold text-teal-800 text-sm">
+                        {{ $hasC6Result ? number_format($current['numerator'], 0, '', '.') : '—' }}
+                    </span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block">Idosos na coorte</span>
+                    <span class="font-bold text-ink text-sm">
+                        {{ $current['cohort_total'] !== null ? number_format($current['cohort_total'], 0, '', '.') : ($current['denominator'] !== null ? number_format($current['denominator'], 0, '', '.') : '—') }}
+                    </span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block">Com práticas pendentes no DW</span>
+                    <span class="font-bold text-amber-700 text-sm">
+                        {{ $hasC6Result ? number_format($current['active_search_count'], 0, '', '.') : '—' }}
                     </span>
                 </div>
                 @if ($quarterSummary && $quarterSummary['component_iii_points'] !== null)

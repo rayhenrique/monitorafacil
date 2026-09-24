@@ -6,6 +6,7 @@ use App\Models\C2NominalChild;
 use App\Models\C3NominalPregnancy;
 use App\Models\C4NominalDiabetic;
 use App\Models\C5NominalHypertensive;
+use App\Models\C6NominalElderly;
 use App\Models\CvatTeamEvaluation;
 use App\Models\FamilyHealthIndicatorSnapshot;
 use App\Models\FamilyHealthMonthlySnapshot;
@@ -13,9 +14,11 @@ use App\Services\C2ActiveSearchService;
 use App\Services\C3ActiveSearchService;
 use App\Services\C4ActiveSearchService;
 use App\Services\C5ActiveSearchService;
+use App\Services\C6ActiveSearchService;
 use App\Services\DashboardSnapshotService;
 use App\Services\FamilyHealthService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
@@ -59,6 +62,8 @@ class IndicatorDetail extends Component
 
     public string $c5SubTab = 'monthly_summary'; // 'monthly_summary', 'nominal'
 
+    public string $c6SubTab = 'monthly_summary'; // 'monthly_summary', 'nominal'
+
     public string $activeTab = 'dashboard'; // 'dashboard', 'teams', 'active_search', 'rules'
 
     // --- PROPRIEDADES DA ABA BUSCA ATIVA C2 / C3 / C4 / C5 ---
@@ -81,6 +86,8 @@ class IndicatorDetail extends Component
     public int $c4Page = 1;
 
     public int $c5Page = 1;
+
+    public int $c6Page = 1;
 
     public array $visibleColumns = [];
 
@@ -183,6 +190,13 @@ class IndicatorDetail extends Component
 
     public ?array $selectedHypertensive = null;
 
+    // Modal Detalhes Clínicos Pessoa Idosa (C6)
+    public bool $showElderlyModal = false;
+
+    public ?array $selectedElderly = null;
+
+    public string $advElderlyAgeRange = ''; // '', '60-69', '70-79', '80+'
+
     public function mount(string $indicator, DashboardSnapshotService $snapshots): void
     {
         $this->indicator = strtolower($indicator);
@@ -223,7 +237,9 @@ class IndicatorDetail extends Component
             $this->quarter = $evaluatedQuarter;
         }
 
-        if ($this->indicator === 'c5') {
+        if ($this->indicator === 'c6') {
+            $this->visibleColumns = C6ActiveSearchService::getDefaultVisibleColumns();
+        } elseif ($this->indicator === 'c5') {
             $this->visibleColumns = C5ActiveSearchService::getDefaultVisibleColumns();
         } elseif ($this->indicator === 'c4') {
             $this->visibleColumns = C4ActiveSearchService::getDefaultVisibleColumns();
@@ -244,6 +260,7 @@ class IndicatorDetail extends Component
         $this->c3Page = 1;
         $this->c4Page = 1;
         $this->c5Page = 1;
+        $this->c6Page = 1;
     }
 
     public function updatedSearchCpf(): void
@@ -252,6 +269,7 @@ class IndicatorDetail extends Component
         $this->c3Page = 1;
         $this->c4Page = 1;
         $this->c5Page = 1;
+        $this->c6Page = 1;
     }
 
     public function updatedSearchName(): void
@@ -260,6 +278,7 @@ class IndicatorDetail extends Component
         $this->c3Page = 1;
         $this->c4Page = 1;
         $this->c5Page = 1;
+        $this->c6Page = 1;
     }
 
     public function updatedSearchCnes(): void
@@ -268,6 +287,7 @@ class IndicatorDetail extends Component
         $this->c3Page = 1;
         $this->c4Page = 1;
         $this->c5Page = 1;
+        $this->c6Page = 1;
     }
 
     public function updatedSearchIne(): void
@@ -276,6 +296,7 @@ class IndicatorDetail extends Component
         $this->c3Page = 1;
         $this->c4Page = 1;
         $this->c5Page = 1;
+        $this->c6Page = 1;
     }
 
     public function updatedPerPage(): void
@@ -284,6 +305,7 @@ class IndicatorDetail extends Component
         $this->c3Page = 1;
         $this->c4Page = 1;
         $this->c5Page = 1;
+        $this->c6Page = 1;
     }
 
     public function toggleColumn(string $column): void
@@ -297,7 +319,9 @@ class IndicatorDetail extends Component
 
     public function selectAllColumns(): void
     {
-        if ($this->indicator === 'c5') {
+        if ($this->indicator === 'c6') {
+            $this->visibleColumns = array_keys(C6ActiveSearchService::getAvailableColumns());
+        } elseif ($this->indicator === 'c5') {
             $this->visibleColumns = array_keys(C5ActiveSearchService::getAvailableColumns());
         } elseif ($this->indicator === 'c4') {
             $this->visibleColumns = array_keys(C4ActiveSearchService::getAvailableColumns());
@@ -310,7 +334,9 @@ class IndicatorDetail extends Component
 
     public function resetDefaultColumns(): void
     {
-        if ($this->indicator === 'c5') {
+        if ($this->indicator === 'c6') {
+            $this->visibleColumns = C6ActiveSearchService::getDefaultVisibleColumns();
+        } elseif ($this->indicator === 'c5') {
             $this->visibleColumns = C5ActiveSearchService::getDefaultVisibleColumns();
         } elseif ($this->indicator === 'c4') {
             $this->visibleColumns = C4ActiveSearchService::getDefaultVisibleColumns();
@@ -347,6 +373,7 @@ class IndicatorDetail extends Component
         $this->c3Page = 1;
         $this->c4Page = 1;
         $this->c5Page = 1;
+        $this->c6Page = 1;
         $this->showAdvancedModal = false;
     }
 
@@ -393,10 +420,12 @@ class IndicatorDetail extends Component
         $this->advPracticeI = null;
         $this->advPracticeJ = null;
         $this->advPracticeK = null;
+        $this->advElderlyAgeRange = '';
         $this->c2Page = 1;
         $this->c3Page = 1;
         $this->c4Page = 1;
         $this->c5Page = 1;
+        $this->c6Page = 1;
     }
 
     public function switchC3SubTab(string $tab): void
@@ -412,6 +441,11 @@ class IndicatorDetail extends Component
     public function switchC5SubTab(string $tab): void
     {
         $this->c5SubTab = in_array($tab, ['monthly_summary', 'nominal'], true) ? $tab : 'monthly_summary';
+    }
+
+    public function switchC6SubTab(string $tab): void
+    {
+        $this->c6SubTab = in_array($tab, ['monthly_summary', 'nominal'], true) ? $tab : 'monthly_summary';
     }
 
     public function setAgeGroup(string $group): void
@@ -566,6 +600,11 @@ class IndicatorDetail extends Component
         $this->c5Page = max(1, $page);
     }
 
+    public function gotoC6Page(int $page): void
+    {
+        $this->c6Page = max(1, $page);
+    }
+
     public function openHypertensiveDetail(int $hypertensiveId, C5ActiveSearchService $c5Service): void
     {
         $found = $c5Service->getHypertensiveById($hypertensiveId);
@@ -580,6 +619,22 @@ class IndicatorDetail extends Component
     {
         $this->showHypertensiveModal = false;
         $this->selectedHypertensive = null;
+    }
+
+    public function openElderlyDetail(int $elderlyId, C6ActiveSearchService $c6Service): void
+    {
+        $found = $c6Service->getElderlyById($elderlyId);
+
+        if ($found) {
+            $this->selectedElderly = $found;
+            $this->showElderlyModal = true;
+        }
+    }
+
+    public function closeElderlyDetail(): void
+    {
+        $this->showElderlyModal = false;
+        $this->selectedElderly = null;
     }
 
     public function setTab(string $tab): void
@@ -648,6 +703,11 @@ class IndicatorDetail extends Component
         $this->c5SubTab = in_array($tab, ['monthly_summary', 'nominal'], true) ? $tab : 'monthly_summary';
     }
 
+    public function setC6SubTab(string $tab): void
+    {
+        $this->c6SubTab = in_array($tab, ['monthly_summary', 'nominal'], true) ? $tab : 'monthly_summary';
+    }
+
     public function updatedActiveTab(string $tab): void
     {
         if ($this->indicator === 'c2' && $tab === 'active_search') {
@@ -661,6 +721,9 @@ class IndicatorDetail extends Component
         }
         if ($this->indicator === 'c5' && $tab === 'active_search') {
             $this->c5SubTab = 'nominal';
+        }
+        if ($this->indicator === 'c6' && $tab === 'active_search') {
+            $this->c6SubTab = 'nominal';
         }
     }
 
@@ -791,7 +854,8 @@ class IndicatorDetail extends Component
         C2ActiveSearchService $c2Service,
         C3ActiveSearchService $c3Service,
         C4ActiveSearchService $c4Service,
-        C5ActiveSearchService $c5Service
+        C5ActiveSearchService $c5Service,
+        C6ActiveSearchService $c6Service
     ): View {
         $data = $service->getIndicatorDetail($this->indicator, $this->year, $this->quarter, $this->selectedIne);
         $periods = $snapshots->periods();
@@ -802,12 +866,14 @@ class IndicatorDetail extends Component
         $c3Data = $this->prepareC3Data($c3Service);
         $c4Data = $this->prepareC4Data($c4Service);
         $c5Data = $this->prepareC5Data($c5Service);
+        $c6Data = $this->prepareC6Data($c6Service);
 
         $activeFiltersCount = match ($this->indicator) {
             'c2' => $c2Data['activeFiltersCount'],
             'c3' => $c3Data['activeFiltersCount'],
             'c4' => $c4Data['activeFiltersCount'],
             'c5' => $c5Data['activeFiltersCount'],
+            'c6' => $c6Data['activeFiltersCount'],
             default => 0,
         };
 
@@ -827,6 +893,10 @@ class IndicatorDetail extends Component
             ? 'nominal'
             : $this->c5SubTab;
 
+        $c6SubTabEffective = ($this->indicator === 'c6' && $this->activeTab === 'active_search')
+            ? 'nominal'
+            : $this->c6SubTab;
+
         return view('livewire.family-health.indicator-detail', array_merge([
             'indicator' => $this->indicator,
             'year' => $this->year,
@@ -837,6 +907,7 @@ class IndicatorDetail extends Component
             'selectedDistrict' => $this->selectedDistrict,
             'selectedClassification' => $this->selectedClassification,
             'activeTab' => $this->activeTab,
+            'showAdvancedModal' => $this->showAdvancedModal,
             'data' => $data,
             'meta' => $data['meta'],
             'current' => $data['current'],
@@ -847,12 +918,14 @@ class IndicatorDetail extends Component
             'c3Teams' => $filteredTeams,
             'c4Teams' => $filteredTeams,
             'c5Teams' => $filteredTeams,
+            'c6Teams' => $filteredTeams,
             'filteredTeams' => $filteredTeams,
             'c1SubTab' => $this->c1SubTab,
             'c2SubTab' => $c2SubTabEffective,
             'c3SubTab' => $c3SubTabEffective,
             'c4SubTab' => $c4SubTabEffective,
             'c5SubTab' => $c5SubTabEffective,
+            'c6SubTab' => $c6SubTabEffective,
             'activeSearchList' => $data['active_search_list'],
             'periods' => $periods,
             'activeFiltersCount' => $activeFiltersCount,
@@ -864,12 +937,14 @@ class IndicatorDetail extends Component
             'realDiabeticsCount' => $this->indicator === 'c4' ? C4ActiveSearchService::getRealDiabeticsCount($this->year, $this->quarter, $this->selectedIne) : 0,
             'isRealC5DataAvailable' => $this->indicator === 'c5' ? C5ActiveSearchService::isRealDataAvailable($this->year, $this->quarter) : false,
             'realHypertensivesCount' => $this->indicator === 'c5' ? C5ActiveSearchService::getRealHypertensivesCount($this->year, $this->quarter, $this->selectedIne) : 0,
-        ], $c1Data, $c2Data['viewVars'], $c3Data['viewVars'], $c4Data['viewVars'], $c5Data['viewVars']));
+            'isRealC6DataAvailable' => $this->indicator === 'c6' ? C6ActiveSearchService::isRealDataAvailable($this->year, $this->quarter) : false,
+            'realElderlyCount' => $this->indicator === 'c6' ? C6ActiveSearchService::getRealElderlyCount($this->year, $this->quarter, $this->selectedIne) : 0,
+        ], $c1Data, $c2Data['viewVars'], $c3Data['viewVars'], $c4Data['viewVars'], $c5Data['viewVars'], $c6Data['viewVars']));
     }
 
     private function getFilteredTeams(Collection $teams): Collection
     {
-        if (! in_array($this->indicator, ['c1', 'c2', 'c3', 'c4', 'c5'], true)) {
+        if (! in_array($this->indicator, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'], true)) {
             return $teams;
         }
 
@@ -1871,5 +1946,209 @@ class IndicatorDetail extends Component
         $filtered = $c5Service->filterCohort($cohort, $filters);
 
         return $c5Service->exportCsv($filtered);
+    }
+
+    private function prepareC6Data(C6ActiveSearchService $c6Service): array
+    {
+        $c6NominalList = collect();
+        $c6SummaryKpis = null;
+        $c6FilterOptions = [];
+        $c6AvailableColumns = C6ActiveSearchService::getAvailableColumns();
+        $c6TotalItems = 0;
+        $c6TotalPages = 1;
+        $activeFiltersCount = 0;
+        $c6TeamRows = collect();
+        $c6Distribution = [
+            'total' => 0,
+            'regular' => ['count' => 0, 'percent' => 0.0],
+            'suficiente' => ['count' => 0, 'percent' => 0.0],
+            'bom' => ['count' => 0, 'percent' => 0.0],
+            'otimo' => ['count' => 0, 'percent' => 0.0],
+        ];
+
+        if ($this->indicator !== 'c6') {
+            return [
+                'activeFiltersCount' => 0,
+                'viewVars' => [
+                    'c6NominalList' => $c6NominalList,
+                    'c6SummaryKpis' => $c6SummaryKpis,
+                    'c6FilterOptions' => $c6FilterOptions,
+                    'c6AvailableColumns' => $c6AvailableColumns,
+                    'c6TotalItems' => $c6TotalItems,
+                    'c6TotalPages' => $c6TotalPages,
+                    'c6TeamRows' => $c6TeamRows,
+                    'c6Distribution' => $c6Distribution,
+                    'showElderlyModal' => false,
+                    'selectedElderly' => null,
+                ],
+            ];
+        }
+
+        $c6BaseCohort = $c6Service->getBaseCohort($this->year, $this->quarter, $this->selectedIne);
+
+        $filters = [
+            'searchCns' => $this->searchCns,
+            'searchCpf' => $this->searchCpf,
+            'searchName' => $this->searchName,
+            'searchCnes' => $this->searchCnes,
+            'searchIne' => $this->searchIne,
+            'advDistrict' => $this->advDistrict,
+            'advFacility' => $this->advFacility,
+            'advTeam' => $this->advTeam,
+            'advMicroarea' => $this->advMicroarea,
+            'advCitizenName' => $this->advCitizenName,
+            'advCitizenCpf' => $this->advCitizenCpf,
+            'advCitizenCns' => $this->advCitizenCns,
+            'advRaceColor' => $this->advRaceColor,
+            'advElderlyAgeRange' => $this->advElderlyAgeRange,
+            'advPracticeA' => $this->advPracticeA,
+            'advPracticeB' => $this->advPracticeB,
+            'advPracticeC' => $this->advPracticeC,
+            'advPracticeD' => $this->advPracticeD,
+        ];
+
+        foreach ($filters as $k => $val) {
+            if (in_array($k, ['searchCns', 'searchCpf', 'searchName', 'searchCnes', 'searchIne'], true)) {
+                continue;
+            }
+            if ($val !== '' && $val !== null && $val !== []) {
+                $activeFiltersCount++;
+            }
+        }
+
+        $c6FilteredCohort = $c6Service->filterCohort($c6BaseCohort, $filters);
+        $c6SummaryKpis = $c6Service->getSummaryKpis($c6FilteredCohort, $this->year, $this->quarter);
+        $c6FilterOptions = $c6Service->getFilterOptions($this->year, $this->quarter);
+
+        $c6TotalItems = $c6FilteredCohort->count();
+        $c6TotalPages = max(1, (int) ceil($c6TotalItems / max(1, $this->perPage)));
+        $this->c6Page = min(max(1, $this->c6Page), $c6TotalPages);
+
+        $c6NominalList = $c6FilteredCohort->forPage($this->c6Page, $this->perPage);
+
+        $hasCvat = Schema::hasTable('cvat_team_evaluations');
+        $facilityMap = $hasCvat ? CvatTeamEvaluation::select('ine', 'cnes', 'facility_name')
+            ->whereNotNull('ine')
+            ->get()
+            ->keyBy('ine') : collect();
+
+        $c6ElderlyGrouped = collect();
+        if (Schema::hasTable('c6_nominal_elderly')) {
+            $c6ElderlyGrouped = C6NominalElderly::query()
+                ->where('year', $this->year)
+                ->where('quarter', $this->quarter)
+                ->whereNotNull('ine')
+                ->where('ine', '!=', '')
+                ->selectRaw('ine, MAX(team_name) as team_name, MAX(cnes) as cnes, MAX(facility_name) as facility_name, count(*) as total_elderly, sum(score_percent) as sum_score, avg(score_percent) as avg_score')
+                ->groupBy('ine')
+                ->get();
+        }
+
+        if ($c6ElderlyGrouped->isNotEmpty()) {
+            $c6TeamRows = $c6ElderlyGrouped->map(function ($group) use ($facilityMap) {
+                $facility = $facilityMap->get($group->ine);
+                $cnes = $facility?->cnes ?: ($group->cnes ?: '—');
+                $facilityName = $facility?->facility_name ?: ($group->facility_name ?: 'Unidade Básica de Saúde');
+                $score = round((float) $group->avg_score, 2);
+                $level = FamilyHealthService::calculatePerformanceLevel('c6', $score);
+
+                return [
+                    'ine' => $group->ine,
+                    'team_name' => $group->team_name,
+                    'cnes' => $cnes,
+                    'facility_name' => $facilityName,
+                    'numerator' => (int) round((float) $group->sum_score),
+                    'denominator' => (int) $group->total_elderly,
+                    'score_percent' => $score,
+                    'performance_level' => $level,
+                ];
+            })->sortByDesc('score_percent')->values();
+        } elseif (Schema::hasTable('c6_cohort_snapshots')) {
+            $c6Snaps = DB::table('c6_cohort_snapshots')
+                ->where('year', $this->year)
+                ->where('quarter', $this->quarter)
+                ->whereNotNull('ine')
+                ->where('ine', '!=', '')
+                ->get();
+
+            $c6TeamRows = $c6Snaps->map(function ($snap) use ($facilityMap) {
+                $facility = $facilityMap->get($snap->ine);
+                $cnes = $facility?->cnes ?? '—';
+                $facilityName = $facility?->facility_name ?? 'Unidade Básica de Saúde';
+                $denominator = (int) ($snap->cohort_total ?? 0);
+                $numerator = (int) ($snap->evaluated_total ?? 0);
+                $score = $denominator > 0 ? round(($numerator / $denominator) * 100, 2) : 0.0;
+                $level = FamilyHealthService::calculatePerformanceLevel('c6', $score);
+
+                return [
+                    'ine' => $snap->ine,
+                    'team_name' => $snap->team_name,
+                    'cnes' => $cnes,
+                    'facility_name' => $facilityName,
+                    'numerator' => $numerator,
+                    'denominator' => $denominator,
+                    'score_percent' => $score,
+                    'performance_level' => $level,
+                ];
+            })->sortByDesc('score_percent')->values();
+        }
+
+        $c6Total = $c6TeamRows->count();
+        $c6Reg = $c6TeamRows->filter(fn ($r) => $r['performance_level'] === 'regular')->count();
+        $c6Suf = $c6TeamRows->filter(fn ($r) => $r['performance_level'] === 'suficiente')->count();
+        $c6Bom = $c6TeamRows->filter(fn ($r) => $r['performance_level'] === 'bom')->count();
+        $c6Oti = $c6TeamRows->filter(fn ($r) => $r['performance_level'] === 'otimo')->count();
+
+        $c6Distribution = [
+            'total' => $c6Total,
+            'regular' => ['count' => $c6Reg, 'percent' => $c6Total > 0 ? round(($c6Reg / $c6Total) * 100, 1) : 0.0],
+            'suficiente' => ['count' => $c6Suf, 'percent' => $c6Total > 0 ? round(($c6Suf / $c6Total) * 100, 1) : 0.0],
+            'bom' => ['count' => $c6Bom, 'percent' => $c6Total > 0 ? round(($c6Bom / $c6Total) * 100, 1) : 0.0],
+            'otimo' => ['count' => $c6Oti, 'percent' => $c6Total > 0 ? round(($c6Oti / $c6Total) * 100, 1) : 0.0],
+        ];
+
+        return [
+            'activeFiltersCount' => $activeFiltersCount,
+            'viewVars' => [
+                'c6NominalList' => $c6NominalList,
+                'c6SummaryKpis' => $c6SummaryKpis,
+                'c6FilterOptions' => $c6FilterOptions,
+                'c6AvailableColumns' => $c6AvailableColumns,
+                'c6TotalItems' => $c6TotalItems,
+                'c6TotalPages' => $c6TotalPages,
+                'c6TeamRows' => $c6TeamRows,
+                'c6Distribution' => $c6Distribution,
+                'showElderlyModal' => $this->showElderlyModal,
+                'selectedElderly' => $this->selectedElderly,
+            ],
+        ];
+    }
+
+    public function exportC6Csv(C6ActiveSearchService $c6Service): StreamedResponse
+    {
+        $cohort = $c6Service->getBaseCohort($this->year, $this->quarter, $this->selectedIne);
+        $filters = [
+            'searchCns' => $this->searchCns,
+            'searchCpf' => $this->searchCpf,
+            'searchName' => $this->searchName,
+            'searchCnes' => $this->searchCnes,
+            'searchIne' => $this->searchIne,
+            'advDistrict' => $this->advDistrict,
+            'advFacility' => $this->advFacility,
+            'advTeam' => $this->advTeam,
+            'advMicroarea' => $this->advMicroarea,
+            'advCitizenName' => $this->advCitizenName,
+            'advCitizenCpf' => $this->advCitizenCpf,
+            'advCitizenCns' => $this->advCitizenCns,
+            'advRaceColor' => $this->advRaceColor,
+            'advElderlyAgeRange' => $this->advElderlyAgeRange,
+            'advPracticeA' => $this->advPracticeA,
+            'advPracticeB' => $this->advPracticeB,
+            'advPracticeC' => $this->advPracticeC,
+            'advPracticeD' => $this->advPracticeD,
+        ];
+        $filtered = $c6Service->filterCohort($cohort, $filters);
+
+        return $c6Service->exportCsv($filtered);
     }
 }

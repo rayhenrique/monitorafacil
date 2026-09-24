@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.24.0';
+    public const CURRENT_VERSION = 'v1.25.0';
 
     public const CURRENT_RELEASE_DATE = '24/09/2026';
 
@@ -61,9 +61,24 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.24.0',
+                'version' => 'v1.25.0',
                 'date' => '24/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Indicador C6 (Cuidado da Pessoa Idosa na APS), 4 Boas Práticas Clínicas (A–D, 100 pts) e Busca Ativa Nominal',
+                'summary' => 'Implementação integral do Indicador C6 (Cuidado da Pessoa Idosa na APS) conforme a Nota Metodológica oficial e Nota Técnica nº 06/2025-CVAT. O módulo contempla o acompanhamento da coorte de 5.780 pessoas com 60 anos ou mais vinculadas às 19 equipes ativas da APS municipal, aferição das 4 Boas Práticas Clínicas oficiais (25 pontos cada = 100 pontos): Consulta Médica/Enfermagem nos últimos 12 meses (A, 25 pts), Antropometria com Peso e Altura na mesma data (B, 25 pts), no mínimo 2 Visitas Domiciliares de ACS com intervalo mínimo de 30 dias (C, 25 pts, com isenção eAP) e Vacinação de Influenza nos últimos 12 meses (D, 25 pts). Inclui busca ativa nominal, auditoria clínica individual, filtros avançados e integração ao pipeline do e-SUS PEC DW.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Indicador C6 com as 4 Boas Práticas Clínicas oficiais somando 100 pontos (25 pts cada) conforme Nota Metodológica C6.'],
+                    ['type' => 'melhoria', 'text' => 'Isenção da Prática C para equipes de Atenção Primária (eAP tipo 76) com normalização automática para a base 100 (fator 100/75 sem D).'],
+                    ['type' => 'melhoria', 'text' => 'Auditoria de vacina Influenza nos últimos 12 meses a partir de tb_fat_vacinacao_vacina e registro de peso e altura simultâneos em atendimentos individuais.'],
+                    ['type' => 'novo', 'text' => 'Busca Ativa Nominal da Pessoa Idosa com 5.780 registros 100% reais, filtros por faixa etária (60-69, 70-79, 80+), raça/cor, status de cada prática, exportação em CSV com BOM UTF-8 e ficha clínica individual.'],
+                    ['type' => 'novo', 'text' => 'Modal de Auditoria Clínica Individual da Pessoa Idosa com detalhamento das 4 práticas, dados antropométricos, vacina e visitas de ACS.'],
+                    ['type' => 'melhoria', 'text' => 'Processamento analítico integrado via `php artisan esus:process-data --scope=c6` e consolidação no Painel Executivo e Visão Geral.'],
+                ],
+            ],
+            [
+                'version' => 'v1.24.0',
+                'date' => '24/09/2026',
+                'badge' => 'Anterior',
                 'title' => 'Indicador C5 (Hipertensão Arterial Sistêmica), 4 Boas Práticas Clínicas (A–D, 100 pts) e Busca Ativa Nominal',
                 'summary' => 'Implementação integral do Indicador C5 (Cuidado da Pessoa com Hipertensão na APS) conforme a Nota Metodológica oficial e Nota Técnica nº 08/2026-DEAPS/SAPS/MS. O módulo inclui o cálculo auditado das 4 Boas Práticas Clínicas (25 pontos cada = 100 pontos), exclusão normativa estrita de ACS para aferição de Pressão Arterial, normalização de equipes eAP (fator 100/75 sem D), extração de dados 100% reais do DW e-SUS PEC, persistência de snapshots e coorte nominal de 11.032 hipertensos com busca ativa e ficha clínica individual.',
                 'highlights' => [
