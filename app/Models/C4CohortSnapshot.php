@@ -3,7 +3,23 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int $year
+ * @property int $quarter
+ * @property string|null $ine
+ * @property string|null $team_name
+ * @property string|null $team_type
+ * @property int $cohort_total
+ * @property int $evaluated_total
+ * @property array<int, int>|null $monthly_counts
+ * @property Carbon|null $as_of
+ * @property string $calculation_version
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
 class C4CohortSnapshot extends Model
 {
     protected $fillable = [

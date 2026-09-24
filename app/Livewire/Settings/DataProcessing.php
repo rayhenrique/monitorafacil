@@ -29,13 +29,13 @@ class DataProcessing extends Component
     /** @var array<string, array{name: string, description: string, status: string, rows: int, message: string}> */
     public array $tablesReport = [];
 
-    public string $selectedScope = 'all'; // 'c1', 'c2', 'c3', 'c4', 'cvat' ou 'all' (Geral Completo)
+    public string $selectedScope = 'all'; // 'c1', 'c2', 'c3', 'c4', 'c5', 'cvat' ou 'all' (Geral Completo)
 
     public ?float $executionTimeMs = null;
 
     public function setScope(string $scope): void
     {
-        $this->selectedScope = in_array($scope, ['c1', 'c2', 'c3', 'c4', 'cvat', 'all'], true) ? $scope : 'all';
+        $this->selectedScope = in_array($scope, ['c1', 'c2', 'c3', 'c4', 'c5', 'cvat', 'all'], true) ? $scope : 'all';
     }
 
     public function processC1(EsusDataProcessingService $service): void
@@ -60,6 +60,12 @@ class DataProcessing extends Component
     {
         $this->selectedScope = 'c4';
         $this->executeProcessing($service, 'c4');
+    }
+
+    public function processC5(EsusDataProcessingService $service): void
+    {
+        $this->selectedScope = 'c5';
+        $this->executeProcessing($service, 'c5');
     }
 
     public function processCvat(): void

@@ -5,12 +5,14 @@ namespace App\Livewire\FamilyHealth;
 use App\Models\C2NominalChild;
 use App\Models\C3NominalPregnancy;
 use App\Models\C4NominalDiabetic;
+use App\Models\C5NominalHypertensive;
 use App\Models\CvatTeamEvaluation;
 use App\Models\FamilyHealthIndicatorSnapshot;
 use App\Models\FamilyHealthMonthlySnapshot;
 use App\Services\C2ActiveSearchService;
 use App\Services\C3ActiveSearchService;
 use App\Services\C4ActiveSearchService;
+use App\Services\C5ActiveSearchService;
 use App\Services\DashboardSnapshotService;
 use App\Services\FamilyHealthService;
 use Illuminate\Support\Collection;
@@ -55,9 +57,11 @@ class IndicatorDetail extends Component
 
     public string $c4SubTab = 'monthly_summary'; // 'monthly_summary', 'nominal'
 
+    public string $c5SubTab = 'monthly_summary'; // 'monthly_summary', 'nominal'
+
     public string $activeTab = 'dashboard'; // 'dashboard', 'teams', 'active_search', 'rules'
 
-    // --- PROPRIEDADES DA ABA BUSCA ATIVA C2 / C3 / C4 ---
+    // --- PROPRIEDADES DA ABA BUSCA ATIVA C2 / C3 / C4 / C5 ---
     public string $searchCns = '';
 
     public string $searchCpf = '';
@@ -75,6 +79,8 @@ class IndicatorDetail extends Component
     public int $c3Page = 1;
 
     public int $c4Page = 1;
+
+    public int $c5Page = 1;
 
     public array $visibleColumns = [];
 
@@ -172,6 +178,11 @@ class IndicatorDetail extends Component
 
     public ?array $selectedDiabetic = null;
 
+    // Modal Detalhes Clínicos Pessoa com Hipertensão (C5)
+    public bool $showHypertensiveModal = false;
+
+    public ?array $selectedHypertensive = null;
+
     public function mount(string $indicator, DashboardSnapshotService $snapshots): void
     {
         $this->indicator = strtolower($indicator);
@@ -212,7 +223,9 @@ class IndicatorDetail extends Component
             $this->quarter = $evaluatedQuarter;
         }
 
-        if ($this->indicator === 'c4') {
+        if ($this->indicator === 'c5') {
+            $this->visibleColumns = C5ActiveSearchService::getDefaultVisibleColumns();
+        } elseif ($this->indicator === 'c4') {
             $this->visibleColumns = C4ActiveSearchService::getDefaultVisibleColumns();
         } elseif ($this->indicator === 'c3') {
             $this->visibleColumns = C3ActiveSearchService::getDefaultVisibleColumns();
@@ -230,6 +243,7 @@ class IndicatorDetail extends Component
         $this->c2Page = 1;
         $this->c3Page = 1;
         $this->c4Page = 1;
+        $this->c5Page = 1;
     }
 
     public function updatedSearchCpf(): void
@@ -237,6 +251,7 @@ class IndicatorDetail extends Component
         $this->c2Page = 1;
         $this->c3Page = 1;
         $this->c4Page = 1;
+        $this->c5Page = 1;
     }
 
     public function updatedSearchName(): void
@@ -244,6 +259,7 @@ class IndicatorDetail extends Component
         $this->c2Page = 1;
         $this->c3Page = 1;
         $this->c4Page = 1;
+        $this->c5Page = 1;
     }
 
     public function updatedSearchCnes(): void
@@ -251,6 +267,7 @@ class IndicatorDetail extends Component
         $this->c2Page = 1;
         $this->c3Page = 1;
         $this->c4Page = 1;
+        $this->c5Page = 1;
     }
 
     public function updatedSearchIne(): void
@@ -258,6 +275,7 @@ class IndicatorDetail extends Component
         $this->c2Page = 1;
         $this->c3Page = 1;
         $this->c4Page = 1;
+        $this->c5Page = 1;
     }
 
     public function updatedPerPage(): void
@@ -265,6 +283,7 @@ class IndicatorDetail extends Component
         $this->c2Page = 1;
         $this->c3Page = 1;
         $this->c4Page = 1;
+        $this->c5Page = 1;
     }
 
     public function toggleColumn(string $column): void
@@ -278,7 +297,9 @@ class IndicatorDetail extends Component
 
     public function selectAllColumns(): void
     {
-        if ($this->indicator === 'c4') {
+        if ($this->indicator === 'c5') {
+            $this->visibleColumns = array_keys(C5ActiveSearchService::getAvailableColumns());
+        } elseif ($this->indicator === 'c4') {
             $this->visibleColumns = array_keys(C4ActiveSearchService::getAvailableColumns());
         } elseif ($this->indicator === 'c3') {
             $this->visibleColumns = array_keys(C3ActiveSearchService::getAvailableColumns());
@@ -289,7 +310,9 @@ class IndicatorDetail extends Component
 
     public function resetDefaultColumns(): void
     {
-        if ($this->indicator === 'c4') {
+        if ($this->indicator === 'c5') {
+            $this->visibleColumns = C5ActiveSearchService::getDefaultVisibleColumns();
+        } elseif ($this->indicator === 'c4') {
             $this->visibleColumns = C4ActiveSearchService::getDefaultVisibleColumns();
         } elseif ($this->indicator === 'c3') {
             $this->visibleColumns = C3ActiveSearchService::getDefaultVisibleColumns();
@@ -323,6 +346,7 @@ class IndicatorDetail extends Component
         $this->c2Page = 1;
         $this->c3Page = 1;
         $this->c4Page = 1;
+        $this->c5Page = 1;
         $this->showAdvancedModal = false;
     }
 
@@ -372,6 +396,7 @@ class IndicatorDetail extends Component
         $this->c2Page = 1;
         $this->c3Page = 1;
         $this->c4Page = 1;
+        $this->c5Page = 1;
     }
 
     public function switchC3SubTab(string $tab): void
@@ -382,6 +407,11 @@ class IndicatorDetail extends Component
     public function switchC4SubTab(string $tab): void
     {
         $this->c4SubTab = in_array($tab, ['monthly_summary', 'nominal'], true) ? $tab : 'monthly_summary';
+    }
+
+    public function switchC5SubTab(string $tab): void
+    {
+        $this->c5SubTab = in_array($tab, ['monthly_summary', 'nominal'], true) ? $tab : 'monthly_summary';
     }
 
     public function setAgeGroup(string $group): void
@@ -532,6 +562,28 @@ class IndicatorDetail extends Component
         $this->selectedDiabetic = null;
     }
 
+    public function gotoC5Page(int $page): void
+    {
+        $this->c5Page = max(1, $page);
+    }
+
+    public function openHypertensiveDetail(int $hypertensiveId, C5ActiveSearchService $c5Service): void
+    {
+        $cohort = $c5Service->getBaseCohort($this->year, $this->quarter, $this->selectedIne);
+        $found = $cohort->firstWhere('id', $hypertensiveId);
+
+        if ($found) {
+            $this->selectedHypertensive = $found;
+            $this->showHypertensiveModal = true;
+        }
+    }
+
+    public function closeHypertensiveDetail(): void
+    {
+        $this->showHypertensiveModal = false;
+        $this->selectedHypertensive = null;
+    }
+
     public function setTab(string $tab): void
     {
         $this->activeTab = $tab;
@@ -593,6 +645,11 @@ class IndicatorDetail extends Component
         $this->c4SubTab = in_array($tab, ['monthly_summary', 'nominal'], true) ? $tab : 'monthly_summary';
     }
 
+    public function setC5SubTab(string $tab): void
+    {
+        $this->c5SubTab = in_array($tab, ['monthly_summary', 'nominal'], true) ? $tab : 'monthly_summary';
+    }
+
     public function updatedActiveTab(string $tab): void
     {
         if ($this->indicator === 'c2' && $tab === 'active_search') {
@@ -603,6 +660,9 @@ class IndicatorDetail extends Component
         }
         if ($this->indicator === 'c4' && $tab === 'active_search') {
             $this->c4SubTab = 'nominal';
+        }
+        if ($this->indicator === 'c5' && $tab === 'active_search') {
+            $this->c5SubTab = 'nominal';
         }
     }
 
@@ -732,7 +792,8 @@ class IndicatorDetail extends Component
         DashboardSnapshotService $snapshots,
         C2ActiveSearchService $c2Service,
         C3ActiveSearchService $c3Service,
-        C4ActiveSearchService $c4Service
+        C4ActiveSearchService $c4Service,
+        C5ActiveSearchService $c5Service
     ): View {
         $data = $service->getIndicatorDetail($this->indicator, $this->year, $this->quarter, $this->selectedIne);
         $periods = $snapshots->periods();
@@ -742,11 +803,13 @@ class IndicatorDetail extends Component
         $c2Data = $this->prepareC2Data($c2Service);
         $c3Data = $this->prepareC3Data($c3Service);
         $c4Data = $this->prepareC4Data($c4Service);
+        $c5Data = $this->prepareC5Data($c5Service);
 
         $activeFiltersCount = match ($this->indicator) {
             'c2' => $c2Data['activeFiltersCount'],
             'c3' => $c3Data['activeFiltersCount'],
             'c4' => $c4Data['activeFiltersCount'],
+            'c5' => $c5Data['activeFiltersCount'],
             default => 0,
         };
 
@@ -761,6 +824,10 @@ class IndicatorDetail extends Component
         $c4SubTabEffective = ($this->indicator === 'c4' && $this->activeTab === 'active_search')
             ? 'nominal'
             : $this->c4SubTab;
+
+        $c5SubTabEffective = ($this->indicator === 'c5' && $this->activeTab === 'active_search')
+            ? 'nominal'
+            : $this->c5SubTab;
 
         return view('livewire.family-health.indicator-detail', array_merge([
             'indicator' => $this->indicator,
@@ -781,11 +848,13 @@ class IndicatorDetail extends Component
             'c2Teams' => $filteredTeams,
             'c3Teams' => $filteredTeams,
             'c4Teams' => $filteredTeams,
+            'c5Teams' => $filteredTeams,
             'filteredTeams' => $filteredTeams,
             'c1SubTab' => $this->c1SubTab,
             'c2SubTab' => $c2SubTabEffective,
             'c3SubTab' => $c3SubTabEffective,
             'c4SubTab' => $c4SubTabEffective,
+            'c5SubTab' => $c5SubTabEffective,
             'activeSearchList' => $data['active_search_list'],
             'periods' => $periods,
             'activeFiltersCount' => $activeFiltersCount,
@@ -795,12 +864,14 @@ class IndicatorDetail extends Component
             'realPregnanciesCount' => $this->indicator === 'c3' ? C3ActiveSearchService::getRealPregnanciesCount($this->year, $this->quarter, $this->selectedIne) : 0,
             'isRealC4DataAvailable' => $this->indicator === 'c4' ? C4ActiveSearchService::isRealDataAvailable($this->year, $this->quarter) : false,
             'realDiabeticsCount' => $this->indicator === 'c4' ? C4ActiveSearchService::getRealDiabeticsCount($this->year, $this->quarter, $this->selectedIne) : 0,
-        ], $c1Data, $c2Data['viewVars'], $c3Data['viewVars'], $c4Data['viewVars']));
+            'isRealC5DataAvailable' => $this->indicator === 'c5' ? C5ActiveSearchService::isRealDataAvailable($this->year, $this->quarter) : false,
+            'realHypertensivesCount' => $this->indicator === 'c5' ? C5ActiveSearchService::getRealHypertensivesCount($this->year, $this->quarter, $this->selectedIne) : 0,
+        ], $c1Data, $c2Data['viewVars'], $c3Data['viewVars'], $c4Data['viewVars'], $c5Data['viewVars']));
     }
 
     private function getFilteredTeams(Collection $teams): Collection
     {
-        if (! in_array($this->indicator, ['c1', 'c2', 'c3', 'c4'], true)) {
+        if (! in_array($this->indicator, ['c1', 'c2', 'c3', 'c4', 'c5'], true)) {
             return $teams;
         }
 
@@ -1603,5 +1674,204 @@ class IndicatorDetail extends Component
         $filtered = $c4Service->filterCohort($cohort, $filters);
 
         return $c4Service->exportCsv($filtered);
+    }
+
+    private function prepareC5Data(C5ActiveSearchService $c5Service): array
+    {
+        $c5NominalList = collect();
+        $c5SummaryKpis = null;
+        $c5FilterOptions = [];
+        $c5AvailableColumns = C5ActiveSearchService::getAvailableColumns();
+        $c5TotalItems = 0;
+        $c5TotalPages = 1;
+        $activeFiltersCount = 0;
+        $c5TeamRows = collect();
+        $c5Distribution = [
+            'total' => 0,
+            'regular' => ['count' => 0, 'percent' => 0.0],
+            'suficiente' => ['count' => 0, 'percent' => 0.0],
+            'bom' => ['count' => 0, 'percent' => 0.0],
+            'otimo' => ['count' => 0, 'percent' => 0.0],
+        ];
+
+        if ($this->indicator !== 'c5') {
+            return [
+                'activeFiltersCount' => 0,
+                'viewVars' => [
+                    'c5NominalList' => $c5NominalList,
+                    'c5SummaryKpis' => $c5SummaryKpis,
+                    'c5FilterOptions' => $c5FilterOptions,
+                    'c5AvailableColumns' => $c5AvailableColumns,
+                    'c5TotalItems' => $c5TotalItems,
+                    'c5TotalPages' => $c5TotalPages,
+                    'c5TeamRows' => $c5TeamRows,
+                    'c5Distribution' => $c5Distribution,
+                ],
+            ];
+        }
+
+        $c5BaseCohort = $c5Service->getBaseCohort($this->year, $this->quarter, $this->selectedIne);
+
+        $filters = [
+            'searchCns' => $this->searchCns,
+            'searchCpf' => $this->searchCpf,
+            'searchName' => $this->searchName,
+            'searchCnes' => $this->searchCnes,
+            'searchIne' => $this->searchIne,
+            'advDistrict' => $this->advDistrict,
+            'advFacility' => $this->advFacility,
+            'advTeam' => $this->advTeam,
+            'advMicroarea' => $this->advMicroarea,
+            'advCitizenName' => $this->advCitizenName,
+            'advCitizenCpf' => $this->advCitizenCpf,
+            'advCitizenCns' => $this->advCitizenCns,
+            'advRaceColor' => $this->advRaceColor,
+            'advPracticeA' => $this->advPracticeA,
+            'advPracticeB' => $this->advPracticeB,
+            'advPracticeC' => $this->advPracticeC,
+            'advPracticeD' => $this->advPracticeD,
+        ];
+
+        foreach ($filters as $k => $val) {
+            if (in_array($k, ['searchCns', 'searchCpf', 'searchName', 'searchCnes', 'searchIne'], true)) {
+                continue;
+            }
+            if ($val !== '' && $val !== null && $val !== []) {
+                $activeFiltersCount++;
+            }
+        }
+
+        $c5FilteredCohort = $c5Service->filterCohort($c5BaseCohort, $filters);
+        $c5SummaryKpis = $c5Service->getSummaryKpis($c5FilteredCohort, $this->year, $this->quarter);
+        $c5FilterOptions = $c5Service->getFilterOptions($this->year, $this->quarter);
+
+        $c5TotalItems = $c5FilteredCohort->count();
+        $c5TotalPages = max(1, (int) ceil($c5TotalItems / max(1, $this->perPage)));
+        $this->c5Page = min(max(1, $this->c5Page), $c5TotalPages);
+
+        $c5NominalList = $c5FilteredCohort->forPage($this->c5Page, $this->perPage);
+
+        $hasCvat = Schema::hasTable('cvat_team_evaluations');
+        $facilityMap = $hasCvat ? CvatTeamEvaluation::select('ine', 'cnes', 'facility_name')
+            ->whereNotNull('ine')
+            ->get()
+            ->keyBy('ine') : collect();
+
+        $c5HypertensivesGrouped = collect();
+        if (Schema::hasTable('c5_nominal_hypertensives')) {
+            $c5HypertensivesGrouped = C5NominalHypertensive::query()
+                ->where('year', $this->year)
+                ->where('quarter', $this->quarter)
+                ->whereNotNull('ine')
+                ->where('ine', '!=', '')
+                ->selectRaw('ine, MAX(team_name) as team_name, MAX(cnes) as cnes, MAX(facility_name) as facility_name, count(*) as total_hypertensives, sum(score_percent) as sum_score, avg(score_percent) as avg_score')
+                ->groupBy('ine')
+                ->get();
+        }
+
+        if ($c5HypertensivesGrouped->isNotEmpty()) {
+            $c5TeamRows = $c5HypertensivesGrouped->map(function ($group) use ($facilityMap) {
+                $facility = $facilityMap->get($group->ine);
+                $cnes = $facility?->cnes ?: ($group->cnes ?: '—');
+                $facilityName = $facility?->facility_name ?: ($group->facility_name ?: 'Unidade Básica de Saúde');
+                $score = round((float) $group->avg_score, 2);
+                $level = FamilyHealthService::calculatePerformanceLevel('c5', $score);
+
+                return [
+                    'ine' => $group->ine,
+                    'team_name' => $group->team_name,
+                    'cnes' => $cnes,
+                    'facility_name' => $facilityName,
+                    'numerator' => (int) round((float) $group->sum_score),
+                    'denominator' => (int) $group->total_hypertensives,
+                    'score_percent' => $score,
+                    'performance_level' => $level,
+                ];
+            })->sortByDesc('score_percent')->values();
+        } elseif (Schema::hasTable('family_health_indicator_snapshots')) {
+            $c5Snaps = FamilyHealthIndicatorSnapshot::query()
+                ->where('indicator_code', 'c5')
+                ->where('year', $this->year)
+                ->where('quarter', $this->quarter)
+                ->whereNotNull('ine')
+                ->where('ine', '!=', '')
+                ->get();
+
+            $c5TeamRows = $c5Snaps->map(function ($snap) use ($facilityMap) {
+                $facility = $facilityMap->get($snap->ine);
+                $cnes = $facility?->cnes ?? '—';
+                $facilityName = $facility?->facility_name ?? 'Unidade Básica de Saúde';
+                $denominator = (int) $snap->denominator;
+                $numerator = (int) $snap->numerator;
+                $score = (float) $snap->score_percent;
+                $level = $snap->performance_level ?: FamilyHealthService::calculatePerformanceLevel('c5', $score);
+
+                return [
+                    'ine' => $snap->ine,
+                    'team_name' => $snap->team_name,
+                    'cnes' => $cnes,
+                    'facility_name' => $facilityName,
+                    'numerator' => $numerator,
+                    'denominator' => $denominator,
+                    'score_percent' => $score,
+                    'performance_level' => $level,
+                ];
+            })->sortByDesc('score_percent')->values();
+        }
+
+        $c5Total = $c5TeamRows->count();
+        $c5Reg = $c5TeamRows->filter(fn ($r) => $r['performance_level'] === 'regular')->count();
+        $c5Suf = $c5TeamRows->filter(fn ($r) => $r['performance_level'] === 'suficiente')->count();
+        $c5Bom = $c5TeamRows->filter(fn ($r) => $r['performance_level'] === 'bom')->count();
+        $c5Oti = $c5TeamRows->filter(fn ($r) => $r['performance_level'] === 'otimo')->count();
+
+        $c5Distribution = [
+            'total' => $c5Total,
+            'regular' => ['count' => $c5Reg, 'percent' => $c5Total > 0 ? round(($c5Reg / $c5Total) * 100, 1) : 0.0],
+            'suficiente' => ['count' => $c5Suf, 'percent' => $c5Total > 0 ? round(($c5Suf / $c5Total) * 100, 1) : 0.0],
+            'bom' => ['count' => $c5Bom, 'percent' => $c5Total > 0 ? round(($c5Bom / $c5Total) * 100, 1) : 0.0],
+            'otimo' => ['count' => $c5Oti, 'percent' => $c5Total > 0 ? round(($c5Oti / $c5Total) * 100, 1) : 0.0],
+        ];
+
+        return [
+            'activeFiltersCount' => $activeFiltersCount,
+            'viewVars' => [
+                'c5NominalList' => $c5NominalList,
+                'c5SummaryKpis' => $c5SummaryKpis,
+                'c5FilterOptions' => $c5FilterOptions,
+                'c5AvailableColumns' => $c5AvailableColumns,
+                'c5TotalItems' => $c5TotalItems,
+                'c5TotalPages' => $c5TotalPages,
+                'c5TeamRows' => $c5TeamRows,
+                'c5Distribution' => $c5Distribution,
+            ],
+        ];
+    }
+
+    public function exportC5Csv(C5ActiveSearchService $c5Service): StreamedResponse
+    {
+        $cohort = $c5Service->getBaseCohort($this->year, $this->quarter, $this->selectedIne);
+        $filters = [
+            'searchCns' => $this->searchCns,
+            'searchCpf' => $this->searchCpf,
+            'searchName' => $this->searchName,
+            'searchCnes' => $this->searchCnes,
+            'searchIne' => $this->searchIne,
+            'advDistrict' => $this->advDistrict,
+            'advFacility' => $this->advFacility,
+            'advTeam' => $this->advTeam,
+            'advMicroarea' => $this->advMicroarea,
+            'advCitizenName' => $this->advCitizenName,
+            'advCitizenCpf' => $this->advCitizenCpf,
+            'advCitizenCns' => $this->advCitizenCns,
+            'advRaceColor' => $this->advRaceColor,
+            'advPracticeA' => $this->advPracticeA,
+            'advPracticeB' => $this->advPracticeB,
+            'advPracticeC' => $this->advPracticeC,
+            'advPracticeD' => $this->advPracticeD,
+        ];
+        $filtered = $c5Service->filterCohort($cohort, $filters);
+
+        return $c5Service->exportCsv($filtered);
     }
 }

@@ -89,7 +89,7 @@
                 <span class="text-[11px] text-slate-500 hidden sm:inline">Clique no card correspondente para iniciar</span>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 gap-3.5">
                 <!-- Card 1: Vínculo & Território (CVAT) -->
                 <button
                     type="button"
@@ -320,7 +320,53 @@
                     </div>
                 </button>
 
-                <!-- Card 6: Processamento Geral Completo -->
+                <!-- Card 6: Indicador C5 -->
+                <button
+                    type="button"
+                    wire:click="processC5"
+                    x-on:click="startProgress('o Indicador C5 e a lista de pessoas com hipertensão')"
+                    wire:loading.attr="disabled"
+                    class="group relative flex flex-col justify-between p-4 sm:p-4.5 rounded-2xl border transition-all duration-200 text-left cursor-pointer bg-gradient-to-b from-red-50/80 to-white border-red-300/80 hover:border-red-500 hover:shadow-md hover:shadow-red-950/10 focus:outline-none focus:ring-2 focus:ring-red-500/40 disabled:opacity-60"
+                >
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="rounded-lg bg-red-100/90 text-red-800 p-2 group-hover:scale-105 transition">
+                                <svg class="h-5 w-5 text-red-700" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                                </svg>
+                            </span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider rounded-full px-2 py-0.5 bg-red-100 text-red-800 border border-red-200">
+                                Indicador C5
+                            </span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-ink group-hover:text-red-900 transition leading-snug">
+                                Hipertensão (C5)
+                            </h3>
+                            <p class="text-[11px] text-slate-500 mt-0.5 leading-normal">
+                                Cuidado Integral · 4 Práticas
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-red-100 flex items-center justify-between text-xs font-semibold text-red-800">
+                        <span wire:loading.remove wire:target="processC5" class="inline-flex items-center gap-1">
+                            <span>Processar</span>
+                            <svg class="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                            </svg>
+                        </span>
+                        <span wire:loading wire:target="processC5" class="inline-flex items-center gap-1.5 text-red-700 font-bold">
+                            <svg class="animate-spin h-3.5 w-3.5 text-red-700" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Processando...</span>
+                        </span>
+                    </div>
+                </button>
+
+                <!-- Card 7: Processamento Geral Completo -->
                 <button
                     type="button"
                     wire:click="processAll"
@@ -344,7 +390,7 @@
                                 Processamento Geral
                             </h3>
                             <p class="text-[11px] text-slate-300 mt-0.5 leading-normal">
-                                Indicadores C1, C2, C3, C4, MICI, MICDT & CVAT
+                                Indicadores C1 a C5, MICI, MICDT & CVAT
                             </p>
                         </div>
                     </div>

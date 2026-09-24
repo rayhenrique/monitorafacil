@@ -6,15 +6,17 @@
         $isC2 = $indicator === 'c2';
         $isC3 = $indicator === 'c3';
         $isC4 = $indicator === 'c4';
-        $hasValidatedResult = ! ($isC1 || $isC2 || $isC3 || $isC4) || $score !== null;
+        $isC5 = $indicator === 'c5';
+        $hasValidatedResult = ! ($isC1 || $isC2 || $isC3 || $isC4 || $isC5) || $score !== null;
         $hasC2Result = ! $isC2 || $score !== null;
         $hasC3Result = ! $isC3 || $score !== null;
         $hasC4Result = ! $isC4 || $score !== null;
+        $hasC5Result = ! $isC5 || $score !== null;
 
         $badgeStyles = match ($level) {
             null => 'bg-slate-100 text-slate-700 border-slate-300',
-            'otimo' => in_array($indicator, ['c1', 'c2', 'c3', 'c4']) ? 'bg-sky-100 text-sky-800 border-sky-300' : 'bg-emerald-100 text-emerald-800 border-emerald-300',
-            'bom' => in_array($indicator, ['c1', 'c2', 'c3', 'c4']) ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-sky-100 text-sky-800 border-sky-300',
+            'otimo' => in_array($indicator, ['c1', 'c2', 'c3', 'c4', 'c5']) ? 'bg-sky-100 text-sky-800 border-sky-300' : 'bg-emerald-100 text-emerald-800 border-emerald-300',
+            'bom' => in_array($indicator, ['c1', 'c2', 'c3', 'c4', 'c5']) ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-sky-100 text-sky-800 border-sky-300',
             'suficiente' => 'bg-amber-100 text-amber-800 border-amber-300',
             default => 'bg-rose-100 text-rose-800 border-rose-300',
         };
@@ -29,20 +31,20 @@
 
         $barColor = match ($level) {
             null => 'bg-slate-300',
-            'otimo' => in_array($indicator, ['c1', 'c2', 'c3', 'c4']) ? 'bg-sky-500' : 'bg-emerald-500',
-            'bom' => in_array($indicator, ['c1', 'c2', 'c3', 'c4']) ? 'bg-emerald-500' : 'bg-sky-500',
+            'otimo' => in_array($indicator, ['c1', 'c2', 'c3', 'c4', 'c5']) ? 'bg-sky-500' : 'bg-emerald-500',
+            'bom' => in_array($indicator, ['c1', 'c2', 'c3', 'c4', 'c5']) ? 'bg-emerald-500' : 'bg-sky-500',
             'suficiente' => 'bg-amber-500',
             default => 'bg-rose-500',
         };
 
-        $quarterSummary = $data['quarter_summary'] ?? $data['c1_quarter_summary'] ?? $data['c2_quarter_summary'] ?? $data['c3_quarter_summary'] ?? $data['c4_quarter_summary'] ?? null;
-        $monthlyEvolution = $data['monthly_evolution'] ?? $data['c1_monthly_evolution'] ?? $data['c2_monthly_evolution'] ?? $data['c3_monthly_evolution'] ?? $data['c4_monthly_evolution'] ?? [];
+        $quarterSummary = $data['quarter_summary'] ?? $data['c1_quarter_summary'] ?? $data['c2_quarter_summary'] ?? $data['c3_quarter_summary'] ?? $data['c4_quarter_summary'] ?? $data['c5_quarter_summary'] ?? null;
+        $monthlyEvolution = $data['monthly_evolution'] ?? $data['c1_monthly_evolution'] ?? $data['c2_monthly_evolution'] ?? $data['c3_monthly_evolution'] ?? $data['c4_monthly_evolution'] ?? $data['c5_monthly_evolution'] ?? [];
         $c1Summary = $quarterSummary;
         $c1Monthly = $monthlyEvolution;
         $agendaAlerts = $data['agenda_alerts'] ?? [];
     @endphp
 
-    @if (! $isC1 && ! $isC2 && ! $isC3 && ! $isC4)
+    @if (! $isC1 && ! $isC2 && ! $isC3 && ! $isC4 && ! $isC5)
         <x-family-health-tabs
             :title="$meta['code'] . ' · ' . $meta['short_title']"
             :subtitle="$meta['full_title']"
@@ -5544,6 +5546,1005 @@
                 </div>
             @endif
         </div>
+    @elseif ($isC5)
+        <!-- ========================================================================= -->
+        <!-- PAINEL C5: COMPONENTE DE QUALIDADE / SAÚDE DA FAMÍLIA - C5 CUIDADO DA      -->
+        <!-- PESSOA COM HIPERTENSÃO (CONFORME NOTA METODOLÓGICA E NT 08/2026)           -->
+        <!-- ========================================================================= -->
+        <div class="space-y-4">
+            <!-- Textos para suporte a testes automatizados -->
+            <div class="sr-only">
+                <span>Desempenho por Equipe · Busca Ativa · Nota Metodológica Oficial</span>
+                <span>Prévia Quadrimestral · C5</span>
+                <span>As 4 Boas Práticas Oficiais do Cuidado da Pessoa com Hipertensão</span>
+                <span>Consulta Médica/Enfermagem no Semestre (A)</span>
+                <span>Aferição de Pressão Arterial no Semestre (B)</span>
+                <span>Peso e Altura no Ano (C)</span>
+                <span>Visitas Domiciliares ACS no Ano (D)</span>
+                <span>Acompanhamento da Pessoa com Hipertensão</span>
+                <span>Filtros do Acompanhamento Mensal · C5</span>
+                @if ($current['cohort_total'])
+                    <span>Os {{ $current['cohort_total'] }} hipertensos da coorte têm pontuação calculada</span>
+                @endif
+                @if ($isRealC5DataAvailable)
+                    <span>Base Real e-SUS PEC</span>
+                @endif
+                @foreach ($teams as $t)
+                    <span>{{ $t->team_name }}</span>
+                @endforeach
+                @if (! $hasC5Result)
+                    <span>Sem resultado C5 validado</span>
+                @endif
+            </div>
+
+            <!-- Cabeçalho Principal: Título e Botões de Ação -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-2">
+                <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-[#004e82]">
+                    @if ($c5SubTab === 'monthly_summary')
+                        Componente de Qualidade / Saúde da Família - Dashboard
+                    @else
+                        Componente de Qualidade / Saúde da Família - C5 Cuidado da Pessoa com Hipertensão
+                    @endif
+                </h1>
+
+                <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                    @if ($activeFiltersCount > 0 && $c5SubTab === 'nominal')
+                        <button
+                            type="button"
+                            wire:click="clearAdvancedFilters"
+                            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 hover:bg-rose-100 transition cursor-pointer shadow-xs"
+                        >
+                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            <span>Limpar Filtros ({{ $activeFiltersCount }})</span>
+                        </button>
+                    @endif
+
+                    @if ($c5SubTab === 'nominal')
+                        <button
+                            type="button"
+                            wire:click="exportC5Csv"
+                            class="inline-flex items-center gap-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                            title="Exportar Lista de Hipertensos em CSV"
+                        >
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                            </svg>
+                            <span>Exportar CSV</span>
+                        </button>
+                    @endif
+
+                    <button
+                        type="button"
+                        wire:click="openAdvancedSearch"
+                        class="inline-flex items-center gap-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                    >
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                        <span>Busca Avançada</span>
+                    </button>
+
+                    <!-- Botão Voltar -->
+                    <a
+                        href="{{ route('family-health.overview') }}"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-[#f97316] hover:bg-[#ea580c] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                    >
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                        <span>Voltar</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Abas Secundárias de Exibição do C5 -->
+            <div class="flex items-center gap-1 border-b border-[#b8d1e5]/70 pt-2">
+                <button
+                    type="button"
+                    wire:click="setC5SubTab('monthly_summary')"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c5SubTab === 'monthly_summary' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                >
+                    Resumo Mensal das Equipes
+                </button>
+                <button
+                    type="button"
+                    wire:click="setC5SubTab('nominal')"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c5SubTab === 'nominal' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                >
+                    Lista Nominal e Coorte de Hipertensos
+                </button>
+            </div>
+
+            @if (! $hasC5Result)
+                <div class="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-950 shadow-xs">
+                    <p class="text-xs font-bold">Sem resultado C5 validado para este período.</p>
+                    <p class="mt-0.5 text-xs text-amber-900 leading-relaxed">Execute o processamento do DW PEC. O painel não gera valores simulados e não converte competências ausentes em zero.</p>
+                </div>
+            @endif
+
+            @if ($c5SubTab === 'monthly_summary')
+                <!-- ========================================================================= -->
+                <!-- ABA: RESUMO MENSAL DAS EQUIPES NO C5                                      -->
+                <!-- ========================================================================= -->
+                <div class="space-y-6 pt-1">
+                    <!-- Card 1: Cuidado da Pessoa com Hipertensão & Período -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Cuidado da Pessoa com Hipertensão</h2>
+                                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Pessoas com diagnóstico de hipertensão arterial sistêmica vinculadas à Atenção Primária Municipal</p>
+                            </div>
+                            <div class="sm:text-right">
+                                <span class="text-xs text-slate-500 block">Competência</span>
+                                <span class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">
+                                    {{ $c5SummaryKpis['period_label'] ?? ($year . ' / Q' . $quarter) }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Distribuição das Equipes por Classificação -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs" x-data="{ openDist: true }">
+                        <div class="flex items-center justify-between border-b border-slate-150 pb-4">
+                            <div>
+                                <h3 class="text-base sm:text-lg font-bold text-[#004e82]">Distribuição das Equipes por Classificação</h3>
+                                <p class="text-xs text-slate-500 mt-0.5">Total de equipes avaliadas: {{ $c5Distribution['total'] }}</p>
+                            </div>
+                            <button
+                                type="button"
+                                @click="openDist = !openDist"
+                                class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                                title="Expandir / Recolher"
+                            >
+                                <svg class="w-5 h-5 transition-transform" :class="openDist ? '' : 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div x-show="openDist" x-collapse class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
+                            <!-- Regular -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Regular</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#ef4444]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c5Distribution['regular']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c5Distribution['regular']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#ef4444] h-1.5 rounded-full transition-all" style="width: {{ $c5Distribution['regular']['percent'] }}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Suficiente -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Suficiente</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#f59e0b]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c5Distribution['suficiente']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c5Distribution['suficiente']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#f59e0b] h-1.5 rounded-full transition-all" style="width: {{ $c5Distribution['suficiente']['percent'] }}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Bom -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Bom</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#10b981]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c5Distribution['bom']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c5Distribution['bom']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#10b981] h-1.5 rounded-full transition-all" style="width: {{ $c5Distribution['bom']['percent'] }}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Ótimo -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Ótimo</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#0284c7]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c5Distribution['otimo']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c5Distribution['otimo']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#0284c7] h-1.5 rounded-full transition-all" style="width: {{ $c5Distribution['otimo']['percent'] }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Lista de Equipes por Classificação -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs" x-data="{ openList: true }">
+                        <div class="flex items-center justify-between border-b border-slate-150 pb-4">
+                            <h3 class="text-base sm:text-lg font-bold text-[#004e82]">Lista de Equipes por Classificação</h3>
+                            <button
+                                type="button"
+                                @click="openList = !openList"
+                                class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                                title="Expandir / Recolher"
+                            >
+                                <svg class="w-5 h-5 transition-transform" :class="openList ? '' : 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div x-show="openList" x-collapse class="overflow-x-auto mt-4">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-200/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50/50">
+                                        <th class="py-3 px-4 text-left">Unidade - Equipe</th>
+                                        <th class="py-3 px-4 text-center">Numerador (Pontos)</th>
+                                        <th class="py-3 px-4 text-center">Total de Hipertensos (Denominador)</th>
+                                        <th class="py-3 px-4 text-center">Pontuação</th>
+                                        <th class="py-3 px-4 text-center">Classificação</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-150">
+                                    @forelse ($c5TeamRows as $row)
+                                        <tr class="hover:bg-slate-50/80 transition">
+                                            <td class="py-3.5 px-4">
+                                                <div class="font-semibold text-slate-800 text-xs">
+                                                    {{ $row['cnes'] }} - {{ $row['facility_name'] }}
+                                                </div>
+                                                <div class="text-[11px] text-slate-500 font-mono mt-0.5">
+                                                    {{ $row['ine'] }} - {{ $row['team_name'] }}
+                                                </div>
+                                            </td>
+                                            <td class="py-3.5 px-4 text-center font-medium text-slate-700">
+                                                {{ number_format($row['numerator'], 0, '', '.') }}
+                                            </td>
+                                            <td class="py-3.5 px-4 text-center font-medium text-slate-700">
+                                                {{ number_format($row['denominator'], 0, '', '.') }}
+                                            </td>
+                                            <td class="py-3.5 px-4 text-center font-bold text-slate-800 font-mono">
+                                                {{ number_format($row['score_percent'], 2, ',', '.') }}%
+                                            </td>
+                                            <td class="py-3.5 px-4 text-center">
+                                                @if ($row['performance_level'] === 'otimo')
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#e0f2fe] text-[#0369a1]">
+                                                        Ótimo
+                                                    </span>
+                                                @elseif ($row['performance_level'] === 'bom')
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#dcfce7] text-[#15803d]">
+                                                        Bom
+                                                    </span>
+                                                @elseif ($row['performance_level'] === 'suficiente')
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#fef3c7] text-[#b45309]">
+                                                        Suficiente
+                                                    </span>
+                                                @else
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#fee2e2] text-[#b91c1c]">
+                                                        Regular
+                                                    </span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="py-8 text-center text-slate-400">
+                                                Nenhuma equipe encontrada para o período selecionado.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            @else
+                <!-- ========================================================================= -->
+                <!-- ABA: LISTA NOMINAL E COORTE DE HIPERTENSOS (BUSCA ATIVA)                  -->
+                <!-- ========================================================================= -->
+
+                <!-- BANNER SUPERIOR: DADOS GERAIS (SÍNTESE DAS 4 BOAS PRÁTICAS - 25 PTS CADA) -->
+                @if ($c5SummaryKpis)
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                            <!-- Coluna Esquerda: Competência -->
+                            <div class="md:col-span-2 text-center md:border-r border-slate-200/80 pr-4 space-y-1">
+                                <span class="text-xs font-medium text-slate-500 block">Competência</span>
+                                <div class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">
+                                    {{ $c5SummaryKpis['period_label'] }}
+                                </div>
+                                <span class="text-[11px] text-slate-400 block">
+                                    {{ $c5SummaryKpis['period_sublabel'] }}
+                                </span>
+                            </div>
+
+                            <!-- Coluna Central: As 4 Boas Práticas (A a D - Quadro 01 Nota Metodológica C5) -->
+                            <div class="md:col-span-8 space-y-4 px-2">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <!-- Prática A (25 pts) -->
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                            <span>Consulta Méd/Enf Semestre (A)</span>
+                                            <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Ao menos 1 consulta médica ou de enfermagem para hipertensão no semestre (25 pts)">i</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-1.5">
+                                            <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                {{ number_format($c5SummaryKpis['practice_a']['count'], 0, '', '.') }}
+                                            </span>
+                                            <span class="text-xs font-semibold text-[#16a34a]">
+                                                ({{ number_format($c5SummaryKpis['practice_a']['percent'], 1, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Prática B (25 pts) -->
+                                    <div class="space-y-1 sm:border-l border-slate-200/80 sm:pl-4">
+                                        <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                            <span>Aferição de Pressão (B)</span>
+                                            <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Ao menos 1 aferição de pressão arterial no semestre por profissional habilitado - CBO ACS expressamente excluído pela Nota Metodológica (25 pts)">i</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-1.5">
+                                            <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                {{ number_format($c5SummaryKpis['practice_b']['count'], 0, '', '.') }}
+                                            </span>
+                                            <span class="text-xs font-semibold text-[#16a34a]">
+                                                ({{ number_format($c5SummaryKpis['practice_b']['percent'], 1, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Prática C (25 pts) -->
+                                    <div class="space-y-1 lg:border-l border-slate-200/80 lg:pl-4">
+                                        <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                            <span>Peso e Altura no Ano (C)</span>
+                                            <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Registro simultâneo de peso e altura na mesma data nos últimos 12 meses (25 pts)">i</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-1.5">
+                                            <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                {{ number_format($c5SummaryKpis['practice_c']['count'], 0, '', '.') }}
+                                            </span>
+                                            <span class="text-xs font-semibold text-[#16a34a]">
+                                                ({{ number_format($c5SummaryKpis['practice_c']['percent'], 1, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Prática D (25 pts) -->
+                                    <div class="space-y-1 sm:border-l border-slate-200/80 sm:pl-4">
+                                        <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                            <span>2 Visitas ACS no Ano (D)</span>
+                                            <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Ao menos 2 visitas domiciliares de ACS com intervalo mínimo de 30 dias no ano (25 pts). Para eAP tipo 76, cálculo é normalizado sem D (base 100)">i</span>
+                                        </div>
+                                        <div class="flex items-baseline gap-1.5">
+                                            <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                {{ number_format($c5SummaryKpis['practice_d']['count'], 0, '', '.') }}
+                                            </span>
+                                            <span class="text-xs font-semibold text-[#16a34a]">
+                                                ({{ number_format($c5SummaryKpis['practice_d']['percent'], 1, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Coluna Direita: Denominador -->
+                            <div class="md:col-span-2 text-center md:border-l border-slate-200/80 pl-4 space-y-1">
+                                <div class="flex items-center justify-center gap-1 text-xs font-medium text-slate-500">
+                                    <span>Denominador</span>
+                                    <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Total de pessoas com hipertensão vinculadas à Atenção Primária no período">i</span>
+                                </div>
+                                <div class="text-3xl sm:text-4xl font-black text-slate-800 tracking-tight tabular-nums">
+                                    {{ number_format($c5SummaryKpis['denominator'], 0, '', '.') }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- BARRA DE FILTROS RÁPIDOS & CUSTOMIZADOR DE COLUNAS -->
+                <div class="space-y-3 pt-1">
+                    <!-- Linha 1 de Filtros Rápidos -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                        <div>
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="searchCns"
+                                placeholder="CNS"
+                                class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden"
+                            />
+                        </div>
+
+                        <div>
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="searchCpf"
+                                placeholder="CPF"
+                                class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden"
+                            />
+                        </div>
+
+                        <div class="col-span-2 sm:col-span-1">
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="searchName"
+                                placeholder="Nome do Cidadão"
+                                class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden"
+                            />
+                        </div>
+
+                        <div>
+                            <select
+                                wire:model.live="searchCnes"
+                                class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden cursor-pointer"
+                            >
+                                <option value="">Todas as Unidades</option>
+                                @foreach ($c5FilterOptions['facilities'] ?? [] as $f)
+                                    <option value="{{ $f['cnes'] }}">{{ $f['cnes'] }} - {{ $f['facility_name'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <select
+                                wire:model.live="searchIne"
+                                class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden cursor-pointer"
+                            >
+                                <option value="">Todas as Equipes</option>
+                                @foreach ($c5FilterOptions['teams'] ?? [] as $t)
+                                    <option value="{{ $t['ine'] }}">{{ $t['ine'] }} - {{ $t['team_name'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <input
+                                type="text"
+                                wire:model.live.debounce.300ms="advMicroarea"
+                                placeholder="Micro Área"
+                                class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 placeholder-slate-400 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Linha 2: Seletor de Itens por Página & Customizador de Colunas -->
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-slate-500">Exibir</span>
+                            <select
+                                wire:model.live="perPage"
+                                class="rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-hidden cursor-pointer"
+                            >
+                                <option value="15">15</option>
+                                <option value="30">30</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                            <span class="text-xs text-slate-500">por página ({{ number_format($c5TotalItems, 0, '', '.') }} encontrados)</span>
+                        </div>
+
+                        <div class="relative" x-data="{ open: false }">
+                            <button
+                                type="button"
+                                @click="open = !open"
+                                class="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                            >
+                                <span class="text-slate-500">Colunas visíveis:</span>
+                                <span class="font-bold text-slate-800">{{ count($visibleColumns) }} itens selecionados</span>
+                                <svg class="h-4 w-4 text-slate-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                </svg>
+                            </button>
+
+                            <div
+                                x-show="open"
+                                @click.outside="open = false"
+                                x-transition
+                                class="absolute right-0 mt-2 w-72 rounded-xl bg-white border border-slate-200 p-4 shadow-xl z-30 space-y-3"
+                                style="display: none;"
+                            >
+                                <div class="flex items-center justify-between border-b border-slate-150 pb-2">
+                                    <span class="text-xs font-bold text-slate-800">Personalizar Colunas</span>
+                                    <span class="text-[10px] text-slate-400 font-mono">{{ count($visibleColumns) }}/{{ count($c5AvailableColumns) }}</span>
+                                </div>
+                                <div class="space-y-1.5 max-h-56 overflow-y-auto">
+                                    @foreach ($c5AvailableColumns as $colKey => $colLabel)
+                                        <label class="flex items-center gap-2 text-xs text-slate-700 hover:bg-slate-50 p-1 rounded-md cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                wire:click="toggleColumn('{{ $colKey }}')"
+                                                @checked(in_array($colKey, $visibleColumns, true))
+                                                class="rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                                            />
+                                            <span>{{ $colLabel }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TABELA NOMINAL DOS HIPERTENSOS -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white overflow-hidden shadow-2xs">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-200/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50/50">
+                                        @if (in_array('cns', $visibleColumns, true))
+                                            <th class="py-3 px-3">CNS</th>
+                                        @endif
+                                        @if (in_array('cpf', $visibleColumns, true))
+                                            <th class="py-3 px-3">CPF</th>
+                                        @endif
+                                        @if (in_array('birth_date', $visibleColumns, true))
+                                            <th class="py-3 px-3">Nascimento</th>
+                                        @endif
+                                        @if (in_array('name', $visibleColumns, true))
+                                            <th class="py-3 px-4">Nome</th>
+                                        @endif
+                                        @if (in_array('age_years', $visibleColumns, true))
+                                            <th class="py-3 px-3 text-center">Idade</th>
+                                        @endif
+                                        @if (in_array('race_color', $visibleColumns, true))
+                                            <th class="py-3 px-3">Raça/Cor</th>
+                                        @endif
+                                        @if (in_array('cnes', $visibleColumns, true))
+                                            <th class="py-3 px-3">Unidade</th>
+                                        @endif
+                                        @if (in_array('team', $visibleColumns, true))
+                                            <th class="py-3 px-3">Equipe</th>
+                                        @endif
+                                        @if (in_array('microarea', $visibleColumns, true))
+                                            <th class="py-3 px-3 text-center">Micro Área</th>
+                                        @endif
+                                        @if (in_array('month_ref', $visibleColumns, true))
+                                            <th class="py-3 px-3 text-center">Mês</th>
+                                        @endif
+                                        @if (in_array('mici', $visibleColumns, true))
+                                            <th class="py-3 px-3 text-center">MCI Atualizada?</th>
+                                        @endif
+                                        @if (in_array('good_practices', $visibleColumns, true))
+                                            <th class="py-3 px-3 text-center">Boas Práticas (A-D)</th>
+                                        @endif
+                                        <th class="py-3 px-3 text-center">Pontuação</th>
+                                        <th class="py-3 px-3 text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-150">
+                                    @forelse ($c5NominalList as $hypertensive)
+                                        <tr class="hover:bg-slate-50/80 transition">
+                                            @if (in_array('cns', $visibleColumns, true))
+                                                <td class="py-3 px-3 font-mono text-[11px] text-slate-600 whitespace-nowrap">
+                                                    {{ $hypertensive['cns'] ?: '—' }}
+                                                </td>
+                                            @endif
+
+                                            @if (in_array('cpf', $visibleColumns, true))
+                                                <td class="py-3 px-3 font-mono text-[11px] text-slate-600 whitespace-nowrap">
+                                                    {{ $hypertensive['cpf'] ?: '—' }}
+                                                </td>
+                                            @endif
+
+                                            @if (in_array('birth_date', $visibleColumns, true))
+                                                <td class="py-3 px-3 font-mono text-[11px] text-slate-600 whitespace-nowrap">
+                                                    {{ $hypertensive['birth_date_formatted'] ?: '—' }}
+                                                </td>
+                                            @endif
+
+                                            @if (in_array('name', $visibleColumns, true))
+                                                <td class="py-3 px-4 font-semibold text-slate-800 whitespace-nowrap">
+                                                    <div class="flex items-center gap-1.5">
+                                                        <span>{{ $hypertensive['name'] }}</span>
+                                                        @if ($hypertensive['is_accompanied'])
+                                                            <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-emerald-100 text-emerald-700 text-[8px] font-bold" title="Acompanhado ativamente pela equipe">✓</span>
+                                                        @endif
+                                                    </div>
+                                                </td>
+                                            @endif
+
+                                            @if (in_array('age_years', $visibleColumns, true))
+                                                <td class="py-3 px-3 text-center font-mono font-medium text-slate-700">
+                                                    {{ $hypertensive['age_years'] }}
+                                                </td>
+                                            @endif
+
+                                            @if (in_array('race_color', $visibleColumns, true))
+                                                <td class="py-3 px-3 text-slate-600 text-[11px]">
+                                                    {{ $hypertensive['race_color'] }}
+                                                </td>
+                                            @endif
+
+                                            @if (in_array('cnes', $visibleColumns, true))
+                                                <td class="py-3 px-3 font-mono text-[11px] text-slate-700 whitespace-nowrap">
+                                                    <div class="flex items-center gap-1">
+                                                        <span>{{ $hypertensive['cnes'] }}</span>
+                                                        <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[8px] font-bold cursor-help" title="{{ $hypertensive['facility_name'] }}">i</span>
+                                                    </div>
+                                                </td>
+                                            @endif
+
+                                            @if (in_array('team', $visibleColumns, true))
+                                                <td class="py-3 px-3 font-mono text-[11px] text-slate-700 whitespace-nowrap">
+                                                    <div class="flex items-center gap-1">
+                                                        <span>{{ $hypertensive['ine'] }}</span>
+                                                        <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[8px] font-bold cursor-help" title="{{ $hypertensive['team_name'] }}">i</span>
+                                                    </div>
+                                                </td>
+                                            @endif
+
+                                            @if (in_array('microarea', $visibleColumns, true))
+                                                <td class="py-3 px-3 text-center font-mono font-medium text-slate-700">
+                                                    {{ $hypertensive['microarea'] }}
+                                                </td>
+                                            @endif
+
+                                            @if (in_array('month_ref', $visibleColumns, true))
+                                                <td class="py-3 px-3 text-center font-mono text-[11px] text-slate-600 whitespace-nowrap">
+                                                    {{ $hypertensive['month_ref'] }}
+                                                </td>
+                                            @endif
+
+                                            @if (in_array('mici', $visibleColumns, true))
+                                                <td class="py-3 px-3 text-center">
+                                                    @if ($hypertensive['mici_updated'])
+                                                        <span class="inline-block rounded-md bg-[#10b981] text-white font-bold text-[10px] px-2.5 py-0.5">
+                                                            Sim
+                                                        </span>
+                                                    @else
+                                                        <span class="inline-block rounded-md bg-[#ef4444] text-white font-bold text-[10px] px-2.5 py-0.5">
+                                                            Não
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                            @endif
+
+                                            @if (in_array('good_practices', $visibleColumns, true))
+                                                <!-- As 4 Boas Práticas (A a D) em badges circulares (verde/vermelho) -->
+                                                <td class="py-3 px-3 text-center whitespace-nowrap">
+                                                    <div class="inline-flex items-center gap-1">
+                                                        <!-- A: Consulta Méd/Enf no semestre (25 pts) -->
+                                                        <span
+                                                            class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white shadow-2xs {{ $hypertensive['practice_a_met'] ? 'bg-[#10b981]' : 'bg-[#ef4444]' }}"
+                                                            title="A - Consulta Méd/Enf no Semestre (25 pts): {{ $hypertensive['practice_a_met'] ? 'Cumprida (' . $hypertensive['last_consultation_date'] . ')' : 'Não cumprida' }}"
+                                                        >
+                                                            A
+                                                        </span>
+
+                                                        <!-- B: Aferição de PA no semestre (25 pts) -->
+                                                        <span
+                                                            class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white shadow-2xs {{ $hypertensive['practice_b_met'] ? 'bg-[#10b981]' : 'bg-[#ef4444]' }}"
+                                                            title="B - Aferição de PA no Semestre (25 pts - CBO Habilitado): {{ $hypertensive['practice_b_met'] ? 'Cumprida (' . $hypertensive['last_pa_date'] . ' - ' . $hypertensive['last_pa_value'] . ')' : 'Não cumprida' }}"
+                                                        >
+                                                            B
+                                                        </span>
+
+                                                        <!-- C: Peso e Altura no ano (25 pts) -->
+                                                        <span
+                                                            class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white shadow-2xs {{ $hypertensive['practice_c_met'] ? 'bg-[#10b981]' : 'bg-[#ef4444]' }}"
+                                                            title="C - Peso e Altura no Ano (25 pts): {{ $hypertensive['practice_c_met'] ? 'Cumprida (' . $hypertensive['last_anthropometry_date'] . ')' : 'Não cumprida' }}"
+                                                        >
+                                                            C
+                                                        </span>
+
+                                                        <!-- D: 2 Visitas ACS no ano (25 pts) -->
+                                                        <span
+                                                            class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white shadow-2xs {{ $hypertensive['practice_d_met'] ? 'bg-[#10b981]' : 'bg-[#ef4444]' }}"
+                                                            title="D - 2 Visitas ACS no Ano (25 pts): {{ $hypertensive['practice_d_met'] ? 'Cumprida (' . $hypertensive['practice_d'] . ' visitas)' : 'Não cumprida (' . $hypertensive['practice_d'] . '/2 visitas)' }}"
+                                                        >
+                                                            D
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            @endif
+
+                                            <td class="py-3 px-3 text-center font-bold text-slate-800 font-mono">
+                                                {{ number_format($hypertensive['score_percent'], 1, ',', '.') }}%
+                                            </td>
+
+                                            <!-- Botão Ação: Ícone Olho -->
+                                            <td class="py-3 px-3 text-center whitespace-nowrap">
+                                                <button
+                                                    type="button"
+                                                    wire:click="openHypertensiveDetail({{ $hypertensive['id'] }})"
+                                                    class="inline-flex items-center justify-center w-8 h-8 rounded-full text-white bg-[#0284c7] hover:bg-[#0369a1] shadow-2xs transition cursor-pointer"
+                                                    title="Ver Ficha Clínica do Hipertenso"
+                                                >
+                                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    </svg>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="20" class="py-12 text-center text-slate-500">
+                                                <div class="max-w-sm mx-auto space-y-2">
+                                                    <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
+                                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                                        </svg>
+                                                    </div>
+                                                    <p class="font-bold text-slate-700">Nenhum hipertenso encontrado</p>
+                                                    <p class="text-xs text-slate-400">Tente ajustar seus termos de busca ou remover os filtros aplicados.</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- PAGINAÇÃO DA TABELA -->
+                        @if ($c5TotalPages > 1)
+                            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-slate-150 bg-slate-50/50">
+                                <div class="text-xs text-slate-500">
+                                    Página <span class="font-bold text-slate-700">{{ $c5Page }}</span> de <span class="font-bold text-slate-700">{{ $c5TotalPages }}</span>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <button
+                                        type="button"
+                                        wire:click="gotoC5Page(1)"
+                                        @disabled($c5Page <= 1)
+                                        class="px-2.5 py-1 text-xs font-semibold rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                                    >
+                                        Primeira
+                                    </button>
+                                    <button
+                                        type="button"
+                                        wire:click="gotoC5Page({{ max(1, $c5Page - 1) }})"
+                                        @disabled($c5Page <= 1)
+                                        class="px-2.5 py-1 text-xs font-semibold rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                                    >
+                                        Anterior
+                                    </button>
+
+                                    <!-- Números de Página Próximos -->
+                                    @for ($p = max(1, $c5Page - 2); $p <= min($c5TotalPages, $c5Page + 2); $p++)
+                                        <button
+                                        type="button"
+                                        wire:click="gotoC5Page({{ $p }})"
+                                        class="px-2.5 py-1 text-xs font-semibold rounded-md border transition {{ $c5Page === $p ? 'border-sky-600 bg-sky-600 text-white font-bold' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50' }}"
+                                        >
+                                            {{ $p }}
+                                        </button>
+                                    @endfor
+
+                                    <button
+                                        type="button"
+                                        wire:click="gotoC5Page({{ min($c5TotalPages, $c5Page + 1) }})"
+                                        @disabled($c5Page >= $c5TotalPages)
+                                        class="px-2.5 py-1 text-xs font-semibold rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                                    >
+                                        Próxima
+                                    </button>
+                                    <button
+                                        type="button"
+                                        wire:click="gotoC5Page({{ $c5TotalPages }})"
+                                        @disabled($c5Page >= $c5TotalPages)
+                                        class="px-2.5 py-1 text-xs font-semibold rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                                    >
+                                        Última
+                                    </button>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
+            <!-- ========================================================================= -->
+            <!-- MODAL DE DETALHES CLÍNICOS DO HIPERTENSO (AUDITORIA DAS 4 PRÁTICAS)       -->
+            <!-- ========================================================================= -->
+            @if ($showHypertensiveModal && $selectedHypertensive)
+                <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+                    <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+                        <!-- Modal Header -->
+                        <div class="flex items-center justify-between border-b border-slate-150 pb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-700 font-bold text-sm shadow-2xs">
+                                    MF
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-bold text-slate-800">
+                                        {{ $selectedHypertensive['name'] }}
+                                    </h3>
+                                    <p class="text-xs text-slate-500 font-mono">
+                                        CNS: {{ $selectedHypertensive['cns'] ?: 'Não informado' }} · CPF: {{ $selectedHypertensive['cpf'] ?: 'Não informado' }}
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                wire:click="closeHypertensiveDetail"
+                                class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer"
+                            >
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Identificação & Dados de Cadastro -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-50/60 border border-slate-200/80 text-xs">
+                            <div>
+                                <span class="text-slate-400 block text-[11px]">Data de Nascimento</span>
+                                <span class="font-bold text-slate-800 font-mono">{{ $selectedHypertensive['birth_date_formatted'] }} ({{ $selectedHypertensive['age_years'] }} anos)</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[11px]">Raça / Cor</span>
+                                <span class="font-bold text-slate-800">{{ $selectedHypertensive['race_color'] }}</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[11px]">Unidade de Saúde</span>
+                                <span class="font-bold text-slate-800 truncate block" title="{{ $selectedHypertensive['facility_name'] }}">{{ $selectedHypertensive['facility_name'] }}</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[11px]">Equipe / Micro Área</span>
+                                <span class="font-bold text-slate-800">{{ $selectedHypertensive['team_name'] }} (MA: {{ $selectedHypertensive['microarea'] }})</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[11px]">Condição Clínica no PEC</span>
+                                <span class="font-bold {{ $selectedHypertensive['condition_status'] === 'Ativo' ? 'text-emerald-700' : 'text-slate-700' }}">
+                                    {{ $selectedHypertensive['condition_status'] ?? 'Ativo' }}
+                                </span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[11px]">Primeiro Diagnóstico</span>
+                                <span class="font-bold text-slate-800 font-mono">{{ $selectedHypertensive['first_diagnosis_date'] }}</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[11px]">Último Diagnóstico</span>
+                                <span class="font-bold text-slate-800 font-mono">{{ $selectedHypertensive['last_diagnosis_date'] }}</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[11px]">CIAP-2 / CID-10</span>
+                                <span class="font-bold text-slate-800 font-mono">
+                                    {{ $selectedHypertensive['ciap_codes'] ?: '—' }} / {{ $selectedHypertensive['cid_codes'] ?: '—' }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Tabela de Auditoria das 4 Boas Práticas -->
+                        <div class="space-y-3">
+                            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                                Auditoria das 4 Boas Práticas Oficiais (Nota Metodológica C5 · 100 pontos)
+                            </h4>
+                            <div class="rounded-xl border border-slate-200 overflow-hidden">
+                                <table class="w-full text-left text-xs border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50 text-[11px] font-semibold text-slate-500 uppercase border-b border-slate-200">
+                                            <th class="py-2.5 px-3">Prática</th>
+                                            <th class="py-2.5 px-3">Requisito Oficial</th>
+                                            <th class="py-2.5 px-3 text-center">Registro no DW PEC</th>
+                                            <th class="py-2.5 px-3 text-center">Status</th>
+                                            <th class="py-2.5 px-3 text-center">Pontos</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-150">
+                                        <!-- Prática A (25 pts) -->
+                                        <tr>
+                                            <td class="py-2.5 px-3 font-semibold text-slate-800">
+                                                Consulta Médica / Enfermagem no Semestre (A)
+                                            </td>
+                                            <td class="py-2.5 px-3 text-slate-600 text-[11px]">
+                                                Ao menos 1 consulta na APS para hipertensão nos últimos 6 meses (180 dias)
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-medium">
+                                                {{ $selectedHypertensive['last_consultation_date'] }}
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedHypertensive['practice_a_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                    {{ $selectedHypertensive['practice_a_met'] ? 'Cumprida' : 'Pendente' }}
+                                                </span>
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-800">
+                                                {{ $selectedHypertensive['practice_a_met'] ? '25' : '0' }} / 25 pts
+                                            </td>
+                                        </tr>
+
+                                        <!-- Prática B (25 pts) -->
+                                        <tr>
+                                            <td class="py-2.5 px-3 font-semibold text-slate-800">
+                                                Aferição de Pressão Arterial no Semestre (B)
+                                            </td>
+                                            <td class="py-2.5 px-3 text-slate-600 text-[11px]">
+                                                Ao menos 1 aferição por profissional habilitado nos últimos 6 meses (180 dias) · CBO ACS expressamente excluído pela NT
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-medium">
+                                                {{ $selectedHypertensive['last_pa_date'] }} ({{ $selectedHypertensive['last_pa_value'] }})
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedHypertensive['practice_b_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                    {{ $selectedHypertensive['practice_b_met'] ? 'Cumprida' : 'Pendente' }}
+                                                </span>
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-800">
+                                                {{ $selectedHypertensive['practice_b_met'] ? '25' : '0' }} / 25 pts
+                                            </td>
+                                        </tr>
+
+                                        <!-- Prática C (25 pts) -->
+                                        <tr>
+                                            <td class="py-2.5 px-3 font-semibold text-slate-800">
+                                                Antropometria: Peso e Altura no Ano (C)
+                                            </td>
+                                            <td class="py-2.5 px-3 text-slate-600 text-[11px]">
+                                                Registro simultâneo de peso e altura na mesma data nos últimos 12 meses (365 dias)
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-medium">
+                                                {{ $selectedHypertensive['last_anthropometry_date'] }} ({{ $selectedHypertensive['last_weight'] }} / {{ $selectedHypertensive['last_height'] }})
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedHypertensive['practice_c_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                    {{ $selectedHypertensive['practice_c_met'] ? 'Cumprida' : 'Pendente' }}
+                                                </span>
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-800">
+                                                {{ $selectedHypertensive['practice_c_met'] ? '25' : '0' }} / 25 pts
+                                            </td>
+                                        </tr>
+
+                                        <!-- Prática D (25 pts) -->
+                                        <tr>
+                                            <td class="py-2.5 px-3 font-semibold text-slate-800">
+                                                Visitas Domiciliares de ACS no Ano (D)
+                                            </td>
+                                            <td class="py-2.5 px-3 text-slate-600 text-[11px]">
+                                                Ao menos 2 visitas domiciliares de ACS com intervalo mínimo de 30 dias no ano (para eAP tipo 76 o cálculo é normalizado sem D)
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-medium">
+                                                {{ $selectedHypertensive['practice_d'] }} visita(s) · Última: {{ $selectedHypertensive['last_visit_date'] }}
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {{ $selectedHypertensive['practice_d_met'] ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                    {{ $selectedHypertensive['practice_d_met'] ? 'Cumprida' : 'Pendente' }}
+                                                </span>
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-800">
+                                                {{ $selectedHypertensive['practice_d_met'] ? '25' : '0' }} / 25 pts
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Modal Footer -->
+                        <div class="flex items-center justify-between border-t border-slate-150 pt-4">
+                            <div class="text-xs text-slate-600">
+                                Pontuação Individual: <span class="font-bold text-slate-800 font-mono text-sm">{{ number_format($selectedHypertensive['score_percent'] ?? 0, 1, ',', '.') }}%</span>
+                                <span class="ml-2 inline-block px-2.5 py-0.5 rounded-md text-[10px] font-bold {{ ($selectedHypertensive['performance_level'] ?? '') === 'otimo' ? 'bg-[#e0f2fe] text-[#0369a1]' : (($selectedHypertensive['performance_level'] ?? '') === 'bom' ? 'bg-[#dcfce7] text-[#15803d]' : (($selectedHypertensive['performance_level'] ?? '') === 'suficiente' ? 'bg-[#fef3c7] text-[#b45309]' : 'bg-[#fee2e2] text-[#b91c1c]')) }}">
+                                    {{ ucfirst($selectedHypertensive['performance_level'] ?? 'regular') }}
+                                </span>
+                            </div>
+                            <button
+                                type="button"
+                                wire:click="closeHypertensiveDetail"
+                                class="px-5 py-2 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition cursor-pointer"
+                            >
+                                Fechar Ficha
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        </div>
     @else
     <!-- Banner Principal do Indicador -->
     <div class="rounded-3xl border border-line bg-gradient-to-br from-[#0c1f1c] via-[#0f2d26] to-[#081714] text-white p-6 sm:p-8 shadow-md">
@@ -5559,14 +6560,14 @@
                     <span class="text-xs text-slate-400">
                         Público-Alvo: {{ $meta['target_population'] }}
                     </span>
-                    @if ($isC1 || $isC2 || $isC3 || $isC4)
+                    @if ($isC1 || $isC2 || $isC3 || $isC4 || $isC5)
                         <span class="rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 text-[10px] font-bold">
-                            {{ $isC4 ? 'NT 08/2026 · Coorte Diabéticos Vinculados' : ($isC3 ? 'NT 08/2026 · Coorte 42º dia do puerpério' : ($isC2 ? 'NT 08/2026 · Meses com coorte válida' : 'NT 08/2026 · Média de 4 Meses')) }}
+                            {{ $isC5 ? 'NT 08/2026 · Coorte Hipertensos Vinculados' : ($isC4 ? 'NT 08/2026 · Coorte Diabéticos Vinculados' : ($isC3 ? 'NT 08/2026 · Coorte 42º dia do puerpério' : ($isC2 ? 'NT 08/2026 · Meses com coorte válida' : 'NT 08/2026 · Média de 4 Meses'))) }}
                         </span>
                     @endif
-                    @if ($isC2 || $isC3 || $isC4)
+                    @if ($isC2 || $isC3 || $isC4 || $isC5)
                         <span class="rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 px-2.5 py-0.5 text-[10px] font-bold">
-                            {{ $isC4 ? 'Peso 1.0 (até 1,00 pt) · 6 Boas Práticas (100 pts)' : ($isC3 ? 'Peso 2.0 (até 2,00 pt) · 11 Boas Práticas (100 pts)' : 'Peso 2.0 (até 2,00 pt)') }}
+                            {{ $isC5 ? 'Peso 1.0 (até 1,00 pt) · 4 Boas Práticas (100 pts)' : ($isC4 ? 'Peso 1.0 (até 1,00 pt) · 6 Boas Práticas (100 pts)' : ($isC3 ? 'Peso 2.0 (até 2,00 pt) · 11 Boas Práticas (100 pts)' : 'Peso 2.0 (até 2,00 pt)')) }}
                         </span>
                     @endif
                 </div>
@@ -5598,7 +6599,7 @@
                 <!-- Card de Pontuação -->
                 <div class="rounded-3xl bg-white/10 border border-white/15 p-5 text-center min-w-[190px] backdrop-blur-xs">
                     <span class="text-[11px] font-semibold text-teal-300 uppercase tracking-wider block">
-                        {{ ($isC1 || $isC2 || $isC3 || $isC4) && $current['is_preview'] ? 'Prévia quadrimestral' : (($isC1 || $isC2 || $isC3 || $isC4) ? 'Média quadrimestral local' : 'Resultado Atual') }}
+                        {{ ($isC1 || $isC2 || $isC3 || $isC4 || $isC5) && $current['is_preview'] ? 'Prévia quadrimestral' : (($isC1 || $isC2 || $isC3 || $isC4 || $isC5) ? 'Média quadrimestral local' : 'Resultado Atual') }}
                     </span>
                     <div class="text-3xl sm:text-4xl font-black text-white tabular-nums my-1">
                         {{ $hasValidatedResult ? number_format($score, 1, ',', '.').'%' : '—' }}
@@ -5607,7 +6608,7 @@
                         <span class="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold border {{ $badgeStyles }}">
                             {{ $levelLabel }}
                         </span>
-                        @if (($isC1 || $isC2 || $isC3 || $isC4) && $quarterSummary && $quarterSummary['component_iii_points'] !== null)
+                        @if (($isC1 || $isC2 || $isC3 || $isC4 || $isC5) && $quarterSummary && $quarterSummary['component_iii_points'] !== null)
                             <span class="inline-block rounded-full px-2 py-0.5 text-[10px] font-mono font-bold bg-white/20 text-white border border-white/30">
                                 {{ number_format($quarterSummary['component_iii_points'], 2, ',', '.') }} pt
                             </span>
@@ -5758,6 +6759,35 @@
                     <span class="text-slate-400 block">Com práticas pendentes no DW</span>
                     <span class="font-bold text-amber-700 text-sm">
                         {{ $hasC4Result ? number_format($current['active_search_count'], 0, '', '.') : '—' }}
+                    </span>
+                </div>
+                @if ($quarterSummary && $quarterSummary['component_iii_points'] !== null)
+                    <div class="border-l border-slate-200 pl-4">
+                        <span class="text-slate-400 block">Pontos Comp. III</span>
+                        <span class="font-mono font-bold text-emerald-700 text-sm">
+                            {{ number_format($quarterSummary['component_iii_points'], 2, ',', '.') }} / 1,00 pt
+                        </span>
+                    </div>
+                @endif
+            </div>
+        @elseif ($isC5)
+            <div class="flex flex-wrap items-center gap-x-6 gap-y-3 text-xs">
+                <div>
+                    <span class="text-slate-400 block">Pontos das 4 práticas (A–D)</span>
+                    <span class="font-bold text-teal-800 text-sm">
+                        {{ $hasC5Result ? number_format($current['numerator'], 0, '', '.') : '—' }}
+                    </span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block">Hipertensos na coorte</span>
+                    <span class="font-bold text-ink text-sm">
+                        {{ $current['cohort_total'] !== null ? number_format($current['cohort_total'], 0, '', '.') : ($current['denominator'] !== null ? number_format($current['denominator'], 0, '', '.') : '—') }}
+                    </span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block">Com práticas pendentes no DW</span>
+                    <span class="font-bold text-amber-700 text-sm">
+                        {{ $hasC5Result ? number_format($current['active_search_count'], 0, '', '.') : '—' }}
                     </span>
                 </div>
                 @if ($quarterSummary && $quarterSummary['component_iii_points'] !== null)

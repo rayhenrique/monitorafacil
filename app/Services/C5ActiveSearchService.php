@@ -2,40 +2,40 @@
 
 namespace App\Services;
 
-use App\Models\C4NominalDiabetic;
+use App\Models\C5NominalHypertensive;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class C4ActiveSearchService
+class C5ActiveSearchService
 {
     /**
-     * Verifica se há registros reais na base local para o quadrimestre do C4.
+     * Verifica se há registros reais na base local para o quadrimestre do C5.
      */
     public static function isRealDataAvailable(int $year, int $quarter): bool
     {
-        if (! Schema::hasTable('c4_nominal_diabetics')) {
+        if (! Schema::hasTable('c5_nominal_hypertensives')) {
             return false;
         }
 
-        return C4NominalDiabetic::query()
+        return C5NominalHypertensive::query()
             ->where('year', $year)
             ->where('quarter', $quarter)
             ->exists();
     }
 
     /**
-     * Retorna a quantidade de diabéticos reais gravados.
+     * Retorna a quantidade de hipertensos reais gravados.
      */
-    public static function getRealDiabeticsCount(int $year, int $quarter, ?string $ine = null): int
+    public static function getRealHypertensivesCount(int $year, int $quarter, ?string $ine = null): int
     {
-        if (! Schema::hasTable('c4_nominal_diabetics')) {
+        if (! Schema::hasTable('c5_nominal_hypertensives')) {
             return 0;
         }
 
-        $q = C4NominalDiabetic::query()
+        $q = C5NominalHypertensive::query()
             ->where('year', $year)
             ->where('quarter', $quarter);
 
@@ -47,7 +47,7 @@ class C4ActiveSearchService
     }
 
     /**
-     * Colunas disponíveis para a tabela de busca ativa do C4.
+     * Colunas disponíveis para a tabela de busca ativa do C5.
      *
      * @return array<string, string>
      */
@@ -65,12 +65,12 @@ class C4ActiveSearchService
             'microarea' => 'Micro Área',
             'month_ref' => 'Mês',
             'mici' => 'MCI Atualizada',
-            'good_practices' => 'Boas Práticas (A-F)',
+            'good_practices' => 'Boas Práticas (A-D)',
         ];
     }
 
     /**
-     * Colunas selecionadas por padrão no C4.
+     * Colunas selecionadas por padrão no C5.
      *
      * @return list<string>
      */
@@ -80,17 +80,17 @@ class C4ActiveSearchService
     }
 
     /**
-     * Lista base de diabéticos da coorte. Consulta exclusivamente c4_nominal_diabetics.
+     * Lista base de hipertensos da coorte. Consulta exclusivamente c5_nominal_hypertensives.
      *
      * @return Collection<int, array<string, mixed>>
      */
     public function getBaseCohort(int $year, int $quarter, ?string $selectedIne = null): Collection
     {
-        if (! Schema::hasTable('c4_nominal_diabetics')) {
+        if (! Schema::hasTable('c5_nominal_hypertensives')) {
             return collect();
         }
 
-        $dbQuery = C4NominalDiabetic::query()
+        $dbQuery = C5NominalHypertensive::query()
             ->where('year', $year)
             ->where('quarter', $quarter);
 
@@ -104,7 +104,7 @@ class C4ActiveSearchService
             return collect();
         }
 
-        return $records->map(function (C4NominalDiabetic $d) {
+        return $records->map(function (C5NominalHypertensive $d) {
             $formatDate = fn ($date) => $date ? Carbon::parse($date)->format('d/m/Y') : '—';
             $birthDateFormatted = $formatDate($d->birth_date);
             $birthDateString = $d->birth_date ? Carbon::parse($d->birth_date)->toDateString() : null;
@@ -157,21 +157,14 @@ class C4ActiveSearchService
                 'practice_d' => (int) $d->practice_d,
                 'practice_d_met' => (bool) $d->practice_d_met,
                 'last_visit_date' => $formatDate($d->last_visit_date),
-                'practice_e' => (int) $d->practice_e,
-                'practice_e_met' => (bool) $d->practice_e_met,
-                'last_hba1c_date' => $formatDate($d->last_hba1c_date),
-                'last_hba1c_type' => $d->last_hba1c_type ?: '—',
-                'practice_f' => (int) $d->practice_f,
-                'practice_f_met' => (bool) $d->practice_f_met,
-                'last_foot_exam_date' => $formatDate($d->last_foot_exam_date),
                 'score_percent' => (float) $d->score_percent,
-                'performance_level' => FamilyHealthService::calculatePerformanceLevel('c4', (float) $d->score_percent),
+                'performance_level' => FamilyHealthService::calculatePerformanceLevel('c5', (float) $d->score_percent),
             ];
         });
     }
 
     /**
-     * Aplica filtros de busca sobre a coleção de diabéticos.
+     * Aplica filtros de busca sobre a coleção de hipertensos.
      *
      * @param  Collection<int, array<string, mixed>>  $cohort
      * @param  array<string, mixed>  $filters
@@ -229,8 +222,6 @@ class C4ActiveSearchService
                 'advPracticeB' => 'practice_b_met',
                 'advPracticeC' => 'practice_c_met',
                 'advPracticeD' => 'practice_d_met',
-                'advPracticeE' => 'practice_e_met',
-                'advPracticeF' => 'practice_f_met',
             ];
 
             foreach ($practiceKeys as $filterKey => $metKey) {
@@ -248,7 +239,7 @@ class C4ActiveSearchService
     }
 
     /**
-     * Retorna os KPIs e métricas consolidadas dos diabéticos filtrados.
+     * Retorna os KPIs e métricas consolidadas dos hipertensos filtrados.
      *
      * @param  Collection<int, array<string, mixed>>  $cohort
      * @return array<string, mixed>
@@ -258,7 +249,7 @@ class C4ActiveSearchService
         $total = $cohort->count();
         if ($total === 0) {
             return [
-                'total_diabetics' => 0,
+                'total_hypertensives' => 0,
                 'denominator' => 0,
                 'period_label' => sprintf('%d / Q%d', $year, $quarter),
                 'period_sublabel' => 'Avaliação Quadrimestral · Componente III',
@@ -267,20 +258,14 @@ class C4ActiveSearchService
                 'practice_b_pct' => 0.0,
                 'practice_c_pct' => 0.0,
                 'practice_d_pct' => 0.0,
-                'practice_e_pct' => 0.0,
-                'practice_f_pct' => 0.0,
                 'practice_a_count' => 0,
                 'practice_b_count' => 0,
                 'practice_c_count' => 0,
                 'practice_d_count' => 0,
-                'practice_e_count' => 0,
-                'practice_f_count' => 0,
                 'practice_a' => ['count' => 0, 'percent' => 0.0],
                 'practice_b' => ['count' => 0, 'percent' => 0.0],
                 'practice_c' => ['count' => 0, 'percent' => 0.0],
                 'practice_d' => ['count' => 0, 'percent' => 0.0],
-                'practice_e' => ['count' => 0, 'percent' => 0.0],
-                'practice_f' => ['count' => 0, 'percent' => 0.0],
                 'regular_count' => 0,
                 'sufficient_count' => 0,
                 'good_count' => 0,
@@ -292,19 +277,15 @@ class C4ActiveSearchService
         $cntB = $cohort->where('practice_b_met', true)->count();
         $cntC = $cohort->where('practice_c_met', true)->count();
         $cntD = $cohort->where('practice_d_met', true)->count();
-        $cntE = $cohort->where('practice_e_met', true)->count();
-        $cntF = $cohort->where('practice_f_met', true)->count();
 
         $avgScore = round($cohort->avg('score_percent'), 2);
         $pctA = round(($cntA / $total) * 100, 1);
         $pctB = round(($cntB / $total) * 100, 1);
         $pctC = round(($cntC / $total) * 100, 1);
         $pctD = round(($cntD / $total) * 100, 1);
-        $pctE = round(($cntE / $total) * 100, 1);
-        $pctF = round(($cntF / $total) * 100, 1);
 
         return [
-            'total_diabetics' => $total,
+            'total_hypertensives' => $total,
             'denominator' => $total,
             'period_label' => sprintf('%d / Q%d', $year, $quarter),
             'period_sublabel' => 'Avaliação Quadrimestral · Componente III',
@@ -313,20 +294,14 @@ class C4ActiveSearchService
             'practice_b_pct' => $pctB,
             'practice_c_pct' => $pctC,
             'practice_d_pct' => $pctD,
-            'practice_e_pct' => $pctE,
-            'practice_f_pct' => $pctF,
             'practice_a_count' => $cntA,
             'practice_b_count' => $cntB,
             'practice_c_count' => $cntC,
             'practice_d_count' => $cntD,
-            'practice_e_count' => $cntE,
-            'practice_f_count' => $cntF,
             'practice_a' => ['count' => $cntA, 'percent' => $pctA],
             'practice_b' => ['count' => $cntB, 'percent' => $pctB],
             'practice_c' => ['count' => $cntC, 'percent' => $pctC],
             'practice_d' => ['count' => $cntD, 'percent' => $pctD],
-            'practice_e' => ['count' => $cntE, 'percent' => $pctE],
-            'practice_f' => ['count' => $cntF, 'percent' => $pctF],
             'regular_count' => $cohort->where('performance_level', 'regular')->count(),
             'sufficient_count' => $cohort->where('performance_level', 'suficiente')->count(),
             'good_count' => $cohort->where('performance_level', 'bom')->count(),
@@ -341,7 +316,7 @@ class C4ActiveSearchService
      */
     public function getFilterOptions(int $year, int $quarter): array
     {
-        if (! Schema::hasTable('c4_nominal_diabetics')) {
+        if (! Schema::hasTable('c5_nominal_hypertensives')) {
             return [
                 'facilities' => [],
                 'teams' => [],
@@ -349,7 +324,7 @@ class C4ActiveSearchService
             ];
         }
 
-        $facilities = C4NominalDiabetic::query()
+        $facilities = C5NominalHypertensive::query()
             ->where('year', $year)
             ->where('quarter', $quarter)
             ->whereNotNull('cnes')
@@ -360,7 +335,7 @@ class C4ActiveSearchService
             ->map(fn ($f) => ['cnes' => $f->cnes, 'facility_name' => $f->facility_name])
             ->toArray();
 
-        $teams = C4NominalDiabetic::query()
+        $teams = C5NominalHypertensive::query()
             ->where('year', $year)
             ->where('quarter', $quarter)
             ->whereNotNull('ine')
@@ -371,7 +346,7 @@ class C4ActiveSearchService
             ->map(fn ($t) => ['ine' => $t->ine, 'team_name' => $t->team_name])
             ->toArray();
 
-        $microareas = C4NominalDiabetic::query()
+        $microareas = C5NominalHypertensive::query()
             ->where('year', $year)
             ->where('quarter', $quarter)
             ->whereNotNull('microarea')
@@ -391,21 +366,21 @@ class C4ActiveSearchService
     }
 
     /**
-     * Exporta os cidadãos diabéticos em formato CSV.
+     * Exporta os cidadãos hipertensos em formato CSV.
      *
-     * @param  Collection<int, array<string, mixed>>  $diabetics
+     * @param  Collection<int, array<string, mixed>>  $hypertensives
      */
-    public function exportCsv(Collection $diabetics): StreamedResponse
+    public function exportCsv(Collection $hypertensives): StreamedResponse
     {
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="c4_busca_ativa_diabeticos_' . date('Ymd_His') . '.csv"',
+            'Content-Disposition' => 'attachment; filename="c5_busca_ativa_hipertensos_' . date('Ymd_His') . '.csv"',
             'Pragma' => 'no-cache',
             'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
             'Expires' => '0',
         ];
 
-        return response()->stream(function () use ($diabetics): void {
+        return response()->stream(function () use ($hypertensives): void {
             $handle = fopen('php://output', 'w');
             // BOM UTF-8
             fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
@@ -417,12 +392,10 @@ class C4ActiveSearchService
                 '(B) Aferição PA', 'Última PA', 'Valor PA',
                 '(C) Antropometria', 'Última Antropo', 'Peso', 'Altura',
                 '(D) Visitas ACS', 'Última Visita',
-                '(E) Hemoglobina Glicada', 'Última HbA1c', 'Tipo HbA1c',
-                '(F) Avaliação dos Pés', 'Última Avaliação Pés',
                 'Pontuação (0-100)', 'Classificação',
             ], ';');
 
-            foreach ($diabetics as $d) {
+            foreach ($hypertensives as $d) {
                 fputcsv($handle, [
                     $d['cns'],
                     $d['cpf'],
@@ -446,11 +419,6 @@ class C4ActiveSearchService
                     $d['last_height'],
                     $d['practice_d_met'] ? 'SIM' : 'NÃO',
                     $d['last_visit_date'],
-                    $d['practice_e_met'] ? 'SIM' : 'NÃO',
-                    $d['last_hba1c_date'],
-                    $d['last_hba1c_type'],
-                    $d['practice_f_met'] ? 'SIM' : 'NÃO',
-                    $d['last_foot_exam_date'],
                     number_format($d['score_percent'], 2, ',', '.'),
                     ucfirst($d['performance_level']),
                 ], ';');

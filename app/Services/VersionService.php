@@ -6,9 +6,9 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.23.16';
+    public const CURRENT_VERSION = 'v1.24.0';
 
-    public const CURRENT_RELEASE_DATE = '23/09/2026';
+    public const CURRENT_RELEASE_DATE = '24/09/2026';
 
     /**
      * Retorna a versão mais recente do sistema.
@@ -61,9 +61,24 @@ class VersionService
     {
         return [
             [
+                'version' => 'v1.24.0',
+                'date' => '24/09/2026',
+                'badge' => 'Versão Atual',
+                'title' => 'Indicador C5 (Hipertensão Arterial Sistêmica), 4 Boas Práticas Clínicas (A–D, 100 pts) e Busca Ativa Nominal',
+                'summary' => 'Implementação integral do Indicador C5 (Cuidado da Pessoa com Hipertensão na APS) conforme a Nota Metodológica oficial e Nota Técnica nº 08/2026-DEAPS/SAPS/MS. O módulo inclui o cálculo auditado das 4 Boas Práticas Clínicas (25 pontos cada = 100 pontos), exclusão normativa estrita de ACS para aferição de Pressão Arterial, normalização de equipes eAP (fator 100/75 sem D), extração de dados 100% reais do DW e-SUS PEC, persistência de snapshots e coorte nominal de 11.032 hipertensos com busca ativa e ficha clínica individual.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Indicador C5 com as 4 Boas Práticas Clínicas oficiais: Consulta Médica/Enfermagem semestral (A, 25 pts), Aferição de PA semestral por profissional habilitado (B, 25 pts), Antropometria Peso + Altura anual (C, 25 pts) e 2 Visitas Domiciliares de ACS anual com intervalo ≥ 30 dias (D, 25 pts).'],
+                    ['type' => 'correcao', 'text' => 'Cumprimento estrito da regra normativa da Nota Metodológica C5 (Quadro 03 e Rodapé 4): CBO 5151-05 (ACS) foi expressamente excluído de pontuar a prática de Aferição de Pressão Arterial.'],
+                    ['type' => 'melhoria', 'text' => 'Tratamento de equipes eAP (tipo 76): a prática D (Visitas de ACS) não condiciona o resultado e a pontuação é automaticamente normalizada para a base 100 (fator 100/75).'],
+                    ['type' => 'novo', 'text' => 'Busca Ativa e Lista Nominal de Hipertensos com filtros rápidos (CNS, CPF, Nome, CNES, INE, Microárea), customizador de colunas visíveis, badges circulares de cumprimento das 4 práticas e exportação CSV.'],
+                    ['type' => 'novo', 'text' => 'Modal de Auditoria Clínica Individual da Pessoa com Hipertensão com status do e-SUS PEC, histórico de diagnósticos (CIAP-2/CID-10) e detalhamento linha a linha das 4 práticas.'],
+                    ['type' => 'melhoria', 'text' => 'Integração completa do C5 na tela de Processar Dados (card dedicado e botão de processamento pontual) e consolidação no Visão Geral e Painel Executivo.'],
+                ],
+            ],
+            [
                 'version' => 'v1.23.16',
                 'date' => '23/09/2026',
-                'badge' => 'Versão Atual',
+                'badge' => 'Anterior',
                 'title' => 'Indicador C4 (Diabetes Mellitus), Extração Real de Exames, Resumo de 19 Equipes e Deploy Atualizado',
                 'summary' => 'Implementação integral do Indicador C4 (Cuidado da Pessoa com Diabetes Mellitus na APS) com 6 Boas Práticas Clínicas (A–F, 100 pontos), extração no e-SUS PEC DW de exames laboratoriais de Hemoglobina Glicada (HbA1c) e procedimentos clínicos, correção do agrupamento de equipes por INE (19 equipes oficiais sem duplicidade), botão Processar Tudo com agendamento do CVAT e deploy padronizado em 15 etapas.',
                 'highlights' => [

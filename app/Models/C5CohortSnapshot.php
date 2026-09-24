@@ -20,7 +20,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-class C2CohortSnapshot extends Model
+class C5CohortSnapshot extends Model
 {
     protected $fillable = [
         'year', 'quarter', 'ine', 'team_name', 'team_type', 'cohort_total',

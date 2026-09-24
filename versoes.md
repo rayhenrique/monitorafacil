@@ -2,6 +2,19 @@
 
 Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento (*Release Notes*) da plataforma **Monitora Fácil · Gestão da Atenção Primária à Saúde**.
 
+## [v1.24.0] - 24/09/2026
+
+### Indicador C5 (Hipertensão Arterial Sistêmica), 4 Boas Práticas Clínicas (A–D, 100 pts) e Busca Ativa Nominal
+- **Indicador C5 com 4 Boas Práticas Clínicas (A–D) e 100 Pontos**: Implementação integral do Indicador C5 (Cuidado da Pessoa com Hipertensão na APS) com as 4 boas práticas oficiais somando 100 pontos (A: Consulta médica ou de enfermagem nos últimos 6 meses [25 pts]; B: Aferição de Pressão Arterial nos últimos 6 meses por profissional habilitado [25 pts]; C: Antropometria com Peso e Altura simultâneos na mesma data nos últimos 12 meses [25 pts]; D: Duas visitas domiciliares de ACS nos últimos 12 meses com intervalo mínimo de 30 dias [25 pts]), conforme Nota Metodológica C5 e Nota Técnica nº 08/2026-DEAPS/SAPS/MS.
+- **Exclusão Normativa Estrita de ACS para Aferição de Pressão Arterial**: Cumprimento rigoroso da regra estabelecida no Quadro 03 e Rodapé 4 da Nota Metodológica C5: o CBO 5151-05 (ACS) foi expressamente excluído de pontuar a prática de aferição de PA. Apenas TACS (3222-55), técnicos, enfermeiros, médicos e outros profissionais habilitados pontuam.
+- **Normalização de Equipes eAP (tipo 76)**: Implementação da regra que dispensa equipes eAP sem agente comunitário da obrigatoriedade da Prática D (Visitas ACS), normalizando a pontuação proporcionalmente para a base 100 com o fator $100 / 75$.
+- **Lista Nominal e Coorte de Hipertensos com Busca Ativa**: Tabela nominal completa com 11.032 cidadãos reais cadastrados e vinculados no e-SUS PEC, busca rápida por CNS, CPF, Nome, CNES, INE e Microárea, personalização de colunas visíveis, badges circulares com status de cumprimento das 4 práticas e exportação em CSV.
+- **Modal de Ficha Clínica Individual do Hipertenso**: Auditoria clínica minuciosa com histórico de diagnósticos (CIAP-2/CID-10), datas do primeiro e último diagnóstico, status da condição no PEC (ativo/resolvido) e linha a linha de conferência das 4 boas práticas com datas e valores.
+- **Subaba Resumo Mensal das Equipes no C5**: Visualização consolidada de todas as 19 equipes ativas do município, distribuição em 4 faixas de desempenho (Regular, Suficiente, Bom e Ótimo) e tabela ordenada com numerador, denominador, pontuação percentual e badge oficial.
+- **Integração no Módulo "Processar Dados"**: Card dedicado ao C5 com suporte a processamento pontual (`--scope=c5`) e inclusão na rotina de processamento geral.
+
+---
+
 ## [v1.23.16] - 23/09/2026
 
 ### Indicador C4 (Diabetes Mellitus), Extração Real de Exames, Resumo de 19 Equipes e Deploy Atualizado

@@ -49,21 +49,14 @@ use Illuminate\Support\Carbon;
  * @property int $practice_d
  * @property bool $practice_d_met
  * @property Carbon|null $last_visit_date
- * @property int $practice_e
- * @property bool $practice_e_met
- * @property Carbon|null $last_hba1c_date
- * @property string|null $last_hba1c_type
- * @property int $practice_f
- * @property bool $practice_f_met
- * @property Carbon|null $last_foot_exam_date
  * @property float $score_percent
  * @property string $calculation_version
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-class C4NominalDiabetic extends Model
+class C5NominalHypertensive extends Model
 {
-    protected $table = 'c4_nominal_diabetics';
+    protected $table = 'c5_nominal_hypertensives';
 
     protected $fillable = [
         'year',
@@ -108,13 +101,6 @@ class C4NominalDiabetic extends Model
         'practice_d',
         'practice_d_met',
         'last_visit_date',
-        'practice_e',
-        'practice_e_met',
-        'last_hba1c_date',
-        'last_hba1c_type',
-        'practice_f',
-        'practice_f_met',
-        'last_foot_exam_date',
         'score_percent',
         'calculation_version',
     ];
@@ -132,8 +118,6 @@ class C4NominalDiabetic extends Model
             'last_pa_date' => 'date',
             'last_anthropometry_date' => 'date',
             'last_visit_date' => 'date',
-            'last_hba1c_date' => 'date',
-            'last_foot_exam_date' => 'date',
             'age_years' => 'integer',
             'mici_updated' => 'boolean',
             'is_accompanied' => 'boolean',
@@ -145,10 +129,6 @@ class C4NominalDiabetic extends Model
             'practice_c_met' => 'boolean',
             'practice_d' => 'integer',
             'practice_d_met' => 'boolean',
-            'practice_e' => 'integer',
-            'practice_e_met' => 'boolean',
-            'practice_f' => 'integer',
-            'practice_f_met' => 'boolean',
             'last_weight' => 'float',
             'last_height' => 'float',
             'score_percent' => 'float',
