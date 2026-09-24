@@ -8,6 +8,7 @@ use App\Models\C3CohortSnapshot;
 use App\Models\C4CohortSnapshot;
 use App\Models\C5CohortSnapshot;
 use App\Models\C6CohortSnapshot;
+use App\Models\C7CohortSnapshot;
 use App\Models\ConsolidationTeam;
 use App\Models\FamilyHealthIndicatorSnapshot;
 use App\Models\FamilyHealthMonthlySnapshot;
@@ -242,13 +243,13 @@ class FamilyHealthService
                 'target_population' => 'Mulheres e homens trans de 9 a 69 anos de idade',
                 'icon' => 'women',
                 'color' => 'purple',
-                'weight' => 1.0,
+                'weight' => 2.0,
                 'polarity' => 'Maior é melhor',
                 'periodicity' => 'Quadrimestral',
                 'source_pdf' => 'Nota Metodológica C7 - Cuidado da mulher na prevenção do câncer.pdf',
-                'objective' => 'Monitorar o rastreamento organizado do câncer do colo do útero e de mama, a cobertura da vacina HPV em adolescentes e o acesso a ações de saúde sexual e reprodutiva.',
-                'numerator_desc' => 'Fórmula ponderada: (A × 20) + (B × 30) + (C × 30) + (D × 20) onde cada letra representa a cobertura da respectiva boa prática.',
-                'denominator_desc' => 'População elegível vinculada em cada uma das 4 faixas etárias correspondentes.',
+                'objective' => 'Monitorar o rastreamento organizado do câncer do colo do útero e de mama, a vacinação contra HPV e o acesso a ações de saúde sexual e reprodutiva na APS.',
+                'numerator_desc' => 'Fórmula ponderada das 4 boas práticas normativas: (A × 20) + (B × 30) + (C × 30) + (D × 20) conforme coberturas das faixas etárias correspondentes.',
+                'denominator_desc' => 'População elegível vinculada às equipes eSF/eAP nas 4 faixas etárias específicas de cada prática.',
                 'parameters' => [
                     'optimal' => ['min' => 75.01, 'max' => 100.0, 'label' => 'Ótimo (> 75% e ≤ 100%)', 'badge' => 'bg-emerald-100 text-emerald-800 border-emerald-300'],
                     'good' => ['min' => 50.01, 'max' => 75.0, 'label' => 'Bom (> 50% e ≤ 75%)', 'badge' => 'bg-sky-100 text-sky-800 border-sky-300'],
@@ -257,10 +258,10 @@ class FamilyHealthService
                 ],
                 'cbos' => ['2235 (Enfermeiros)', '2231/2251/2252/2253 (Médicos)', '3222 (Técnicos de Enfermagem)'],
                 'good_practices' => [
-                    ['letter' => 'A', 'title' => 'Rastreamento Câncer Colo de Útero (25 a 64 anos)', 'desc' => 'Citopatológico nos últimos 36 meses ou teste molecular HPV nos últimos 60 meses.', 'weight_pct' => '20%'],
-                    ['letter' => 'B', 'title' => 'Vacinação contra HPV para Meninas (9 a 14 anos)', 'desc' => 'Pelo menos 1 dose administrada da vacina HPV na faixa etária.', 'weight_pct' => '30%'],
-                    ['letter' => 'C', 'title' => 'Saúde Sexual e Reprodutiva (14 a 69 anos)', 'desc' => 'Pelo menos 1 atendimento sobre planejamento reprodutivo ou saúde sexual nos últimos 12 meses.', 'weight_pct' => '30%'],
-                    ['letter' => 'D', 'title' => 'Rastreamento Câncer de Mama (50 a 69 anos)', 'desc' => 'Mamografia bilateral de rastreamento solicitada ou avaliada nos últimos 24 meses.', 'weight_pct' => '20%'],
+                    ['letter' => 'A', 'code' => 'A', 'title' => 'Rastreamento Câncer Colo de Útero (25 a 64 anos)', 'desc' => 'Ao menos 1 exame citopatológico nos últimos 36 meses ou teste molecular DNA-HPV nos últimos 60 meses.', 'points' => 20, 'weight_pct' => '20%'],
+                    ['letter' => 'B', 'code' => 'B', 'title' => 'Vacinação contra HPV (9 a 14 anos)', 'desc' => 'Ao menos 1 dose administrada da vacina HPV (imunobiológicos 67 ou 93) registrada na vida.', 'points' => 30, 'weight_pct' => '30%'],
+                    ['letter' => 'C', 'code' => 'C', 'title' => 'Saúde Sexual e Reprodutiva (14 a 69 anos)', 'desc' => 'Ao menos 1 consulta médica ou de enfermagem nos últimos 12 meses com CIAP/CID/Procedimento elegível.', 'points' => 30, 'weight_pct' => '30%'],
+                    ['letter' => 'D', 'code' => 'D', 'title' => 'Rastreamento Câncer de Mama (50 a 69 anos)', 'desc' => 'Ao menos 1 mamografia bilateral de rastreamento solicitada ou avaliada nos últimos 24 meses.', 'points' => 20, 'weight_pct' => '20%'],
                 ],
             ],
         ];
@@ -360,6 +361,10 @@ class FamilyHealthService
             ->where('year', $year)->where('quarter', $quarter)->whereNull('ine')
             ->where('calculation_version', C6DwService::VERSION)->first() : null;
 
+        $c7Cohort = Schema::hasTable('c7_cohort_snapshots') ? C7CohortSnapshot::query()
+            ->where('year', $year)->where('quarter', $quarter)->whereNull('ine')
+            ->where('calculation_version', C7DwService::VERSION)->first() : null;
+
         $indicatorsMeta = self::getIndicatorsMetadata();
         $snapshots = FamilyHealthIndicatorSnapshot::query()
             ->where('year', $year)
@@ -399,7 +404,10 @@ class FamilyHealthService
             if ($slug === 'c6' && ($snap?->good_practices_breakdown['calculation_version'] ?? null) !== C6DwService::VERSION) {
                 $snap = null;
             }
-            $score = $snap ? (float) $snap->score_percent : (in_array($slug, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'], true) ? null : 0.0);
+            if ($slug === 'c7' && ($snap?->good_practices_breakdown['calculation_version'] ?? null) !== C7DwService::VERSION) {
+                $snap = null;
+            }
+            $score = $snap ? (float) $snap->score_percent : (in_array($slug, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7'], true) ? null : 0.0);
             $level = $score !== null ? self::calculatePerformanceLevel($slug, $score) : null;
 
             // Agregação real das classificações de equipes
@@ -416,6 +424,8 @@ class FamilyHealthService
                 $teamsForIndicator = $teamsForIndicator->filter(fn ($s) => ($s->good_practices_breakdown['calculation_version'] ?? null) === C5DwService::VERSION);
             } elseif ($slug === 'c6') {
                 $teamsForIndicator = $teamsForIndicator->filter(fn ($s) => ($s->good_practices_breakdown['calculation_version'] ?? null) === C6DwService::VERSION);
+            } elseif ($slug === 'c7') {
+                $teamsForIndicator = $teamsForIndicator->filter(fn ($s) => ($s->good_practices_breakdown['calculation_version'] ?? null) === C7DwService::VERSION);
             }
 
             $classifications = [
@@ -449,9 +459,9 @@ class FamilyHealthService
                 'classifications' => $classifications,
                 'active_search_count' => $snap ? $snap->active_search_count : 0,
                 'has_data' => $snap !== null,
-                'cohort_total' => $slug === 'c2' ? $c2Cohort?->cohort_total : ($slug === 'c3' ? $c3Cohort?->cohort_total : ($slug === 'c4' ? $c4Cohort?->cohort_total : ($slug === 'c5' ? $c5Cohort?->cohort_total : ($slug === 'c6' ? $c6Cohort?->cohort_total : null)))),
-                'evaluated_total' => $slug === 'c2' ? $c2Cohort?->evaluated_total : ($slug === 'c3' ? $c3Cohort?->evaluated_total : ($slug === 'c4' ? $c4Cohort?->evaluated_total : ($slug === 'c5' ? $c5Cohort?->evaluated_total : ($slug === 'c6' ? $c6Cohort?->evaluated_total : null)))),
-                'cohort_as_of' => $slug === 'c2' ? $c2Cohort?->as_of?->format('d/m/Y') : ($slug === 'c3' ? $c3Cohort?->as_of?->format('d/m/Y') : ($slug === 'c4' ? $c4Cohort?->as_of?->format('d/m/Y') : ($slug === 'c5' ? $c5Cohort?->as_of?->format('d/m/Y') : ($slug === 'c6' ? $c6Cohort?->as_of?->format('d/m/Y') : null)))),
+                'cohort_total' => $slug === 'c2' ? $c2Cohort?->cohort_total : ($slug === 'c3' ? $c3Cohort?->cohort_total : ($slug === 'c4' ? $c4Cohort?->cohort_total : ($slug === 'c5' ? $c5Cohort?->cohort_total : ($slug === 'c6' ? $c6Cohort?->cohort_total : ($slug === 'c7' ? $c7Cohort?->cohort_total : null))))),
+                'evaluated_total' => $slug === 'c2' ? $c2Cohort?->evaluated_total : ($slug === 'c3' ? $c3Cohort?->evaluated_total : ($slug === 'c4' ? $c4Cohort?->evaluated_total : ($slug === 'c5' ? $c5Cohort?->evaluated_total : ($slug === 'c6' ? $c6Cohort?->evaluated_total : ($slug === 'c7' ? $c7Cohort?->evaluated_total : null))))),
+                'cohort_as_of' => $slug === 'c2' ? $c2Cohort?->as_of?->format('d/m/Y') : ($slug === 'c3' ? $c3Cohort?->as_of?->format('d/m/Y') : ($slug === 'c4' ? $c4Cohort?->as_of?->format('d/m/Y') : ($slug === 'c5' ? $c5Cohort?->as_of?->format('d/m/Y') : ($slug === 'c6' ? $c6Cohort?->as_of?->format('d/m/Y') : ($slug === 'c7' ? $c7Cohort?->as_of?->format('d/m/Y') : null))))),
                 'is_preview' => match ($slug) {
                     'c1' => (bool) ($snap?->good_practices_breakdown['is_preview'] ?? false),
                     'c2' => (bool) ($c2Cohort?->as_of?->lt(Carbon::create($year, $quarter * 4, 1)->endOfMonth())),
@@ -459,6 +469,7 @@ class FamilyHealthService
                     'c4' => (bool) ($c4Cohort?->as_of?->lt(Carbon::create($year, $quarter * 4, 1)->endOfMonth())),
                     'c5' => (bool) ($c5Cohort?->as_of?->lt(Carbon::create($year, $quarter * 4, 1)->endOfMonth())),
                     'c6' => (bool) ($c6Cohort?->as_of?->lt(Carbon::create($year, $quarter * 4, 1)->endOfMonth())),
+                    'c7' => (bool) ($c7Cohort?->as_of?->lt(Carbon::create($year, $quarter * 4, 1)->endOfMonth())),
                     default => false,
                 },
             ];
@@ -551,7 +562,7 @@ class FamilyHealthService
     public function getIndicatorDetail(string $code, int $year, int $quarter, ?string $selectedIne = null): array
     {
         $code = strtolower($code);
-        if (! in_array($code, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'], true)) {
+        if (! in_array($code, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7'], true)) {
             $this->ensureBaselineSnapshots($year, $quarter);
         }
 
@@ -585,6 +596,9 @@ class FamilyHealthService
         if ($code === 'c6' && ($municipalSnap?->good_practices_breakdown['calculation_version'] ?? null) !== C6DwService::VERSION) {
             $municipalSnap = null;
         }
+        if ($code === 'c7' && ($municipalSnap?->good_practices_breakdown['calculation_version'] ?? null) !== C7DwService::VERSION) {
+            $municipalSnap = null;
+        }
 
         // Lista por equipes
         $teamsQuery = FamilyHealthIndicatorSnapshot::query()
@@ -593,7 +607,7 @@ class FamilyHealthService
             ->where('indicator_code', $code)
             ->whereNotNull('ine');
 
-        if (in_array($code, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'], true)) {
+        if (in_array($code, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7'], true)) {
             $teamsQuery->where(function ($q) {
                 $q->whereIn('team_type', ['70', '76'])
                     ->orWhereNull('team_type');
@@ -611,6 +625,9 @@ class FamilyHealthService
         }
 
         $teams = $teamsQuery->orderByDesc('score_percent')->get();
+        if ($code === 'c7') {
+            $teams = $teams->filter(fn ($team) => ($team->good_practices_breakdown['calculation_version'] ?? null) === C7DwService::VERSION);
+        }
         if ($code === 'c6') {
             $teams = $teams->filter(fn ($team) => ($team->good_practices_breakdown['calculation_version'] ?? null) === C6DwService::VERSION);
         }
@@ -636,7 +653,7 @@ class FamilyHealthService
             $currentFocus = $teams->firstWhere('ine', $selectedIne);
         }
 
-        $activeSnap = in_array($code, ['c2', 'c3', 'c4', 'c5', 'c6'], true) && $selectedIne ? $currentFocus : ($currentFocus ?? $municipalSnap);
+        $activeSnap = in_array($code, ['c2', 'c3', 'c4', 'c5', 'c6', 'c7'], true) && $selectedIne ? $currentFocus : ($currentFocus ?? $municipalSnap);
         $c2CohortTeams = $code === 'c2' && Schema::hasTable('c2_cohort_snapshots') ? C2CohortSnapshot::query()
             ->where('year', $year)->where('quarter', $quarter)->whereNotNull('ine')
             ->where('calculation_version', C2DwService::VERSION)->orderBy('team_name')->get() : collect();
@@ -677,25 +694,34 @@ class FamilyHealthService
             ->when($selectedIne, fn ($q) => $q->where('ine', $selectedIne), fn ($q) => $q->whereNull('ine'))
             ->where('calculation_version', C6DwService::VERSION)->first() : null;
 
+        $c7CohortTeams = $code === 'c7' && Schema::hasTable('c7_cohort_snapshots') ? C7CohortSnapshot::query()
+            ->where('year', $year)->where('quarter', $quarter)->whereNotNull('ine')
+            ->where('calculation_version', C7DwService::VERSION)->orderBy('team_name')->get() : collect();
+        $c7Cohort = $code === 'c7' && Schema::hasTable('c7_cohort_snapshots') ? C7CohortSnapshot::query()
+            ->where('year', $year)->where('quarter', $quarter)
+            ->when($selectedIne, fn ($q) => $q->where('ine', $selectedIne), fn ($q) => $q->whereNull('ine'))
+            ->where('calculation_version', C7DwService::VERSION)->first() : null;
+
         $activeCohort = match ($code) {
             'c2' => $c2Cohort,
             'c3' => $c3Cohort,
             'c4' => $c4Cohort,
             'c5' => $c5Cohort,
             'c6' => $c6Cohort,
+            'c7' => $c7Cohort,
             default => null,
         };
         $cohortAsOf = $activeCohort?->as_of ? Carbon::parse($activeCohort->as_of) : null;
 
         $detail = [
             'meta' => $meta,
-            'municipal_score' => $municipalSnap ? (float) $municipalSnap->score_percent : (in_array($code, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'], true) ? null : 0.0),
-            'municipal_level' => $municipalSnap ? $municipalSnap->performance_level : (in_array($code, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'], true) ? null : 'regular'),
+            'municipal_score' => $municipalSnap ? (float) $municipalSnap->score_percent : (in_array($code, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7'], true) ? null : 0.0),
+            'municipal_level' => $municipalSnap ? $municipalSnap->performance_level : (in_array($code, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7'], true) ? null : 'regular'),
             'current' => [
                 'numerator' => $activeSnap ? $activeSnap->numerator : 0,
                 'denominator' => $activeSnap ? $activeSnap->denominator : 0,
-                'score_percent' => $activeSnap ? (float) $activeSnap->score_percent : (in_array($code, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'], true) ? null : 0.0),
-                'performance_level' => $activeSnap ? $activeSnap->performance_level : (in_array($code, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'], true) ? null : 'regular'),
+                'score_percent' => $activeSnap ? (float) $activeSnap->score_percent : (in_array($code, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7'], true) ? null : 0.0),
+                'performance_level' => $activeSnap ? $activeSnap->performance_level : (in_array($code, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7'], true) ? null : 'regular'),
                 'active_search_count' => $activeSnap ? $activeSnap->active_search_count : 0,
                 'good_practices_breakdown' => $activeSnap ? $activeSnap->good_practices_breakdown : [],
                 'has_data' => $activeSnap !== null,
@@ -704,18 +730,18 @@ class FamilyHealthService
                 'cohort_as_of' => $cohortAsOf?->format('d/m/Y'),
                 'is_preview' => match ($code) {
                     'c1' => (bool) ($activeSnap?->good_practices_breakdown['is_preview'] ?? false),
-                    'c2', 'c3', 'c4', 'c5', 'c6' => $cohortAsOf ? (bool) ($cohortAsOf->lt(Carbon::create($year, $quarter * 4, 1)->endOfMonth())) : false,
+                    'c2', 'c3', 'c4', 'c5', 'c6', 'c7' => $cohortAsOf ? (bool) ($cohortAsOf->lt(Carbon::create($year, $quarter * 4, 1)->endOfMonth())) : false,
                     default => false,
                 },
                 'monthly_cohort' => $activeCohort?->monthly_counts ?? [],
             ],
             'teams' => $teams,
-            'cohort_teams' => $code === 'c6' ? $c6CohortTeams : ($code === 'c5' ? $c5CohortTeams : ($code === 'c4' ? $c4CohortTeams : ($code === 'c3' ? $c3CohortTeams : $c2CohortTeams))),
-            'active_search_list' => in_array($code, ['c2', 'c3', 'c4', 'c5', 'c6'], true) ? [] : $this->generateActiveSearchSample($code, $activeSnap ? $activeSnap->active_search_count : 15, $selectedIne),
+            'cohort_teams' => $code === 'c7' ? $c7CohortTeams : ($code === 'c6' ? $c6CohortTeams : ($code === 'c5' ? $c5CohortTeams : ($code === 'c4' ? $c4CohortTeams : ($code === 'c3' ? $c3CohortTeams : $c2CohortTeams)))),
+            'active_search_list' => in_array($code, ['c2', 'c3', 'c4', 'c5', 'c6', 'c7'], true) ? [] : $this->generateActiveSearchSample($code, $activeSnap ? $activeSnap->active_search_count : 15, $selectedIne),
         ];
 
-        // Lógica específica para Indicadores com Acompanhamento Mensal e Avaliação Quadrimestral (C1 a C6 - NT 08/2026 e NT 06/2025)
-        if (in_array($code, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'], true)) {
+        // Lógica específica para Indicadores com Acompanhamento Mensal e Avaliação Quadrimestral (C1 a C7 - NT 08/2026 e NT 06/2025)
+        if (in_array($code, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7'], true)) {
             $weight = (float) ($meta['weight'] ?? 1.0);
             $monthsConfig = self::getMonthsForQuarter($quarter);
 
@@ -727,7 +753,7 @@ class FamilyHealthService
                 ->when($selectedIne, fn ($q) => $q->where('ine', $selectedIne), fn ($q) => $q->whereNull('ine'))
                 ->get()
                 ->keyBy('month');
-            if (in_array($code, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'], true) && ! $activeSnap) {
+            if (in_array($code, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7'], true) && ! $activeSnap) {
                 $monthlySnapshots = collect();
             }
 
@@ -737,8 +763,8 @@ class FamilyHealthService
 
             foreach ($monthsConfig as $mNum => $cfg) {
                 $snap = $monthlySnapshots->get($mNum);
-                $mScore = $snap ? (float) $snap->score_percent : (in_array($code, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'], true) ? null : 0.0);
-                $mLevel = $snap ? $snap->performance_level : (in_array($code, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'], true) ? null : self::calculatePerformanceLevel($code, $mScore));
+                $mScore = $snap ? (float) $snap->score_percent : (in_array($code, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7'], true) ? null : 0.0);
+                $mLevel = $snap ? $snap->performance_level : (in_array($code, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7'], true) ? null : self::calculatePerformanceLevel($code, $mScore));
                 $mPoints = $mLevel ? self::calculateComponentIIIPoints($mLevel, $weight) : null;
 
                 $monthlyEvolution[] = [
@@ -753,7 +779,7 @@ class FamilyHealthService
                     'cohort_total' => $activeCohort?->monthly_counts[$mNum] ?? null,
                     'is_preview' => match ($code) {
                         'c1' => false,
-                        'c2', 'c3', 'c4', 'c5', 'c6' => $cohortAsOf ? (bool) ($cohortAsOf->lt(Carbon::create($year, $mNum, 1)->endOfMonth())) : false,
+                        'c2', 'c3', 'c4', 'c5', 'c6', 'c7' => $cohortAsOf ? (bool) ($cohortAsOf->lt(Carbon::create($year, $mNum, 1)->endOfMonth())) : false,
                         default => false,
                     },
                     'score_percent' => $mScore,
@@ -768,7 +794,7 @@ class FamilyHealthService
             }
 
             // Média aritmética simples dos 4 meses conforme NT 08/2026 e NT 06/2025: (M1 + M2 + M3 + M4) / 4
-            $quarterAvgScore = $countedMonths > 0 ? round($sumScores / $countedMonths, 2) : (in_array($code, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'], true) ? null : ($activeSnap ? (float) $activeSnap->score_percent : 0.0));
+            $quarterAvgScore = $countedMonths > 0 ? round($sumScores / $countedMonths, 2) : (in_array($code, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7'], true) ? null : ($activeSnap ? (float) $activeSnap->score_percent : 0.0));
             $quarterLevel = $quarterAvgScore !== null ? self::calculatePerformanceLevel($code, $quarterAvgScore) : null;
             $quarterPoints = $quarterLevel ? self::calculateComponentIIIPoints($quarterLevel, $weight) : null;
 

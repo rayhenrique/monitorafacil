@@ -35,7 +35,7 @@ class DataProcessing extends Component
 
     public function setScope(string $scope): void
     {
-        $this->selectedScope = in_array($scope, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'cvat', 'all'], true) ? $scope : 'all';
+        $this->selectedScope = in_array($scope, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'cvat', 'all'], true) ? $scope : 'all';
     }
 
     public function processC1(EsusDataProcessingService $service): void
@@ -72,6 +72,12 @@ class DataProcessing extends Component
     {
         $this->selectedScope = 'c6';
         $this->executeProcessing($service, 'c6');
+    }
+
+    public function processC7(EsusDataProcessingService $service): void
+    {
+        $this->selectedScope = 'c7';
+        $this->executeProcessing($service, 'c7');
     }
 
     public function processCvat(): void
@@ -137,6 +143,7 @@ class DataProcessing extends Component
             'c4' => 'Indicador C4 (Diabetes Mellitus)',
             'c5' => 'Indicador C5 (Hipertensão Arterial)',
             'c6' => 'Indicador C6 (Cuidado da Pessoa Idosa)',
+            'c7' => 'Indicador C7 (Prevenção do Câncer / Mulheres)',
             default => 'Geral Completo',
         };
         $this->updateProgress(10, "Iniciando verificação do banco de dados e-SUS PEC [{$scopeDesc}]...");

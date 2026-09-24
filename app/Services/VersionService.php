@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.25.1';
+    public const CURRENT_VERSION = 'v1.26.0';
 
     public const CURRENT_RELEASE_DATE = '24/09/2026';
 
@@ -61,9 +61,25 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.25.1',
+                'version' => 'v1.26.0',
                 'date' => '24/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Indicador C7 (Cuidado da Mulher na Prevenção do Câncer), 4 Boas Práticas Clínicas (A–D, 100 pts), Peso 2.0x e Busca Ativa',
+                'summary' => 'Implementação integral do Indicador C7 (Cuidado da Mulher na Prevenção do Câncer do Colo do Útero e de Mama na Atenção Primária) em estrita conformidade com a Nota Metodológica oficial e Nota Técnica nº 06/2025-CVAT. O módulo contempla o acompanhamento de 16.869 mulheres e homens transgêneros vinculados às 19 equipes da APS municipal (idade de 9 a 69 anos), aferição das 4 Boas Práticas Clínicas oficiais somando 100 pontos: Rastreamento do Câncer do Colo do Útero (Prática A, 25 a 64 anos, citopatológico em 36 meses ou molecular DNA-HPV em 60 meses, 20 pts); Vacinação contra HPV (Prática B, 9 a 14 anos, pelo menos 1 dose registrada na vida, 30 pts); Atenção à Saúde Sexual e Reprodutiva (Prática C, 14 a 69 anos, atendimento médico/enfermagem nos últimos 12 meses, 30 pts); e Rastreamento do Câncer de Mama (Prática D, 50 a 69 anos, mamografia bilateral nos últimos 24 meses, 20 pts). O indicador possui Peso 2.0x no Componente III (até 2,00 pontos de pontuação final). Inclui extração de alto desempenho no DW e-SUS PEC (resolvida em 15.8 segundos para toda a rede), busca ativa nominal otimizada, auditoria clínica individual da mulher, filtros avançados, exportação CSV, card dedicado no módulo Processar Dados e expansão dos scripts de deploy para 18 etapas.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Indicador C7 com as 4 Boas Práticas Clínicas oficiais somando 100 pontos: Colo do Útero (A, 20 pts), Vacina HPV (B, 30 pts), Saúde Sexual e Reprodutiva (C, 30 pts) e Câncer de Mama (D, 20 pts) conforme Nota Metodológica C7.'],
+                    ['type' => 'novo', 'text' => 'Componente III com Peso 2.0x (até 2,00 pontos na pontuação final do município e de cada equipe) conforme Nota Técnica nº 06/2025-CVAT.'],
+                    ['type' => 'melhoria', 'text' => 'Motor de extração do DW e-SUS PEC com pré-resolução dimensional de chaves primárias, consolidando 16.869 mulheres e 19 equipes em apenas 15.8 segundos.'],
+                    ['type' => 'novo', 'text' => 'Busca Ativa Nominal com 16.869 mulheres e homens trans vinculados, paginação rápida, filtros por faixa etária, unidade, equipe, microárea, cumprimento de cada prática e exportação em CSV com UTF-8.'],
+                    ['type' => 'novo', 'text' => 'Modal de Auditoria Clínica Individual da Mulher com linha do tempo clínica, datas de exames, tipo de imunobiológico contra HPV e diagnósticos/procedimentos de saúde reprodutiva.'],
+                    ['type' => 'melhoria', 'text' => 'Módulo Processar Dados com Card 8 dedicado para acionamento pontual do Indicador C7 (--scope=c7) e integração no botão "Processar Tudo".'],
+                    ['type' => 'melhoria', 'text' => 'Scripts de deploy (deploy.sh e scripts/deploy.sh) expandidos para 18 etapas completas com alocação otimizada de memória e documentação atualizada em deploy.md.'],
+                ],
+            ],
+            [
+                'version' => 'v1.25.1',
+                'date' => '24/09/2026',
+                'badge' => 'Anterior',
                 'title' => 'Sincronização dos Cards de Vínculo e Acompanhamento na Visão Geral com o Módulo CVAT Nominal (NT 30/2025)',
                 'summary' => 'Ajuste e sincronização da seção de Vínculo e Acompanhamento na tela Visão Geral com as métricas reais auditadas da Relação Nominal da NT 30/2025 (módulo Vínculo e Acompanhamento Territorial). Os cards passam a exibir a competência real (2026 / M09), Total MICI atualizados (36.705 com 99,20% de 37.002), Total MICI + MICDT atualizados (35.939 com 99,04% de 36.289 com MICDT) e contagem exata de desatualizados (297 e 116), eliminando dados legados divergentes e mantendo consistência total com a tabela oficial cvat_nominal_metrics e consolidation_registrations.',
                 'highlights' => [

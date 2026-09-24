@@ -117,6 +117,7 @@ class EsusDataProcessingService
             'c4' => 'Indicador C4 (Pessoas com Diabetes)',
             'c5' => 'Indicador C5 (Pessoas com Hipertensão)',
             'c6' => 'Indicador C6 (Cuidado da Pessoa Idosa)',
+            'c7' => 'Indicador C7 (Prevenção do Câncer / Mulheres)',
             default => 'Geral Completo',
         };
         $this->notifyProgress($progressCallback, 10, "Iniciando conexão e validação com o e-SUS PEC [{$scopeDesc}]...", $tablesReport);
@@ -248,7 +249,7 @@ class EsusDataProcessingService
         $eligibleTeamsByIne = collect($teamsExtracted)->keyBy('ine')->all();
 
         // ETAPA 3: tb_fat_atendimento_individual · Indicador C1 Mais Acesso Mês a Mês (65%)
-        if (in_array($scope, ['c2', 'c3', 'c4', 'c5', 'c6'], true)) {
+        if (in_array($scope, ['c2', 'c3', 'c4', 'c5', 'c6', 'c7'], true)) {
             $tablesReport['tb_fat_atendimento_individual']['status'] = 'info';
             $tablesReport['tb_fat_atendimento_individual']['rows'] = 0;
             $tablesReport['tb_fat_atendimento_individual']['message'] = sprintf('Não processado (Foco selecionado: %s).', $scopeDesc);
@@ -880,8 +881,72 @@ class EsusDataProcessingService
             ];
         }
 
+        // ETAPA 3.10: Indicador C7 Cuidado da Mulher na Prevenção do Câncer (4 Boas Práticas e Lista Nominal)
+        $c7FailureMessage = null;
+        if ($scope === 'all' || $scope === 'c7') {
+            $this->notifyProgress($progressCallback, 93, 'Processando Indicador C7 (Cuidado da Mulher na Prevenção do Câncer e Boas Práticas A–D)...', $tablesReport);
+            try {
+                if (! $isLivePecConnected || ! $connection) {
+                    throw new \RuntimeException('A leitura do C7 exige conexão com o DW do PEC. Nenhum resultado foi gerado.');
+                }
+
+                $connection->statement("SET statement_timeout TO '30s'");
+
+                $c7Stats = app(C7SnapshotService::class)->process($connection, $year, $quarter, $eligibleTeamsByIne);
+
+                $tablesReport['c7_dw'] = [
+                    'name' => 'C7 · DW PEC',
+                    'description' => 'Coorte de mulheres na prevenção do câncer, 4 boas práticas A–D e lista nominal de busca ativa',
+                    'status' => 'success',
+                    'rows' => $c7Stats['women'],
+                    'message' => sprintf(
+                        '%d mulheres ativas gravadas; %d equipes com lista nominal pronta para busca ativa.',
+                        $c7Stats['women'],
+                        $c7Stats['teams']
+                    ),
+                ];
+                $connection->statement("SET statement_timeout TO '10s'");
+            } catch (Throwable $e) {
+                if ($connection) {
+                    try {
+                        $connection->statement("SET statement_timeout TO '10s'");
+                    } catch (Throwable) {
+                    }
+                }
+                $message = 'C7 não processado: '.$e->getMessage();
+                $tablesReport['c7_dw'] = [
+                    'name' => 'C7 · DW PEC',
+                    'description' => 'Coorte de mulheres na prevenção do câncer e 4 boas práticas A–D',
+                    'status' => 'error',
+                    'rows' => 0,
+                    'message' => $message,
+                ];
+                $syncLog->update(['status' => SyncStatus::Failed, 'finished_at' => now(), 'error_message' => $message]);
+                if ($scope === 'c7') {
+                    $this->notifyProgress($progressCallback, 100, $message, $tablesReport);
+
+                    return [
+                        'success' => false,
+                        'message' => $message,
+                        'progress' => 100,
+                        'tables' => $tablesReport,
+                        'execution_time_ms' => round((microtime(true) - $startTime) * 1000, 2),
+                    ];
+                }
+                $c7FailureMessage = $message;
+            }
+        } else {
+            $tablesReport['c7_dw'] = [
+                'name' => 'C7 · DW PEC',
+                'description' => 'Coorte de mulheres na prevenção do câncer, 4 boas práticas A–D e lista nominal de busca ativa',
+                'status' => 'info',
+                'rows' => 0,
+                'message' => sprintf('Não processado (Foco selecionado: %s).', $scopeDesc),
+            ];
+        }
+
         // ETAPA 4: tb_fat_cad_individual e tb_fat_cad_domiciliar
-        if (in_array($scope, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'], true)) {
+        if (in_array($scope, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7'], true)) {
             $tablesReport['tb_fat_cad_individual']['status'] = 'info';
             $tablesReport['tb_fat_cad_individual']['rows'] = 0;
             $tablesReport['tb_fat_cad_individual']['message'] = sprintf('Não processado (Foco selecionado: %s).', $scopeDesc);
@@ -1025,6 +1090,7 @@ class EsusDataProcessingService
             'c4' => 'Indicador C4 (Pessoas com Diabetes)',
             'c5' => 'Indicador C5 (Pessoas com Hipertensão)',
             'c6' => 'Indicador C6 (Cuidado da Pessoa Idosa)',
+            'c7' => 'Indicador C7 (Prevenção do Câncer / Mulheres)',
             default => 'Geral Completo',
         };
 
@@ -1033,7 +1099,8 @@ class EsusDataProcessingService
             ($c3FailureMessage ? $c3FailureMessage.' ' : '').
             ($c4FailureMessage ? $c4FailureMessage.' ' : '').
             ($c5FailureMessage ? $c5FailureMessage.' ' : '').
-            ($c6FailureMessage ? $c6FailureMessage.' ' : '')
+            ($c6FailureMessage ? $c6FailureMessage.' ' : '').
+            ($c7FailureMessage ? $c7FailureMessage.' ' : '')
         );
 
         $syncLog->update([

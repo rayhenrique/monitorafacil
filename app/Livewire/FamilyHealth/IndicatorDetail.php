@@ -7,6 +7,7 @@ use App\Models\C3NominalPregnancy;
 use App\Models\C4NominalDiabetic;
 use App\Models\C5NominalHypertensive;
 use App\Models\C6NominalElderly;
+use App\Models\C7NominalWoman;
 use App\Models\CvatTeamEvaluation;
 use App\Models\FamilyHealthIndicatorSnapshot;
 use App\Models\FamilyHealthMonthlySnapshot;
@@ -15,6 +16,8 @@ use App\Services\C3ActiveSearchService;
 use App\Services\C4ActiveSearchService;
 use App\Services\C5ActiveSearchService;
 use App\Services\C6ActiveSearchService;
+use App\Services\C7ActiveSearchService;
+use App\Services\C7DwService;
 use App\Services\DashboardSnapshotService;
 use App\Services\FamilyHealthService;
 use Illuminate\Support\Collection;
@@ -64,6 +67,8 @@ class IndicatorDetail extends Component
 
     public string $c6SubTab = 'monthly_summary'; // 'monthly_summary', 'nominal'
 
+    public string $c7SubTab = 'monthly_summary'; // 'monthly_summary', 'nominal'
+
     public string $activeTab = 'dashboard'; // 'dashboard', 'teams', 'active_search', 'rules'
 
     // --- PROPRIEDADES DA ABA BUSCA ATIVA C2 / C3 / C4 / C5 ---
@@ -88,6 +93,8 @@ class IndicatorDetail extends Component
     public int $c5Page = 1;
 
     public int $c6Page = 1;
+
+    public int $c7Page = 1;
 
     public array $visibleColumns = [];
 
@@ -197,6 +204,13 @@ class IndicatorDetail extends Component
 
     public string $advElderlyAgeRange = ''; // '', '60-69', '70-79', '80+'
 
+    // Modal Detalhes Clínicos Mulher / Prevenção Câncer (C7)
+    public bool $showWomanModal = false;
+
+    public ?array $selectedWoman = null;
+
+    public string $advWomanAgeRange = ''; // '', '9-14', '15-24', '25-49', '50-64', '65-69'
+
     public function mount(string $indicator, DashboardSnapshotService $snapshots): void
     {
         $this->indicator = strtolower($indicator);
@@ -261,6 +275,7 @@ class IndicatorDetail extends Component
         $this->c4Page = 1;
         $this->c5Page = 1;
         $this->c6Page = 1;
+        $this->c7Page = 1;
     }
 
     public function updatedSearchCpf(): void
@@ -270,6 +285,7 @@ class IndicatorDetail extends Component
         $this->c4Page = 1;
         $this->c5Page = 1;
         $this->c6Page = 1;
+        $this->c7Page = 1;
     }
 
     public function updatedSearchName(): void
@@ -279,6 +295,7 @@ class IndicatorDetail extends Component
         $this->c4Page = 1;
         $this->c5Page = 1;
         $this->c6Page = 1;
+        $this->c7Page = 1;
     }
 
     public function updatedSearchCnes(): void
@@ -288,6 +305,7 @@ class IndicatorDetail extends Component
         $this->c4Page = 1;
         $this->c5Page = 1;
         $this->c6Page = 1;
+        $this->c7Page = 1;
     }
 
     public function updatedSearchIne(): void
@@ -297,6 +315,7 @@ class IndicatorDetail extends Component
         $this->c4Page = 1;
         $this->c5Page = 1;
         $this->c6Page = 1;
+        $this->c7Page = 1;
     }
 
     public function updatedPerPage(): void
@@ -306,6 +325,7 @@ class IndicatorDetail extends Component
         $this->c4Page = 1;
         $this->c5Page = 1;
         $this->c6Page = 1;
+        $this->c7Page = 1;
     }
 
     public function toggleColumn(string $column): void
@@ -421,11 +441,13 @@ class IndicatorDetail extends Component
         $this->advPracticeJ = null;
         $this->advPracticeK = null;
         $this->advElderlyAgeRange = '';
+        $this->advWomanAgeRange = '';
         $this->c2Page = 1;
         $this->c3Page = 1;
         $this->c4Page = 1;
         $this->c5Page = 1;
         $this->c6Page = 1;
+        $this->c7Page = 1;
     }
 
     public function switchC3SubTab(string $tab): void
@@ -446,6 +468,11 @@ class IndicatorDetail extends Component
     public function switchC6SubTab(string $tab): void
     {
         $this->c6SubTab = in_array($tab, ['monthly_summary', 'nominal'], true) ? $tab : 'monthly_summary';
+    }
+
+    public function switchC7SubTab(string $tab): void
+    {
+        $this->c7SubTab = in_array($tab, ['monthly_summary', 'nominal'], true) ? $tab : 'monthly_summary';
     }
 
     public function setAgeGroup(string $group): void
@@ -635,6 +662,27 @@ class IndicatorDetail extends Component
     {
         $this->showElderlyModal = false;
         $this->selectedElderly = null;
+    }
+
+    public function gotoC7Page(int $page): void
+    {
+        $this->c7Page = max(1, $page);
+    }
+
+    public function openWomanDetail(int $womanId, C7ActiveSearchService $c7Service): void
+    {
+        $found = $c7Service->getWomanById($womanId);
+
+        if ($found) {
+            $this->selectedWoman = $found;
+            $this->showWomanModal = true;
+        }
+    }
+
+    public function closeWomanDetail(): void
+    {
+        $this->showWomanModal = false;
+        $this->selectedWoman = null;
     }
 
     public function setTab(string $tab): void
@@ -855,7 +903,8 @@ class IndicatorDetail extends Component
         C3ActiveSearchService $c3Service,
         C4ActiveSearchService $c4Service,
         C5ActiveSearchService $c5Service,
-        C6ActiveSearchService $c6Service
+        C6ActiveSearchService $c6Service,
+        C7ActiveSearchService $c7Service
     ): View {
         $data = $service->getIndicatorDetail($this->indicator, $this->year, $this->quarter, $this->selectedIne);
         $periods = $snapshots->periods();
@@ -867,6 +916,7 @@ class IndicatorDetail extends Component
         $c4Data = $this->prepareC4Data($c4Service);
         $c5Data = $this->prepareC5Data($c5Service);
         $c6Data = $this->prepareC6Data($c6Service);
+        $c7Data = $this->prepareC7Data($c7Service);
 
         $activeFiltersCount = match ($this->indicator) {
             'c2' => $c2Data['activeFiltersCount'],
@@ -874,6 +924,7 @@ class IndicatorDetail extends Component
             'c4' => $c4Data['activeFiltersCount'],
             'c5' => $c5Data['activeFiltersCount'],
             'c6' => $c6Data['activeFiltersCount'],
+            'c7' => $c7Data['activeFiltersCount'],
             default => 0,
         };
 
@@ -897,6 +948,10 @@ class IndicatorDetail extends Component
             ? 'nominal'
             : $this->c6SubTab;
 
+        $c7SubTabEffective = ($this->indicator === 'c7' && $this->activeTab === 'active_search')
+            ? 'nominal'
+            : $this->c7SubTab;
+
         return view('livewire.family-health.indicator-detail', array_merge([
             'indicator' => $this->indicator,
             'year' => $this->year,
@@ -919,6 +974,7 @@ class IndicatorDetail extends Component
             'c4Teams' => $filteredTeams,
             'c5Teams' => $filteredTeams,
             'c6Teams' => $filteredTeams,
+            'c7Teams' => $filteredTeams,
             'filteredTeams' => $filteredTeams,
             'c1SubTab' => $this->c1SubTab,
             'c2SubTab' => $c2SubTabEffective,
@@ -926,6 +982,7 @@ class IndicatorDetail extends Component
             'c4SubTab' => $c4SubTabEffective,
             'c5SubTab' => $c5SubTabEffective,
             'c6SubTab' => $c6SubTabEffective,
+            'c7SubTab' => $c7SubTabEffective,
             'activeSearchList' => $data['active_search_list'],
             'periods' => $periods,
             'activeFiltersCount' => $activeFiltersCount,
@@ -939,12 +996,14 @@ class IndicatorDetail extends Component
             'realHypertensivesCount' => $this->indicator === 'c5' ? C5ActiveSearchService::getRealHypertensivesCount($this->year, $this->quarter, $this->selectedIne) : 0,
             'isRealC6DataAvailable' => $this->indicator === 'c6' ? C6ActiveSearchService::isRealDataAvailable($this->year, $this->quarter) : false,
             'realElderlyCount' => $this->indicator === 'c6' ? C6ActiveSearchService::getRealElderlyCount($this->year, $this->quarter, $this->selectedIne) : 0,
-        ], $c1Data, $c2Data['viewVars'], $c3Data['viewVars'], $c4Data['viewVars'], $c5Data['viewVars'], $c6Data['viewVars']));
+            'isRealC7DataAvailable' => $this->indicator === 'c7' ? C7ActiveSearchService::isRealDataAvailable($this->year, $this->quarter) : false,
+            'realWomenCount' => $this->indicator === 'c7' ? C7ActiveSearchService::getRealWomenCount($this->year, $this->quarter, $this->selectedIne) : 0,
+        ], $c1Data, $c2Data['viewVars'], $c3Data['viewVars'], $c4Data['viewVars'], $c5Data['viewVars'], $c6Data['viewVars'], $c7Data['viewVars']));
     }
 
     private function getFilteredTeams(Collection $teams): Collection
     {
-        if (! in_array($this->indicator, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'], true)) {
+        if (! in_array($this->indicator, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7'], true)) {
             return $teams;
         }
 
@@ -2150,5 +2209,271 @@ class IndicatorDetail extends Component
         $filtered = $c6Service->filterCohort($cohort, $filters);
 
         return $c6Service->exportCsv($filtered);
+    }
+
+    private function prepareC7Data(C7ActiveSearchService $c7Service): array
+    {
+        $c7NominalList = collect();
+        $c7SummaryKpis = null;
+        $c7FilterOptions = [];
+        $c7AvailableColumns = C7ActiveSearchService::getAvailableColumns();
+        $c7TotalItems = 0;
+        $c7TotalPages = 1;
+        $activeFiltersCount = 0;
+        $c7TeamRows = collect();
+        $c7Distribution = [
+            'total' => 0,
+            'regular' => ['count' => 0, 'percent' => 0.0],
+            'suficiente' => ['count' => 0, 'percent' => 0.0],
+            'bom' => ['count' => 0, 'percent' => 0.0],
+            'otimo' => ['count' => 0, 'percent' => 0.0],
+        ];
+
+        if ($this->indicator !== 'c7') {
+            return [
+                'activeFiltersCount' => 0,
+                'viewVars' => [
+                    'c7NominalList' => $c7NominalList,
+                    'c7SummaryKpis' => $c7SummaryKpis,
+                    'c7FilterOptions' => $c7FilterOptions,
+                    'c7AvailableColumns' => $c7AvailableColumns,
+                    'c7TotalItems' => $c7TotalItems,
+                    'c7TotalPages' => $c7TotalPages,
+                    'c7TeamRows' => $c7TeamRows,
+                    'c7Distribution' => $c7Distribution,
+                    'showWomanModal' => false,
+                    'selectedWoman' => null,
+                ],
+            ];
+        }
+
+        $hasCvat = Schema::hasTable('cvat_team_evaluations');
+        $facilityMap = $hasCvat ? CvatTeamEvaluation::select('ine', 'cnes', 'facility_name')
+            ->distinct()
+            ->get()
+            ->keyBy('ine') : collect();
+
+        // 1. Equipes / Visão Geral: Priorizar c7_cohort_snapshots (ultra-rápido, 1ms)
+        if (Schema::hasTable('c7_cohort_snapshots')) {
+            $c7Snaps = DB::table('c7_cohort_snapshots')
+                ->where('year', $this->year)
+                ->where('quarter', $this->quarter)
+                ->whereNotNull('ine')
+                ->where('calculation_version', C7DwService::VERSION)
+                ->get();
+
+            if ($c7Snaps->isNotEmpty()) {
+                $c7TeamRows = $c7Snaps->map(function ($snap) use ($facilityMap) {
+                    $ine = $snap->ine;
+                    $score = (float) $snap->final_score;
+                    $level = FamilyHealthService::calculatePerformanceLevel('c7', $score);
+                    $facility = $facilityMap->get($ine);
+
+                    return [
+                        'ine' => $ine,
+                        'team_name' => $snap->team_name ?? ($facility?->facility_name ?? ('Equipe INE '.$ine)),
+                        'facility_name' => $facility?->facility_name ?? '—',
+                        'cnes' => $facility?->cnes ?? '—',
+                        'cohort_total' => (int) $snap->cohort_total,
+                        'evaluated_total' => (int) $snap->evaluated_total,
+                        'practice_a_compliant' => (int) $snap->practice_a_compliant,
+                        'practice_a_eligible' => (int) $snap->practice_a_eligible,
+                        'practice_a_score' => (float) $snap->practice_a_score,
+                        'practice_b_compliant' => (int) $snap->practice_b_compliant,
+                        'practice_b_eligible' => (int) $snap->practice_b_eligible,
+                        'practice_b_score' => (float) $snap->practice_b_score,
+                        'practice_c_compliant' => (int) $snap->practice_c_compliant,
+                        'practice_c_eligible' => (int) $snap->practice_c_eligible,
+                        'practice_c_score' => (float) $snap->practice_c_score,
+                        'practice_d_compliant' => (int) $snap->practice_d_compliant,
+                        'practice_d_eligible' => (int) $snap->practice_d_eligible,
+                        'practice_d_score' => (float) $snap->practice_d_score,
+                        'score_percent' => $score,
+                        'performance_level' => $level,
+                    ];
+                });
+            }
+        }
+
+        // Fallback para agrupar c7_nominal_women se snapshots não existirem
+        if ($c7TeamRows->isEmpty() && Schema::hasTable('c7_nominal_women')) {
+            $c7WomenGrouped = C7NominalWoman::query()
+                ->where('year', $this->year)
+                ->where('quarter', $this->quarter)
+                ->select(
+                    'ine',
+                    'facility_name',
+                    DB::raw('COUNT(*) as total_cohort'),
+                    DB::raw('SUM(CASE WHEN practice_a_met = 1 THEN 1 ELSE 0 END) as compliant_a'),
+                    DB::raw('SUM(CASE WHEN eligible_practice_a = 1 THEN 1 ELSE 0 END) as eligible_a'),
+                    DB::raw('SUM(CASE WHEN practice_b_met = 1 THEN 1 ELSE 0 END) as compliant_b'),
+                    DB::raw('SUM(CASE WHEN eligible_practice_b = 1 THEN 1 ELSE 0 END) as eligible_b'),
+                    DB::raw('SUM(CASE WHEN practice_c_met = 1 THEN 1 ELSE 0 END) as compliant_c'),
+                    DB::raw('SUM(CASE WHEN eligible_practice_c = 1 THEN 1 ELSE 0 END) as eligible_c'),
+                    DB::raw('SUM(CASE WHEN practice_d_met = 1 THEN 1 ELSE 0 END) as compliant_d'),
+                    DB::raw('SUM(CASE WHEN eligible_practice_d = 1 THEN 1 ELSE 0 END) as eligible_d')
+                )
+                ->groupBy('ine', 'facility_name')
+                ->get();
+
+            $c7TeamRows = $c7WomenGrouped->map(function ($group) use ($facilityMap) {
+                $ine = $group->ine;
+                $tot = (int) $group->total_cohort;
+                $elA = (int) $group->eligible_a;
+                $cmA = (int) $group->compliant_a;
+                $elB = (int) $group->eligible_b;
+                $cmB = (int) $group->compliant_b;
+                $elC = (int) $group->eligible_c;
+                $cmC = (int) $group->compliant_c;
+                $elD = (int) $group->eligible_d;
+                $cmD = (int) $group->compliant_d;
+
+                $scA = $elA > 0 ? round(($cmA / $elA) * 20.0, 2) : 20.0;
+                $scB = $elB > 0 ? round(($cmB / $elB) * 30.0, 2) : 30.0;
+                $scC = $elC > 0 ? round(($cmC / $elC) * 30.0, 2) : 30.0;
+                $scD = $elD > 0 ? round(($cmD / $elD) * 20.0, 2) : 20.0;
+                $score = round($scA + $scB + $scC + $scD, 2);
+
+                $level = FamilyHealthService::calculatePerformanceLevel('c7', $score);
+                $facility = $facilityMap->get($ine);
+
+                return [
+                    'ine' => $ine,
+                    'team_name' => $facility?->facility_name ?? $group->facility_name ?? ('Equipe INE '.$ine),
+                    'facility_name' => $facility?->facility_name ?? $group->facility_name ?? '—',
+                    'cnes' => $facility?->cnes ?? '—',
+                    'cohort_total' => $tot,
+                    'evaluated_total' => $tot,
+                    'practice_a_compliant' => $cmA,
+                    'practice_a_eligible' => $elA,
+                    'practice_a_score' => $scA,
+                    'practice_b_compliant' => $cmB,
+                    'practice_b_eligible' => $elB,
+                    'practice_b_score' => $scB,
+                    'practice_c_compliant' => $cmC,
+                    'practice_c_eligible' => $elC,
+                    'practice_c_score' => $scC,
+                    'practice_d_compliant' => $cmD,
+                    'practice_d_eligible' => $elD,
+                    'practice_d_score' => $scD,
+                    'score_percent' => $score,
+                    'performance_level' => $level,
+                ];
+            });
+        }
+
+        $c7Total = $c7TeamRows->count();
+        $c7Reg = $c7TeamRows->filter(fn ($r) => $r['performance_level'] === 'regular')->count();
+        $c7Suf = $c7TeamRows->filter(fn ($r) => $r['performance_level'] === 'suficiente')->count();
+        $c7Bom = $c7TeamRows->filter(fn ($r) => $r['performance_level'] === 'bom')->count();
+        $c7Oti = $c7TeamRows->filter(fn ($r) => $r['performance_level'] === 'otimo')->count();
+
+        $c7Distribution = [
+            'total' => $c7Total,
+            'regular' => ['count' => $c7Reg, 'percent' => $c7Total > 0 ? round(($c7Reg / $c7Total) * 100, 1) : 0.0],
+            'suficiente' => ['count' => $c7Suf, 'percent' => $c7Total > 0 ? round(($c7Suf / $c7Total) * 100, 1) : 0.0],
+            'bom' => ['count' => $c7Bom, 'percent' => $c7Total > 0 ? round(($c7Bom / $c7Total) * 100, 1) : 0.0],
+            'otimo' => ['count' => $c7Oti, 'percent' => $c7Total > 0 ? round(($c7Oti / $c7Total) * 100, 1) : 0.0],
+        ];
+
+        // 2. Otimização de Memória: Carregar coorte nominal completa somente quando na aba nominal
+        if ($this->c7SubTab !== 'nominal') {
+            $c7SummaryKpis = $c7Service->getSummaryKpisFromSnapshot($this->year, $this->quarter, $this->selectedIne);
+            if (! $c7SummaryKpis) {
+                @ini_set('memory_limit', '512M');
+                $c7BaseCohort = $c7Service->getBaseCohort($this->year, $this->quarter, $this->selectedIne);
+                $c7SummaryKpis = $c7Service->getSummaryKpis($c7BaseCohort, $this->year, $this->quarter);
+            }
+            $c7TotalItems = $c7SummaryKpis['total_women'] ?? 0;
+            $c7FilterOptions = [];
+        } else {
+            @ini_set('memory_limit', '512M');
+            $c7FilterOptions = $c7Service->getFilterOptions($this->year, $this->quarter);
+            $c7BaseCohort = $c7Service->getBaseCohort($this->year, $this->quarter, $this->selectedIne);
+
+            $filters = [
+                'searchCns' => $this->searchCns,
+                'searchCpf' => $this->searchCpf,
+                'searchName' => $this->searchName,
+                'searchCnes' => $this->searchCnes,
+                'searchIne' => $this->searchIne,
+                'advDistrict' => $this->advDistrict,
+                'advFacility' => $this->advFacility,
+                'advTeam' => $this->advTeam,
+                'advMicroarea' => $this->advMicroarea,
+                'advCitizenName' => $this->advCitizenName,
+                'advCitizenCpf' => $this->advCitizenCpf,
+                'advCitizenCns' => $this->advCitizenCns,
+                'advRaceColor' => $this->advRaceColor,
+                'advWomanAgeRange' => $this->advWomanAgeRange,
+                'advPracticeA' => $this->advPracticeA,
+                'advPracticeB' => $this->advPracticeB,
+                'advPracticeC' => $this->advPracticeC,
+                'advPracticeD' => $this->advPracticeD,
+            ];
+
+            foreach ($filters as $k => $val) {
+                if (in_array($k, ['searchCns', 'searchCpf', 'searchName', 'searchCnes', 'searchIne'], true)) {
+                    continue;
+                }
+                if ($val !== '' && $val !== null && $val !== []) {
+                    $activeFiltersCount++;
+                }
+            }
+
+            $c7FilteredCohort = $c7Service->filterCohort($c7BaseCohort, $filters);
+            $c7SummaryKpis = $c7Service->getSummaryKpis($c7FilteredCohort, $this->year, $this->quarter);
+
+            $c7TotalItems = $c7FilteredCohort->count();
+            $c7TotalPages = max(1, (int) ceil($c7TotalItems / max(1, $this->perPage)));
+            $this->c7Page = min(max(1, $this->c7Page), $c7TotalPages);
+
+            $c7NominalList = $c7FilteredCohort->forPage($this->c7Page, $this->perPage);
+        }
+
+        return [
+            'activeFiltersCount' => $activeFiltersCount,
+            'viewVars' => [
+                'c7NominalList' => $c7NominalList,
+                'c7SummaryKpis' => $c7SummaryKpis,
+                'c7FilterOptions' => $c7FilterOptions,
+                'c7AvailableColumns' => $c7AvailableColumns,
+                'c7TotalItems' => $c7TotalItems,
+                'c7TotalPages' => $c7TotalPages,
+                'c7TeamRows' => $c7TeamRows,
+                'c7Distribution' => $c7Distribution,
+                'showWomanModal' => $this->showWomanModal,
+                'selectedWoman' => $this->selectedWoman,
+            ],
+        ];
+    }
+
+    public function exportC7Csv(C7ActiveSearchService $c7Service): StreamedResponse
+    {
+        @ini_set('memory_limit', '512M');
+        $cohort = $c7Service->getBaseCohort($this->year, $this->quarter, $this->selectedIne);
+        $filters = [
+            'searchCns' => $this->searchCns,
+            'searchCpf' => $this->searchCpf,
+            'searchName' => $this->searchName,
+            'searchCnes' => $this->searchCnes,
+            'searchIne' => $this->searchIne,
+            'advDistrict' => $this->advDistrict,
+            'advFacility' => $this->advFacility,
+            'advTeam' => $this->advTeam,
+            'advMicroarea' => $this->advMicroarea,
+            'advCitizenName' => $this->advCitizenName,
+            'advCitizenCpf' => $this->advCitizenCpf,
+            'advCitizenCns' => $this->advCitizenCns,
+            'advRaceColor' => $this->advRaceColor,
+            'advWomanAgeRange' => $this->advWomanAgeRange,
+            'advPracticeA' => $this->advPracticeA,
+            'advPracticeB' => $this->advPracticeB,
+            'advPracticeC' => $this->advPracticeC,
+            'advPracticeD' => $this->advPracticeD,
+        ];
+        $filtered = $c7Service->filterCohort($cohort, $filters);
+
+        return $c7Service->exportCsv($filtered, $this->year, $this->quarter, $this->selectedIne);
     }
 }

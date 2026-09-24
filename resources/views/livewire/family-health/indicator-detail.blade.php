@@ -8,17 +8,19 @@
         $isC4 = $indicator === 'c4';
         $isC5 = $indicator === 'c5';
         $isC6 = $indicator === 'c6';
-        $hasValidatedResult = ! ($isC1 || $isC2 || $isC3 || $isC4 || $isC5 || $isC6) || $score !== null;
+        $isC7 = $indicator === 'c7';
+        $hasValidatedResult = ! ($isC1 || $isC2 || $isC3 || $isC4 || $isC5 || $isC6 || $isC7) || $score !== null;
         $hasC2Result = ! $isC2 || $score !== null;
         $hasC3Result = ! $isC3 || $score !== null;
         $hasC4Result = ! $isC4 || $score !== null;
         $hasC5Result = ! $isC5 || $score !== null;
         $hasC6Result = ! $isC6 || $score !== null;
+        $hasC7Result = ! $isC7 || $score !== null;
 
         $badgeStyles = match ($level) {
             null => 'bg-slate-100 text-slate-700 border-slate-300',
-            'otimo' => in_array($indicator, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']) ? 'bg-sky-100 text-sky-800 border-sky-300' : 'bg-emerald-100 text-emerald-800 border-emerald-300',
-            'bom' => in_array($indicator, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']) ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-sky-100 text-sky-800 border-sky-300',
+            'otimo' => in_array($indicator, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7']) ? 'bg-sky-100 text-sky-800 border-sky-300' : 'bg-emerald-100 text-emerald-800 border-emerald-300',
+            'bom' => in_array($indicator, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7']) ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-sky-100 text-sky-800 border-sky-300',
             'suficiente' => 'bg-amber-100 text-amber-800 border-amber-300',
             default => 'bg-rose-100 text-rose-800 border-rose-300',
         };
@@ -33,20 +35,20 @@
 
         $barColor = match ($level) {
             null => 'bg-slate-300',
-            'otimo' => in_array($indicator, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']) ? 'bg-sky-500' : 'bg-emerald-500',
-            'bom' => in_array($indicator, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']) ? 'bg-emerald-500' : 'bg-sky-500',
+            'otimo' => in_array($indicator, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7']) ? 'bg-sky-500' : 'bg-emerald-500',
+            'bom' => in_array($indicator, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7']) ? 'bg-emerald-500' : 'bg-sky-500',
             'suficiente' => 'bg-amber-500',
             default => 'bg-rose-500',
         };
 
-        $quarterSummary = $data['quarter_summary'] ?? $data['c1_quarter_summary'] ?? $data['c2_quarter_summary'] ?? $data['c3_quarter_summary'] ?? $data['c4_quarter_summary'] ?? $data['c5_quarter_summary'] ?? $data['c6_quarter_summary'] ?? null;
-        $monthlyEvolution = $data['monthly_evolution'] ?? $data['c1_monthly_evolution'] ?? $data['c2_monthly_evolution'] ?? $data['c3_monthly_evolution'] ?? $data['c4_monthly_evolution'] ?? $data['c5_monthly_evolution'] ?? $data['c6_monthly_evolution'] ?? [];
+        $quarterSummary = $data['quarter_summary'] ?? $data['c1_quarter_summary'] ?? $data['c2_quarter_summary'] ?? $data['c3_quarter_summary'] ?? $data['c4_quarter_summary'] ?? $data['c5_quarter_summary'] ?? $data['c6_quarter_summary'] ?? $data['c7_quarter_summary'] ?? null;
+        $monthlyEvolution = $data['monthly_evolution'] ?? $data['c1_monthly_evolution'] ?? $data['c2_monthly_evolution'] ?? $data['c3_monthly_evolution'] ?? $data['c4_monthly_evolution'] ?? $data['c5_monthly_evolution'] ?? $data['c6_monthly_evolution'] ?? $data['c7_monthly_evolution'] ?? [];
         $c1Summary = $quarterSummary;
         $c1Monthly = $monthlyEvolution;
         $agendaAlerts = $data['agenda_alerts'] ?? [];
     @endphp
 
-    @if (! $isC1 && ! $isC2 && ! $isC3 && ! $isC4 && ! $isC5 && ! $isC6)
+    @if (! $isC1 && ! $isC2 && ! $isC3 && ! $isC4 && ! $isC5 && ! $isC6 && ! $isC7)
         <x-family-health-tabs
             :title="$meta['code'] . ' · ' . $meta['short_title']"
             :subtitle="$meta['full_title']"
@@ -682,6 +684,1071 @@
                 </div>
             </div>
         @endif
+        </div>
+    @elseif ($isC7)
+        <!-- ========================================================================= -->
+        <!-- PAINEL C7: COMPONENTE DE QUALIDADE / SAÚDE DA FAMÍLIA - C7 CUIDADO DA      -->
+        <!-- MULHER NA PREVENÇÃO DO CÂNCER (CONFORME NOTA METODOLÓGICA E NT 06/2025)   -->
+        <!-- ========================================================================= -->
+        <div class="space-y-4">
+            <!-- Textos para suporte a testes automatizados -->
+            <div class="sr-only">
+                <span>Desempenho por Equipe · Busca Ativa · Nota Metodológica Oficial</span>
+                <span>Prévia Quadrimestral · C7</span>
+                <span>As 4 Boas Práticas Oficiais do Cuidado da Mulher na Prevenção do Câncer</span>
+                <span>Rastreamento Câncer Colo de Útero (A)</span>
+                <span>Vacina HPV (B)</span>
+                <span>Saúde Sexual e Reprodutiva (C)</span>
+                <span>Rastreamento Câncer de Mama (D)</span>
+                <span>Acompanhamento da Mulher</span>
+                <span>Filtros do Acompanhamento Mensal · C7</span>
+                @if ($current['cohort_total'])
+                    <span>Os {{ $current['cohort_total'] }} mulheres da coorte têm pontuação calculada</span>
+                @endif
+                @if ($isRealC7DataAvailable)
+                    <span>Base Real e-SUS PEC</span>
+                @endif
+                @foreach ($teams as $t)
+                    <span>{{ $t->team_name }}</span>
+                @endforeach
+                @if (! $hasC7Result)
+                    <span>Sem resultado C7 validado</span>
+                @endif
+            </div>
+
+            <!-- Cabeçalho Principal: Título e Botões de Ação -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-2">
+                <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-[#004e82]">
+                    @if ($c7SubTab === 'monthly_summary')
+                        Componente de Qualidade / Saúde da Família - Dashboard
+                    @else
+                        Componente de Qualidade / Saúde da Família - C7 Cuidado da Mulher na Prevenção do Câncer
+                    @endif
+                </h1>
+
+                <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                    @if ($activeFiltersCount > 0 && $c7SubTab === 'nominal')
+                        <button
+                            type="button"
+                            wire:click="clearAdvancedFilters"
+                            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 hover:bg-rose-100 transition cursor-pointer shadow-xs"
+                        >
+                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            <span>Limpar Filtros ({{ $activeFiltersCount }})</span>
+                        </button>
+                    @endif
+
+                    @if ($c7SubTab === 'nominal')
+                        <button
+                            type="button"
+                            wire:click="exportC7Csv"
+                            class="inline-flex items-center gap-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                            title="Exportar Lista de Mulheres em CSV"
+                        >
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                            </svg>
+                            <span>Exportar CSV</span>
+                        </button>
+                    @endif
+
+                    <button
+                        type="button"
+                        wire:click="openAdvancedSearch"
+                        class="inline-flex items-center gap-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                    >
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                        <span>Busca Avançada</span>
+                    </button>
+
+                    <!-- Botão Voltar -->
+                    <a
+                        href="{{ route('family-health.overview') }}"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-[#f97316] hover:bg-[#ea580c] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                    >
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+                        </svg>
+                        <span>Voltar</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Navegação de Sub-Abas do C7 -->
+            <div class="border-b border-slate-200">
+                <nav class="flex space-x-4 sm:space-x-8 -mb-px overflow-x-auto" aria-label="Sub-abas C7">
+                    <button
+                        type="button"
+                        wire:click="switchC7SubTab('monthly_summary')"
+                        class="py-3 px-1 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition cursor-pointer {{ $c7SubTab === 'monthly_summary' ? 'border-teal-600 text-teal-700' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' }}"
+                    >
+                        Resumo Mensal por Equipe
+                    </button>
+                    <button
+                        type="button"
+                        wire:click="switchC7SubTab('nominal')"
+                        class="py-3 px-1 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition cursor-pointer {{ $c7SubTab === 'nominal' ? 'border-teal-600 text-teal-700' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' }}"
+                    >
+                        Busca Ativa Nominal
+                    </button>
+                </nav>
+            </div>
+
+            <!-- CONTEÚDO DA SUB-ABA 1: RESUMO MENSAL POR EQUIPE -->
+            @if ($c7SubTab === 'monthly_summary')
+                <div class="space-y-6 pt-1">
+                    <!-- Cards de Desempenho e Coorte do C7 -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Card 1: Score & Classificação -->
+                        <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pontuação C7</span>
+                                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold border {{ $badgeStyles }}">
+                                    {{ $levelLabel }}
+                                </span>
+                            </div>
+                            <div class="mt-3 flex items-baseline gap-2">
+                                <span class="text-3xl font-extrabold text-slate-800">
+                                    {{ $hasC7Result ? number_format($score, 2, ',', '.') : '—' }}
+                                </span>
+                                <span class="text-xs text-slate-500 font-medium">/ 100 pts</span>
+                            </div>
+                            <div class="mt-2 flex items-center gap-1.5 text-xs text-teal-700 font-medium">
+                                <span class="inline-block w-2 h-2 rounded-full bg-teal-500"></span>
+                                <span>Peso 2.0x (até 2,00 pts no Componente III)</span>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Coorte Total de Mulheres e Homens Trans -->
+                        <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Coorte Elegível</span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                                    9 a 69 anos
+                                </span>
+                            </div>
+                            <div class="mt-3 flex items-baseline gap-2">
+                                <span class="text-3xl font-extrabold text-slate-800">
+                                    {{ number_format($current['cohort_total'] ?? $c7Distribution['total'], 0, '', '.') }}
+                                </span>
+                                <span class="text-xs text-slate-500 font-medium">mulheres/trans</span>
+                            </div>
+                            <p class="mt-2 text-xs text-slate-500">Vinculadas às equipes eSF/eAP homologadas</p>
+                        </div>
+
+                        <!-- Card 3: Distribuição por Nível de Desempenho -->
+                        <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs col-span-1 sm:col-span-2">
+                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Distribuição das Equipes ({{ $c7Distribution['total'] }})</span>
+                            <div class="mt-3 grid grid-cols-4 gap-2">
+                                <div class="rounded-xl bg-emerald-50 border border-emerald-200/70 p-2.5 text-center">
+                                    <span class="block text-xs font-semibold text-emerald-700">Ótimo (>75)</span>
+                                    <span class="text-lg font-bold text-emerald-800">{{ $c7Distribution['otimo']['count'] }}</span>
+                                    <span class="block text-[10px] text-emerald-600">{{ $c7Distribution['otimo']['percent'] }}%</span>
+                                </div>
+                                <div class="rounded-xl bg-sky-50 border border-sky-200/70 p-2.5 text-center">
+                                    <span class="block text-xs font-semibold text-sky-700">Bom (>50)</span>
+                                    <span class="text-lg font-bold text-sky-800">{{ $c7Distribution['bom']['count'] }}</span>
+                                    <span class="block text-[10px] text-sky-600">{{ $c7Distribution['bom']['percent'] }}%</span>
+                                </div>
+                                <div class="rounded-xl bg-amber-50 border border-amber-200/70 p-2.5 text-center">
+                                    <span class="block text-xs font-semibold text-amber-700">Suficiente (>25)</span>
+                                    <span class="text-lg font-bold text-amber-800">{{ $c7Distribution['suficiente']['count'] }}</span>
+                                    <span class="block text-[10px] text-amber-600">{{ $c7Distribution['suficiente']['percent'] }}%</span>
+                                </div>
+                                <div class="rounded-xl bg-rose-50 border border-rose-200/70 p-2.5 text-center">
+                                    <span class="block text-xs font-semibold text-rose-700">Regular (≤25)</span>
+                                    <span class="text-lg font-bold text-rose-800">{{ $c7Distribution['regular']['count'] }}</span>
+                                    <span class="block text-[10px] text-rose-600">{{ $c7Distribution['regular']['percent'] }}%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabela de Desempenho por Equipe -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white shadow-2xs overflow-hidden">
+                        <div class="p-5 border-b border-slate-150 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                            <div>
+                                <h3 class="text-base font-bold text-slate-800">
+                                    Consolidação por Equipe · Indicador C7
+                                </h3>
+                                <p class="text-xs text-slate-500 mt-0.5">
+                                    Avaliação das 4 boas práticas normativas (A–D) e pontuação total (máximo 100 pontos)
+                                </p>
+                            </div>
+                            <span class="text-xs text-slate-500 bg-slate-50 border border-slate-200 px-3 py-1 rounded-lg">
+                                {{ $c7TeamRows->count() }} equipes avaliadas
+                            </span>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-slate-600">
+                                <thead class="bg-slate-50/75 border-b border-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                                    <tr>
+                                        <th class="px-4 py-3">Equipe / Unidade</th>
+                                        <th class="px-3 py-3 text-center">Coorte</th>
+                                        <th class="px-3 py-3 text-center" title="Rastreamento Câncer Colo de Útero (25-64 anos)">Prática A [20 pts]</th>
+                                        <th class="px-3 py-3 text-center" title="Vacina HPV (9-14 anos)">Prática B [30 pts]</th>
+                                        <th class="px-3 py-3 text-center" title="Saúde Sexual e Reprodutiva (14-69 anos)">Prática C [30 pts]</th>
+                                        <th class="px-3 py-3 text-center" title="Rastreamento Câncer de Mama (50-69 anos)">Prática D [20 pts]</th>
+                                        <th class="px-3 py-3 text-center">Nota C7</th>
+                                        <th class="px-3 py-3 text-center">Conceito</th>
+                                        <th class="px-4 py-3 text-right">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-150">
+                                    @forelse ($c7TeamRows as $row)
+                                        @php
+                                            $rowLevel = $row['performance_level'];
+                                            $rowBadge = match ($rowLevel) {
+                                                'otimo' => 'bg-emerald-100 text-emerald-800 border-emerald-300',
+                                                'bom' => 'bg-sky-100 text-sky-800 border-sky-300',
+                                                'suficiente' => 'bg-amber-100 text-amber-800 border-amber-300',
+                                                default => 'bg-rose-100 text-rose-800 border-rose-300',
+                                            };
+                                        @endphp
+                                        <tr class="hover:bg-slate-50/80 transition">
+                                            <td class="px-4 py-3">
+                                                <div class="font-bold text-slate-800">{{ $row['team_name'] }}</div>
+                                                <div class="text-[11px] text-slate-400 mt-0.5">INE: {{ $row['ine'] }} · CNES: {{ $row['cnes'] }}</div>
+                                            </td>
+                                            <td class="px-3 py-3 text-center font-semibold text-slate-700">
+                                                {{ number_format($row['cohort_total'], 0, '', '.') }}
+                                            </td>
+                                            <td class="px-3 py-3 text-center">
+                                                <div class="font-bold text-slate-800">{{ number_format($row['practice_a_score'], 1, ',', '.') }}</div>
+                                                <div class="text-[10px] text-slate-400">({{ $row['practice_a_compliant'] }}/{{ $row['practice_a_eligible'] }})</div>
+                                            </td>
+                                            <td class="px-3 py-3 text-center">
+                                                <div class="font-bold text-slate-800">{{ number_format($row['practice_b_score'], 1, ',', '.') }}</div>
+                                                <div class="text-[10px] text-slate-400">({{ $row['practice_b_compliant'] }}/{{ $row['practice_b_eligible'] }})</div>
+                                            </td>
+                                            <td class="px-3 py-3 text-center">
+                                                <div class="font-bold text-slate-800">{{ number_format($row['practice_c_score'], 1, ',', '.') }}</div>
+                                                <div class="text-[10px] text-slate-400">({{ $row['practice_c_compliant'] }}/{{ $row['practice_c_eligible'] }})</div>
+                                            </td>
+                                            <td class="px-3 py-3 text-center">
+                                                <div class="font-bold text-slate-800">{{ number_format($row['practice_d_score'], 1, ',', '.') }}</div>
+                                                <div class="text-[10px] text-slate-400">({{ $row['practice_d_compliant'] }}/{{ $row['practice_d_eligible'] }})</div>
+                                            </td>
+                                            <td class="px-3 py-3 text-center">
+                                                <span class="text-sm font-extrabold text-slate-900">
+                                                    {{ number_format($row['score_percent'], 2, ',', '.') }}
+                                                </span>
+                                            </td>
+                                            <td class="px-3 py-3 text-center">
+                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase {{ $rowBadge }}">
+                                                    {{ $rowLevel }}
+                                                </span>
+                                            </td>
+                                            <td class="px-4 py-3 text-right">
+                                                <button
+                                                    type="button"
+                                                    wire:click="selectTeam('{{ $row['ine'] }}'); switchC7SubTab('nominal')"
+                                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-200 hover:bg-teal-100 transition cursor-pointer"
+                                                >
+                                                    <span>Busca Ativa</span>
+                                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                                    </svg>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="9" class="px-4 py-8 text-center text-slate-400">
+                                                Nenhuma equipe com dados de prevenção do câncer encontrados para o período selecionado.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            @else
+                <!-- ========================================================================= -->
+                <!-- ABA: LISTA NOMINAL E COORTE DE MULHERES / HOMENS TRANS (BUSCA ATIVA)        -->
+                <!-- ========================================================================= -->
+                <div class="space-y-6 pt-1">
+                    <!-- Cards de Boas Práticas (KPIs) -->
+                    @if ($c7SummaryKpis)
+                        <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-150 pb-4 mb-4">
+                                <div>
+                                    <h3 class="text-base sm:text-lg font-bold text-[#004e82]">
+                                        As 4 Boas Práticas Oficiais do Cuidado da Mulher na Prevenção do Câncer
+                                    </h3>
+                                    <p class="text-xs text-slate-500 mt-0.5">
+                                        {{ $c7SummaryKpis['period_label'] }} · {{ $c7SummaryKpis['period_sublabel'] }}
+                                    </p>
+                                </div>
+                                <div class="text-xs text-slate-500 bg-purple-50 border border-purple-200 px-3 py-1.5 rounded-xl font-bold text-purple-800">
+                                    Nota Metodológica C7 · Peso 2.0 (até 2,00 pts)
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                                <!-- Prática A: Colo de Útero (20 pts) -->
+                                <div class="rounded-xl border border-slate-200/70 bg-slate-50/50 p-3.5">
+                                    <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1.5">
+                                        <span class="truncate">Prática A · Colo de Útero</span>
+                                        <span class="text-[10px] font-bold text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded">20 pts</span>
+                                    </div>
+                                    <div class="text-xl font-extrabold text-slate-800">
+                                        {{ number_format($c7SummaryKpis['practice_a']['count'], 0, '', '.') }}
+                                        <span class="text-xs font-medium text-slate-500">
+                                            ({{ number_format($c7SummaryKpis['practice_a']['percent'], 1, ',', '.') }}%)
+                                        </span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-400 mt-1">25 a 64 anos (Cito 36m / Mol 60m)</p>
+                                </div>
+
+                                <!-- Prática B: Vacina HPV (30 pts) -->
+                                <div class="rounded-xl border border-slate-200/70 bg-slate-50/50 p-3.5">
+                                    <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1.5">
+                                        <span class="truncate">Prática B · Vacina HPV</span>
+                                        <span class="text-[10px] font-bold text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded">30 pts</span>
+                                    </div>
+                                    <div class="text-xl font-extrabold text-slate-800">
+                                        {{ number_format($c7SummaryKpis['practice_b']['count'], 0, '', '.') }}
+                                        <span class="text-xs font-medium text-slate-500">
+                                            ({{ number_format($c7SummaryKpis['practice_b']['percent'], 1, ',', '.') }}%)
+                                        </span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-400 mt-1">9 a 14 anos (≥1 dose na vida)</p>
+                                </div>
+
+                                <!-- Prática C: Saúde Sexual e Reprodutiva (30 pts) -->
+                                <div class="rounded-xl border border-slate-200/70 bg-slate-50/50 p-3.5">
+                                    <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1.5">
+                                        <span class="truncate">Prática C · Saúde Sexual</span>
+                                        <span class="text-[10px] font-bold text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded">30 pts</span>
+                                    </div>
+                                    <div class="text-xl font-extrabold text-slate-800">
+                                        {{ number_format($c7SummaryKpis['practice_c']['count'], 0, '', '.') }}
+                                        <span class="text-xs font-medium text-slate-500">
+                                            ({{ number_format($c7SummaryKpis['practice_c']['percent'], 1, ',', '.') }}%)
+                                        </span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-400 mt-1">14 a 69 anos (últimos 12 meses)</p>
+                                </div>
+
+                                <!-- Prática D: Mama (20 pts) -->
+                                <div class="rounded-xl border border-slate-200/70 bg-slate-50/50 p-3.5">
+                                    <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1.5">
+                                        <span class="truncate">Prática D · Mama</span>
+                                        <span class="text-[10px] font-bold text-pink-700 bg-pink-50 px-1.5 py-0.5 rounded">20 pts</span>
+                                    </div>
+                                    <div class="text-xl font-extrabold text-slate-800">
+                                        {{ number_format($c7SummaryKpis['practice_d']['count'], 0, '', '.') }}
+                                        <span class="text-xs font-medium text-slate-500">
+                                            ({{ number_format($c7SummaryKpis['practice_d']['percent'], 1, ',', '.') }}%)
+                                        </span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-400 mt-1">50 a 69 anos (Mamografia 24m)</p>
+                                </div>
+
+                                <!-- Total da Coorte -->
+                                <div class="rounded-xl border border-slate-200/70 bg-slate-50/50 p-3.5">
+                                    <div class="text-xs font-semibold text-slate-600 mb-1.5">Total Coorte</div>
+                                    <div class="text-xl font-extrabold text-slate-800">
+                                        {{ number_format($c7SummaryKpis['denominator'], 0, '', '.') }}
+                                    </div>
+                                    <p class="text-[11px] text-slate-400 mt-1">Mulheres/Trans vinculadas</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Barra de Filtros Rápidos da Busca Ativa -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs space-y-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                            <!-- Busca por Nome / CPF / CNS -->
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Buscar Cidadã</label>
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        wire:model.live.debounce.300ms="searchName"
+                                        placeholder="Nome, CPF ou CNS..."
+                                        class="w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 shadow-2xs"
+                                    />
+                                    <svg class="w-4 h-4 text-slate-400 absolute left-2.5 top-2" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <!-- Filtro de Equipe -->
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Equipe</label>
+                                <select
+                                    wire:model.live="searchIne"
+                                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 shadow-2xs"
+                                >
+                                    <option value="">Todas as equipes</option>
+                                    @foreach ($c7FilterOptions['teams'] ?? [] as $t)
+                                        <option value="{{ $t['ine'] }}">{{ $t['name'] }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Filtro de Unidade / UBS -->
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Unidade Básica</label>
+                                <select
+                                    wire:model.live="advFacility"
+                                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 shadow-2xs"
+                                >
+                                    <option value="">Todas as unidades</option>
+                                    @foreach ($c7FilterOptions['facilities'] ?? [] as $f)
+                                        <option value="{{ $f['name'] }}">{{ $f['name'] }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Filtro de Faixa Etária Específica C7 -->
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Faixa Etária / Prática</label>
+                                <select
+                                    wire:model.live="advWomanAgeRange"
+                                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 shadow-2xs"
+                                >
+                                    <option value="">Todas as faixas (9 a 69 anos)</option>
+                                    <option value="9-14">9 a 14 anos (Vacina HPV)</option>
+                                    <option value="15-24">15 a 24 anos (Saúde Sexual)</option>
+                                    <option value="25-49">25 a 49 anos (Colo do Útero)</option>
+                                    <option value="50-64">50 a 64 anos (Colo e Mama)</option>
+                                    <option value="65-69">65 a 69 anos (Mama e Saúde Sexual)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabela Nominal de Busca Ativa -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white shadow-2xs overflow-hidden">
+                        <div class="p-4 border-b border-slate-150 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-bold text-slate-800">
+                                    Lista Nominal de Acompanhamento ({{ number_format($c7TotalItems, 0, '', '.') }} mulheres/trans)
+                                </span>
+                            </div>
+                            <div class="text-xs text-slate-500">
+                                Exibindo página {{ $c7Page }} de {{ $c7TotalPages }}
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-slate-600">
+                                <thead class="bg-slate-50/75 border-b border-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                                    <tr>
+                                        <th class="px-4 py-3">Cidadã</th>
+                                        <th class="px-3 py-3">Equipe / UBS</th>
+                                        <th class="px-3 py-3 text-center">Faixa Etária</th>
+                                        <th class="px-3 py-3 text-center" title="Rastreamento Câncer Colo de Útero (25-64 anos)">Prática A (Colo)</th>
+                                        <th class="px-3 py-3 text-center" title="Vacina HPV (9-14 anos)">Prática B (HPV)</th>
+                                        <th class="px-3 py-3 text-center" title="Saúde Sexual e Reprodutiva (14-69 anos)">Prática C (Sexual)</th>
+                                        <th class="px-3 py-3 text-center" title="Rastreamento Câncer de Mama (50-69 anos)">Prática D (Mama)</th>
+                                        <th class="px-3 py-3 text-center">Pontos C7</th>
+                                        <th class="px-4 py-3 text-right">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-150">
+                                    @forelse ($c7NominalList as $w)
+                                        <tr class="hover:bg-slate-50/80 transition">
+                                            <td class="px-4 py-3">
+                                                <div class="font-bold text-slate-800">{{ $w['name'] }}</div>
+                                                <div class="text-[11px] text-slate-400 mt-0.5">
+                                                    {{ $w['cpf'] ?: $w['cns'] }} · {{ $w['age_years'] }} anos ({{ $w['birth_date_formatted'] }})
+                                                </div>
+                                            </td>
+                                            <td class="px-3 py-3">
+                                                <div class="font-medium text-slate-700 truncate max-w-[180px]">{{ $w['team_name'] }}</div>
+                                                <div class="text-[11px] text-slate-400 truncate max-w-[180px]">{{ $w['facility_name'] }}</div>
+                                            </td>
+                                            <td class="px-3 py-3 text-center">
+                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700">
+                                                    {{ $w['age_years'] }} anos
+                                                </span>
+                                            </td>
+                                            <!-- Prática A: Colo de Útero (25-64 anos) -->
+                                            <td class="px-3 py-3 text-center">
+                                                @if (! $w['eligible_practice_a'])
+                                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-400">
+                                                        N/A (fora da faixa)
+                                                    </span>
+                                                @elseif ($w['practice_a_met'])
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200" title="Último exame: {{ $w['last_cervical_exam_date'] ?: '—' }}">
+                                                        <svg class="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                                        </svg>
+                                                        <span>Conforme</span>
+                                                    </span>
+                                                @else
+                                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                                        Pendente
+                                                    </span>
+                                                @endif
+                                            </td>
+                                            <!-- Prática B: Vacina HPV (9-14 anos) -->
+                                            <td class="px-3 py-3 text-center">
+                                                @if (! $w['eligible_practice_b'])
+                                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-400">
+                                                        N/A (fora da faixa)
+                                                    </span>
+                                                @elseif ($w['practice_b_met'])
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200" title="Dose aplicada: {{ $w['last_hpv_vaccine_date'] ?: '—' }}">
+                                                        <svg class="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                                        </svg>
+                                                        <span>Conforme</span>
+                                                    </span>
+                                                @else
+                                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                                        Pendente
+                                                    </span>
+                                                @endif
+                                            </td>
+                                            <!-- Prática C: Saúde Sexual (14-69 anos) -->
+                                            <td class="px-3 py-3 text-center">
+                                                @if (! $w['eligible_practice_c'])
+                                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-400">
+                                                        N/A (fora da faixa)
+                                                    </span>
+                                                @elseif ($w['practice_c_met'])
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200" title="Atendimento: {{ $w['last_sexual_health_date'] ?: '—' }}">
+                                                        <svg class="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                                        </svg>
+                                                        <span>Conforme</span>
+                                                    </span>
+                                                @else
+                                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                                        Pendente
+                                                    </span>
+                                                @endif
+                                            </td>
+                                            <!-- Prática D: Mama (50-69 anos) -->
+                                            <td class="px-3 py-3 text-center">
+                                                @if (! $w['eligible_practice_d'])
+                                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-400">
+                                                        N/A (fora da faixa)
+                                                    </span>
+                                                @elseif ($w['practice_d_met'])
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200" title="Mamografia: {{ $w['last_mammogram_date'] ?: '—' }}">
+                                                        <svg class="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                                        </svg>
+                                                        <span>Conforme</span>
+                                                    </span>
+                                                @else
+                                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                                        Pendente
+                                                    </span>
+                                                @endif
+                                            </td>
+                                            <td class="px-3 py-3 text-center font-bold text-slate-800">
+                                                {{ number_format($w['score_percent'], 1, ',', '.') }} pts
+                                            </td>
+                                            <td class="px-4 py-3 text-right">
+                                                <button
+                                                    type="button"
+                                                    wire:click="openWomanDetail({{ $w['id'] }})"
+                                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-[#004e82] bg-sky-50 border border-sky-200 hover:bg-sky-100 transition cursor-pointer"
+                                                >
+                                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    </svg>
+                                                    <span>Auditar</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="9" class="px-4 py-8 text-center text-slate-400">
+                                                Nenhuma cidadã encontrada com os filtros selecionados.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Paginação -->
+                        @if ($c7TotalPages > 1)
+                            <div class="px-4 py-3 border-t border-slate-150 flex items-center justify-between">
+                                <div class="text-xs text-slate-500">
+                                    Página <span class="font-bold text-slate-700">{{ $c7Page }}</span> de <span class="font-bold text-slate-700">{{ $c7TotalPages }}</span>
+                                    ({{ number_format($c7TotalItems, 0, '', '.') }} mulheres/trans no total)
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <button
+                                        type="button"
+                                        wire:click="gotoC7Page(1)"
+                                        @disabled($c7Page <= 1)
+                                        class="px-2.5 py-1 text-xs font-semibold rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                                    >
+                                        Primeira
+                                    </button>
+                                    <button
+                                        type="button"
+                                        wire:click="gotoC7Page({{ max(1, $c7Page - 1) }})"
+                                        @disabled($c7Page <= 1)
+                                        class="px-2.5 py-1 text-xs font-semibold rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                                    >
+                                        Anterior
+                                    </button>
+                                    @for ($p = max(1, $c7Page - 2); $p <= min($c7TotalPages, $c7Page + 2); $p++)
+                                        <button
+                                            type="button"
+                                            wire:click="gotoC7Page({{ $p }})"
+                                            class="px-2.5 py-1 text-xs font-semibold rounded-md border transition cursor-pointer {{ $c7Page === $p ? 'border-teal-600 bg-teal-600 text-white font-bold' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50' }}"
+                                        >
+                                            {{ $p }}
+                                        </button>
+                                    @endfor
+                                    <button
+                                        type="button"
+                                        wire:click="gotoC7Page({{ min($c7TotalPages, $c7Page + 1) }})"
+                                        @disabled($c7Page >= $c7TotalPages)
+                                        class="px-2.5 py-1 text-xs font-semibold rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                                    >
+                                        Próxima
+                                    </button>
+                                    <button
+                                        type="button"
+                                        wire:click="gotoC7Page({{ $c7TotalPages }})"
+                                        @disabled($c7Page >= $c7TotalPages)
+                                        class="px-2.5 py-1 text-xs font-semibold rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                                    >
+                                        Última
+                                    </button>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
+            <!-- MODAL DE AUDITORIA CLÍNICA NOMINAL (C7) -->
+            @if ($showWomanModal && $selectedWoman)
+                <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+                    <div class="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-3xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                        <!-- Header do Modal -->
+                        <div class="bg-gradient-to-r from-[#0c1f1c] via-[#0f2d26] to-[#081714] text-white p-6 relative">
+                            <button
+                                type="button"
+                                wire:click="closeWomanDetail"
+                                class="absolute top-5 right-5 text-slate-400 hover:text-white transition cursor-pointer p-1"
+                            >
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-500/20 text-teal-300 border border-teal-500/30">
+                                    C7 · Auditoria Clínica
+                                </span>
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/10 text-slate-200">
+                                    {{ $selectedWoman['age_years'] }} anos
+                                </span>
+                            </div>
+                            <h2 class="text-xl font-extrabold text-white">
+                                {{ $selectedWoman['name'] }}
+                            </h2>
+                            <p class="text-xs text-slate-300 mt-1">
+                                CPF: {{ $selectedWoman['cpf'] ?: '—' }} · CNS: {{ $selectedWoman['cns'] ?: '—' }} · Nasc: {{ $selectedWoman['birth_date_formatted'] }}
+                            </p>
+                            <p class="text-xs text-slate-400 mt-0.5">
+                                Equipe: {{ $selectedWoman['team_name'] }} (INE: {{ $selectedWoman['ine'] }}) · UBS: {{ $selectedWoman['facility_name'] }}
+                            </p>
+                        </div>
+
+                        <!-- Corpo do Modal: As 4 Boas Práticas -->
+                        <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                            <!-- Card Prática A: Colo de Útero -->
+                            <div class="rounded-2xl border p-4.5 transition {{ $selectedWoman['practice_a_met'] ? 'border-emerald-200 bg-emerald-50/30' : (! $selectedWoman['eligible_practice_a'] ? 'border-slate-200 bg-slate-50/50' : 'border-rose-200 bg-rose-50/30') }}">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold {{ $selectedWoman['practice_a_met'] ? 'bg-emerald-600 text-white' : (! $selectedWoman['eligible_practice_a'] ? 'bg-slate-300 text-slate-600' : 'bg-rose-600 text-white') }}">
+                                            A
+                                        </span>
+                                        <h4 class="text-sm font-bold text-slate-800">
+                                             Rastreamento do Câncer do Colo do Útero [20 pts]
+                                        </h4>
+                                    </div>
+                                    @if (! $selectedWoman['eligible_practice_a'])
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-200 text-slate-600">
+                                            Não elegível (idade fora de 25 a 64 anos)
+                                        </span>
+                                    @elseif ($selectedWoman['practice_a_met'])
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                            Conforme (+20 pts)
+                                        </span>
+                                    @else
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">
+                                            Pendente (0 pts)
+                                        </span>
+                                    @endif
+                                </div>
+                                <p class="text-xs text-slate-600">
+                                    Exame citopatológico realizado nos últimos 36 meses ou teste molecular DNA-HPV nos últimos 60 meses por médico ou enfermeiro.
+                                </p>
+                                @if ($selectedWoman['last_cervical_exam_date'])
+                                    <div class="mt-2.5 p-2.5 rounded-xl bg-white border border-slate-200 text-xs space-y-1">
+                                        <div class="font-semibold text-slate-800">
+                                            Último Exame: {{ $selectedWoman['last_cervical_exam_date'] }}
+                                        </div>
+                                        <div class="text-slate-600">
+                                            Código: <span class="font-mono font-bold">{{ $selectedWoman['last_cervical_exam_code'] }}</span> — {{ $selectedWoman['last_cervical_exam_desc'] }}
+                                        </div>
+                                    </div>
+                                @elseif ($selectedWoman['eligible_practice_a'])
+                                    <p class="mt-2 text-xs font-medium text-rose-600">
+                                        Nenhum exame de colo de útero registrado no período de vigência. Necessário agendar coleta citopatológica.
+                                    </p>
+                                @endif
+                            </div>
+
+                            <!-- Card Prática B: Vacina HPV -->
+                            <div class="rounded-2xl border p-4.5 transition {{ $selectedWoman['practice_b_met'] ? 'border-emerald-200 bg-emerald-50/30' : (! $selectedWoman['eligible_practice_b'] ? 'border-slate-200 bg-slate-50/50' : 'border-rose-200 bg-rose-50/30') }}">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold {{ $selectedWoman['practice_b_met'] ? 'bg-emerald-600 text-white' : (! $selectedWoman['eligible_practice_b'] ? 'bg-slate-300 text-slate-600' : 'bg-rose-600 text-white') }}">
+                                            B
+                                        </span>
+                                        <h4 class="text-sm font-bold text-slate-800">
+                                            Vacinação contra o HPV [30 pts]
+                                        </h4>
+                                    </div>
+                                    @if (! $selectedWoman['eligible_practice_b'])
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-200 text-slate-600">
+                                            Não elegível (idade fora de 9 a 14 anos)
+                                        </span>
+                                    @elseif ($selectedWoman['practice_b_met'])
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                            Conforme (+30 pts)
+                                        </span>
+                                    @else
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">
+                                            Pendente (0 pts)
+                                        </span>
+                                    @endif
+                                </div>
+                                <p class="text-xs text-slate-600">
+                                    Pelo menos 1 dose da vacina HPV (imunobiológicos 67 - quadrivalente ou 93 - nonavalente) registrada em qualquer momento da vida.
+                                </p>
+                                @if ($selectedWoman['last_hpv_vaccine_date'])
+                                    <div class="mt-2.5 p-2.5 rounded-xl bg-white border border-slate-200 text-xs space-y-1">
+                                        <div class="font-semibold text-slate-800">
+                                            Vacina Registrada: {{ $selectedWoman['last_hpv_vaccine_date'] }}
+                                        </div>
+                                        <div class="text-slate-600">
+                                            Imunobiológico: <span class="font-mono font-bold">{{ $selectedWoman['last_hpv_vaccine_code'] }}</span> — {{ $selectedWoman['last_hpv_vaccine_name'] }}
+                                        </div>
+                                    </div>
+                                @elseif ($selectedWoman['eligible_practice_b'])
+                                    <p class="mt-2 text-xs font-medium text-rose-600">
+                                        Nenhuma dose de vacina contra HPV identificada no histórico vacinal da APS/RNDS.
+                                    </p>
+                                @endif
+                            </div>
+
+                            <!-- Card Prática C: Saúde Sexual e Reprodutiva -->
+                            <div class="rounded-2xl border p-4.5 transition {{ $selectedWoman['practice_c_met'] ? 'border-emerald-200 bg-emerald-50/30' : (! $selectedWoman['eligible_practice_c'] ? 'border-slate-200 bg-slate-50/50' : 'border-rose-200 bg-rose-50/30') }}">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold {{ $selectedWoman['practice_c_met'] ? 'bg-emerald-600 text-white' : (! $selectedWoman['eligible_practice_c'] ? 'bg-slate-300 text-slate-600' : 'bg-rose-600 text-white') }}">
+                                            C
+                                        </span>
+                                        <h4 class="text-sm font-bold text-slate-800">
+                                            Atenção à Saúde Sexual e Reprodutiva [30 pts]
+                                        </h4>
+                                    </div>
+                                    @if (! $selectedWoman['eligible_practice_c'])
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-200 text-slate-600">
+                                            Não elegível (idade fora de 14 a 69 anos)
+                                        </span>
+                                    @elseif ($selectedWoman['practice_c_met'])
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                            Conforme (+30 pts)
+                                        </span>
+                                    @else
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">
+                                            Pendente (0 pts)
+                                        </span>
+                                    @endif
+                                </div>
+                                <p class="text-xs text-slate-600">
+                                    Pelo menos 1 atendimento médico ou de enfermagem nos últimos 12 meses abordando saúde reprodutiva, planejamento familiar ou climatério.
+                                </p>
+                                @if ($selectedWoman['last_sexual_health_date'])
+                                    <div class="mt-2.5 p-2.5 rounded-xl bg-white border border-slate-200 text-xs space-y-1">
+                                        <div class="font-semibold text-slate-800">
+                                            Atendimento: {{ $selectedWoman['last_sexual_health_date'] }}
+                                        </div>
+                                        <div class="text-slate-600">
+                                            Condição/Procedimento: <span class="font-mono font-bold">{{ $selectedWoman['last_sexual_health_code'] }}</span> — {{ $selectedWoman['last_sexual_health_detail'] }}
+                                        </div>
+                                    </div>
+                                @elseif ($selectedWoman['eligible_practice_c'])
+                                    <p class="mt-2 text-xs font-medium text-rose-600">
+                                        Sem registro de atendimento em saúde sexual e reprodutiva nos últimos 12 meses.
+                                    </p>
+                                @endif
+                            </div>
+
+                            <!-- Card Prática D: Rastreamento Câncer de Mama -->
+                            <div class="rounded-2xl border p-4.5 transition {{ $selectedWoman['practice_d_met'] ? 'border-emerald-200 bg-emerald-50/30' : (! $selectedWoman['eligible_practice_d'] ? 'border-slate-200 bg-slate-50/50' : 'border-rose-200 bg-rose-50/30') }}">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold {{ $selectedWoman['practice_d_met'] ? 'bg-emerald-600 text-white' : (! $selectedWoman['eligible_practice_d'] ? 'bg-slate-300 text-slate-600' : 'bg-rose-600 text-white') }}">
+                                            D
+                                        </span>
+                                        <h4 class="text-sm font-bold text-slate-800">
+                                            Rastreamento do Câncer de Mama [20 pts]
+                                        </h4>
+                                    </div>
+                                    @if (! $selectedWoman['eligible_practice_d'])
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-200 text-slate-600">
+                                            Não elegível (idade fora de 50 a 69 anos)
+                                        </span>
+                                    @elseif ($selectedWoman['practice_d_met'])
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                            Conforme (+20 pts)
+                                        </span>
+                                    @else
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">
+                                            Pendente (0 pts)
+                                        </span>
+                                    @endif
+                                </div>
+                                <p class="text-xs text-slate-600">
+                                    Pelo menos 1 mamografia bilateral de rastreamento solicitada ou avaliada nos últimos 24 meses por médico ou enfermeiro.
+                                </p>
+                                @if ($selectedWoman['last_mammogram_date'])
+                                    <div class="mt-2.5 p-2.5 rounded-xl bg-white border border-slate-200 text-xs space-y-1">
+                                        <div class="font-semibold text-slate-800">
+                                            Mamografia: {{ $selectedWoman['last_mammogram_date'] }}
+                                        </div>
+                                        <div class="text-slate-600">
+                                            Procedimento: <span class="font-mono font-bold">{{ $selectedWoman['last_mammogram_code'] }}</span> — {{ $selectedWoman['last_mammogram_desc'] }}
+                                        </div>
+                                    </div>
+                                @elseif ($selectedWoman['eligible_practice_d'])
+                                    <p class="mt-2 text-xs font-medium text-rose-600">
+                                        Nenhuma mamografia de rastreamento registrada nos últimos 24 meses. Necessário solicitar rastreamento mamográfico.
+                                    </p>
+                                @endif
+                            </div>
+                        </div>
+
+                        <!-- Footer do Modal -->
+                        <div class="bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-between">
+                            <div class="text-xs text-slate-500">
+                                Pontuação Individual: <span class="font-extrabold text-slate-800">{{ number_format($selectedWoman['score_percent'], 1, ',', '.') }} pts</span>
+                            </div>
+                            <button
+                                type="button"
+                                wire:click="closeWomanDetail"
+                                class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-slate-800 hover:bg-slate-900 transition cursor-pointer"
+                            >
+                                Fechar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- MODAL DE BUSCA AVANÇADA DO C7 (PREVENÇÃO DO CÂNCER) -->
+            @if ($showAdvancedModal)
+                <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+                    <div class="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                        <!-- Modal Header -->
+                        <div class="bg-gradient-to-r from-[#0c1f1c] via-[#0f2d26] to-[#081714] text-white p-6 relative">
+                            <button
+                                type="button"
+                                wire:click="closeAdvancedSearch"
+                                class="absolute top-5 right-5 text-slate-400 hover:text-white transition cursor-pointer p-1"
+                            >
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                            <h3 class="text-lg font-bold text-white">
+                                Busca Avançada · C7 Prevenção do Câncer / Mulheres
+                            </h3>
+                            <p class="text-xs text-slate-300 mt-1">
+                                Filtre por dados demográficos, território e conformidade nas 4 boas práticas normativas
+                            </p>
+                        </div>
+
+                        <!-- Modal Body -->
+                        <div class="p-6 space-y-4 max-h-[65vh] overflow-y-auto">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <!-- Equipe -->
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Equipe de Saúde</label>
+                                    <select
+                                        wire:model="advTeam"
+                                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 shadow-2xs"
+                                    >
+                                        <option value="">Todas as equipes</option>
+                                        @foreach ($c7FilterOptions['teams'] ?? [] as $tm)
+                                            <option value="{{ $tm['name'] }}">{{ $tm['name'] }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Unidade -->
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Unidade Básica (UBS)</label>
+                                    <select
+                                        wire:model="advFacility"
+                                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 shadow-2xs"
+                                    >
+                                        <option value="">Todas as unidades</option>
+                                        @foreach ($c7FilterOptions['facilities'] ?? [] as $fc)
+                                            <option value="{{ $fc['name'] }}">{{ $fc['name'] }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Bairro / Distrito -->
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Bairro / Território</label>
+                                    <select
+                                        wire:model="advDistrict"
+                                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 shadow-2xs"
+                                    >
+                                        <option value="">Todos os bairros</option>
+                                        @foreach ($c7FilterOptions['districts'] ?? [] as $dst)
+                                            <option value="{{ $dst['name'] }}">{{ $dst['name'] }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Microárea -->
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Microárea</label>
+                                    <input
+                                        type="text"
+                                        wire:model="advMicroarea"
+                                        placeholder="Ex: 01, 02..."
+                                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 shadow-2xs"
+                                    />
+                                </div>
+
+                                <!-- Faixa Etária -->
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Faixa Etária Oficial</label>
+                                    <select
+                                        wire:model="advWomanAgeRange"
+                                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 shadow-2xs"
+                                    >
+                                        <option value="">Todas (9 a 69 anos)</option>
+                                        <option value="9-14">9 a 14 anos (Vacina HPV)</option>
+                                        <option value="15-24">15 a 24 anos (Saúde Sexual)</option>
+                                        <option value="25-49">25 a 49 anos (Colo do Útero)</option>
+                                        <option value="50-64">50 a 64 anos (Colo e Mama)</option>
+                                        <option value="65-69">65 a 69 anos (Mama e Saúde Sexual)</option>
+                                    </select>
+                                </div>
+
+                                <!-- Raça / Cor -->
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Raça / Cor</label>
+                                    <select
+                                        wire:model="advRaceColor"
+                                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 shadow-2xs"
+                                    >
+                                        <option value="">Todas</option>
+                                        @foreach ($c7FilterOptions['races'] ?? [] as $r)
+                                            <option value="{{ $r }}">{{ $r }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Filtros das 4 Boas Práticas -->
+                            <div class="border-t border-slate-150 pt-3">
+                                <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                                    Conformidade das 4 Boas Práticas
+                                </h4>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-600 mb-1">Prática A: Colo de Útero (20 pts)</label>
+                                        <select
+                                            wire:model="advPracticeA"
+                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 shadow-2xs"
+                                        >
+                                            <option value="">Todas</option>
+                                            <option value="cumprida">Conforme</option>
+                                            <option value="pendente">Pendente</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-600 mb-1">Prática B: Vacina HPV (30 pts)</label>
+                                        <select
+                                            wire:model="advPracticeB"
+                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 shadow-2xs"
+                                        >
+                                            <option value="">Todas</option>
+                                            <option value="cumprida">Conforme</option>
+                                            <option value="pendente">Pendente</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-600 mb-1">Prática C: Saúde Sexual (30 pts)</label>
+                                        <select
+                                            wire:model="advPracticeC"
+                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 shadow-2xs"
+                                        >
+                                            <option value="">Todas</option>
+                                            <option value="cumprida">Conforme</option>
+                                            <option value="pendente">Pendente</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-600 mb-1">Prática D: Câncer de Mama (20 pts)</label>
+                                        <select
+                                            wire:model="advPracticeD"
+                                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-teal-500 shadow-2xs"
+                                        >
+                                            <option value="">Todas</option>
+                                            <option value="cumprida">Conforme</option>
+                                            <option value="pendente">Pendente</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal Footer -->
+                        <div class="flex items-center justify-between border-t border-slate-150 pt-4 px-6 pb-6">
+                            <button
+                                type="button"
+                                wire:click="clearAdvancedFilters"
+                                class="px-4 py-2 rounded-xl text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 transition cursor-pointer"
+                            >
+                                Limpar Filtros
+                            </button>
+                            <button
+                                type="button"
+                                wire:click="applyAdvancedFilters"
+                                class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-teal-700 hover:bg-teal-800 transition cursor-pointer shadow-xs"
+                            >
+                                Aplicar Filtros
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
     @elseif ($isC2)
         <!-- ========================================================================= -->
@@ -7804,14 +8871,14 @@
                     <span class="text-xs text-slate-400">
                         Público-Alvo: {{ $meta['target_population'] }}
                     </span>
-                    @if ($isC1 || $isC2 || $isC3 || $isC4 || $isC5 || $isC6)
+                    @if ($isC1 || $isC2 || $isC3 || $isC4 || $isC5 || $isC6 || $isC7)
                         <span class="rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 text-[10px] font-bold">
-                            {{ $isC6 ? 'NT 06/2025 · Coorte Pessoas Idosas Vinculadas' : ($isC5 ? 'NT 08/2026 · Coorte Hipertensos Vinculados' : ($isC4 ? 'NT 08/2026 · Coorte Diabéticos Vinculados' : ($isC3 ? 'NT 08/2026 · Coorte 42º dia do puerpério' : ($isC2 ? 'NT 08/2026 · Meses com coorte válida' : 'NT 08/2026 · Média de 4 Meses')))) }}
+                            {{ $isC7 ? 'NT 06/2025 · Coorte Mulheres na Prevenção do Câncer' : ($isC6 ? 'NT 06/2025 · Coorte Pessoas Idosas Vinculadas' : ($isC5 ? 'NT 08/2026 · Coorte Hipertensos Vinculados' : ($isC4 ? 'NT 08/2026 · Coorte Diabéticos Vinculados' : ($isC3 ? 'NT 08/2026 · Coorte 42º dia do puerpério' : ($isC2 ? 'NT 08/2026 · Meses com coorte válida' : 'NT 08/2026 · Média de 4 Meses'))))) }}
                         </span>
                     @endif
-                    @if ($isC2 || $isC3 || $isC4 || $isC5 || $isC6)
+                    @if ($isC2 || $isC3 || $isC4 || $isC5 || $isC6 || $isC7)
                         <span class="rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 px-2.5 py-0.5 text-[10px] font-bold">
-                            {{ $isC6 ? 'Peso 1.0 (até 1,00 pt) · 4 Boas Práticas (100 pts)' : ($isC5 ? 'Peso 1.0 (até 1,00 pt) · 4 Boas Práticas (100 pts)' : ($isC4 ? 'Peso 1.0 (até 1,00 pt) · 6 Boas Práticas (100 pts)' : ($isC3 ? 'Peso 2.0 (até 2,00 pt) · 11 Boas Práticas (100 pts)' : 'Peso 2.0 (até 2,00 pt)'))) }}
+                            {{ $isC7 ? 'Peso 2.0 (até 2,00 pt) · 4 Boas Práticas (100 pts)' : ($isC6 ? 'Peso 1.0 (até 1,00 pt) · 4 Boas Práticas (100 pts)' : ($isC5 ? 'Peso 1.0 (até 1,00 pt) · 4 Boas Práticas (100 pts)' : ($isC4 ? 'Peso 1.0 (até 1,00 pt) · 6 Boas Práticas (100 pts)' : ($isC3 ? 'Peso 2.0 (até 2,00 pt) · 11 Boas Práticas (100 pts)' : 'Peso 2.0 (até 2,00 pt)')))) }}
                         </span>
                     @endif
                 </div>
@@ -7843,7 +8910,7 @@
                 <!-- Card de Pontuação -->
                 <div class="rounded-3xl bg-white/10 border border-white/15 p-5 text-center min-w-[190px] backdrop-blur-xs">
                     <span class="text-[11px] font-semibold text-teal-300 uppercase tracking-wider block">
-                        {{ ($isC1 || $isC2 || $isC3 || $isC4 || $isC5 || $isC6) && $current['is_preview'] ? 'Prévia quadrimestral' : (($isC1 || $isC2 || $isC3 || $isC4 || $isC5 || $isC6) ? 'Média quadrimestral local' : 'Resultado Atual') }}
+                        {{ ($isC1 || $isC2 || $isC3 || $isC4 || $isC5 || $isC6 || $isC7) && $current['is_preview'] ? 'Prévia quadrimestral' : (($isC1 || $isC2 || $isC3 || $isC4 || $isC5 || $isC6 || $isC7) ? 'Média quadrimestral local' : 'Resultado Atual') }}
                     </span>
                     <div class="text-3xl sm:text-4xl font-black text-white tabular-nums my-1">
                         {{ $hasValidatedResult ? number_format($score, 1, ',', '.').'%' : '—' }}
@@ -7852,7 +8919,7 @@
                         <span class="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold border {{ $badgeStyles }}">
                             {{ $levelLabel }}
                         </span>
-                        @if (($isC1 || $isC2 || $isC3 || $isC4 || $isC5 || $isC6) && $quarterSummary && $quarterSummary['component_iii_points'] !== null)
+                        @if (($isC1 || $isC2 || $isC3 || $isC4 || $isC5 || $isC6 || $isC7) && $quarterSummary && $quarterSummary['component_iii_points'] !== null)
                             <span class="inline-block rounded-full px-2 py-0.5 text-[10px] font-mono font-bold bg-white/20 text-white border border-white/30">
                                 {{ number_format($quarterSummary['component_iii_points'], 2, ',', '.') }} pt
                             </span>
@@ -8068,6 +9135,35 @@
                         <span class="text-slate-400 block">Pontos Comp. III</span>
                         <span class="font-mono font-bold text-emerald-700 text-sm">
                             {{ number_format($quarterSummary['component_iii_points'], 2, ',', '.') }} / 1,00 pt
+                        </span>
+                    </div>
+                @endif
+            </div>
+        @elseif ($isC7)
+            <div class="flex flex-wrap items-center gap-x-6 gap-y-3 text-xs">
+                <div>
+                    <span class="text-slate-400 block">Pontos das 4 práticas (A–D)</span>
+                    <span class="font-bold text-teal-800 text-sm">
+                        {{ $hasC7Result ? number_format($current['numerator'], 0, '', '.') : '—' }}
+                    </span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block">Mulheres/Trans na coorte</span>
+                    <span class="font-bold text-ink text-sm">
+                        {{ $current['cohort_total'] !== null ? number_format($current['cohort_total'], 0, '', '.') : ($current['denominator'] !== null ? number_format($current['denominator'], 0, '', '.') : '—') }}
+                    </span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block">Com práticas pendentes no DW</span>
+                    <span class="font-bold text-amber-700 text-sm">
+                        {{ $hasC7Result ? number_format($current['active_search_count'], 0, '', '.') : '—' }}
+                    </span>
+                </div>
+                @if ($quarterSummary && $quarterSummary['component_iii_points'] !== null)
+                    <div class="border-l border-slate-200 pl-4">
+                        <span class="text-slate-400 block">Pontos Comp. III</span>
+                        <span class="font-mono font-bold text-emerald-700 text-sm">
+                            {{ number_format($quarterSummary['component_iii_points'], 2, ',', '.') }} / 2,00 pt
                         </span>
                     </div>
                 @endif

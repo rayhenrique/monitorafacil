@@ -2,6 +2,23 @@
 
 Documento oficial de versionamento semântico (`SemVer`) e notas de lançamento (*Release Notes*) da plataforma **Monitora Fácil · Gestão da Atenção Primária à Saúde**.
 
+## [v1.26.0] - 24/09/2026
+
+### Indicador C7 (Cuidado da Mulher na Prevenção do Câncer), 4 Boas Práticas Clínicas (A–D, 100 pts), Peso 2.0x e Busca Ativa
+- **Indicador C7 com as 4 Boas Práticas Clínicas (A–D) e 100 Pontos**: Implementação integral do Indicador C7 (Cuidado da Mulher na Prevenção do Câncer do Colo do Útero e de Mama na Atenção Primária) em estrita conformidade com a Nota Metodológica oficial e Nota Técnica nº 06/2025-CVAT. Coorte de 16.869 mulheres e homens transgêneros com útero vinculados às 19 equipes da APS municipal (idades de 9 a 69 anos).
+- **As 4 Boas Práticas Oficiais do Componente III**:
+  - **Prática A [20 pts]**: Rastreamento do Câncer do Colo do Útero (25 a 64 anos) — Exame citopatológico realizado nos últimos 36 meses ou teste molecular DNA-HPV nos últimos 60 meses por médico ou enfermeiro habilitado.
+  - **Prática B [30 pts]**: Vacinação contra o Papilomavírus Humano - HPV (9 a 14 anos) — Pelo menos 1 dose da vacina HPV (imunobiológicos 67 quadrivalente ou 93 nonavalente) registrada em qualquer momento da vida por qualquer profissional habilitado.
+  - **Prática C [30 pts]**: Atenção à Saúde Sexual e Reprodutiva (14 a 69 anos) — Pelo menos 1 atendimento médico ou de enfermagem nos últimos 12 meses com registro de procedimentos (DIU, implante, laqueadura, vasectomia), CIAP-2 (W10-W14, W78, Y04, etc.) ou CID-10 de planejamento familiar, puerpério e climatério.
+  - **Prática D [20 pts]**: Rastreamento do Câncer de Mama (50 a 69 anos) — Pelo menos 1 mamografia bilateral de rastreamento solicitada ou avaliada nos últimos 24 meses por médico ou enfermeiro.
+- **Peso 2.0x no Componente III**: Multiplicador de peso 2.0x aplicado sobre a pontuação base (0 a 100 pts), convertendo a nota para a escala ministerial oficial de até 2,00 pontos na composição do Componente III.
+- **Motor de Extração DW e-SUS PEC Otimizado (15.8 segundos)**: Resolução prévia de chaves primárias dimensionais (`tb_dim_procedimento`, `tb_dim_imunobiologico`, `tb_dim_ciap`, `tb_dim_cid`), eliminando table scans em mais de 1,1 milhão de registros e processando 16.869 cidadãs e 19 equipes em tempo recorde.
+- **Busca Ativa Nominal e Modal de Auditoria Clínica Individual**: Relação nominal completa com filtros rápidos e avançados (faixa etária, unidade, equipe, microárea, raça/cor e cumprimento individual de cada prática), visualizador de colunas personalizadas, paginação de alta eficiência com cache de snapshot e exportação CSV com UTF-8 BOM. Modal de auditoria clínica com linha do tempo de exames citopatológicos, mamografias, doses de HPV e atendimentos de saúde sexual.
+- **Resumo Executivo das 19 Equipes da APS**: Subaba de equipes com tabela detalhada por INE, numeradores, denominadores, notas de cada prática e distribuição percentual nas 4 faixas de desempenho (Regular, Suficiente, Bom e Ótimo).
+- **Módulo Processar Dados e Scripts de Deploy (18 Etapas)**: Card 8 dedicado para processamento do C7 (`--scope=c7`) e integração no botão "Processar Tudo". Scripts `deploy.sh` e `scripts/deploy.sh` expandidos para 18 etapas e documentados em `deploy.md`.
+
+---
+
 ## [v1.25.1] - 24/09/2026
 
 ### Sincronização dos Cards de Vínculo e Acompanhamento na Visão Geral com o Módulo CVAT Nominal (NT 30/2025)
