@@ -326,6 +326,11 @@ class IndicatorDetail extends Component
         $this->showAdvancedModal = false;
     }
 
+    public function applyAdvancedFilters(): void
+    {
+        $this->applyAdvancedSearch();
+    }
+
     public function clearAdvancedFilters(): void
     {
         $this->advDistrict = '';

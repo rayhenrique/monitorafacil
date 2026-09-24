@@ -219,6 +219,14 @@ class C4IndicatorTest extends TestCase
             ->assertSee('ANTONIO ALVES')
             ->assertDontSee('BENEDITA SOUZA');
 
+        // Advanced filter by Practice B (SIM) via applyAdvancedFilters
+        $component->call('clearAdvancedFilters')
+            ->set('showAdvancedModal', true)
+            ->call('toggleBooleanFilter', 'advPracticeB', 'sim')
+            ->call('applyAdvancedFilters')
+            ->assertSee('BENEDITA SOUZA')
+            ->assertDontSee('ANTONIO ALVES');
+
         // Clear filters
         $component->call('clearAdvancedFilters')
             ->assertSee('ANTONIO ALVES')
