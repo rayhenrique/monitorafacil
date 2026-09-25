@@ -6,9 +6,9 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.26.0';
+    public const CURRENT_VERSION = 'v1.27.0';
 
-    public const CURRENT_RELEASE_DATE = '24/09/2026';
+    public const CURRENT_RELEASE_DATE = '25/09/2026';
 
     /**
      * Retorna a versão mais recente do sistema.
@@ -61,9 +61,24 @@ class VersionService
     {
         return [
             [
+                'version' => 'v1.27.0',
+                'date' => '25/09/2026',
+                'badge' => 'Versão Atual',
+                'title' => 'Módulo de Saúde Bucal (eSB), Indicadores B1 a B6, Pontuação Municipal (10 pts) e Avaliação Estrita das Equipes eSB',
+                'summary' => 'Implementação integral do novo módulo oficial de Saúde Bucal (eSB) no Monitora Fácil, em total conformidade com as Notas Metodológicas do Ministério da Saúde. O módulo contempla os 6 indicadores odontológicos da Atenção Primária: B1 (Primeira Consulta Odontológica Programática - Peso 2.0x), B2 (Tratamento Odontológico Concluído em até 12 meses - Peso 2.0x), B3 (Taxa de Exodontia de Dentes Permanentes - Polaridade Menor é Melhor - Peso 2.0x), B4 (Ação Coletiva de Escovação Supervisionada em crianças de 6 a 12 anos - Peso 1.0x), B5 (Procedimentos Odontológicos Preventivos Individuais - Faixa Central - Peso 2.0x) e B6 (Tratamento Restaurador Atraumático ART/TRA - Peso 1.0x), somando 10,0 pontos na pontuação municipal. A avaliação contempla estritamente as 19 equipes de Saúde Bucal (eSB 001 a eSB 021) do município, excluindo equipes de Saúde da Família (eSF) da avaliação odontológica. Inclui painel geral municipal (/saude-bucal), telas detalhadas (/saude-bucal/{b1..b6}) com layout padronizado de duas abas (Aba 1: Resumo das Equipes com 4 quadrantes e Aba 2: Busca Ativa Nominal com dados clínicos reais), comando Artisan esus:process-oral-health e suíte completa de testes automatizados.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Novo módulo de Saúde Bucal (eSB) com os 6 indicadores oficiais: B1 (1ª Consulta, Peso 2.0x), B2 (Trat. Concluído, Peso 2.0x), B3 (Taxa Exodontia, Menor-Melhor, Peso 2.0x), B4 (Escovação Supervisionada 6-12a, Peso 1.0x), B5 (Proced. Preventivos, Peso 2.0x) e B6 (Restauração ART/TRA, Peso 1.0x), somando 10,0 pontos municipais.'],
+                    ['type' => 'melhoria', 'text' => 'Avaliação e consolidação estrita das 19 Equipes de Saúde Bucal (eSB 001 a eSB 021) ativas no município, com filtro que elimina equipes eSF/eAP/USF/PACS da avaliação odontológica.'],
+                    ['type' => 'novo', 'text' => 'Painel Geral de Saúde Bucal (/saude-bucal) com Hero Card executivo, cálculo da Pontuação Municipal (ISB), status global e cards comparativos dos 6 indicadores com barras de progresso e contagem de equipes por classificação.'],
+                    ['type' => 'novo', 'text' => 'Telas Analíticas Detalhadas (/saude-bucal/{b1..b6}) com Aba 1 ("Resumo das Equipes") com os 4 quadrantes oficiais e tabela padrão de 5 colunas, e Aba 2 ("Busca Ativa") com paginação debounced e auditoria clínica.'],
+                    ['type' => 'melhoria', 'text' => 'Motor de extração do DW do e-SUS PEC (B1DwService a B6DwService) de alta performance e comando Artisan `php artisan esus:process-oral-health` com alocação otimizada de memória e transações atômicas.'],
+                    ['type' => 'melhoria', 'text' => 'Navegação lateral desktop e mobile atualizada com o novo grupo expansível "Saúde Bucal" e badges metodológicos, preservando 100% a Política de Rodapé Único.'],
+                ],
+            ],
+            [
                 'version' => 'v1.26.0',
                 'date' => '24/09/2026',
-                'badge' => 'Versão Atual',
+                'badge' => 'Anterior',
                 'title' => 'Indicador C7 (Cuidado da Mulher na Prevenção do Câncer), 4 Boas Práticas Clínicas (A–D, 100 pts), Peso 2.0x e Busca Ativa',
                 'summary' => 'Implementação integral do Indicador C7 (Cuidado da Mulher na Prevenção do Câncer do Colo do Útero e de Mama na Atenção Primária) em estrita conformidade com a Nota Metodológica oficial e Nota Técnica nº 06/2025-CVAT. O módulo contempla o acompanhamento de 16.869 mulheres e homens transgêneros vinculados às 19 equipes da APS municipal (idade de 9 a 69 anos), aferição das 4 Boas Práticas Clínicas oficiais somando 100 pontos: Rastreamento do Câncer do Colo do Útero (Prática A, 25 a 64 anos, citopatológico em 36 meses ou molecular DNA-HPV em 60 meses, 20 pts); Vacinação contra HPV (Prática B, 9 a 14 anos, pelo menos 1 dose registrada na vida, 30 pts); Atenção à Saúde Sexual e Reprodutiva (Prática C, 14 a 69 anos, atendimento médico/enfermagem nos últimos 12 meses, 30 pts); e Rastreamento do Câncer de Mama (Prática D, 50 a 69 anos, mamografia bilateral nos últimos 24 meses, 20 pts). O indicador possui Peso 2.0x no Componente III (até 2,00 pontos de pontuação final). Inclui extração de alto desempenho no DW e-SUS PEC (resolvida em 15.8 segundos para toda a rede), busca ativa nominal otimizada, auditoria clínica individual da mulher, filtros avançados, exportação CSV, card dedicado no módulo Processar Dados e expansão dos scripts de deploy para 18 etapas.',
                 'highlights' => [

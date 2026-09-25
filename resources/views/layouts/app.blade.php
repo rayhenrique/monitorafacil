@@ -193,6 +193,50 @@
                                         </div>
                                     </div>
 
+                                    <!-- Saúde Bucal Mobile -->
+                                    <div x-data="{ open: {{ request()->routeIs('oral-health.*') ? 'true' : 'false' }} }" class="space-y-1">
+                                        <div class="flex items-center justify-between rounded-xl transition {{ request()->routeIs('oral-health.*') ? 'bg-teal-500/15 text-teal-300 font-semibold' : 'text-slate-300 hover:bg-[#132d27] hover:text-white font-medium' }}">
+                                            <a href="{{ route('oral-health.overview') }}" @click="mobileMenuOpen = false" class="flex-1 flex items-center gap-3 px-3 py-2.5 text-sm">
+                                                <svg class="h-5 w-5 {{ request()->routeIs('oral-health.*') ? 'text-teal-400' : 'text-slate-400' }} shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 4c-2.5 0-4 2-4 5.5 0 3.5 1.5 6 3 9.5 1 2.3 2 4.5 3 4.5s1-1.5 2-4c.5-1.3 1-2.5 1-2.5s.5 1.2 1 2.5c1 2.5 1 4 2 4s2-2.2 3-4.5c1.5-3.5 3-6 3-9.5C21 6 19.5 4 17 4c-2 0-3.5 1.5-5 1.5S9 4 7 4z" />
+                                                </svg>
+                                                <span>Saúde Bucal</span>
+                                            </a>
+                                            <button type="button" @click="open = !open" class="p-2.5 text-slate-400 hover:text-white transition" aria-label="Alternar menu saúde bucal">
+                                                <svg class="h-4 w-4 transition-transform duration-200" :class="{ 'rotate-180 text-teal-400': open }" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <div x-show="open" class="ml-4 pl-3 border-l border-[#1a3832] space-y-1 mt-1" style="{{ request()->routeIs('oral-health.*') ? '' : 'display: none;' }}">
+                                            <a href="{{ route('oral-health.overview') }}" @click="mobileMenuOpen = false" class="block rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('oral-health.overview') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">Painel Geral</a>
+                                            <a href="{{ route('oral-health.indicator', 'b1') }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('oral-health.indicator') && request()->route('indicator') === 'b1' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                                <span>B1 · Primeira Consulta</span>
+                                                <span class="text-[10px] text-teal-400 font-mono">1x/ano</span>
+                                            </a>
+                                            <a href="{{ route('oral-health.indicator', 'b2') }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('oral-health.indicator') && request()->route('indicator') === 'b2' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                                <span>B2 · Trat. Concluído</span>
+                                                <span class="text-[10px] text-teal-400 font-mono">12m</span>
+                                            </a>
+                                            <a href="{{ route('oral-health.indicator', 'b3') }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('oral-health.indicator') && request()->route('indicator') === 'b3' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                                <span>B3 · Taxa Exodontia</span>
+                                                <span class="text-[10px] text-teal-400 font-mono">Menor</span>
+                                            </a>
+                                            <a href="{{ route('oral-health.indicator', 'b4') }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('oral-health.indicator') && request()->route('indicator') === 'b4' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                                <span>B4 · Escovação Superv.</span>
+                                                <span class="text-[10px] text-teal-400 font-mono">6-12a</span>
+                                            </a>
+                                            <a href="{{ route('oral-health.indicator', 'b5') }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('oral-health.indicator') && request()->route('indicator') === 'b5' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                                <span>B5 · Proced. Preventivos</span>
+                                                <span class="text-[10px] text-teal-400 font-mono">Prev.</span>
+                                            </a>
+                                            <a href="{{ route('oral-health.indicator', 'b6') }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('oral-health.indicator') && request()->route('indicator') === 'b6' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                                <span>B6 · Restauração ART</span>
+                                                <span class="text-[10px] text-teal-400 font-mono">TRA</span>
+                                            </a>
+                                        </div>
+                                    </div>
+
                                     <div x-data="{ open: {{ request()->routeIs('settings.*') ? 'true' : 'false' }} }" class="space-y-1">
                                         <div class="flex items-center justify-between rounded-xl transition {{ request()->routeIs('settings.*') ? 'bg-teal-500/15 text-teal-300 font-semibold' : 'text-slate-300 hover:bg-[#132d27] hover:text-white font-medium' }}">
                                             <a href="{{ route('settings.users') }}" @click="mobileMenuOpen = false" class="flex-1 flex items-center gap-3 px-3 py-2.5 text-sm">
@@ -421,6 +465,55 @@
                                 <a href="{{ route('family-health.indicator', 'c7') }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('family-health.indicator') && request()->route('indicator') === 'c7' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
                                     <span>C7 · Câncer Mulher</span>
                                     <span class="text-[10px] font-mono text-teal-400/80">Pond.</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Saúde Bucal (B1 ao B6) -->
+                        <div x-data="{ open: {{ request()->routeIs('oral-health.*') ? 'true' : 'false' }} }" class="space-y-1">
+                            <div class="flex items-center justify-between rounded-xl transition {{ request()->routeIs('oral-health.*') ? 'bg-teal-500/15 text-teal-300 font-semibold' : 'text-slate-300 hover:bg-[#132d27] hover:text-white font-medium' }}">
+                                <a href="{{ route('oral-health.overview') }}"
+                                   :class="sidebarCollapsed ? 'justify-center !px-2' : 'px-3.5'"
+                                   :title="sidebarCollapsed ? 'Saúde Bucal' : ''"
+                                   class="flex-1 flex items-center gap-3 py-2.5 text-sm">
+                                    <svg class="h-5 w-5 {{ request()->routeIs('oral-health.*') ? 'text-teal-400' : 'text-slate-400 group-hover:text-teal-300' }} shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 4c-2.5 0-4 2-4 5.5 0 3.5 1.5 6 3 9.5 1 2.3 2 4.5 3 4.5s1-1.5 2-4c.5-1.3 1-2.5 1-2.5s.5 1.2 1 2.5c1 2.5 1 4 2 4s2-2.2 3-4.5c1.5-3.5 3-6 3-9.5C21 6 19.5 4 17 4c-2 0-3.5 1.5-5 1.5S9 4 7 4z" />
+                                    </svg>
+                                    <span x-show="!sidebarCollapsed" class="truncate">Saúde Bucal</span>
+                                </a>
+                                <button type="button" x-show="!sidebarCollapsed" @click="open = !open" class="p-2.5 text-slate-400 hover:text-white transition" aria-label="Alternar menu saúde bucal">
+                                    <svg class="h-4 w-4 transition-transform duration-200" :class="{ 'rotate-180 text-teal-400': open }" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div x-show="open && !sidebarCollapsed" class="ml-4 pl-3 border-l border-[#1a3832] space-y-1 mt-1" style="{{ request()->routeIs('oral-health.*') ? '' : 'display: none;' }}">
+                                <a href="{{ route('oral-health.overview') }}" class="block rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('oral-health.overview') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                    Painel Geral
+                                </a>
+                                <a href="{{ route('oral-health.indicator', 'b1') }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('oral-health.indicator') && request()->route('indicator') === 'b1' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                    <span>B1 · Primeira Consulta</span>
+                                    <span class="text-[10px] font-mono text-teal-400/80">1x/ano</span>
+                                </a>
+                                <a href="{{ route('oral-health.indicator', 'b2') }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('oral-health.indicator') && request()->route('indicator') === 'b2' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                    <span>B2 · Trat. Concluído</span>
+                                    <span class="text-[10px] font-mono text-teal-400/80">12m</span>
+                                </a>
+                                <a href="{{ route('oral-health.indicator', 'b3') }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('oral-health.indicator') && request()->route('indicator') === 'b3' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                    <span>B3 · Taxa Exodontia</span>
+                                    <span class="text-[10px] font-mono text-teal-400/80">Menor</span>
+                                </a>
+                                <a href="{{ route('oral-health.indicator', 'b4') }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('oral-health.indicator') && request()->route('indicator') === 'b4' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                    <span>B4 · Escovação Superv.</span>
+                                    <span class="text-[10px] font-mono text-teal-400/80">6-12a</span>
+                                </a>
+                                <a href="{{ route('oral-health.indicator', 'b5') }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('oral-health.indicator') && request()->route('indicator') === 'b5' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                    <span>B5 · Proced. Preventivos</span>
+                                    <span class="text-[10px] font-mono text-teal-400/80">Prev.</span>
+                                </a>
+                                <a href="{{ route('oral-health.indicator', 'b6') }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('oral-health.indicator') && request()->route('indicator') === 'b6' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                    <span>B6 · Restauração ART</span>
+                                    <span class="text-[10px] font-mono text-teal-400/80">TRA</span>
                                 </a>
                             </div>
                         </div>

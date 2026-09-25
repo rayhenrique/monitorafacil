@@ -17,7 +17,7 @@ As tabelas das seções 3 a 6 são o desenho-alvo. As tabelas já existentes est
 
 ## 2. Estado atual
 
-O banco de dados operacional e analítico do Monitora Fácil conta atualmente com **23 tabelas de aplicação** em produção, distribuídas em quatro domínios funcionais (Gestão, Consolidação/APS, Coortes e Busca Ativa C2–C7, e Avaliação Territorial/CVAT), além de **8 tabelas técnicas de infraestrutura** gerenciadas pelo Laravel.
+O banco de dados operacional e analítico do Monitora Fácil conta atualmente com **26 tabelas de aplicação** em produção, distribuídas em cinco domínios funcionais (Gestão, Consolidação/APS, Coortes e Busca Ativa C2–C7, Saúde Bucal eSB B1–B6, e Avaliação Territorial/CVAT), além de **8 tabelas técnicas de infraestrutura** gerenciadas pelo Laravel.
 
 ### 2.1. Inventário Geral de Tabelas Ativas
 
@@ -42,6 +42,9 @@ O banco de dados operacional e analítico do Monitora Fácil conta atualmente co
 | | `c6_nominal_elderly` | `C6NominalElderly` | Lista nominal com busca ativa de idosos com 4 boas práticas (Quadro 01: consulta anual, antropometria anual, visitas ACS 12m, vacina Influenza anual). |
 | | `c7_cohort_snapshots` | `C7CohortSnapshot` | Coorte C7 (saúde da mulher) com cumprimento e pontuação dos 4 denominadores/estratos clínicos (colo do útero, HPV, saúde sexual/reprodutiva e mama). |
 | | `c7_nominal_women` | `C7NominalWoman` | Lista nominal com busca ativa com identificação de elegibilidade e cumprimento individual das 4 práticas (Quadro 01) e pendências clínicas estruturadas. |
+| **Saúde Bucal (eSB - B1 a B6)** | `oral_health_indicator_snapshots` | `OralHealthIndicatorSnapshot` | Snapshots consolidados quadrimestrais por eSB e município para os 6 indicadores de Saúde Bucal (B1 a B6). |
+| | `oral_health_monthly_snapshots` | `OralHealthMonthlySnapshot` | Evolução mensal de produção e desempenho dos indicadores de Saúde Bucal por equipe e competência. |
+| | `oral_health_nominal_patients` | `OralHealthNominalPatient` | Lista nominal e busca ativa odontológica (1ª consulta, tratamentos concluídos, escovação coletiva, procedimentos preventivos, exodontias e ART). |
 | **Avaliação Territorial (CVAT)** | `cvat_team_evaluations` | `CvatTeamEvaluation` | Avaliação de desempenho das equipes na Portaria GM/MS e NT nº 8/2026: nota de cadastro (0–3), acompanhamento (0–7), nota final (0–10), classificação (ÓTIMO, BOM, SUFICIENTE, REGULAR), parâmetro e razão de vinculados. |
 | | `cvat_dimension_distributions` | `CvatDimensionDistribution` | Distribuição consolidada de equipes por faixa de desempenho para as dimensões de Cadastro e Acompanhamento. |
 | | `cvat_nominal_citizens` | `CvatNominalCitizen` | Cidadãos nominais para saneamento de cadastros e acompanhamento prioritário (MICI/MICDT, vínculo, vulnerabilidades: idoso/criança, benefícios: BPC/PBF, contatos de cuidado e elegibilidade). |
@@ -110,7 +113,23 @@ Todas as tabelas nominais implementam as especificações das Notas Metodológic
     - Prática D (50–69 anos): `eligible_practice_d`, `practice_d_met`, `practice_d_count`, `last_mammogram_date`, `last_mammogram_code`, `last_mammogram_desc` (mamografia de rastreamento 24m).
     - `score_percent`, `pending_practices` (JSON com pendências clínicas), `calculation_version`.
 
-#### 2.2.4. Avaliação Territorial e Vínculo (CVAT - Portaria GM/MS e NT nº 8/2026)
+#### 2.2.4. Saúde Bucal (eSB - Indicadores B1 a B6)
+
+Os indicadores de Saúde Bucal na APS seguem as Notas Metodológicas Oficiais do Ministério da Saúde:
+- **`oral_health_indicator_snapshots`**:
+  - Consolidação quadrimestral por equipe de Saúde Bucal (eSB Modalidade I e II - tipos 87 e 88) e consolidado municipal (`ine IS NULL`).
+  - Colunas: `id`, `year`, `quarter`, `ine`, `team_name`, `cnes`, `facility_name`, `team_type` (`87`, `88`), `indicator_code` (`b1`..`b6`), `numerator`, `denominator`, `score_percent`, `performance_level` (`otimo`, `bom`, `suficiente`, `regular`), `good_practices_breakdown` (JSON), `active_search_count`, timestamps.
+  - Índices: `PRIMARY(id)`, `INDEX(ine)`, `INDEX(cnes)`, `INDEX(indicator_code)`, `UNIQUE(year, quarter, ine, indicator_code)`.
+- **`oral_health_monthly_snapshots`**:
+  - Evolução mensal dos 6 indicadores odontológicos por equipe e competência (`month_in_quarter` de 1 a 4).
+  - Colunas: `id`, `year`, `month`, `quarter`, `month_in_quarter`, `ine`, `team_name`, `cnes`, `facility_name`, `team_type`, `indicator_code`, `numerator`, `denominator`, `score_percent`, `performance_level`, timestamps.
+  - Índices: `PRIMARY(id)`, `INDEX(ine)`, `INDEX(cnes)`, `INDEX(indicator_code)`, `UNIQUE(year, month, ine, indicator_code)`.
+- **`oral_health_nominal_patients`**:
+  - Lista nominal de cidadãos e eventos clínicos odontológicos para busca ativa prioritária nas eSB.
+  - Colunas: `id`, `year`, `quarter`, `indicator_code` (`b1`, `b2`, `b4`, `b5`, `b6`), `cidadao_pec_id`, `cns`, `cpf`, `name`, `social_name`, `birth_date`, `age_years`, `phone`, `cnes`, `facility_name`, `ine`, `team_name`, `professional_name`, `professional_cbo`, `first_consultation_date`, `treatment_completed_date`, `treatment_status` (`concluido`, `em_andamento`, `nao_iniciado`, `atrasado`), `has_first_consultation`, `has_treatment_completed`, `has_supervised_brushing`, `last_brushing_date`, `preventive_procedures_count`, `restorative_procedures_count`, `art_procedures_count`, `exodontia_procedures_count`, `total_procedures_count`, `score_percent`, `calculation_version`, timestamps.
+  - Índices: `PRIMARY(id)`, `INDEX(cidadao_pec_id)`, `INDEX(cns)`, `INDEX(cpf)`, `INDEX(name)`, `INDEX(cnes)`, `INDEX(ine)`, `INDEX(indicator_code)`, `INDEX(year, quarter, indicator_code, ine)`.
+
+#### 2.2.5. Avaliação Territorial e Vínculo (CVAT - Portaria GM/MS e NT nº 8/2026)
 
 - **`cvat_team_evaluations`**:
   - Avaliação individual das equipes no CVAT: `year`, `quarter`, `quarter_label`, `cnes`, `facility_name`, `ine`, `team_type`, `team_name`, `parameter` (parâmetro populacional da equipe, default 2500), `linked_registrations` (cadastros vinculados), `linked_ratio` (razão cadastros/parâmetro), `registration_score` (nota da dimensão cadastro, 0 a 3,00), `registration_result`, `monitoring_score` (nota da dimensão acompanhamento, 0 a 7,00), `monitoring_result`, `final_score` (nota final da equipe, 0 a 10,00), `final_classification` (`ÓTIMO`, `BOM`, `SUFICIENTE`, `REGULAR`).

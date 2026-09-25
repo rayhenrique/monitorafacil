@@ -1,0 +1,2578 @@
+
+===================== B1 : Nota Metodológica B1 - Primeira consulta programada.pdf =====================
+[L82] Nota Metodológica B1 (0054640774)         SEI 25000.053348/2026-78 / pg. 1
+    11
+    Dia de extração
+    dos dados
+    SIAPS: 20º dia útil de cada mês.
+    SCNES: A última competência válida.
+    Escopo da base de dados de acompanhamento
+    12
+    Evento
+    Primeira consulta odontológica programada.
+    13
+    Período de
+    acompanhamento
+    Mensal.
+    14
+[L118] · Numerador: não se aplica.
+    · Denominador: mudanças de equipe (eSF/eAP),
+    considerando os critérios de desempate previstos na
+    Portaria Saps/MS n° 161 de 10 de dezembro de 2024;
+    ·
+    Óbito no CADSUS.
+    16
+    Boas práticas
+    Não se aplica.
+    17
+    Datas relevantes
+    Não se aplica.
+    Procedimentos para o desenvolvimento do indicador
+    18
+    Unidade de
+[L119] · Denominador: mudanças de equipe (eSF/eAP),
+    considerando os critérios de desempate previstos na
+    Portaria Saps/MS n° 161 de 10 de dezembro de 2024;
+    ·
+    Óbito no CADSUS.
+    16
+    Boas práticas
+    Não se aplica.
+    17
+    Datas relevantes
+    Não se aplica.
+    Procedimentos para o desenvolvimento do indicador
+    18
+    Unidade de
+    medida
+[L132] Unidade de
+    medida
+    Percentual.
+    19
+    Descritivo da
+    Unidade de
+    Medida
+    %
+    20
+    Status do
+    indicador
+    Acumulativo: não.
+    21
+    Granularidade
+    Identificador Nacional de Equipe (INE).
+[L137] Unidade de
+    Medida
+    %
+    20
+    Status do
+    indicador
+    Acumulativo: não.
+    21
+    Granularidade
+    Identificador Nacional de Equipe (INE).
+    22
+    Polaridade
+    Maior-melhor.
+    23
+    Fórmula de
+[L148] Polaridade
+    Maior-melhor.
+    23
+    Fórmula de
+    Cálculo
+    Numerador:
+    Nº total de pessoas com primeira consulta odontológica
+    programada realizadas pela eSB.
+    Denominador:
+    Nº total de pessoas vinculadas à eSF/eAP de referência da
+    eSB.
+    N
+    Título
+    Descrição
+    Nota Metodológica B1 (0054640774)         SEI 25000.053348/2026-78 / pg. 2
+[L151] Fórmula de
+    Cálculo
+    Numerador:
+    Nº total de pessoas com primeira consulta odontológica
+    programada realizadas pela eSB.
+    Denominador:
+    Nº total de pessoas vinculadas à eSF/eAP de referência da
+    eSB.
+    N
+    Título
+    Descrição
+    Nota Metodológica B1 (0054640774)         SEI 25000.053348/2026-78 / pg. 2
+    24
+    Método de cálculo
+    I. Regras Gerais:
+[L153] Numerador:
+    Nº total de pessoas com primeira consulta odontológica
+    programada realizadas pela eSB.
+    Denominador:
+    Nº total de pessoas vinculadas à eSF/eAP de referência da
+    eSB.
+    N
+    Título
+    Descrição
+    Nota Metodológica B1 (0054640774)         SEI 25000.053348/2026-78 / pg. 2
+    24
+    Método de cálculo
+    I. Regras Gerais:
+    a) Identificação da pessoa assistida:
+    · Nome, data de nascimento, Cadastro de Pessoa Física
+[L156] Denominador:
+    Nº total de pessoas vinculadas à eSF/eAP de referência da
+    eSB.
+    N
+    Título
+    Descrição
+    Nota Metodológica B1 (0054640774)         SEI 25000.053348/2026-78 / pg. 2
+    24
+    Método de cálculo
+    I. Regras Gerais:
+    a) Identificação da pessoa assistida:
+    · Nome, data de nascimento, Cadastro de Pessoa Física
+    (CPF) ou Cartão Nacional de Saúde (CNS) válido, em
+    conformidade com o Sistema de Cadastramento de
+    Usuários do Sistema Único de Saúde (CADSUS).
+[L162] Nota Metodológica B1 (0054640774)         SEI 25000.053348/2026-78 / pg. 2
+    24
+    Método de cálculo
+    I. Regras Gerais:
+    a) Identificação da pessoa assistida:
+    · Nome, data de nascimento, Cadastro de Pessoa Física
+    (CPF) ou Cartão Nacional de Saúde (CNS) válido, em
+    conformidade com o Sistema de Cadastramento de
+    Usuários do Sistema Único de Saúde (CADSUS).
+    b) Validação das equipes e profissionais:
+    · Serão consideradas, para o cálculo final, as eSB com
+    carga horária de 40 (quarenta) horas semanais, bem
+    como aquelas com carga horária diferenciada,
+    observando-se as seguintes regras de vinculação:
+    1 eSB 40h vinculada a 1 eSF 40h ou 2 eAP 20h
+[L164] Método de cálculo
+    I. Regras Gerais:
+    a) Identificação da pessoa assistida:
+    · Nome, data de nascimento, Cadastro de Pessoa Física
+    (CPF) ou Cartão Nacional de Saúde (CNS) válido, em
+    conformidade com o Sistema de Cadastramento de
+    Usuários do Sistema Único de Saúde (CADSUS).
+    b) Validação das equipes e profissionais:
+    · Serão consideradas, para o cálculo final, as eSB com
+    carga horária de 40 (quarenta) horas semanais, bem
+    como aquelas com carga horária diferenciada,
+    observando-se as seguintes regras de vinculação:
+    1 eSB 40h vinculada a 1 eSF 40h ou 2 eAP 20h
+    1 eSB 30h vinculada a 1 eAP 30h
+    1 eSB 20h vinculada a 1 eAP 20h
+[L181] produções realizadas nas Unidades Odontológicas Móveis
+    (UOM) por cirurgiões-dentistas das eSB que, conforme
+    cadastro no SCNES, compartilham carga horária tanto na
+    unidade de saúde quanto na respectiva UOM, desde que
+    a UOM esteja devidamente homologada e apta ao
+    recebimento de custeio pelo Ministério da Saúde.
+    · Poderá ocorrer flutuação de vinculação da eSB entre
+    equipes de Saúde da Família (eSF) ou equipes de Atenção
+    Primária (eAP). Neste caso, será considerada a última
+    vinculação válida no período analisado.
+    c)
+    CBO utilizados para o cálculo do indicador:
+    · 2232-08 Cirurgião-Dentista Clínico Geral;
+    · 2232-93 Cirurgião-Dentista da Estratégia Saúde da
+    Família;
+[L192] CBO utilizados para o cálculo do indicador:
+    · 2232-08 Cirurgião-Dentista Clínico Geral;
+    · 2232-93 Cirurgião-Dentista da Estratégia Saúde da
+    Família;
+    · 2232-72 Cirurgião-Dentista de Saúde Coletiva.
+    d)
+    Código no SIGTAP:
+    · Para o numerador: 03.01.01.015-3 – PRIMEIRA
+    CONSULTA ODONTOLÓGICA PROGRAMADA.
+    · Registros do campo “Tipo de consulta” com marcação
+    da opção “Primeira consulta odontológica programática”.
+    · O usuário poderá ser contabilizado apenas uma vez para
+    o mesmo cirurgião-dentista no período de 12 (doze)
+    meses, contados a partir da data de conclusão do
+    tratamento ou, caso não haja conclusão, da data da
+[L198] Código no SIGTAP:
+    · Para o numerador: 03.01.01.015-3 – PRIMEIRA
+    CONSULTA ODONTOLÓGICA PROGRAMADA.
+    · Registros do campo “Tipo de consulta” com marcação
+    da opção “Primeira consulta odontológica programática”.
+    · O usuário poderá ser contabilizado apenas uma vez para
+    o mesmo cirurgião-dentista no período de 12 (doze)
+    meses, contados a partir da data de conclusão do
+    tratamento ou, caso não haja conclusão, da data da
+    primeira consulta programada.
+    e)
+    Modelos de Informação da Estratégia e-SUS APS:
+    ·
+    Modelo de Informação de Atendimento
+    Odontológico Individual (MIAOI):
+[L232] Nota Metodológica B1 (0054640774)         SEI 25000.053348/2026-78 / pg. 3
+    27
+    Interpretação em
+    saúde
+    Apresenta o acesso da população aos serviços de saúde
+    bucal, oferecendo um perfil do atendimento odontológico,
+    a partir do serviço ofertado pelas eSB, além do
+    planejamento da continuidade do cuidado a partir da
+    elaboração de um plano preventivo-terapêutico individual
+    que contemple todas as necessidades apresentadas pelo
+    indivíduo na avaliação realizada pelo cirurgião-dentista.
+    Estabelece também perspectiva de avaliação para
+    melhoria no processo de planejamento, oferta de insumos
+    e completude dos profissionais de Saúde Bucal no
+    território e período analisado.
+[L255] Parâmetro
+    Ótimo: > 1,25
+    Bom: > 0,75 e ≤ 1,25
+    Suficiente: > 0,25 e ≤ 0,75
+    Regular: ≤ 0,25
+    31
+    Classificação
+    gerencial
+    Indicador de resultado.
+    32
+    Classificação de
+    desempenho
+    Indicador de efetividade.
+    Limitações
+    33
+[L308] Denominador:
+    número total de pessoas vinculadas à eSF/eAP de
+    referência da equipe de Saúde Bucal, conforme 'regra de vinculação da pessoa à
+    equipe' da Nota Técnicaº 30/2025-CGESCO/DESCO/SAPS/MS. Para as eSB com carga
+    horária diferenciada (20hrs), que são vinculadas a 1 eSF será considerado o total de
+    pessoas vinculadas dividido por 2 (dois).
+    4
+    .
+    2
+    .
+    Para garantir que todos os municípios possam fazer o monitoramento da
+    sua situação em relação a esses indicadores, acompanhar o progresso e fazer um
+    cálculo preliminar dos seus resultados, serão considerados os modelos de
+    Nota Metodológica B1 (0054640774)         SEI 25000.053348/2026-78 / pg. 4
+    informação publicados previamente pela Secretaria de Atenção Primária à Saúde
+[L321] Nota Metodológica B1 (0054640774)         SEI 25000.053348/2026-78 / pg. 4
+    informação publicados previamente pela Secretaria de Atenção Primária à Saúde
+    (Saps), do Ministério da Saúde, no âmbito do e-SUS APS, através do sítio eletrônico:
+    https://sisaps.saude.gov.br/sistemas/sisab/docs/modelos/intro/
+    .
+    4
+    .
+    3
+    .
+    Numerador:
+    número total de pessoas com primeira consulta
+    odontológica programada realizadas pela eSB, independente da vinculação do
+    usuário à eSF/eAP de referência. O usuário poderá ser contabilizado apenas uma vez
+    para o mesmo dentista no período de 12 (doze) meses, contados a partir da data de
+    conclusão do tratamento ou, caso não haja conclusão, da data da primeira consulta
+[L330] Numerador:
+    número total de pessoas com primeira consulta
+    odontológica programada realizadas pela eSB, independente da vinculação do
+    usuário à eSF/eAP de referência. O usuário poderá ser contabilizado apenas uma vez
+    para o mesmo dentista no período de 12 (doze) meses, contados a partir da data de
+    conclusão do tratamento ou, caso não haja conclusão, da data da primeira consulta
+    programada.
+    4
+    .
+    4
+    .
+    Detalhamento de regras:
+    deve-se considerar os critérios como
+    classiﬁcação brasileira de ocupações - CBO, SIGTAP e modelos de informação a
+    serem considerados no processo de extração dos dados (Quadro 1).
+[L343] classiﬁcação brasileira de ocupações - CBO, SIGTAP e modelos de informação a
+    serem considerados no processo de extração dos dados (Quadro 1).
+    
+    Quadro 01. Informações para a composição do indicador.
+    Condicionante
+    Código/Campo
+    Descrição
+    Observação
+    CBO
+    
+    2232-08
+    Cirurgião-
+    Dentista Clínico
+    Geral
+    -
+[L344] serem considerados no processo de extração dos dados (Quadro 1).
+    
+    Quadro 01. Informações para a composição do indicador.
+    Condicionante
+    Código/Campo
+    Descrição
+    Observação
+    CBO
+    
+    2232-08
+    Cirurgião-
+    Dentista Clínico
+    Geral
+    -
+    2232-93
+[L346] Quadro 01. Informações para a composição do indicador.
+    Condicionante
+    Código/Campo
+    Descrição
+    Observação
+    CBO
+    
+    2232-08
+    Cirurgião-
+    Dentista Clínico
+    Geral
+    -
+    2232-93
+    Cirurgião-
+    Dentista da
+[L351] CBO
+    
+    2232-08
+    Cirurgião-
+    Dentista Clínico
+    Geral
+    -
+    2232-93
+    Cirurgião-
+    Dentista da
+    Estratégia
+    Saúde da
+    Família
+    -
+    2232-72
+[L370] SIGTAP
+    03.01.01.015-3
+    Primeira
+    consulta
+    odontológica
+    programática
+    -
+    Tipo de
+    Atendimento
+    Atendimento
+    Individual
+    Registros do
+    campo Tipo de
+    Consulta, na
+    opção
+[L415] Legenda: CBO - Classiﬁcação Brasileira de Ocupações; SIGTAP - Sistema de
+    Gerenciamento da Tabela de Procedimentos.
+    
+    Nota Metodológica B1 (0054640774)         SEI 25000.053348/2026-78 / pg. 5
+    5
+    .
+    REFERÊNCIAS
+    BRASIL. Ministério da Saúde. Secretaria de Atenção à Saúde. Departamento de
+    Atenção Básica. Saúde Bucal – Cadernos de Atenção Básica nº 17. Brasília: Ministério
+    da Saúde, 2008. 92 p.
+    BRASIL. Ministério da Saúde. Portaria nº 2.436, de 21 de setembro de 2017. Aprova
+    a Política Nacional de Atenção Básica, estabelecendo a revisão de diretrizes para a
+    organização da Atenção Básica, no âmbito do Sistema Único de Saúde (SUS).
+    Brasília: Ministério da Saúde, 2017.
+    BRASIL. Ministério da Saúde. A saúde bucal no Sistema Único de Saúde. Brasília:
+[L418] Nota Metodológica B1 (0054640774)         SEI 25000.053348/2026-78 / pg. 5
+    5
+    .
+    REFERÊNCIAS
+    BRASIL. Ministério da Saúde. Secretaria de Atenção à Saúde. Departamento de
+    Atenção Básica. Saúde Bucal – Cadernos de Atenção Básica nº 17. Brasília: Ministério
+    da Saúde, 2008. 92 p.
+    BRASIL. Ministério da Saúde. Portaria nº 2.436, de 21 de setembro de 2017. Aprova
+    a Política Nacional de Atenção Básica, estabelecendo a revisão de diretrizes para a
+    organização da Atenção Básica, no âmbito do Sistema Único de Saúde (SUS).
+    Brasília: Ministério da Saúde, 2017.
+    BRASIL. Ministério da Saúde. A saúde bucal no Sistema Único de Saúde. Brasília:
+    Ministério da Saúde, 2018. 350 p.
+    BRASIL. Ministério da Saúde. Portaria nº 14.572, de 8 de maio de 2023. Institui a
+    Política Nacional de Saúde Bucal no âmbito do Sistema Único de Saúde (SUS) e
+[L529] Nota Metodológica B1 (0054640774)         SEI 25000.053348/2026-78 / pg. 6
+    Referência:
+    Processo nº 25000.053348/2026-78
+    SEI nº 0054640774
+    Departamento de Saúde da Família
+    - DESF
+    Esplanada dos Ministérios, Bloco O  - Bairro Zona Cívico-Administrativa, Brasília/DF, CEP 70052-900
+    Site - saude.gov.br
+    
+    Nota Metodológica B1 (0054640774)         SEI 25000.053348/2026-78 / pg. 7
+[L538] Nota Metodológica B1 (0054640774)         SEI 25000.053348/2026-78 / pg. 7
+
+===================== B2 : Nota Metodológica B2 - Tratamento concluído.pdf =====================
+[L76] Nota Metodológica B2 (0054640775)         SEI 25000.053348/2026-78 / pg. 1
+    8
+    Periodicidade da
+    atualização
+    Mensal.
+    9
+    Periodicidade do
+    monitoramento
+    Mensal.
+    10
+    Periodicidade da
+    avaliação
+    Quadrimestral.
+    11
+    Dia de extração
+[L130] Unidade de
+    medida
+    Percentual.
+    19
+    Descritivo da
+    Unidade de
+    Medida
+    %
+    20
+    Status do
+    indicador
+    Acumulativo: Não.
+    21
+    Granularidade
+    Identificador Nacional de Equipe (INE).
+[L135] Unidade de
+    Medida
+    %
+    20
+    Status do
+    indicador
+    Acumulativo: Não.
+    21
+    Granularidade
+    Identificador Nacional de Equipe (INE).
+    22
+    Polaridade
+    Maior-melhor.
+    23
+    Fórmula de
+[L146] Polaridade
+    Maior-melhor.
+    23
+    Fórmula de
+    Cálculo
+    Numerador:
+    Nº total de pessoas com tratamento odontológico
+    concluído pela eSB.
+    Denominador:
+    Nº total de pessoas com primeira consulta odontológica
+    programática realizadas pela eSB.
+    N
+    Título
+    Descrição
+    Nota Metodológica B2 (0054640775)         SEI 25000.053348/2026-78 / pg. 2
+[L149] Fórmula de
+    Cálculo
+    Numerador:
+    Nº total de pessoas com tratamento odontológico
+    concluído pela eSB.
+    Denominador:
+    Nº total de pessoas com primeira consulta odontológica
+    programática realizadas pela eSB.
+    N
+    Título
+    Descrição
+    Nota Metodológica B2 (0054640775)         SEI 25000.053348/2026-78 / pg. 2
+    24
+    Método de cálculo
+    I. Regras Gerais:
+[L151] Numerador:
+    Nº total de pessoas com tratamento odontológico
+    concluído pela eSB.
+    Denominador:
+    Nº total de pessoas com primeira consulta odontológica
+    programática realizadas pela eSB.
+    N
+    Título
+    Descrição
+    Nota Metodológica B2 (0054640775)         SEI 25000.053348/2026-78 / pg. 2
+    24
+    Método de cálculo
+    I. Regras Gerais:
+    a) Identificação da pessoa assistida:
+    · Nome, data de nascimento, Cadastro de Pessoa Física
+[L154] Denominador:
+    Nº total de pessoas com primeira consulta odontológica
+    programática realizadas pela eSB.
+    N
+    Título
+    Descrição
+    Nota Metodológica B2 (0054640775)         SEI 25000.053348/2026-78 / pg. 2
+    24
+    Método de cálculo
+    I. Regras Gerais:
+    a) Identificação da pessoa assistida:
+    · Nome, data de nascimento, Cadastro de Pessoa Física
+    (CPF)  ou Cartão Nacional de Saúde (CNS)  válido por
+    pessoa, em conformidade com o Cadastro Nacional de
+    Saúde Sistema de Cadastramento de Usuários do Sistema
+[L160] Nota Metodológica B2 (0054640775)         SEI 25000.053348/2026-78 / pg. 2
+    24
+    Método de cálculo
+    I. Regras Gerais:
+    a) Identificação da pessoa assistida:
+    · Nome, data de nascimento, Cadastro de Pessoa Física
+    (CPF)  ou Cartão Nacional de Saúde (CNS)  válido por
+    pessoa, em conformidade com o Cadastro Nacional de
+    Saúde Sistema de Cadastramento de Usuários do Sistema
+    Único de Saúde (CADSUS).
+    b) Validação das equipes e profissionais:
+    ·  Serão consideradas, para o cálculo final, as eSB com
+    carga horária de 40 (quarenta) horas semanais, bem
+    como aquelas com carga horária diferenciada,
+    observando-se as seguintes regras de vinculação:
+[L162] Método de cálculo
+    I. Regras Gerais:
+    a) Identificação da pessoa assistida:
+    · Nome, data de nascimento, Cadastro de Pessoa Física
+    (CPF)  ou Cartão Nacional de Saúde (CNS)  válido por
+    pessoa, em conformidade com o Cadastro Nacional de
+    Saúde Sistema de Cadastramento de Usuários do Sistema
+    Único de Saúde (CADSUS).
+    b) Validação das equipes e profissionais:
+    ·  Serão consideradas, para o cálculo final, as eSB com
+    carga horária de 40 (quarenta) horas semanais, bem
+    como aquelas com carga horária diferenciada,
+    observando-se as seguintes regras de vinculação:
+    1 eSB 40h vinculada a 1 eSF 40h ou 2 eAP 20h
+    1 eSB 30h vinculada a 1 eAP 30h
+[L180] produções realizadas nas Unidades Odontológicas Móveis
+    (UOM) por cirurgiões-dentistas das eSB que, conforme
+    registro no SCNES, compartilham carga horária tanto na
+    unidade de saúde quanto na respectiva UOM, desde que
+    a UOM esteja devidamente homologada e apta ao
+    recebimento de custeio pelo Ministério da Saúde.
+    · Poderá ocorrer flutuação de vinculação da eSB entre eSF
+    ou eAP. Neste caso, será considerada a última vinculação
+    válida no período analisado.
+    c)
+    CBO utilizados para o cálculo do indicador:
+    · 2232-08 Cirurgião-Dentista Clínico Geral;
+    · 2232-93 Cirurgião-Dentista da Estratégia Saúde da
+    Família;
+    · 2232-72 Cirurgião-Dentista de Saúde Coletiva.
+[L190] CBO utilizados para o cálculo do indicador:
+    · 2232-08 Cirurgião-Dentista Clínico Geral;
+    · 2232-93 Cirurgião-Dentista da Estratégia Saúde da
+    Família;
+    · 2232-72 Cirurgião-Dentista de Saúde Coletiva.
+    d)
+    Código no SIGTAP:
+    · 03.01.01.015-3 – PRIMEIRA CONSULTA ODONTOLÓGICA
+    PROGRAMÁTICA.
+    · Registros do campo “Tipo de consulta” com marcação
+    da opção “Primeira consulta odontológica programática”.
+    · O usuário poderá ser contabilizado apenas uma vez para
+    o mesmo dentista ao longo de 12 meses, contados a
+    partir da data da primeira consulta programática ou da
+    conclusão do tratamento.
+[L196] Código no SIGTAP:
+    · 03.01.01.015-3 – PRIMEIRA CONSULTA ODONTOLÓGICA
+    PROGRAMÁTICA.
+    · Registros do campo “Tipo de consulta” com marcação
+    da opção “Primeira consulta odontológica programática”.
+    · O usuário poderá ser contabilizado apenas uma vez para
+    o mesmo dentista ao longo de 12 meses, contados a
+    partir da data da primeira consulta programática ou da
+    conclusão do tratamento.
+    e)
+    Preenchimento de campo conduta:
+    · O número de tratamentos odontológicos concluídos
+    deve ser registrado no campo “Conduta”, na opção
+    “Tratamento concluído”.
+    f)
+[L234] Nota Metodológica B2 (0054640775)         SEI 25000.053348/2026-78 / pg. 3
+    27
+    Interpretação em
+    saúde
+    Apresenta a resolutividade na oferta do atendimento
+    odontológico à população, a partir da primeira consulta
+    odontológica programática, com a avaliação e a
+    elaboração de um plano preventivo-terapêutico individual
+    que contemple todas as necessidades apresentadas pelo
+    indivíduo.
+    28
+    Ano de referência
+    2024.
+    29
+    Indicadores
+[L252] Parâmetro
+    Ótimo: > 75 e ≤ 100
+    Bom: > 50 e ≤ 75
+    Suficiente: > 25 e ≤ 50
+    Regular: ≤ 25
+    31
+    Classificação
+    gerencial
+    Indicador de resultado.
+    32
+    Classificação de
+    desempenho
+    Indicador de excelência.
+    Limitações
+    33
+[L303] Denominador:
+    número t
+    otal de pessoas com primeira consulta
+    odontológica programática realizadas pela eSB. O usuário poderá ser contabilizado
+    apenas uma vez para o mesmo dentista no período de 12 (doze) meses, contados a
+    partir da data de conclusão do tratamento ou, caso não haja conclusão, da data da
+    primeira consulta programada.
+    4
+    .
+    2
+    .
+    Para garantir que todos os municípios possam fazer o monitoramento da
+    sua situação em relação a esses indicadores, acompanhar o progresso e fazer um
+    cálculo preliminar dos seus resultados, serão considerados os modelos de
+    informação publicados previamente pela Secretaria de Atenção Primária à Saúde
+[L324] Numerador:
+    número total de tratamentos odontológicos concluídos
+    Nota Metodológica B2 (0054640775)         SEI 25000.053348/2026-78 / pg. 4
+    pela eSB, previsto no plano preventivo-terapêutico registrado pelo cirurgião-
+    dentista.
+    4
+    .
+    4
+    .
+    Detalhamento de regras:
+    deve-se considerar os critérios como
+    classiﬁcação brasileira de ocupações - CBO, SIGTAP e modelos de informação a
+    serem considerados no processo de extração dos dados (Quadro 1).
+    Quadro 01. Informações para a composição do indicador.
+    Condicionante
+[L326] Nota Metodológica B2 (0054640775)         SEI 25000.053348/2026-78 / pg. 4
+    pela eSB, previsto no plano preventivo-terapêutico registrado pelo cirurgião-
+    dentista.
+    4
+    .
+    4
+    .
+    Detalhamento de regras:
+    deve-se considerar os critérios como
+    classiﬁcação brasileira de ocupações - CBO, SIGTAP e modelos de informação a
+    serem considerados no processo de extração dos dados (Quadro 1).
+    Quadro 01. Informações para a composição do indicador.
+    Condicionante
+    Código/Campo
+    Descrição
+[L335] classiﬁcação brasileira de ocupações - CBO, SIGTAP e modelos de informação a
+    serem considerados no processo de extração dos dados (Quadro 1).
+    Quadro 01. Informações para a composição do indicador.
+    Condicionante
+    Código/Campo
+    Descrição
+    Observação
+    CBO
+    
+    2232-08
+    Cirurgião-
+    Dentista
+    Clínico Geral
+    -
+    2232-93
+[L336] serem considerados no processo de extração dos dados (Quadro 1).
+    Quadro 01. Informações para a composição do indicador.
+    Condicionante
+    Código/Campo
+    Descrição
+    Observação
+    CBO
+    
+    2232-08
+    Cirurgião-
+    Dentista
+    Clínico Geral
+    -
+    2232-93
+    Cirurgião-
+[L337] Quadro 01. Informações para a composição do indicador.
+    Condicionante
+    Código/Campo
+    Descrição
+    Observação
+    CBO
+    
+    2232-08
+    Cirurgião-
+    Dentista
+    Clínico Geral
+    -
+    2232-93
+    Cirurgião-
+    Dentista da
+[L342] CBO
+    
+    2232-08
+    Cirurgião-
+    Dentista
+    Clínico Geral
+    -
+    2232-93
+    Cirurgião-
+    Dentista da
+    Estratégia
+    Saúde da
+    Família
+    -
+    2232-72
+[L378] SIGTAP
+    03.01.01.015-3
+    Primeira
+    consulta
+    odontológica
+    programática
+    Usuários atendidos no período
+    avaliado que não apresentaram
+    registro de conclusão de
+    tratamento ou de primeira
+    consulta programática nos 12
+    (doze) meses anteriores, ou que
+    tiveram o tratamento concluído
+    nos últimos 12 (doze) meses.
+    Tipo de
+[L426] Legenda: CBO - Classiﬁcação Brasileira de Ocupações; SIGTAP -
+    Sistema de
+    Gerenciamento da Tabela de Procedimentos
+    .
+    
+    5
+    .
+    REFERÊNCIAS
+    BRASIL. Ministério da Saúde. Portaria nº 2.436, de 21 de setembro de 2017. Aprova
+    Nota Metodológica B2 (0054640775)         SEI 25000.053348/2026-78 / pg. 5
+    a Política Nacional de Atenção Básica, estabelecendo a revisão de diretrizes para a
+    organização da Atenção Básica, no âmbito do Sistema Único de Saúde (SUS).
+    Brasília: Ministério da Saúde, 2017.
+    BRASIL. Ministério da Saúde. Portaria nº 14.572, de 8 de maio de 2023. Institui a
+    Política Nacional de Saúde Bucal no âmbito do Sistema Único de Saúde (SUS) e
+[L435] Nota Metodológica B2 (0054640775)         SEI 25000.053348/2026-78 / pg. 5
+    a Política Nacional de Atenção Básica, estabelecendo a revisão de diretrizes para a
+    organização da Atenção Básica, no âmbito do Sistema Único de Saúde (SUS).
+    Brasília: Ministério da Saúde, 2017.
+    BRASIL. Ministério da Saúde. Portaria nº 14.572, de 8 de maio de 2023. Institui a
+    Política Nacional de Saúde Bucal no âmbito do Sistema Único de Saúde (SUS) e
+    altera a Lei nº 8.080, de 19 de setembro de 1990, para incluir a saúde bucal no
+    campo de atuação do SUS. Brasília: Ministério da Saúde, 2023.
+    MERCHÁN-HAMANN, E.; TAULI, P. L.; COSTA, M. P. Terminologia das medidas e
+    indicadores em Epidemiologia: subsídios para uma possível padronização da
+    nomenclatura. Informe Epidemiológico do SUS, v. 9, n. 4, p. 273-284, 2000.
+    STARFIELD, B. Atenção primária: equilíbrio entre necessidades de saúde, serviços e
+    tecnologia. Brasília: UNESCO, 2002. 726p.
+    
+    NOTA DE RODAPÉ:
+[L539] Nota Metodológica B2 (0054640775)         SEI 25000.053348/2026-78 / pg. 6
+
+===================== B3 : Nota Metodológica B3 - Taxa de exodontia.pdf =====================
+[L90] Nota Metodológica B3 (0054640777)         SEI 25000.053348/2026-78 / pg. 1
+    8
+    Periodicidade da
+    atualização
+    Mensal.
+    9
+    Periodicidade do
+    monitoramento
+    Mensal.
+    10
+    Periodicidade da
+    avaliação
+    Quadrimestral.
+    11
+    Dia de extração
+[L131] referência da eSB, considerando os códigos SIGTAP
+    
+    descritos no método de
+    cálculo
+    .
+    15
+    Interrupção do
+    acompanhamento
+    Não se aplica.
+    16
+    Boas práticas
+    Não se aplica.
+    17
+    Datas relevantes
+    Não se aplica.
+[L148] Unidade de
+    medida
+    Percentual.
+    19
+    Descritivo da
+    Unidade de
+    Medida
+    %
+    20
+    Status do
+    indicador
+    Acumulativo: Não.
+    21
+    Granularidade
+    Identificador Nacional de Equipe (INE).
+[L153] Unidade de
+    Medida
+    %
+    20
+    Status do
+    indicador
+    Acumulativo: Não.
+    21
+    Granularidade
+    Identificador Nacional de Equipe (INE).
+    22
+    Polaridade
+    Menor-melhor.
+    23
+    Fórmula de
+[L164] Polaridade
+    Menor-melhor.
+    23
+    Fórmula de
+    Cálculo
+    Numerador:
+    N° total
+    
+    de
+    exodontias realizadas
+    
+    pelo cirurgião-dentista
+    
+    da
+    eSB.
+[L167] Fórmula de
+    Cálculo
+    Numerador:
+    N° total
+    
+    de
+    exodontias realizadas
+    
+    pelo cirurgião-dentista
+    
+    da
+    eSB.
+    Denominador:
+    N
+    º
+[L169] Numerador:
+    N° total
+    
+    de
+    exodontias realizadas
+    
+    pelo cirurgião-dentista
+    
+    da
+    eSB.
+    Denominador:
+    N
+    º
+    total
+    de
+[L179] Denominador:
+    N
+    º
+    total
+    de
+    procedimentos
+    individuais
+    preventivos
+    ,
+    
+    curativos
+    e exo
+    dontias realizadas pela
+    eSB
+    .
+[L209] Nota Metodológica B3 (0054640777)         SEI 25000.053348/2026-78 / pg. 2
+    24
+    Método de cálculo
+    1 eSB 40h vinculada a 1 eSF 40h ou 2 eAP 20h
+    1 eSB 30h vinculada a 1 eAP 30h
+    1 eSB 20h vinculada a 1 eAP 20h
+    2 eSB 20h vinculada a 1 eSF 40h
+    · Serão consideradas, para fins de cálculo final, as
+    produções realizadas nas Unidades Odontológicas Móveis
+    (UOM) por cirurgiões-dentistas e técnicos em saúde bucal
+    das eSB que, conforme registro no SCNES, compartilham
+    carga horária tanto na unidade de saúde quanto na
+    respectiva UOM, desde que a UOM esteja devidamente
+    homologada e apta ao recebimento de custeio pelo
+    Ministério da Saúde.
+[L211] Método de cálculo
+    1 eSB 40h vinculada a 1 eSF 40h ou 2 eAP 20h
+    1 eSB 30h vinculada a 1 eAP 30h
+    1 eSB 20h vinculada a 1 eAP 20h
+    2 eSB 20h vinculada a 1 eSF 40h
+    · Serão consideradas, para fins de cálculo final, as
+    produções realizadas nas Unidades Odontológicas Móveis
+    (UOM) por cirurgiões-dentistas e técnicos em saúde bucal
+    das eSB que, conforme registro no SCNES, compartilham
+    carga horária tanto na unidade de saúde quanto na
+    respectiva UOM, desde que a UOM esteja devidamente
+    homologada e apta ao recebimento de custeio pelo
+    Ministério da Saúde.
+    · Poderá ocorrer flutuação de vinculação da eSB entre eSF
+    ou eAP. Neste caso, será considerada a última vinculação
+[L217] produções realizadas nas Unidades Odontológicas Móveis
+    (UOM) por cirurgiões-dentistas e técnicos em saúde bucal
+    das eSB que, conforme registro no SCNES, compartilham
+    carga horária tanto na unidade de saúde quanto na
+    respectiva UOM, desde que a UOM esteja devidamente
+    homologada e apta ao recebimento de custeio pelo
+    Ministério da Saúde.
+    · Poderá ocorrer flutuação de vinculação da eSB entre eSF
+    ou eAP. Neste caso, será considerada a última vinculação
+    válida no período analisado
+    c)
+    CBO utilizados para o cálculo do indicador:
+    · 2232-08 Cirurgião-Dentista Clínico Geral;
+    · 2232-93 Cirurgião-Dentista da Estratégia Saúde da
+    Família;
+[L228] CBO utilizados para o cálculo do indicador:
+    · 2232-08 Cirurgião-Dentista Clínico Geral;
+    · 2232-93 Cirurgião-Dentista da Estratégia Saúde da
+    Família;
+    · 2232-72 Cirurgião-Dentista de Saúde Coletiva.
+    ·
+    3224-05 - Técnico em Saúde Bucal;
+    ·
+    3224-25 - Técnico em Saúde Bucal da Estratégia de
+    
+    Saúde da
+    F
+    amília;
+    d)
+    Código na SIGTAP de taxa de exodontia:
+[L242] Código na SIGTAP de taxa de exodontia:
+    Numerador
+    · 04.14.02.013-8 –
+    Exodontia de dente permanente
+    ;
+    
+    ·
+    04.14.02.014-6
+    
+    –
+    Exodontia
+    múltipla com
+    alveoloplastia
+    
+    por sextante
+[L356] Nota Metodológica B3 (0054640777)         SEI 25000.053348/2026-78 / pg. 3
+    preparo biomecânico
+    ;
+    ·
+    03.07.02.007-0 –
+    Pulpotomia dentária
+    ;
+    · 03.07.03.002-4 - Raspagem e alisamento subgengivais
+    (por sextante);
+    ·
+    03.07
+    .03.004-0 –
+    Profilaxia / remoção da placa
+    
+    bacteriana
+[L457] Parâmetro
+    Ótimo:
+    ≥
+    3 e < 10
+    Bom:
+    ≥
+    10 e < 12
+    
+    Suficiente:
+    ≥ 12 e < 14
+    Regular: < 3 ou
+    ≥ 14
+    31
+    Classificação
+    gerencial
+[L487] Nota Metodológica B3 (0054640777)         SEI 25000.053348/2026-78 / pg. 4
+    33
+    Limitações
+    ·
+    Considerando que há necessidade de registro
+    
+    qualificado da informação em campo específico, é
+    
+    possível que os resultados sejam limitados por
+    
+    dificuldades de registro pelos profissionais de saúde no
+    
+    prontuário eletrônico.
+    · Envio tardio da informação.
+    Responsabilidades
+[L532] Denominador:
+    número
+    
+    total de procedimentos individuais preventivos,
+    curativos e exodontias realizados pela eSB.
+    4
+    .
+    2
+    .
+    Para garantir que todos os municípios possam fazer o monitoramento da
+    sua situação em relação a esses indicadores, acompanhar o progresso e fazer um
+    cálculo preliminar dos seus resultados, serão considerados os modelos de
+    informação publicados previamente pela Secretaria de Atenção Primária à Saúde, do
+    Ministério da Saúde, no âmbito do e-SUS APS, através do sítio eletrônico:
+    https://sisaps.saude.gov.br/sistemas/sisab/docs/modelos/intro/
+[L552] Numerador:
+    número total de exodontias simples ou múltiplas realizadas
+    pelo cirurgião-dentista da eSB. A exodontia é um procedimento odontológico de
+    extração de dentes, classiﬁcado como simples ou complexo. Ela é considerada
+    complexa quando necessita de osteotomias e/ou odontossecções diversas; ou,
+    ainda, em casos de dentes próximos às estruturas nobres com risco eminente de
+    lesões adjacentes. Serão considerados, para este indicador, os códigos do Sistema
+    de Gerenciamento da Tabela de Procedimentos (SIGTAP), conforme a descrição
+    apresentada na ficha de qualificação.
+    4
+    .
+    4
+    .
+    Detalhamento de regras:
+    deve-se considerar os critérios como
+[L559] de Gerenciamento da Tabela de Procedimentos (SIGTAP), conforme a descrição
+    apresentada na ficha de qualificação.
+    4
+    .
+    4
+    .
+    Detalhamento de regras:
+    deve-se considerar os critérios como
+    classiﬁcação brasileira de ocupações - CBO, SIGTAP e modelos de informação a
+    serem considerados no processo de extração dos dados (Quadro 1).
+    Quadro 01. Informações para a composição do indicador.
+    Condicionante
+    Código/Campo
+    Descrição
+    Observação
+[L567] classiﬁcação brasileira de ocupações - CBO, SIGTAP e modelos de informação a
+    serem considerados no processo de extração dos dados (Quadro 1).
+    Quadro 01. Informações para a composição do indicador.
+    Condicionante
+    Código/Campo
+    Descrição
+    Observação
+    2232-08
+    Cirurgião-
+    Dentista
+    Clínico Geral
+    Numerador/denominador
+    Nota Metodológica B3 (0054640777)         SEI 25000.053348/2026-78 / pg. 5
+    CBO
+    
+[L568] serem considerados no processo de extração dos dados (Quadro 1).
+    Quadro 01. Informações para a composição do indicador.
+    Condicionante
+    Código/Campo
+    Descrição
+    Observação
+    2232-08
+    Cirurgião-
+    Dentista
+    Clínico Geral
+    Numerador/denominador
+    Nota Metodológica B3 (0054640777)         SEI 25000.053348/2026-78 / pg. 5
+    CBO
+    
+    
+[L569] Quadro 01. Informações para a composição do indicador.
+    Condicionante
+    Código/Campo
+    Descrição
+    Observação
+    2232-08
+    Cirurgião-
+    Dentista
+    Clínico Geral
+    Numerador/denominador
+    Nota Metodológica B3 (0054640777)         SEI 25000.053348/2026-78 / pg. 5
+    CBO
+    
+    
+    
+[L579] Nota Metodológica B3 (0054640777)         SEI 25000.053348/2026-78 / pg. 5
+    CBO
+    
+    
+    
+    2232-93
+    Cirurgião-
+    Dentista da
+    Estratégia
+    Saúde da
+    Família
+    Numerador/denominador
+    2232-72
+    Cirurgião-
+    Dentista de
+[L580] CBO
+    
+    
+    
+    2232-93
+    Cirurgião-
+    Dentista da
+    Estratégia
+    Saúde da
+    Família
+    Numerador/denominador
+    2232-72
+    Cirurgião-
+    Dentista de
+    Saúde Coletiva
+[L614] SIGTAP
+    
+    
+    
+    04.14.02.013-
+    8
+    Exodontia de
+    dente
+    permanente
+    Numerador
+    04.14.02.014-
+    6
+    Exodontia
+    múltipla com
+    alveoloplastia
+[L634] SIGTAP –
+    Denominador" da
+    tabela da ficha de
+    qualificação
+    -
+    Denominador
+    Modelo de
+    informação
+    Modelo de
+    Informação de
+    Atendimento
+    Odontológico
+    Individual
+    -
+    -
+[L654] Legenda: CBO - Classiﬁcação Brasileira de Ocupações; SIGTAP -
+    Sistema de
+    Gerenciamento da Tabela de Procedimentos
+    .
+    
+    5
+    .
+    REFERÊNCIAS
+    Brasil. Ministério da Saúde. Secretaria de Atenção à Saúde. Departamento de
+    Atenção Básica. Saúde Bucal – Cadernos de Atenção Básica nº 17. Brasília: Ministério
+    da Saúde, 2008. 92 p.
+    Brasil. Ministério da Saúde. Portaria nº 2.436, de 21 de setembro de 2017. Aprova a
+    Política Nacional de Atenção Básica, estabelecendo a revisão de diretrizes para a
+    organização da Atenção Básica, no âmbito do Sistema Único de Saúde (SUS).
+    Brasília: Ministério da Saúde, 2017.
+[L674] Nota Metodológica B3 (0054640777)         SEI 25000.053348/2026-78 / pg. 6
+    campo de atuação do SUS. Brasília: Ministério da Saúde, 2023.
+    
+    NOTA DE RODAPÉ:
+    1.
+    Na Seção 3.24
+    , houve
+    correção da nomenclatura do CadSUS, de acordo
+    https://webatendimento.saude.gov.br/faq/cadsus
+    ,
+    alteração de ordem CPF e CNS, alteração na validação das equipes com inclusão das eSB de carga horária diferenciada; inclusão da
+    produção das unidades odontológicas móveis (UOM), inclusão dos CBO 3224-05 e 3224-25 no cálculo do indicador, inclusão dos
+    procedimentos SIGTAP '
+    01.01.02.012-0
+    – Orientação de higienização de próteses de
+[L685] produção das unidades odontológicas móveis (UOM), inclusão dos CBO 3224-05 e 3224-25 no cálculo do indicador, inclusão dos
+    procedimentos SIGTAP '
+    01.01.02.012-0
+    – Orientação de higienização de próteses de
+    ntárias' e '03.07.05.001-7
+    – Fotobiomodulação
+    a laser de baixa potência para o tratamento da mucosite oral e radioinduzida e/ou quimioinduzida'
+    no
+    denominador, exclusão do
+    procedimento SIGTAP '03.07.01.013-9 - Restauração de dente permanente posterior com amálgama' do denominador.
+    2.
+    Na Seção 3.24
+    , houve a inclusão dos técnicos em saúde bucal no item "e)
+    Modelos de Informação da Estratégia e-SUS APS".
+    3.
+[L686] procedimentos SIGTAP '
+    01.01.02.012-0
+    – Orientação de higienização de próteses de
+    ntárias' e '03.07.05.001-7
+    – Fotobiomodulação
+    a laser de baixa potência para o tratamento da mucosite oral e radioinduzida e/ou quimioinduzida'
+    no
+    denominador, exclusão do
+    procedimento SIGTAP '03.07.01.013-9 - Restauração de dente permanente posterior com amálgama' do denominador.
+    2.
+    Na Seção 3.24
+    , houve a inclusão dos técnicos em saúde bucal no item "e)
+    Modelos de Informação da Estratégia e-SUS APS".
+    3.
+    Na Seção 3.25
+[L694] procedimento SIGTAP '03.07.01.013-9 - Restauração de dente permanente posterior com amálgama' do denominador.
+    2.
+    Na Seção 3.24
+    , houve a inclusão dos técnicos em saúde bucal no item "e)
+    Modelos de Informação da Estratégia e-SUS APS".
+    3.
+    Na Seção 3.25
+    , houve alteração na terminologia de "equipe" para "INE".
+    4.
+    Na Seção 3.30
+    , houve alteração do parâmetro.
+    5.
+    Na Seção 4.4
+    , houve alteração do Quadro 1, incluindo os CBO 3224-05 e 3224-25 no cálculo do denominador do indicador.
+    Documento assinado eletronicamente por
+[L707] , houve alteração do Quadro 1, incluindo os CBO 3224-05 e 3224-25 no cálculo do denominador do indicador.
+    Documento assinado eletronicamente por
+    Audrey Fischer
+    ,
+    Diretor(a) do
+    Departamento de Estratégias, Acreditação e Componentes da Atenção
+    Primária à Saúde
+    , em 12/05/2026, às 13:34, conforme horário oficial de Brasília,
+    com fundamento no § 3º, do art. 4º, do
+    Decreto nº 10.543, de 13 de novembro de
+    2020
+    ; e art. 8º, da
+    Portaria nº 900 de 31 de Março de 2017
+    .
+    Documento assinado eletronicamente por
+[L775] Nota Metodológica B3 (0054640777)         SEI 25000.053348/2026-78 / pg. 7
+
+===================== B4 : Nota Metodológica B4 - Escovação supervisionada.pdf =====================
+[L108] Nota Metodológica B4 (0054640778)         SEI 25000.053348/2026-78 / pg. 1
+    7
+    Uso/aplicabilidade
+    Avaliar se
+    a eSB
+    tem conseguido caminhar em
+    direção
+    à
+    
+    mudança do modelo de ate
+    nção, com ações
+    que priorizam
+    
+    a pro
+    moção da saúde e a prevenção de agravos, e permite
+[L179] · Denominador: mudanças de equipe (eSF/eAP),
+    considerando os critérios de desempate previstos na
+    Portaria Saps/MS n° 161 de 10 de dezembro de 2024.
+    ·
+    Óbito no CADSUS.
+    16
+    Boas práticas
+    Não se aplica.
+    17
+    Datas relevantes
+    Não se aplica.
+    Procedimentos para o desenvolvimento do indicador
+    18
+    Unidade de
+    medida
+[L192] Unidade de
+    medida
+    Percentual.
+    19
+    Descritivo da
+    Unidade de
+    Medida
+    %
+    20
+    Status do
+    indicador
+    Acumulativo: não.
+    21
+    Granularidade
+    Identificador Nacional de Equipe (INE).
+[L197] Unidade de
+    Medida
+    %
+    20
+    Status do
+    indicador
+    Acumulativo: não.
+    21
+    Granularidade
+    Identificador Nacional de Equipe (INE).
+    22
+    Polaridade
+    Maior-melhor.
+    N
+    Título
+[L208] Polaridade
+    Maior-melhor.
+    N
+    Título
+    Descrição
+    Nota Metodológica B4 (0054640778)         SEI 25000.053348/2026-78 / pg. 2
+    23
+    Fórmula de
+    Cálculo
+    Numerador:
+    Nº total
+    de
+    crianças de 6 a 12 anos
+    
+    participantes da ação
+[L213] Nota Metodológica B4 (0054640778)         SEI 25000.053348/2026-78 / pg. 2
+    23
+    Fórmula de
+    Cálculo
+    Numerador:
+    Nº total
+    de
+    crianças de 6 a 12 anos
+    
+    participantes da ação
+    
+    coletiva de escovação dental
+    supervisionada realizada
+    
+    pela
+[L215] Fórmula de
+    Cálculo
+    Numerador:
+    Nº total
+    de
+    crianças de 6 a 12 anos
+    
+    participantes da ação
+    
+    coletiva de escovação dental
+    supervisionada realizada
+    
+    pela
+    eSB
+    .
+[L217] Numerador:
+    Nº total
+    de
+    crianças de 6 a 12 anos
+    
+    participantes da ação
+    
+    coletiva de escovação dental
+    supervisionada realizada
+    
+    pela
+    eSB
+    .
+    Denominador:
+    N
+[L230] Denominador:
+    N
+    º total
+    de
+    crianças de 6 a 12 anos vinculadas à
+    
+    eSF
+    /
+    eAP
+    
+    de
+    referência da eSB,
+    conforme 'regra de vinculação
+    da pessoa à equipe' da Nota Técnicaº 30/2025-
+    CGESCO/DESCO/SAPS/MS
+[L249] Nota Metodológica B4 (0054640778)         SEI 25000.053348/2026-78 / pg. 3
+    24
+    Método de cálculo
+    I. Regras Gerais:
+    a) Identificação da pessoa assistida:
+    · Nome, data de nascimento, Cadastro de Pessoa Física
+    (CPF) ou Cartão Nacional de Saúde (CNS) válido, em
+    conformidade com o Sistema de Cadastramento de
+    Usuários do Sistema Único de Saúde (CadSUS).
+    b) Validação das equipes e profissionais:
+    · Serão consideradas, para o cálculo final, as eSB com
+    carga horária de 40 (quarenta) horas semanais, bem
+    como aquelas com carga horária diferenciada,
+    observando-se as seguintes regras de vinculação:
+    1 eSB 40h vinculada a 1 eSF 40h ou 2 eAP 20h
+[L251] Método de cálculo
+    I. Regras Gerais:
+    a) Identificação da pessoa assistida:
+    · Nome, data de nascimento, Cadastro de Pessoa Física
+    (CPF) ou Cartão Nacional de Saúde (CNS) válido, em
+    conformidade com o Sistema de Cadastramento de
+    Usuários do Sistema Único de Saúde (CadSUS).
+    b) Validação das equipes e profissionais:
+    · Serão consideradas, para o cálculo final, as eSB com
+    carga horária de 40 (quarenta) horas semanais, bem
+    como aquelas com carga horária diferenciada,
+    observando-se as seguintes regras de vinculação:
+    1 eSB 40h vinculada a 1 eSF 40h ou 2 eAP 20h
+    1 eSB 30h vinculada a 1 eAP 30h
+    1 eSB 20h vinculada a 1 eAP 20h
+[L268] produções realizadas nas Unidades Odontológicas Móveis
+    (UOM) por cirurgiões-dentistas, técnicos em saúde bucal e
+    auxiliares em saúde bucal das eSB que, conforme registro
+    no SCNES, compartilham carga horária tanto na unidade
+    de saúde quanto na respectiva UOM, desde que a UOM
+    esteja devidamente homologada e apta ao recebimento
+    de custeio pelo Ministério da Saúde.
+    · Poderá ocorrer flutuação de vinculação da eSB entre
+    equipes de Saúde da Família (eSF) ou equipes de Atenção
+    Primária (eAP). Neste caso, será considerada a última
+    vinculação válida no período analisado.
+    c)
+    CBO utilizados para o cálculo do indicador:
+    · 2232-08
+    -
+[L280] CBO utilizados para o cálculo do indicador:
+    · 2232-08
+    -
+    Cirurgião-Dentista Clínico Geral;
+    · 2232-93
+    -
+    Cirurgião-Dentista da Estratégia Saúde da
+    Família;
+    · 2232-72
+    -
+    Cirurgião-Dentista de Saúde Coletiva;
+    ·
+    3224-05 - Técnico em Saúde Bucal;
+    ·
+    3224-25 - Técnico em Saúde Bucal da Estratégia de
+[L313] Código no SIGTAP (o procedimento só é válido
+    respeitando-se as habilitações de CBO previstos na
+    tabela SIGTAP):
+    · 01.01.02.003-1 - Ação coletiva de escovação dental
+    supervisionada.
+    25
+    Categorias de
+    análise
+    Brasil, regiões, unidade federativa (UF), municípios, CNES
+    e INE.
+    26
+    Fonte de dados
+    · Sistema de Informação para a Atenção Primária à Saúde
+    (SIAPS).
+    · Sistema de Cadastro Nacional de Estabelecimentos de
+[L314] respeitando-se as habilitações de CBO previstos na
+    tabela SIGTAP):
+    · 01.01.02.003-1 - Ação coletiva de escovação dental
+    supervisionada.
+    25
+    Categorias de
+    análise
+    Brasil, regiões, unidade federativa (UF), municípios, CNES
+    e INE.
+    26
+    Fonte de dados
+    · Sistema de Informação para a Atenção Primária à Saúde
+    (SIAPS).
+    · Sistema de Cadastro Nacional de Estabelecimentos de
+    Saúde (SCNES).
+[L315] tabela SIGTAP):
+    · 01.01.02.003-1 - Ação coletiva de escovação dental
+    supervisionada.
+    25
+    Categorias de
+    análise
+    Brasil, regiões, unidade federativa (UF), municípios, CNES
+    e INE.
+    26
+    Fonte de dados
+    · Sistema de Informação para a Atenção Primária à Saúde
+    (SIAPS).
+    · Sistema de Cadastro Nacional de Estabelecimentos de
+    Saúde (SCNES).
+    N
+[L332] Nota Metodológica B4 (0054640778)         SEI 25000.053348/2026-78 / pg. 4
+    Análise do indicador
+    27
+    Interpretação em
+    saúde
+    É uma medida de saúde pública utilizada para enfrentar o
+    
+    problema da
+    cárie dentária
+    e de doenças periodontais,
+    
+    além promover a criação de hábitos saudáveis
+    . A
+    ação
+    
+[L365] Parâmetro
+    Ótimo: > 1
+    Bom: > 0,5 e ≤ 1
+    Suficiente: > 0,25 e ≤ 0,5
+    Regular: ≤ 0,25
+    31
+    Classificação
+    gerencial
+    Indicador de processo.
+    32
+    Classificação de
+    desempenho
+    Indicador de excelência.
+    Limitações
+    33
+[L421] Denominador:
+    número total de crianças de 6 a 12 anos de idade
+    vinculadas à eSF/eAP de referência da eSB,
+    conforme 'regra de vinculação da pessoa
+    à equipe' da Nota Técnicaº 30/2025-CGESCO/DESCO/SAPS/MS
+    . Para as eSB com
+    carga horária diferenciada (20hrs), que são vinculadas a 1 eSF será considerado o
+    total de pessoas vinculadas dividido por 2 (dois).
+    4
+    .
+    2
+    .
+    Para garantir que todos os municípios possam fazer o monitoramento da
+    sua situação em relação a esses indicadores, acompanhar o progresso e fazer um
+    cálculo preliminar dos seus resultados, serão considerados os modelos de
+[L436] Nota Metodológica B4 (0054640778)         SEI 25000.053348/2026-78 / pg. 5
+    informação publicados previamente pela Secretaria de Atenção Primária à Saúde
+    (Saps), do Ministério da Saúde, no âmbito do e-SUS APS, através do sítio eletrônico:
+    https://sisaps.saude.gov.br/sistemas/sisab/docs/modelos/intro/
+    .
+    4
+    .
+    3
+    .
+    Numerador:
+    número total de crianças de 6 a 12 anos de idade,
+    participantes da ação coletiva de escovação dental supervisionada realizada pela
+    eSB. Entende-se por escovação dental supervisionada o procedimento coletivo de
+    escovação dental, com ou sem evidenciação de placa bacteriana, realizada com
+    grupos populacionais de 6 a 12 anos de idade sob orientação e supervisão de um ou
+[L445] Numerador:
+    número total de crianças de 6 a 12 anos de idade,
+    participantes da ação coletiva de escovação dental supervisionada realizada pela
+    eSB. Entende-se por escovação dental supervisionada o procedimento coletivo de
+    escovação dental, com ou sem evidenciação de placa bacteriana, realizada com
+    grupos populacionais de 6 a 12 anos de idade sob orientação e supervisão de um ou
+    mais profissionais de saúde.
+    4
+    .
+    4
+    .
+    Detalhamento de regras:
+    deve-se considerar os critérios como
+    classiﬁcação brasileira de ocupações - CBO, SIGTAP e modelos de informação a
+    serem considerados no processo de extração dos dados (Quadro 1).
+[L458] classiﬁcação brasileira de ocupações - CBO, SIGTAP e modelos de informação a
+    serem considerados no processo de extração dos dados (Quadro 1).
+    
+    Quadro 01. Informações para a composição do indicador.
+    Condicionante
+    Código/Campo
+    Descrição
+    Observação
+    
+    
+    
+    
+    
+    CBO
+    
+[L459] serem considerados no processo de extração dos dados (Quadro 1).
+    
+    Quadro 01. Informações para a composição do indicador.
+    Condicionante
+    Código/Campo
+    Descrição
+    Observação
+    
+    
+    
+    
+    
+    CBO
+    
+    
+[L461] Quadro 01. Informações para a composição do indicador.
+    Condicionante
+    Código/Campo
+    Descrição
+    Observação
+    
+    
+    
+    
+    
+    CBO
+    
+    
+    
+    
+[L471] CBO
+    
+    
+    
+    
+    
+    
+    2232-08
+    Cirurgião-Dentista Clínico Geral
+    
+    
+    -
+    
+    
+    
+[L503] SIGTAP
+    01.01.02.003-
+    1
+    Ação coletiva de escovação
+    dental supervisionada
+    -
+    Modelo de
+    informação
+    Modelo de
+    Informação de
+    Atividade
+    Coletiva
+    Práticas em Saúde 04: Escovação
+    dental supervisionada
+    -
+[L519] Legenda: CBO - Classiﬁcação Brasileira de Ocupações; SIGTAP - Sistema de
+    Gerenciamento da Tabela de Procedimentos; SIAPS - Sistema de Informação
+    em Atenção Primária à Saúde.
+    
+    5
+    .
+    REFERÊNCIAS
+    AQUILANATE, A. G.
+    et al
+    . The importance of dental health education for
+    preschoolchildren. Revista Brasileira de Odontologia, v. 32, n. 1, p. 39-45, 2003.
+    BRASIL. Ministério da Saúde. Secretaria de Atenção à Saúde. Departamento de
+    Atenção Básica. Coordenação Geral de Saúde Bucal. Diretrizes da Política Nacional
+    de Saúde Bucal. Brasília: Ministério da Saúde, 2004.
+    BRASIL. Ministério da Saúde. Secretaria de Atenção à Saúde. Departamento de
+[L538] Nota Metodológica B4 (0054640778)         SEI 25000.053348/2026-78 / pg. 6
+    BRASIL. Ministério da Saúde. Secretaria de Atenção Primária à Saúde. Departamento
+    de Estratégias e Políticas de Saúde Comunitária. Diretriz para a prática clínica
+    odontológica na Atenção Primária à Saúde: recomendações para higiene bucal na
+    infância [recurso eletrônico]. Brasília: Ministério da Saúde, 2024.
+    MERCHÁN-HAMANN, E.; TAULI, P. L.; COSTA, M. P. Terminologia das medidas e
+    indicadores em Epidemiologia: subsídios para uma possível padronização da
+    nomenclatura. Informe Epidemiológico do SUS, v. 9, n. 4, p. 273-284, 2000.
+    SANTOS, C. R. P. et al. Escovação dentária supervisionada no controle da cárie
+    dentária e da doença periodontal: uma revisão da literatura. Revista Odontológica de
+    Araçatuba, Araçatuba, v. 32, n. 2, p. 25-30, 2011.
+    
+    NOTA DE RODAPÉ:
+    1.
+    Na seção 2.1
+[L648] Nota Metodológica B4 (0054640778)         SEI 25000.053348/2026-78 / pg. 7
+
+===================== B5 : Nota Metodológica B5 - Procedimentos odontológicos preventivos.pdf =====================
+[L95] Nota Metodológica B5 (0054640779)         SEI 25000.053348/2026-78 / pg. 1
+    11
+    Dia de extração
+    dos dados
+    SIAPS: 20º dia útil de cada mês.
+    SCNES: A última competência válida.
+    Escopo da base de dados de acompanhamento
+    12
+    Evento
+    Procedimentos preventivos
+    13
+    Período de
+    acompanhamento
+    Não se aplica.
+    14
+[L118] SIGTAP descritos no método de cálculo.
+    15
+    Interrupção do
+    acompanhamento
+    Não se aplica.
+    16
+    Boas práticas
+    Não se aplica.
+    17
+    Datas relevantes
+    Não se aplica.
+    Procedimentos para o desenvolvimento do indicador
+    18
+    Unidade de
+    medida
+[L131] Unidade de
+    medida
+    Percentual.
+    19
+    Descritivo da
+    Unidade de
+    Medida
+    %
+    20
+    Status do
+    indicador
+    Acumulativo: não.
+    21
+    Granularidade
+    Identificador Nacional de Equipe (INE).
+[L136] Unidade de
+    Medida
+    %
+    20
+    Status do
+    indicador
+    Acumulativo: não.
+    21
+    Granularidade
+    Identificador Nacional de Equipe (INE).
+    22
+    Polaridade
+    Maior-melhor.
+    23
+    Fórmula de
+[L147] Polaridade
+    Maior-melhor.
+    23
+    Fórmula de
+    Cálculo
+    Numerador:
+    Nº total de procedimentos odontológicos preventivos
+    individuais realizados pela eSB.
+    Denominador:
+    Nº total de procedimentos odontológicos individuais
+    realizados pela eSB.
+    I. Regras Gerais:
+    a) Identificação da pessoa assistida:
+    · Nome, data de nascimento, Cadastro de Pessoa Física
+    (CPF) ou Cartão Nacional de Saúde (CNS) válido, em
+[L150] Fórmula de
+    Cálculo
+    Numerador:
+    Nº total de procedimentos odontológicos preventivos
+    individuais realizados pela eSB.
+    Denominador:
+    Nº total de procedimentos odontológicos individuais
+    realizados pela eSB.
+    I. Regras Gerais:
+    a) Identificação da pessoa assistida:
+    · Nome, data de nascimento, Cadastro de Pessoa Física
+    (CPF) ou Cartão Nacional de Saúde (CNS) válido, em
+    conformidade com o Sistema de Cadastramento de
+    Usuários do Sistema Único de Saúde (CadSUS).
+    b) Validação das equipes e profissionais:
+[L152] Numerador:
+    Nº total de procedimentos odontológicos preventivos
+    individuais realizados pela eSB.
+    Denominador:
+    Nº total de procedimentos odontológicos individuais
+    realizados pela eSB.
+    I. Regras Gerais:
+    a) Identificação da pessoa assistida:
+    · Nome, data de nascimento, Cadastro de Pessoa Física
+    (CPF) ou Cartão Nacional de Saúde (CNS) válido, em
+    conformidade com o Sistema de Cadastramento de
+    Usuários do Sistema Único de Saúde (CadSUS).
+    b) Validação das equipes e profissionais:
+    · Serão consideradas, para o cálculo final, as eSB com
+    carga horária de 40 (quarenta) horas semanais, bem
+[L155] Denominador:
+    Nº total de procedimentos odontológicos individuais
+    realizados pela eSB.
+    I. Regras Gerais:
+    a) Identificação da pessoa assistida:
+    · Nome, data de nascimento, Cadastro de Pessoa Física
+    (CPF) ou Cartão Nacional de Saúde (CNS) válido, em
+    conformidade com o Sistema de Cadastramento de
+    Usuários do Sistema Único de Saúde (CadSUS).
+    b) Validação das equipes e profissionais:
+    · Serão consideradas, para o cálculo final, as eSB com
+    carga horária de 40 (quarenta) horas semanais, bem
+    como aquelas com carga horária diferenciada,
+    observando-se as seguintes regras de vinculação:
+    1 eSB 40h vinculada a 1 eSF 40h ou 2 eAP 20h
+[L174] produções realizadas nas Unidades Odontológicas Móveis
+    (UOM) por cirurgiões-dentistas e técnicos em saúde bucal
+    das eSB que, conforme registro no SCNES, compartilham
+    carga horária tanto na unidade de saúde quanto na
+    respectiva UOM, desde que a UOM esteja devidamente
+    homologada e apta ao recebimento de custeio pelo
+    N
+    Título
+    Descrição
+    Nota Metodológica B5 (0054640779)         SEI 25000.053348/2026-78 / pg. 2
+    24
+    Método de cálculo
+    Ministério da Saúde.
+    · Poderá ocorrer flutuação de vinculação da eSB entre
+    equipes de Saúde da Família (eSF) ou equipes de Atenção
+[L183] Nota Metodológica B5 (0054640779)         SEI 25000.053348/2026-78 / pg. 2
+    24
+    Método de cálculo
+    Ministério da Saúde.
+    · Poderá ocorrer flutuação de vinculação da eSB entre
+    equipes de Saúde da Família (eSF) ou equipes de Atenção
+    Primária (eAP). Neste caso, será considerada a última
+    vinculação válida no período analisado
+    c)
+    CBO utilizados para o cálculo do indicador:
+    · 2232-08 Cirurgião-Dentista Clínico Geral;
+    · 2232-93 Cirurgião-Dentista da Estratégia Saúde da
+    Família;
+    · 2232-72 Cirurgião-Dentista de Saúde Coletiva;
+    · 3224-05 Técnico em Saúde Bucal;
+[L185] Método de cálculo
+    Ministério da Saúde.
+    · Poderá ocorrer flutuação de vinculação da eSB entre
+    equipes de Saúde da Família (eSF) ou equipes de Atenção
+    Primária (eAP). Neste caso, será considerada a última
+    vinculação válida no período analisado
+    c)
+    CBO utilizados para o cálculo do indicador:
+    · 2232-08 Cirurgião-Dentista Clínico Geral;
+    · 2232-93 Cirurgião-Dentista da Estratégia Saúde da
+    Família;
+    · 2232-72 Cirurgião-Dentista de Saúde Coletiva;
+    · 3224-05 Técnico em Saúde Bucal;
+    · 3224-25 Técnico em Saúde Bucal da Estratégia de Saúde
+    da Família.
+[L192] CBO utilizados para o cálculo do indicador:
+    · 2232-08 Cirurgião-Dentista Clínico Geral;
+    · 2232-93 Cirurgião-Dentista da Estratégia Saúde da
+    Família;
+    · 2232-72 Cirurgião-Dentista de Saúde Coletiva;
+    · 3224-05 Técnico em Saúde Bucal;
+    · 3224-25 Técnico em Saúde Bucal da Estratégia de Saúde
+    da Família.
+    d)
+    Código na SIGTAP:
+    Numerador
+    · 01.01.02.005-8 - Aplicação de cariostático (por dente);
+    · 01.01.02.006-6 - Aplicação de selante (por dente);
+    · 01.01.02.007-4 - Aplicação tópica de flúor (individual por
+    sessão);
+[L201] Código na SIGTAP:
+    Numerador
+    · 01.01.02.005-8 - Aplicação de cariostático (por dente);
+    · 01.01.02.006-6 - Aplicação de selante (por dente);
+    · 01.01.02.007-4 - Aplicação tópica de flúor (individual por
+    sessão);
+    · 01.01.02.008-2 - Evidenciação de placa bacteriana;
+    · 01.01.02.010-4 - Orientação de higiene bucal;
+    · 01.01.02.012-0 - Orientação de higienização de próteses
+    dentárias;
+    · 03.07.03.004-0 - Profilaxia/ Remoção da placa
+    bacteriana.
+    
+    Denominador
+    De
+[L216] scrição do SIGTAP
+    de
+    procedimentos realizados
+    por Cirurgião-
+    De
+    ntista:
+    ·
+    01.01.02.005-8 -
+    Aplicação
+    de
+    cariostático (por
+    
+    de
+    nte);
+    ·
+[L355] Nota Metodológica B5 (0054640779)         SEI 25000.053348/2026-78 / pg. 3
+    ·
+    03.07.01.014-7 -
+    Adequação do comportamento da
+    
+    pessoa com
+    de
+    ficiência;
+    ·
+    03.07.01.015-5
+    -
+    Adequação do comportamento
+    de
+    
+    crianças;
+[L447] scrição do SIGTAP
+    de
+    procedimentos realizados
+    por Técnico em Saú
+    de
+    Bucal:
+    ·
+    01.01.02.005-8
+    -
+    Aplicação
+    de
+    cariostático (por
+    
+    de
+    nte);
+[L528] Nota Metodológica B5 (0054640779)         SEI 25000.053348/2026-78 / pg. 4
+    27
+    Interpretação em
+    saúde
+    Os procedimentos odontológicos preventivos são
+    essenciais para a preservação das estruturas dentárias e
+    dos tecidos de suporte do dente. Eles têm como principal
+    objetivo prevenir a cárie e as doenças periodontais. Esses
+    procedimentos englobam ações clínicas, educativas e
+    terapêuticas, que atuam diretamente nas causas dessas
+    doenças, impedindo, controlando ou revertendo seu
+    aparecimento.
+    28
+    Ano de referência
+    2024.
+[L549] Parâmetro
+    Ótimo: ≥ 65 e ≤ 85
+    Bom: ≥ 55 e < 65
+    Suficiente: ≥ 40 e < 55
+    Regular: < 40 ou > 85
+    31
+    Classificação
+    gerencial
+    Indicador de processo.
+    32
+    Classificação de
+    desempenho
+    Indicador de excelência.
+    Limitações
+    33
+[L603] Denominador:
+    número total de procedimentos odontológicos
+    individuais realizados pela eSB.
+    4
+    .
+    2
+    .
+    Para garantir que todos os municípios possam fazer o monitoramento da
+    sua situação em relação a esses indicadores, acompanhar o progresso e fazer um
+    cálculo preliminar dos seus resultados, serão considerados os modelos de
+    informação publicados previamente pela Secretaria de Atenção Primária à Saúde, do
+    Ministério da Saúde, no âmbito do e-SUS APS, através do sítio eletrônico:
+    https://sisaps.saude.gov.br/sistemas/sisab/docs/modelos/intro/
+    .
+    4
+[L621] Numerador:
+    número total de procedimentos odontológicos individuais
+    preventivos realizados pela eSB. Entende-se por procedimentos odontológicos
+    Nota Metodológica B5 (0054640779)         SEI 25000.053348/2026-78 / pg. 5
+    preventivos aqueles realizados pela equipe de Saúde Bucal, no ambiente da
+    assistência odontológica, cujo objetivo é diminuir doenças/agravos bucais para
+    manter a saúde oral e reduzir a necessidade de tratamentos mais complexos. Será
+    considerado o código do Sistema de Gerenciamento da Tabela de Procedimentos
+    (SIGTAP).
+    4
+    .
+    4
+    .
+    Detalhamento da regra:
+    deve-se considerar os critérios como
+[L624] Nota Metodológica B5 (0054640779)         SEI 25000.053348/2026-78 / pg. 5
+    preventivos aqueles realizados pela equipe de Saúde Bucal, no ambiente da
+    assistência odontológica, cujo objetivo é diminuir doenças/agravos bucais para
+    manter a saúde oral e reduzir a necessidade de tratamentos mais complexos. Será
+    considerado o código do Sistema de Gerenciamento da Tabela de Procedimentos
+    (SIGTAP).
+    4
+    .
+    4
+    .
+    Detalhamento da regra:
+    deve-se considerar os critérios como
+    classiﬁcação brasileira de ocupações - CBO, SIGTAP e modelos de informação a
+    serem considerados no processo de extração dos dados (Quadro 1).
+    Quadro 01. Informações para a composição do indicador.
+[L629] (SIGTAP).
+    4
+    .
+    4
+    .
+    Detalhamento da regra:
+    deve-se considerar os critérios como
+    classiﬁcação brasileira de ocupações - CBO, SIGTAP e modelos de informação a
+    serem considerados no processo de extração dos dados (Quadro 1).
+    Quadro 01. Informações para a composição do indicador.
+    Condicionante
+    Código/Campo
+    Descrição
+    Observação
+    
+[L636] classiﬁcação brasileira de ocupações - CBO, SIGTAP e modelos de informação a
+    serem considerados no processo de extração dos dados (Quadro 1).
+    Quadro 01. Informações para a composição do indicador.
+    Condicionante
+    Código/Campo
+    Descrição
+    Observação
+    
+    
+    
+    
+    
+    CBO
+    
+    
+[L637] serem considerados no processo de extração dos dados (Quadro 1).
+    Quadro 01. Informações para a composição do indicador.
+    Condicionante
+    Código/Campo
+    Descrição
+    Observação
+    
+    
+    
+    
+    
+    CBO
+    
+    
+    
+[L638] Quadro 01. Informações para a composição do indicador.
+    Condicionante
+    Código/Campo
+    Descrição
+    Observação
+    
+    
+    
+    
+    
+    CBO
+    
+    
+    
+    
+[L648] CBO
+    
+    
+    
+    
+    
+    2232-08
+    Cirurgião-Dentista
+    Clínico Geral
+    
+    -
+    
+    2232-93
+    Cirurgião-Dentista
+    da Estratégia
+[L679] SIGTAP
+    
+    
+    Considerar os códigos descritos
+    no item “d) Código SIGTAP –
+    Numerador" da tabela da ficha
+    de qualificação
+    -
+    Numerador
+    Considerar os códigos
+    descritos no item “d) Código
+    SIGTAP – Denominador" da
+    tabela da ficha de qualificação
+    -
+    Denominador
+[L683] no item “d) Código SIGTAP –
+    Numerador" da tabela da ficha
+    de qualificação
+    -
+    Numerador
+    Considerar os códigos
+    descritos no item “d) Código
+    SIGTAP – Denominador" da
+    tabela da ficha de qualificação
+    -
+    Denominador
+    Modelo de
+    informação
+    Modelo de Informação de
+    Atendimento Odontológico
+[L690] SIGTAP – Denominador" da
+    tabela da ficha de qualificação
+    -
+    Denominador
+    Modelo de
+    informação
+    Modelo de Informação de
+    Atendimento Odontológico
+    Individual
+    Registro de
+    atendimento.
+    
+    Registro de
+    atendimento
+    conforme regras
+[L708] Legenda: CBO - Classiﬁcação Brasileira de Ocupações; SIGTAP -
+    Sistema de
+    Gerenciamento da Tabela de Procedimentos.
+    
+    5
+    .
+    REFERÊNCIAS
+    BRASIL. Ministério da Saúde. Secretaria de Atenção à Saúde. Departamento de
+    Atenção Básica. Saúde Bucal – Cadernos de Atenção Básica nº 17. Brasília: Ministério
+    da Saúde, 2008. 92 p.
+    BRASIL. Ministério da Saúde. Portaria nº 2.436, de 21 de setembro de 2017. Aprova
+    a Política Nacional de Atenção Básica, estabelecendo a revisão de diretrizes para a
+    organização da Atenção Básica, no âmbito do Sistema Único de Saúde (SUS).
+    Brasília: Ministério da Saúde, 2017.
+    Nota Metodológica B5 (0054640779)         SEI 25000.053348/2026-78 / pg. 6
+[L722] Nota Metodológica B5 (0054640779)         SEI 25000.053348/2026-78 / pg. 6
+    BRASIL. Ministério da Saúde. A saúde bucal no Sistema Único de Saúde. Brasília:
+    Ministério da Saúde, 2018. 350 p.
+    BRASIL. Ministério da Saúde. Portaria nº 14.572, de 8 de maio de 2023. Institui a
+    Política Nacional de Saúde Bucal no âmbito do Sistema Único de Saúde (SUS) e
+    altera a Lei nº 8.080, de 19 de setembro de 1990, para incluir a saúde bucal no
+    campo de atuação do SUS. Brasília: Ministério da Saúde, 2023.
+    MERCHÁN-HAMANN, E.; TAULI, P. L.; COSTA, M. P. Terminologia das medidas e
+    indicadores em Epidemiologia: subsídios para uma possível padronização da
+    nomenclatura. Informe Epidemiológico do SUS, v. 9, n. 4, p. 273-284, 2000.
+    
+    NOTA DE RODAPÉ:
+    1.
+    Na Seção 3.24
+    , houve
+[L741] numerador os SIGTAP '01.01.02.009-0 - Selamento provisório de cavidade dentária', '
+    03.07.01.013-9 - Restauração de dente
+    permanente posterior com amálgama', e '03.07.01.009-0 - Restauração de dente decíduo posterior com amálgama'; e f
+    oram
+    incluídos os SIGTAP  '01.01.02.012-0 - Orientação de higienização de próteses dentárias' e '03.07.03.004-0 - Profilaxia/ Remoção da
+    placa bacteriana'; Inclusão do detalhamentos de todos os procedimentos SIGTAP considerados no denominador.
+    2.
+    Na Seção 3.25
+    , houve alteração na terminologia de 'equipe' para 'INE'.
+    3.
+    Na Seção 3.30
+    , houve alteração do parâmetro.
+    Documento assinado eletronicamente por
+    Audrey Fischer
+    ,
+[L745] incluídos os SIGTAP  '01.01.02.012-0 - Orientação de higienização de próteses dentárias' e '03.07.03.004-0 - Profilaxia/ Remoção da
+    placa bacteriana'; Inclusão do detalhamentos de todos os procedimentos SIGTAP considerados no denominador.
+    2.
+    Na Seção 3.25
+    , houve alteração na terminologia de 'equipe' para 'INE'.
+    3.
+    Na Seção 3.30
+    , houve alteração do parâmetro.
+    Documento assinado eletronicamente por
+    Audrey Fischer
+    ,
+    Diretor(a) do
+    Departamento de Estratégias, Acreditação e Componentes da Atenção
+    Primária à Saúde
+    , em 12/05/2026, às 13:34, conforme horário oficial de Brasília,
+[L746] placa bacteriana'; Inclusão do detalhamentos de todos os procedimentos SIGTAP considerados no denominador.
+    2.
+    Na Seção 3.25
+    , houve alteração na terminologia de 'equipe' para 'INE'.
+    3.
+    Na Seção 3.30
+    , houve alteração do parâmetro.
+    Documento assinado eletronicamente por
+    Audrey Fischer
+    ,
+    Diretor(a) do
+    Departamento de Estratégias, Acreditação e Componentes da Atenção
+    Primária à Saúde
+    , em 12/05/2026, às 13:34, conforme horário oficial de Brasília,
+    com fundamento no § 3º, do art. 4º, do
+[L820] Nota Metodológica B5 (0054640779)         SEI 25000.053348/2026-78 / pg. 7
+
+===================== B6 : Nota Metodológica B6 - Tratamento restaurador atraumático.pdf =====================
+[L124] Nota Metodológica B6 (0054640781)         SEI 25000.053348/2026-78 / pg. 1
+    14
+    Entrada no
+    acompanhamento
+    Procedimentos “
+    Tratamento
+    
+    R
+    estaurado
+    r
+    
+    A
+    traumático
+    ”
+    r
+[L164] Unidade de
+    medida
+    Percentual.
+    19
+    Descritivo da
+    Unidade de
+    Medida
+    %
+    20
+    Status do
+    indicador
+    Acumulativo: Não.
+    21
+    Granularidade
+    Identificador Nacional de Equipe (INE).
+[L169] Unidade de
+    Medida
+    %
+    20
+    Status do
+    indicador
+    Acumulativo: Não.
+    21
+    Granularidade
+    Identificador Nacional de Equipe (INE).
+    22
+    Polaridade
+    Maior-melhor.
+    23
+    Fórmula de
+[L180] Polaridade
+    Maior-melhor.
+    23
+    Fórmula de
+    Cálculo
+    Numerador:
+    Nº total
+    de procedimentos
+    
+    “Tratamento R
+    estaurador
+    A
+    traumático
+    ”
+    
+[L183] Fórmula de
+    Cálculo
+    Numerador:
+    Nº total
+    de procedimentos
+    
+    “Tratamento R
+    estaurador
+    A
+    traumático
+    ”
+    
+    realizados pela eSB.
+    Denominador:
+    N
+[L185] Numerador:
+    Nº total
+    de procedimentos
+    
+    “Tratamento R
+    estaurador
+    A
+    traumático
+    ”
+    
+    realizados pela eSB.
+    Denominador:
+    N
+    º total
+    de
+[L196] Denominador:
+    N
+    º total
+    de
+    procedimentos
+    
+    restauradores
+    realizados pela eSB
+    .
+    N
+    Título
+    Descrição
+    Nota Metodológica B6 (0054640781)         SEI 25000.053348/2026-78 / pg. 2
+    24
+    Método de cálculo
+[L208] Nota Metodológica B6 (0054640781)         SEI 25000.053348/2026-78 / pg. 2
+    24
+    Método de cálculo
+    I. Regras Gerais:
+    a) Identificação da pessoa assistida:
+    · Nome, data de nascimento, Cadastro de Pessoa Física (CPF) ou Cartão
+    Nacional de Saúde (CNS) válido, em conformidade com o Sistema de
+    Cadastramento de Usuários do Sistema Único de Saúde (CadSUS).
+    b) Validação das equipes e profissionais:
+    · Serão consideradas, para o cálculo final, as eSB com carga horária de
+    40 (quarenta) horas semanais, bem como aquelas com carga horária
+    diferenciada, observando-se as seguintes regras de vinculação:
+    1 eSB 40h vinculada a 1 eSF 40h ou 2 eAP 20h
+    1 eSB 30h vinculada a 1 eAP 30h
+    1 eSB 20h vinculada a 1 eAP 20h
+[L210] Método de cálculo
+    I. Regras Gerais:
+    a) Identificação da pessoa assistida:
+    · Nome, data de nascimento, Cadastro de Pessoa Física (CPF) ou Cartão
+    Nacional de Saúde (CNS) válido, em conformidade com o Sistema de
+    Cadastramento de Usuários do Sistema Único de Saúde (CadSUS).
+    b) Validação das equipes e profissionais:
+    · Serão consideradas, para o cálculo final, as eSB com carga horária de
+    40 (quarenta) horas semanais, bem como aquelas com carga horária
+    diferenciada, observando-se as seguintes regras de vinculação:
+    1 eSB 40h vinculada a 1 eSF 40h ou 2 eAP 20h
+    1 eSB 30h vinculada a 1 eAP 30h
+    1 eSB 20h vinculada a 1 eAP 20h
+    2 eSB 20h vinculada a 1 eSF 40h
+    · Serão consideradas, para fins de cálculo final, as produções realizadas
+[L225] nas Unidades Odontológicas Móveis (UOM) por cirurgiões-dentistas das
+    eSB que, conforme registro no SCNES, compartilham carga horária tanto
+    na unidade de saúde quanto na respectiva UOM, desde que a UOM
+    esteja devidamente homologada e apta ao recebimento de custeio pelo
+    Ministério da Saúde.
+    · Poderá ocorrer flutuação de vinculação da eSB entre equipes de Saúde
+    da Família (eSF) ou equipes de Atenção Primária (eAP). Neste caso, será
+    considerada a última vinculação válida no período analisado.
+    c)
+    CBO utilizados para o cálculo do indicador:
+    · 2232-08 Cirurgião-Dentista Clínico Geral;
+    · 2232-93 Cirurgião-Dentista da Estratégia Saúde da Família;
+    · 2232-72 Cirurgião-Dentista de Saúde Coletiva.
+    d)
+    Código na SIGTAP:
+[L234] CBO utilizados para o cálculo do indicador:
+    · 2232-08 Cirurgião-Dentista Clínico Geral;
+    · 2232-93 Cirurgião-Dentista da Estratégia Saúde da Família;
+    · 2232-72 Cirurgião-Dentista de Saúde Coletiva.
+    d)
+    Código na SIGTAP:
+    Numerador
+    ·
+    03.07.01.007-4
+    –
+    
+    Tratamento restaurador
+    atraumático
+    
+    (TRA/ART).
+[L239] Código na SIGTAP:
+    Numerador
+    ·
+    03.07.01.007-4
+    –
+    
+    Tratamento restaurador
+    atraumático
+    
+    (TRA/ART).
+    Denominador
+    ·
+    03.07.0
+    1.003-1
+    –
+[L333] Parâmetro
+    Ótimo: > 8
+    Bom: > 6 e ≤ 8
+    Suficiente: > 3 e ≤ 6
+    Regular: ≤ 3
+    31
+    Classificação
+    gerencial
+    Indicador de resultado.
+    N
+    Título
+    Descrição
+    Nota Metodológica B6 (0054640781)         SEI 25000.053348/2026-78 / pg. 3
+    32
+    Classificação de
+[L345] Nota Metodológica B6 (0054640781)         SEI 25000.053348/2026-78 / pg. 3
+    32
+    Classificação de
+    desempenho
+    Indicador de eficiência.
+    Limitações
+    33
+    Limitações
+    · Considerando que há necessidade de registro qualificado da
+    informação em campo específico, é possível que os resultados sejam
+    limitados por dificuldades de registro.
+    · Envio tardio da informação.
+    Responsabilidades
+    34
+    Gerencial
+[L389] Denominador:
+    número total de procedimentos restauradores realizados pela eSB.
+    4
+    .
+    2
+    .
+    Para garantir que todos os municípios possam fazer o monitoramento da sua situação
+    em relação a esses indicadores, acompanhar o progresso e fazer um cálculo preliminar dos seus
+    resultados, serão considerados os modelos de informação publicados previamente pela
+    Secretaria de Atenção Primária à Saúde, do Ministério da Saúde, no âmbito do e-SUS APS, através
+    do sítio eletrônico: https://sisaps.saude.gov.br/sistemas/sisab/docs/modelos/intro/ .
+    4
+    .
+    3
+    .
+[L404] Numerador:
+    número total de procedimentos
+    “Tratamento R
+    estaurador
+    A
+    traumático
+    ”
+    realizados pela eSB. O Tratamento Restaurador Atraumático (ART) é uma técnica de odontologia
+    minimamente invasiva que utiliza instrumentos manuais para remover cáries e restaura o dente
+    com materiais adesivos biocompatíveis. Será considerado o código do Sistema de Gerenciamento
+    da Tabela de Procedimentos (SIGTAP).
+    4
+    .
+    4
+    .
+[L414] da Tabela de Procedimentos (SIGTAP).
+    4
+    .
+    4
+    .
+    Detalhamento da regra:
+    deve-se considerar os critérios como classiﬁcação
+    brasileira de ocupações - CBO, SIGTAP e modelos de informação a serem considerados no
+    processo de extração dos dados (Quadro 1).
+    
+    Quadro 01. Informações para a composição do indicador.
+    Condicionante
+    Código/Campo
+    Descrição
+    
+[L421] brasileira de ocupações - CBO, SIGTAP e modelos de informação a serem considerados no
+    processo de extração dos dados (Quadro 1).
+    
+    Quadro 01. Informações para a composição do indicador.
+    Condicionante
+    Código/Campo
+    Descrição
+    
+    
+    
+    
+    
+    CBO
+    
+    
+[L422] processo de extração dos dados (Quadro 1).
+    
+    Quadro 01. Informações para a composição do indicador.
+    Condicionante
+    Código/Campo
+    Descrição
+    
+    
+    
+    
+    
+    CBO
+    
+    
+    
+[L424] Quadro 01. Informações para a composição do indicador.
+    Condicionante
+    Código/Campo
+    Descrição
+    
+    
+    
+    
+    
+    CBO
+    
+    
+    
+    
+    
+[L433] CBO
+    
+    
+    
+    
+    
+    2232-08
+    Cirurgião-Dentista Clínico Geral
+    2232-93
+    Cirurgião-Dentista da Estratégia Saúde da Família
+    2232-72
+    Cirurgião-Dentista de Saúde Coletiva
+    
+    
+    
+[L463] Nota Metodológica B6 (0054640781)         SEI 25000.053348/2026-78 / pg. 4
+    SIGTAP
+    
+    
+    
+    
+    03.07.01.010-4
+    Restauração de dente decíduo posterior com
+    
+    ionômero de vidro
+    03.07.01.011-2
+    Restauração de dente decíduo anterior com resina
+    composta
+    03.07.01.012-0
+    Restauração de dente permanente posterior com
+[L464] SIGTAP
+    
+    
+    
+    
+    03.07.01.010-4
+    Restauração de dente decíduo posterior com
+    
+    ionômero de vidro
+    03.07.01.011-2
+    Restauração de dente decíduo anterior com resina
+    composta
+    03.07.01.012-0
+    Restauração de dente permanente posterior com
+    
+[L492] Legenda: CBO - Classiﬁcação Brasileira de Ocupações; SIGTAP -
+    Sistema de Gerenciamento
+    da Tabela de Procedimentos.
+    
+    5
+    .
+    REFERÊNCIAS
+    BRASIL. Ministério da Saúde. Secretaria de Atenção à Saúde. Departamento de Atenção Básica.
+    Saúde Bucal – Cadernos de Atenção Básica nº 17. Brasília: Ministério da Saúde, 2008. 92 p.
+    BRASIL. Ministério da Saúde. Portaria nº 2.436, de 21 de setembro de 2017. Aprova a Política
+    Nacional de Atenção Básica, estabelecendo a revisão de diretrizes para a organização da Atenção
+    Básica, no âmbito do Sistema Único de Saúde (SUS). Brasília: Ministério da Saúde, 2017.
+    BRASIL. Ministério da Saúde. A saúde bucal no Sistema Único de Saúde. Brasília: Ministério da
+    Saúde, 2018. 350 p.
+    BRASIL. Ministério da Saúde. Portaria nº 14.572, de 8 de maio de 2023. Institui a Política Nacional
+[L527] m excluídos do denominador os SIGTAP 03.07.01.009-0 – Restauração de dente decíduo posterior com amálgama e 03.07.01.013-9 –
+    Restauração de dente permanente posterior com amálgama.
+    2.
+    Na Seção 3.25
+    , houve alteração na terminologia de 'equipe' para 'INE'.
+    Documento assinado eletronicamente por
+    Audrey Fischer
+    ,
+    Diretor(a) do Departamento de
+    Estratégias, Acreditação e Componentes da Atenção Primária à Saúde
+    , em 12/05/2026,
+    às 13:34, conforme horário oficial de Brasília, com fundamento no § 3º, do art. 4º, do
+    Decreto nº
+    10.543, de 13 de novembro de 2020
+    ; e art. 8º, da
+[L578] Nota Metodológica B6 (0054640781)         SEI 25000.053348/2026-78 / pg. 5
+    A autenticidade deste documento pode ser conferida no site
+    http://sei.saude.gov.br/sei/controlador_externo.php?
+    acao=documento_conferir&id_orgao_acesso_externo=0
+    , informando o código verificador
+    0054640781
+    e o código CRC
+    82E9CAC7
+    .
+    Referência:
+    Processo nº 25000.053348/2026-78
+    SEI nº 0054640781
+    
+    Departamento de Saúde da Família
+    - DESF
+[L596] Nota Metodológica B6 (0054640781)         SEI 25000.053348/2026-78 / pg. 6

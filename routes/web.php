@@ -36,6 +36,13 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/{indicator}', IndicatorDetail::class)->name('indicator');
     });
 
+    Route::prefix('saude-bucal')->name('oral-health.')->group(function (): void {
+        Route::get('/', \App\Livewire\OralHealth\Overview::class)->name('overview');
+        Route::get('/{indicator}', \App\Livewire\OralHealth\IndicatorDetail::class)
+            ->whereIn('indicator', ['b1', 'b2', 'b3', 'b4', 'b5', 'b6'])
+            ->name('indicator');
+    });
+
     Route::prefix('configuracoes')->name('settings.')->group(function (): void {
         Route::get('/usuarios', UsersManager::class)->name('users');
         Route::get('/municipio', MunicipalitySettings::class)->name('municipality');

@@ -63,35 +63,38 @@ if [ "$SYNC_DATA" = true ]; then
     echo "==> [10/18] Consolidando dados reais do Indicador C5 (Pessoas com Hipertensão)..."
     $PHP_BIN -d memory_limit=1024M artisan esus:process-data --scope=c5 || echo "AVISO: Falha na consolidação do C5. Continuando deploy..."
 
-    echo "==> [11/18] Consolidando dados reais do Indicador C6 (Cuidado da Pessoa Idosa)..."
+    echo "==> [11/19] Consolidando dados reais do Indicador C6 (Cuidado da Pessoa Idosa)..."
     $PHP_BIN -d memory_limit=1024M artisan esus:process-data --scope=c6 || echo "AVISO: Falha na consolidação do C6. Continuando deploy..."
 
-    echo "==> [12/18] Consolidando dados reais do Indicador C7 (Cuidado da Mulher na Prevenção do Câncer)..."
+    echo "==> [12/19] Consolidando dados reais do Indicador C7 (Cuidado da Mulher na Prevenção do Câncer)..."
     $PHP_BIN -d memory_limit=1024M artisan esus:process-data --scope=c7 || echo "AVISO: Falha na consolidação do C7. Continuando deploy..."
+
+    echo "==> [13/19] Consolidando dados reais de Saúde Bucal (Indicadores B1 a B6 - eSB)..."
+    $PHP_BIN -d memory_limit=1024M artisan esus:process-oral-health || echo "AVISO: Falha na consolidação de Saúde Bucal. Continuando deploy..."
 else
-    echo "==> [5-12/18] Sincronização de dados do PEC ignorada (--quick / --no-sync ativo)."
+    echo "==> [5-13/19] Sincronização de dados do PEC ignorada (--quick / --no-sync ativo)."
 fi
 
-echo "==> [13/18] Publicando assets do Livewire..."
+echo "==> [14/19] Publicando assets do Livewire..."
 $PHP_BIN artisan livewire:publish --assets
 
-echo "==> [14/18] Limpando caches da aplicação..."
+echo "==> [15/19] Limpando caches da aplicação..."
 $PHP_BIN artisan optimize:clear
 
-echo "==> [15/18] Otimizando cache de configuração..."
+echo "==> [16/19] Otimizando cache de configuração..."
 $PHP_BIN artisan config:cache
 
-echo "==> [16/18] Reiniciando workers da fila com a versão nova..."
+echo "==> [17/19] Reiniciando workers da fila com a versão nova..."
 $PHP_BIN artisan queue:restart || true
 if command -v systemctl &> /dev/null && ! systemctl is-active --quiet monitorafacil-queue.service; then
     echo "ATENÇÃO: monitorafacil-queue.service não está ativo. O botão CVAT agenda jobs, mas eles precisam de um worker para executar." >&2
     echo "Veja scripts/monitorafacil-queue.service.example e as instruções no README.md." >&2
 fi
 
-echo "==> [17/18] Otimizando cache de rotas..."
+echo "==> [18/19] Otimizando cache de rotas..."
 $PHP_BIN artisan route:cache
 
-echo "==> [18/18] Otimizando cache de views..."
+echo "==> [19/19] Otimizando cache de views..."
 $PHP_BIN artisan view:cache
 
 echo "=============================================================================="

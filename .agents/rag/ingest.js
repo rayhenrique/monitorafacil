@@ -57,6 +57,24 @@ function getPdfMetadata(filename) {
     if (fn.includes("c7")) {
         return { indicador: "C7", tema: "citopatologico_cancer", defaultTitulo: "Nota Metodológica C7 - Prevenção de Câncer" };
     }
+    if (fn.includes("b1")) {
+        return { indicador: "B1", tema: "saude_bucal_primeira_consulta", defaultTitulo: "Nota Metodológica B1 - Primeira Consulta Odontológica Programada" };
+    }
+    if (fn.includes("b2")) {
+        return { indicador: "B2", tema: "saude_bucal_tratamento_concluido", defaultTitulo: "Nota Metodológica B2 - Tratamento Odontológico Concluído" };
+    }
+    if (fn.includes("b3")) {
+        return { indicador: "B3", tema: "saude_bucal_taxa_exodontia", defaultTitulo: "Nota Metodológica B3 - Taxa de Exodontia de Dentes Permanentes" };
+    }
+    if (fn.includes("b4")) {
+        return { indicador: "B4", tema: "saude_bucal_escovacao_supervisionada", defaultTitulo: "Nota Metodológica B4 - Ação Coletiva de Escovação Dental Supervisionada" };
+    }
+    if (fn.includes("b5")) {
+        return { indicador: "B5", tema: "saude_bucal_procedimentos_preventivos", defaultTitulo: "Nota Metodológica B5 - Procedimentos Odontológicos Preventivos" };
+    }
+    if (fn.includes("b6")) {
+        return { indicador: "B6", tema: "saude_bucal_restauracao_art", defaultTitulo: "Nota Metodológica B6 - Tratamento Restaurador Atraumático (ART)" };
+    }
     if (fn.includes("cvat") || fn.includes("nt_06")) {
         return { indicador: "CVAT", tema: "avaliacao_territorial_qualidade", defaultTitulo: "Nota Técnica 8/2026 - Avaliação Quadrimestral e CVAT" };
     }

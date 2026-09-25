@@ -320,6 +320,9 @@ php artisan esus:process-data --scope=all
 php artisan esus:process-data --scope=c2 --year=2026 --quarter=3
 php artisan esus:process-data --scope=c4 --year=2026 --quarter=3
 php artisan esus:process-data --scope=cvat --year=2026 --month=12
+
+# Processamento de Saúde Bucal (Indicadores B1 a B6 - Equipes eSB):
+php artisan esus:process-oral-health --year=2026 --quarter=3
 ```
 
 ### Ingestão da Base de Conhecimento RAG Local
