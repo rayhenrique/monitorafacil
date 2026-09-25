@@ -779,188 +779,206 @@
             </div>
 
             <!-- Navegação de Sub-Abas do C7 -->
-            <div class="border-b border-slate-200">
-                <nav class="flex space-x-4 sm:space-x-8 -mb-px overflow-x-auto" aria-label="Sub-abas C7">
-                    <button
-                        type="button"
-                        wire:click="switchC7SubTab('monthly_summary')"
-                        class="py-3 px-1 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition cursor-pointer {{ $c7SubTab === 'monthly_summary' ? 'border-teal-600 text-teal-700' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' }}"
-                    >
-                        Resumo Mensal por Equipe
-                    </button>
-                    <button
-                        type="button"
-                        wire:click="switchC7SubTab('nominal')"
-                        class="py-3 px-1 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition cursor-pointer {{ $c7SubTab === 'nominal' ? 'border-teal-600 text-teal-700' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' }}"
-                    >
-                        Busca Ativa Nominal
-                    </button>
-                </nav>
+            <div class="flex items-center gap-1 border-b border-[#dce6e2] pt-2">
+                <button
+                    type="button"
+                    wire:click="switchC7SubTab('monthly_summary')"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c7SubTab === 'monthly_summary' ? 'bg-teal-50 text-teal-800 border-teal-600 font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                >
+                    Resumo Mensal por Equipe
+                </button>
+                <button
+                    type="button"
+                    wire:click="switchC7SubTab('nominal')"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c7SubTab === 'nominal' ? 'bg-teal-50 text-teal-800 border-teal-600 font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                >
+                    Busca Ativa Nominal
+                </button>
             </div>
 
             <!-- CONTEÚDO DA SUB-ABA 1: RESUMO MENSAL POR EQUIPE -->
             @if ($c7SubTab === 'monthly_summary')
                 <div class="space-y-6 pt-1">
-                    <!-- Cards de Desempenho e Coorte do C7 -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <!-- Card 1: Score & Classificação -->
-                        <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pontuação C7</span>
-                                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold border {{ $badgeStyles }}">
-                                    {{ $levelLabel }}
-                                </span>
+                    <!-- Card 1: Cuidado da Mulher na Prevenção do Câncer & Período -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Cuidado da Mulher na Prevenção do Câncer</h2>
+                                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Mulheres e homens trans elegíveis na prevenção do câncer de colo e mama, vacina HPV e saúde sexual</p>
                             </div>
-                            <div class="mt-3 flex items-baseline gap-2">
-                                <span class="text-3xl font-extrabold text-slate-800">
-                                    {{ $hasC7Result ? number_format($score, 2, ',', '.') : '—' }}
+                            <div class="sm:text-right">
+                                <span class="text-xs text-slate-500 block">Competência</span>
+                                <span class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">
+                                    {{ $c7SummaryKpis['period_label'] ?? ($year . ' / Q' . $quarter) }}
                                 </span>
-                                <span class="text-xs text-slate-500 font-medium">/ 100 pts</span>
-                            </div>
-                            <div class="mt-2 flex items-center gap-1.5 text-xs text-teal-700 font-medium">
-                                <span class="inline-block w-2 h-2 rounded-full bg-teal-500"></span>
-                                <span>Peso 2.0x (até 2,00 pts no Componente III)</span>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Card 2: Coorte Total de Mulheres e Homens Trans -->
-                        <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Coorte Elegível</span>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
-                                    9 a 69 anos
-                                </span>
+                    <!-- Card 2: Distribuição das Equipes por Classificação -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs" x-data="{ openDist: true }">
+                        <div class="flex items-center justify-between border-b border-slate-150 pb-4">
+                            <div>
+                                <h3 class="text-base sm:text-lg font-bold text-[#004e82]">Distribuição das Equipes por Classificação</h3>
+                                <p class="text-xs text-slate-500 mt-0.5">Total de equipes avaliadas: {{ $c7Distribution['total'] }}</p>
                             </div>
-                            <div class="mt-3 flex items-baseline gap-2">
-                                <span class="text-3xl font-extrabold text-slate-800">
-                                    {{ number_format($current['cohort_total'] ?? $c7Distribution['total'], 0, '', '.') }}
-                                </span>
-                                <span class="text-xs text-slate-500 font-medium">mulheres/trans</span>
-                            </div>
-                            <p class="mt-2 text-xs text-slate-500">Vinculadas às equipes eSF/eAP homologadas</p>
+                            <button
+                                type="button"
+                                @click="openDist = !openDist"
+                                class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                                title="Expandir / Recolher"
+                            >
+                                <svg class="w-5 h-5 transition-transform" :class="openDist ? '' : 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                                </svg>
+                            </button>
                         </div>
 
-                        <!-- Card 3: Distribuição por Nível de Desempenho -->
-                        <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs col-span-1 sm:col-span-2">
-                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Distribuição das Equipes ({{ $c7Distribution['total'] }})</span>
-                            <div class="mt-3 grid grid-cols-4 gap-2">
-                                <div class="rounded-xl bg-emerald-50 border border-emerald-200/70 p-2.5 text-center">
-                                    <span class="block text-xs font-semibold text-emerald-700">Ótimo (>75)</span>
-                                    <span class="text-lg font-bold text-emerald-800">{{ $c7Distribution['otimo']['count'] }}</span>
-                                    <span class="block text-[10px] text-emerald-600">{{ $c7Distribution['otimo']['percent'] }}%</span>
+                        <div x-show="openDist" x-collapse class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
+                            <!-- Regular -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Regular</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#ef4444]"></span>
                                 </div>
-                                <div class="rounded-xl bg-sky-50 border border-sky-200/70 p-2.5 text-center">
-                                    <span class="block text-xs font-semibold text-sky-700">Bom (>50)</span>
-                                    <span class="text-lg font-bold text-sky-800">{{ $c7Distribution['bom']['count'] }}</span>
-                                    <span class="block text-[10px] text-sky-600">{{ $c7Distribution['bom']['percent'] }}%</span>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c7Distribution['regular']['count'] }}
                                 </div>
-                                <div class="rounded-xl bg-amber-50 border border-amber-200/70 p-2.5 text-center">
-                                    <span class="block text-xs font-semibold text-amber-700">Suficiente (>25)</span>
-                                    <span class="text-lg font-bold text-amber-800">{{ $c7Distribution['suficiente']['count'] }}</span>
-                                    <span class="block text-[10px] text-amber-600">{{ $c7Distribution['suficiente']['percent'] }}%</span>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c7Distribution['regular']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#ef4444] h-1.5 rounded-full transition-all" style="width: {{ $c7Distribution['regular']['percent'] }}%"></div>
                                 </div>
-                                <div class="rounded-xl bg-rose-50 border border-rose-200/70 p-2.5 text-center">
-                                    <span class="block text-xs font-semibold text-rose-700">Regular (≤25)</span>
-                                    <span class="text-lg font-bold text-rose-800">{{ $c7Distribution['regular']['count'] }}</span>
-                                    <span class="block text-[10px] text-rose-600">{{ $c7Distribution['regular']['percent'] }}%</span>
+                            </div>
+
+                            <!-- Suficiente -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Suficiente</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#f59e0b]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c7Distribution['suficiente']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c7Distribution['suficiente']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#f59e0b] h-1.5 rounded-full transition-all" style="width: {{ $c7Distribution['suficiente']['percent'] }}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Bom -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Bom</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#10b981]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c7Distribution['bom']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c7Distribution['bom']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#10b981] h-1.5 rounded-full transition-all" style="width: {{ $c7Distribution['bom']['percent'] }}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Ótimo -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Ótimo</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-600"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c7Distribution['otimo']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c7Distribution['otimo']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-emerald-600 h-1.5 rounded-full transition-all" style="width: {{ $c7Distribution['otimo']['percent'] }}%"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Tabela de Desempenho por Equipe -->
-                    <div class="rounded-2xl border border-slate-200/80 bg-white shadow-2xs overflow-hidden">
-                        <div class="p-5 border-b border-slate-150 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <!-- Card 3: Lista de Equipes por Classificação -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs" x-data="{ openList: true }">
+                        <div class="flex items-center justify-between border-b border-slate-150 pb-4">
                             <div>
-                                <h3 class="text-base font-bold text-slate-800">
-                                    Consolidação por Equipe · Indicador C7
-                                </h3>
-                                <p class="text-xs text-slate-500 mt-0.5">
-                                    Avaliação das 4 boas práticas normativas (A–D) e pontuação total (máximo 100 pontos)
-                                </p>
+                                <h3 class="text-base sm:text-lg font-bold text-[#004e82]">Lista de Equipes por Classificação</h3>
+                                <p class="text-xs text-slate-500 mt-0.5">Pontuação média e classificação oficial do quadrimestre para cada equipe</p>
                             </div>
-                            <span class="text-xs text-slate-500 bg-slate-50 border border-slate-200 px-3 py-1 rounded-lg">
-                                {{ $c7TeamRows->count() }} equipes avaliadas
-                            </span>
+                            <button
+                                type="button"
+                                @click="openList = !openList"
+                                class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                                title="Expandir / Recolher"
+                            >
+                                <svg class="w-5 h-5 transition-transform" :class="openList ? '' : 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                                </svg>
+                            </button>
                         </div>
 
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-xs text-slate-600">
-                                <thead class="bg-slate-50/75 border-b border-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-                                    <tr>
-                                        <th class="px-4 py-3">Equipe / Unidade</th>
-                                        <th class="px-3 py-3 text-center">Coorte</th>
-                                        <th class="px-3 py-3 text-center" title="Rastreamento Câncer Colo de Útero (25-64 anos)">Prática A [20 pts]</th>
-                                        <th class="px-3 py-3 text-center" title="Vacina HPV (9-14 anos)">Prática B [30 pts]</th>
-                                        <th class="px-3 py-3 text-center" title="Saúde Sexual e Reprodutiva (14-69 anos)">Prática C [30 pts]</th>
-                                        <th class="px-3 py-3 text-center" title="Rastreamento Câncer de Mama (50-69 anos)">Prática D [20 pts]</th>
-                                        <th class="px-3 py-3 text-center">Nota C7</th>
-                                        <th class="px-3 py-3 text-center">Conceito</th>
-                                        <th class="px-4 py-3 text-right">Ação</th>
+                        <div x-show="openList" x-collapse class="overflow-x-auto mt-4">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-200/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50/50">
+                                        <th class="py-3 px-4 text-left">Unidade - Equipe</th>
+                                        <th class="py-3 px-4 text-center">Numerador (Pontos)</th>
+                                        <th class="py-3 px-4 text-center">Total de Mulheres / Trans (Denominador)</th>
+                                        <th class="py-3 px-4 text-center">Pontuação</th>
+                                        <th class="py-3 px-4 text-center">Classificação</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-150">
                                     @forelse ($c7TeamRows as $row)
-                                        @php
-                                            $rowLevel = $row['performance_level'];
-                                            $rowBadge = match ($rowLevel) {
-                                                'otimo' => 'bg-emerald-100 text-emerald-800 border-emerald-300',
-                                                'bom' => 'bg-sky-100 text-sky-800 border-sky-300',
-                                                'suficiente' => 'bg-amber-100 text-amber-800 border-amber-300',
-                                                default => 'bg-rose-100 text-rose-800 border-rose-300',
-                                            };
-                                        @endphp
                                         <tr class="hover:bg-slate-50/80 transition">
-                                            <td class="px-4 py-3">
-                                                <div class="font-bold text-slate-800">{{ $row['team_name'] }}</div>
-                                                <div class="text-[11px] text-slate-400 mt-0.5">INE: {{ $row['ine'] }} · CNES: {{ $row['cnes'] }}</div>
+                                            <td class="py-3.5 px-4">
+                                                <div class="font-semibold text-slate-800 text-xs">
+                                                    {{ $row['cnes'] }} - {{ $row['facility_name'] }}
+                                                </div>
+                                                <div class="text-[11px] text-slate-500 font-mono mt-0.5">
+                                                    {{ $row['ine'] }} - {{ $row['team_name'] }}
+                                                </div>
                                             </td>
-                                            <td class="px-3 py-3 text-center font-semibold text-slate-700">
-                                                {{ number_format($row['cohort_total'], 0, '', '.') }}
+                                            <td class="py-3.5 px-4 text-center font-medium text-slate-700 font-mono">
+                                                {{ number_format($row['numerator'] ?? ($row['practice_a_compliant'] + $row['practice_b_compliant'] + $row['practice_c_compliant'] + $row['practice_d_compliant']), 0, '', '.') }}
                                             </td>
-                                            <td class="px-3 py-3 text-center">
-                                                <div class="font-bold text-slate-800">{{ number_format($row['practice_a_score'], 1, ',', '.') }}</div>
-                                                <div class="text-[10px] text-slate-400">({{ $row['practice_a_compliant'] }}/{{ $row['practice_a_eligible'] }})</div>
+                                            <td class="py-3.5 px-4 text-center font-medium text-slate-700 font-mono">
+                                                {{ number_format($row['denominator'] ?? $row['cohort_total'], 0, '', '.') }}
                                             </td>
-                                            <td class="px-3 py-3 text-center">
-                                                <div class="font-bold text-slate-800">{{ number_format($row['practice_b_score'], 1, ',', '.') }}</div>
-                                                <div class="text-[10px] text-slate-400">({{ $row['practice_b_compliant'] }}/{{ $row['practice_b_eligible'] }})</div>
+                                            <td class="py-3.5 px-4 text-center font-bold text-slate-800 font-mono">
+                                                {{ number_format($row['score_percent'], 2, ',', '.') }}%
                                             </td>
-                                            <td class="px-3 py-3 text-center">
-                                                <div class="font-bold text-slate-800">{{ number_format($row['practice_c_score'], 1, ',', '.') }}</div>
-                                                <div class="text-[10px] text-slate-400">({{ $row['practice_c_compliant'] }}/{{ $row['practice_c_eligible'] }})</div>
-                                            </td>
-                                            <td class="px-3 py-3 text-center">
-                                                <div class="font-bold text-slate-800">{{ number_format($row['practice_d_score'], 1, ',', '.') }}</div>
-                                                <div class="text-[10px] text-slate-400">({{ $row['practice_d_compliant'] }}/{{ $row['practice_d_eligible'] }})</div>
-                                            </td>
-                                            <td class="px-3 py-3 text-center">
-                                                <span class="text-sm font-extrabold text-slate-900">
-                                                    {{ number_format($row['score_percent'], 2, ',', '.') }}
-                                                </span>
-                                            </td>
-                                            <td class="px-3 py-3 text-center">
-                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase {{ $rowBadge }}">
-                                                    {{ $rowLevel }}
-                                                </span>
-                                            </td>
-                                            <td class="px-4 py-3 text-right">
-                                                <button
-                                                    type="button"
-                                                    wire:click="selectTeam('{{ $row['ine'] }}'); switchC7SubTab('nominal')"
-                                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-200 hover:bg-teal-100 transition cursor-pointer"
-                                                >
-                                                    <span>Busca Ativa</span>
-                                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                                                    </svg>
-                                                </button>
+                                            <td class="py-3.5 px-4 text-center">
+                                                @if ($row['performance_level'] === 'otimo')
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#e0f2fe] text-[#0369a1]">
+                                                        Ótimo
+                                                    </span>
+                                                @elseif ($row['performance_level'] === 'bom')
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#dcfce7] text-[#15803d]">
+                                                        Bom
+                                                    </span>
+                                                @elseif ($row['performance_level'] === 'suficiente')
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#fef3c7] text-[#b45309]">
+                                                        Suficiente
+                                                    </span>
+                                                @else
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#fee2e2] text-[#b91c1c]">
+                                                        Regular
+                                                    </span>
+                                                @endif
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="9" class="px-4 py-8 text-center text-slate-400">
-                                                Nenhuma equipe com dados de prevenção do câncer encontrados para o período selecionado.
+                                            <td colspan="5" class="py-8 text-center text-slate-400">
+                                                Nenhuma equipe encontrada para o período selecionado.
                                             </td>
                                         </tr>
                                     @endforelse
@@ -974,91 +992,103 @@
                 <!-- ABA: LISTA NOMINAL E COORTE DE MULHERES / HOMENS TRANS (BUSCA ATIVA)        -->
                 <!-- ========================================================================= -->
                 <div class="space-y-6 pt-1">
-                    <!-- Cards de Boas Práticas (KPIs) -->
+                    <!-- BANNER SUPERIOR: DADOS GERAIS (SÍNTESE DAS 4 BOAS PRÁTICAS) -->
                     @if ($c7SummaryKpis)
                         <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs">
-                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-150 pb-4 mb-4">
-                                <div>
-                                    <h3 class="text-base sm:text-lg font-bold text-[#004e82]">
-                                        As 4 Boas Práticas Oficiais do Cuidado da Mulher na Prevenção do Câncer
-                                    </h3>
-                                    <p class="text-xs text-slate-500 mt-0.5">
-                                        {{ $c7SummaryKpis['period_label'] }} · {{ $c7SummaryKpis['period_sublabel'] }}
-                                    </p>
-                                </div>
-                                <div class="text-xs text-slate-500 bg-purple-50 border border-purple-200 px-3 py-1.5 rounded-xl font-bold text-purple-800">
-                                    Nota Metodológica C7 · Peso 2.0 (até 2,00 pts)
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                                <!-- Prática A: Colo de Útero (20 pts) -->
-                                <div class="rounded-xl border border-slate-200/70 bg-slate-50/50 p-3.5">
-                                    <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1.5">
-                                        <span class="truncate">Prática A · Colo de Útero</span>
-                                        <span class="text-[10px] font-bold text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded">20 pts</span>
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                                <!-- Coluna Esquerda: Competência -->
+                                <div class="md:col-span-2 text-center md:border-r border-slate-200/80 pr-4 space-y-1">
+                                    <span class="text-xs font-medium text-slate-500 block">Competência</span>
+                                    <div class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">
+                                        {{ $c7SummaryKpis['period_label'] }}
                                     </div>
-                                    <div class="text-xl font-extrabold text-slate-800">
-                                        {{ number_format($c7SummaryKpis['practice_a']['count'], 0, '', '.') }}
-                                        <span class="text-xs font-medium text-slate-500">
-                                            ({{ number_format($c7SummaryKpis['practice_a']['percent'], 1, ',', '.') }}%)
-                                        </span>
-                                    </div>
-                                    <p class="text-[11px] text-slate-400 mt-1">25 a 64 anos (Cito 36m / Mol 60m)</p>
+                                    <span class="text-[11px] text-slate-400 block">
+                                        {{ $c7SummaryKpis['period_sublabel'] }}
+                                    </span>
                                 </div>
 
-                                <!-- Prática B: Vacina HPV (30 pts) -->
-                                <div class="rounded-xl border border-slate-200/70 bg-slate-50/50 p-3.5">
-                                    <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1.5">
-                                        <span class="truncate">Prática B · Vacina HPV</span>
-                                        <span class="text-[10px] font-bold text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded">30 pts</span>
+                                <!-- Coluna Central: As 4 Boas Práticas (A a D - NT 06/2025) -->
+                                <div class="md:col-span-8 space-y-4 px-2">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                        <!-- Prática A (20 pts) -->
+                                        <div class="space-y-1">
+                                            <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                                <span>Colo de Útero (A)</span>
+                                                <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Exame citopatológico (36m) ou teste molecular HPV (60m) em mulheres de 25 a 64 anos (20 pts)">i</span>
+                                            </div>
+                                            <div class="flex items-baseline gap-1.5">
+                                                <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                    {{ number_format($c7SummaryKpis['practice_a']['count'] ?? $c7SummaryKpis['practice_a']['compliant'] ?? 0, 0, '', '.') }}
+                                                </span>
+                                                <span class="text-xs font-semibold text-[#16a34a]">
+                                                    ({{ number_format($c7SummaryKpis['practice_a']['percent'], 1, ',', '.') }}%)
+                                                </span>
+                                            </div>
+                                            <p class="text-[10px] text-slate-400">25 a 64 anos (20 pts)</p>
+                                        </div>
+
+                                        <!-- Prática B (30 pts) -->
+                                        <div class="space-y-1 sm:border-l border-slate-200/80 sm:pl-4">
+                                            <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                                <span>Vacina HPV (B)</span>
+                                                <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Ao menos 1 dose da vacina HPV na vida em meninas e meninos de 9 a 14 anos (30 pts)">i</span>
+                                            </div>
+                                            <div class="flex items-baseline gap-1.5">
+                                                <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                    {{ number_format($c7SummaryKpis['practice_b']['count'] ?? $c7SummaryKpis['practice_b']['compliant'] ?? 0, 0, '', '.') }}
+                                                </span>
+                                                <span class="text-xs font-semibold text-[#16a34a]">
+                                                    ({{ number_format($c7SummaryKpis['practice_b']['percent'], 1, ',', '.') }}%)
+                                                </span>
+                                            </div>
+                                            <p class="text-[10px] text-slate-400">9 a 14 anos (30 pts)</p>
+                                        </div>
+
+                                        <!-- Prática C (30 pts) -->
+                                        <div class="space-y-1 lg:border-l border-slate-200/80 lg:pl-4">
+                                            <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                                <span>Saúde Sexual (C)</span>
+                                                <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Ao menos 1 atendimento de saúde sexual e reprodutiva nos últimos 12 meses (30 pts)">i</span>
+                                            </div>
+                                            <div class="flex items-baseline gap-1.5">
+                                                <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                    {{ number_format($c7SummaryKpis['practice_c']['count'] ?? $c7SummaryKpis['practice_c']['compliant'] ?? 0, 0, '', '.') }}
+                                                </span>
+                                                <span class="text-xs font-semibold text-[#16a34a]">
+                                                    ({{ number_format($c7SummaryKpis['practice_c']['percent'], 1, ',', '.') }}%)
+                                                </span>
+                                            </div>
+                                            <p class="text-[10px] text-slate-400">14 a 69 anos (30 pts)</p>
+                                        </div>
+
+                                        <!-- Prática D (20 pts) -->
+                                        <div class="space-y-1 sm:border-l border-slate-200/80 sm:pl-4">
+                                            <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                                <span>Mama (D)</span>
+                                                <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Mamografia de rastreamento bilateral nos últimos 24 meses em mulheres de 50 a 69 anos (20 pts)">i</span>
+                                            </div>
+                                            <div class="flex items-baseline gap-1.5">
+                                                <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                    {{ number_format($c7SummaryKpis['practice_d']['count'] ?? $c7SummaryKpis['practice_d']['compliant'] ?? 0, 0, '', '.') }}
+                                                </span>
+                                                <span class="text-xs font-semibold text-[#16a34a]">
+                                                    ({{ number_format($c7SummaryKpis['practice_d']['percent'], 1, ',', '.') }}%)
+                                                </span>
+                                            </div>
+                                            <p class="text-[10px] text-slate-400">50 a 69 anos (20 pts)</p>
+                                        </div>
                                     </div>
-                                    <div class="text-xl font-extrabold text-slate-800">
-                                        {{ number_format($c7SummaryKpis['practice_b']['count'], 0, '', '.') }}
-                                        <span class="text-xs font-medium text-slate-500">
-                                            ({{ number_format($c7SummaryKpis['practice_b']['percent'], 1, ',', '.') }}%)
-                                        </span>
-                                    </div>
-                                    <p class="text-[11px] text-slate-400 mt-1">9 a 14 anos (≥1 dose na vida)</p>
                                 </div>
 
-                                <!-- Prática C: Saúde Sexual e Reprodutiva (30 pts) -->
-                                <div class="rounded-xl border border-slate-200/70 bg-slate-50/50 p-3.5">
-                                    <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1.5">
-                                        <span class="truncate">Prática C · Saúde Sexual</span>
-                                        <span class="text-[10px] font-bold text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded">30 pts</span>
+                                <!-- Coluna Direita: Denominador -->
+                                <div class="md:col-span-2 text-center md:border-l border-slate-200/80 pl-4 space-y-1">
+                                    <div class="flex items-center justify-center gap-1 text-xs font-medium text-slate-500">
+                                        <span>Denominador</span>
+                                        <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Total de mulheres e homens trans vinculados na coorte elegível (9 a 69 anos)">i</span>
                                     </div>
-                                    <div class="text-xl font-extrabold text-slate-800">
-                                        {{ number_format($c7SummaryKpis['practice_c']['count'], 0, '', '.') }}
-                                        <span class="text-xs font-medium text-slate-500">
-                                            ({{ number_format($c7SummaryKpis['practice_c']['percent'], 1, ',', '.') }}%)
-                                        </span>
+                                    <div class="text-3xl sm:text-4xl font-black text-slate-800 tracking-tight tabular-nums">
+                                        {{ number_format($c7SummaryKpis['total_women'] ?? $c7SummaryKpis['denominator'] ?? 0, 0, '', '.') }}
                                     </div>
-                                    <p class="text-[11px] text-slate-400 mt-1">14 a 69 anos (últimos 12 meses)</p>
-                                </div>
-
-                                <!-- Prática D: Mama (20 pts) -->
-                                <div class="rounded-xl border border-slate-200/70 bg-slate-50/50 p-3.5">
-                                    <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1.5">
-                                        <span class="truncate">Prática D · Mama</span>
-                                        <span class="text-[10px] font-bold text-pink-700 bg-pink-50 px-1.5 py-0.5 rounded">20 pts</span>
-                                    </div>
-                                    <div class="text-xl font-extrabold text-slate-800">
-                                        {{ number_format($c7SummaryKpis['practice_d']['count'], 0, '', '.') }}
-                                        <span class="text-xs font-medium text-slate-500">
-                                            ({{ number_format($c7SummaryKpis['practice_d']['percent'], 1, ',', '.') }}%)
-                                        </span>
-                                    </div>
-                                    <p class="text-[11px] text-slate-400 mt-1">50 a 69 anos (Mamografia 24m)</p>
-                                </div>
-
-                                <!-- Total da Coorte -->
-                                <div class="rounded-xl border border-slate-200/70 bg-slate-50/50 p-3.5">
-                                    <div class="text-xs font-semibold text-slate-600 mb-1.5">Total Coorte</div>
-                                    <div class="text-xl font-extrabold text-slate-800">
-                                        {{ number_format($c7SummaryKpis['denominator'], 0, '', '.') }}
-                                    </div>
-                                    <p class="text-[11px] text-slate-400 mt-1">Mulheres/Trans vinculadas</p>
                                 </div>
                             </div>
                         </div>
@@ -7781,149 +7811,156 @@
                                 class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
                                 title="Expandir / Recolher"
                             >
-                                <svg class="w-5 h-5 transform transition-transform" :class="openDist ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                <svg class="w-5 h-5 transition-transform" :class="openDist ? '' : 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
                                 </svg>
                             </button>
                         </div>
 
-                        <div x-show="openDist" x-collapse class="pt-4">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                <!-- Regular -->
-                                <div class="rounded-xl border border-rose-200 bg-rose-50/40 p-4">
-                                    <div class="flex items-center justify-between text-xs font-semibold text-rose-800 mb-1">
-                                        <span>Regular (≤ 25%)</span>
-                                        <span class="font-mono text-sm font-bold text-rose-700">
-                                            {{ $c6Distribution['regular']['count'] }}
-                                        </span>
-                                    </div>
-                                    <p class="text-[11px] text-rose-600">
-                                        {{ number_format($c6Distribution['regular']['percent'], 1, ',', '.') }}% do total
-                                    </p>
-                                    <div class="w-full bg-rose-200/60 rounded-full h-1.5 mt-2 overflow-hidden">
-                                        <div class="bg-[#ef4444] h-1.5 rounded-full transition-all" style="width: {{ $c6Distribution['regular']['percent'] }}%"></div>
-                                    </div>
+                        <div x-show="openDist" x-collapse class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
+                            <!-- Regular -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Regular</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#ef4444]"></span>
                                 </div>
-
-                                <!-- Suficiente -->
-                                <div class="rounded-xl border border-amber-200 bg-amber-50/40 p-4">
-                                    <div class="flex items-center justify-between text-xs font-semibold text-amber-800 mb-1">
-                                        <span>Suficiente (25% a 50%)</span>
-                                        <span class="font-mono text-sm font-bold text-amber-700">
-                                            {{ $c6Distribution['suficiente']['count'] }}
-                                        </span>
-                                    </div>
-                                    <p class="text-[11px] text-amber-600">
-                                        {{ number_format($c6Distribution['suficiente']['percent'], 1, ',', '.') }}% do total
-                                    </p>
-                                    <div class="w-full bg-amber-200/60 rounded-full h-1.5 mt-2 overflow-hidden">
-                                        <div class="bg-[#f59e0b] h-1.5 rounded-full transition-all" style="width: {{ $c6Distribution['suficiente']['percent'] }}%"></div>
-                                    </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c6Distribution['regular']['count'] }}
                                 </div>
-
-                                <!-- Bom -->
-                                <div class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4">
-                                    <div class="flex items-center justify-between text-xs font-semibold text-emerald-800 mb-1">
-                                        <span>Bom (50% a 75%)</span>
-                                        <span class="font-mono text-sm font-bold text-emerald-700">
-                                            {{ $c6Distribution['bom']['count'] }}
-                                        </span>
-                                    </div>
-                                    <p class="text-[11px] text-emerald-600">
-                                        {{ number_format($c6Distribution['bom']['percent'], 1, ',', '.') }}% do total
-                                    </p>
-                                    <div class="w-full bg-emerald-200/60 rounded-full h-1.5 mt-2 overflow-hidden">
-                                        <div class="bg-[#10b981] h-1.5 rounded-full transition-all" style="width: {{ $c6Distribution['bom']['percent'] }}%"></div>
-                                    </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c6Distribution['regular']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#ef4444] h-1.5 rounded-full transition-all" style="width: {{ $c6Distribution['regular']['percent'] }}%"></div>
                                 </div>
+                            </div>
 
-                                <!-- Ótimo -->
-                                <div class="rounded-xl border border-sky-200 bg-sky-50/40 p-4">
-                                    <div class="flex items-center justify-between text-xs font-semibold text-sky-800 mb-1">
-                                        <span>Ótimo (> 75%)</span>
-                                        <span class="font-mono text-sm font-bold text-sky-700">
-                                            {{ $c6Distribution['otimo']['count'] }}
-                                        </span>
-                                    </div>
-                                    <p class="text-[11px] text-sky-600">
-                                        {{ number_format($c6Distribution['otimo']['percent'], 1, ',', '.') }}% do total
-                                    </p>
-                                    <div class="w-full bg-sky-200/60 rounded-full h-1.5 mt-2 overflow-hidden">
-                                        <div class="bg-emerald-600 h-1.5 rounded-full transition-all" style="width: {{ $c6Distribution['otimo']['percent'] }}%"></div>
-                                    </div>
+                            <!-- Suficiente -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Suficiente</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#f59e0b]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c6Distribution['suficiente']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c6Distribution['suficiente']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#f59e0b] h-1.5 rounded-full transition-all" style="width: {{ $c6Distribution['suficiente']['percent'] }}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Bom -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Bom</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#10b981]"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c6Distribution['bom']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c6Distribution['bom']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-[#10b981] h-1.5 rounded-full transition-all" style="width: {{ $c6Distribution['bom']['percent'] }}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Ótimo -->
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-600">Ótimo</span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-600"></span>
+                                </div>
+                                <div class="text-3xl font-black text-slate-800 mt-2">
+                                    {{ $c6Distribution['otimo']['count'] }}
+                                </div>
+                                <span class="text-xs text-slate-400 mt-0.5 block">
+                                    {{ number_format($c6Distribution['otimo']['percent'], 1, ',', '.') }}% do total
+                                </span>
+                                <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
+                                    <div class="bg-emerald-600 h-1.5 rounded-full transition-all" style="width: {{ $c6Distribution['otimo']['percent'] }}%"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Card 3: Lista de Equipes Avaliadas no C6 -->
-                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs">
-                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-150 pb-4 mb-4">
+                    <!-- Card 3: Lista de Equipes por Classificação -->
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs" x-data="{ openList: true }">
+                        <div class="flex items-center justify-between border-b border-slate-150 pb-4">
                             <div>
-                                <h3 class="text-base sm:text-lg font-bold text-[#004e82]">Desempenho por Equipe no C6</h3>
+                                <h3 class="text-base sm:text-lg font-bold text-[#004e82]">Lista de Equipes por Classificação</h3>
                                 <p class="text-xs text-slate-500 mt-0.5">Pontuação média e classificação oficial do quadrimestre para cada equipe</p>
                             </div>
+                            <button
+                                type="button"
+                                @click="openList = !openList"
+                                class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                                title="Expandir / Recolher"
+                            >
+                                <svg class="w-5 h-5 transition-transform" :class="openList ? '' : 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                                </svg>
+                            </button>
                         </div>
 
-                        <div class="overflow-x-auto rounded-xl border border-slate-200/80">
+                        <div x-show="openList" x-collapse class="overflow-x-auto mt-4">
                             <table class="w-full text-left text-xs border-collapse">
                                 <thead>
-                                    <tr class="bg-slate-50 text-[11px] font-bold text-slate-600 uppercase border-b border-slate-200">
-                                        <th class="py-3 px-3 text-center w-24">INE</th>
-                                        <th class="py-3 px-4">Equipe</th>
-                                        <th class="py-3 px-4">Unidade de Saúde / CNES</th>
-                                        <th class="py-3 px-3 text-center">Pontos (Num.)</th>
-                                        <th class="py-3 px-3 text-center">Idosos (Den.)</th>
-                                        <th class="py-3 px-4 text-center">Desempenho C6</th>
-                                        <th class="py-3 px-3 text-center">Classificação</th>
+                                    <tr class="border-b border-slate-200/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50/50">
+                                        <th class="py-3 px-4 text-left">Unidade - Equipe</th>
+                                        <th class="py-3 px-4 text-center">Numerador (Pontos)</th>
+                                        <th class="py-3 px-4 text-center">Total de Idosos (Denominador)</th>
+                                        <th class="py-3 px-4 text-center">Pontuação</th>
+                                        <th class="py-3 px-4 text-center">Classificação</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-150">
                                     @forelse ($c6TeamRows as $row)
-                                        <tr class="hover:bg-slate-50/80 transition-colors">
-                                            <td class="py-3 px-3 text-center font-mono font-semibold text-slate-600">
-                                                {{ $row['ine'] }}
+                                        <tr class="hover:bg-slate-50/80 transition">
+                                            <td class="py-3.5 px-4">
+                                                <div class="font-semibold text-slate-800 text-xs">
+                                                    {{ $row['cnes'] }} - {{ $row['facility_name'] }}
+                                                </div>
+                                                <div class="text-[11px] text-slate-500 font-mono mt-0.5">
+                                                    {{ $row['ine'] }} - {{ $row['team_name'] }}
+                                                </div>
                                             </td>
-                                            <td class="py-3 px-4 font-bold text-slate-800">
-                                                {{ $row['team_name'] }}
-                                            </td>
-                                            <td class="py-3 px-4 text-slate-600 text-xs">
-                                                {{ $row['facility_name'] }}
-                                                <span class="text-[10px] text-slate-400 font-mono block">CNES: {{ $row['cnes'] }}</span>
-                                            </td>
-                                            <td class="py-3 px-3 text-center font-mono font-semibold text-teal-800">
+                                            <td class="py-3.5 px-4 text-center font-medium text-slate-700 font-mono">
                                                 {{ number_format($row['numerator'], 0, '', '.') }}
                                             </td>
-                                            <td class="py-3 px-3 text-center font-mono font-semibold text-slate-700">
+                                            <td class="py-3.5 px-4 text-center font-medium text-slate-700 font-mono">
                                                 {{ number_format($row['denominator'], 0, '', '.') }}
                                             </td>
-                                            <td class="py-3 px-4 text-center font-mono font-black text-sm text-slate-800">
-                                                {{ number_format($row['score_percent'], 1, ',', '.') }}%
+                                            <td class="py-3.5 px-4 text-center font-bold text-slate-800 font-mono">
+                                                {{ number_format($row['score_percent'], 2, ',', '.') }}%
                                             </td>
-                                            <td class="py-3 px-3 text-center">
-                                                @php
-                                                    $lvl = $row['performance_level'];
-                                                    $badge = match ($lvl) {
-                                                        'otimo' => 'bg-[#e0f2fe] text-[#0369a1] border-[#bae6fd]',
-                                                        'bom' => 'bg-[#dcfce7] text-[#15803d] border-[#bbf7d0]',
-                                                        'suficiente' => 'bg-[#fef3c7] text-[#b45309] border-[#fde68a]',
-                                                        default => 'bg-[#fee2e2] text-[#b91c1c] border-[#fecaca]',
-                                                    };
-                                                    $lbl = match ($lvl) {
-                                                        'otimo' => 'Ótimo',
-                                                        'bom' => 'Bom',
-                                                        'suficiente' => 'Suficiente',
-                                                        default => 'Regular',
-                                                    };
-                                                @endphp
-                                                <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold border {{ $badge }}">
-                                                    {{ $lbl }}
-                                                </span>
+                                            <td class="py-3.5 px-4 text-center">
+                                                @if ($row['performance_level'] === 'otimo')
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#e0f2fe] text-[#0369a1]">
+                                                        Ótimo
+                                                    </span>
+                                                @elseif ($row['performance_level'] === 'bom')
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#dcfce7] text-[#15803d]">
+                                                        Bom
+                                                    </span>
+                                                @elseif ($row['performance_level'] === 'suficiente')
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#fef3c7] text-[#b45309]">
+                                                        Suficiente
+                                                    </span>
+                                                @else
+                                                    <span class="inline-block px-3 py-1 rounded-md text-[11px] font-bold bg-[#fee2e2] text-[#b91c1c]">
+                                                        Regular
+                                                    </span>
+                                                @endif
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="7" class="py-8 text-center text-xs text-slate-400">
+                                            <td colspan="5" class="py-8 text-center text-slate-400">
                                                 Nenhuma equipe com dados de pessoas idosas encontrados para o período selecionado.
                                             </td>
                                         </tr>
@@ -7938,104 +7975,103 @@
                 <!-- ABA: LISTA NOMINAL E COORTE DE PESSOAS IDOSAS (BUSCA ATIVA)                -->
                 <!-- ========================================================================= -->
                 <div class="space-y-6 pt-1">
-                    <!-- Cards de Boas Práticas (KPIs) -->
+                    <!-- BANNER SUPERIOR: DADOS GERAIS (SÍNTESE DAS 4 BOAS PRÁTICAS) -->
                     @if ($c6SummaryKpis)
                         <div class="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs">
-                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-150 pb-4 mb-4">
-                                <div>
-                                    <h3 class="text-base sm:text-lg font-bold text-[#004e82]">
-                                        As 4 Boas Práticas Oficiais do Cuidado da Pessoa Idosa
-                                    </h3>
-                                    <p class="text-xs text-slate-500 mt-0.5">
-                                        {{ $c6SummaryKpis['period_label'] }} · {{ $c6SummaryKpis['period_sublabel'] }}
-                                    </p>
-                                </div>
-                                <div class="text-xs text-slate-500 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl font-medium">
-                                    Nota Metodológica C6 · Peso 1.0 (até 1,00 pt)
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                                <!-- Prática A (25 pts) -->
-                                <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-4">
-                                    <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1">
-                                        <span>Consulta Méd./Enf. (A)</span>
-                                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-teal-100 text-teal-800 font-bold">25 pts</span>
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                                <!-- Coluna Esquerda: Competência -->
+                                <div class="md:col-span-2 text-center md:border-r border-slate-200/80 pr-4 space-y-1">
+                                    <span class="text-xs font-medium text-slate-500 block">Competência</span>
+                                    <div class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">
+                                        {{ $c6SummaryKpis['period_label'] }}
                                     </div>
-                                    <div class="text-xl font-black text-slate-800 font-mono my-1">
-                                        {{ number_format($c6SummaryKpis['practice_a']['count'], 0, '', '.') }}
-                                        <span class="text-xs text-slate-500 font-normal">
-                                            ({{ number_format($c6SummaryKpis['practice_a']['percent'], 1, ',', '.') }}%)
-                                        </span>
-                                    </div>
-                                    <p class="text-[11px] text-slate-500 leading-snug">
-                                        Ao menos 1 consulta médica ou de enfermagem nos últimos 12 meses
-                                    </p>
+                                    <span class="text-[11px] text-slate-400 block">
+                                        {{ $c6SummaryKpis['period_sublabel'] }}
+                                    </span>
                                 </div>
 
-                                <!-- Prática B (25 pts) -->
-                                <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-4">
-                                    <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1">
-                                        <span>Peso e Altura (B)</span>
-                                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-teal-100 text-teal-800 font-bold">25 pts</span>
+                                <!-- Coluna Central: As 4 Boas Práticas (A a D - NT 06/2025) -->
+                                <div class="md:col-span-8 space-y-4 px-2">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                        <!-- Prática A (25 pts) -->
+                                        <div class="space-y-1">
+                                            <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                                <span>Consulta Méd/Enf (A)</span>
+                                                <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Ao menos 1 consulta médica ou de enfermagem nos últimos 12 meses (25 pts)">i</span>
+                                            </div>
+                                            <div class="flex items-baseline gap-1.5">
+                                                <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                    {{ number_format($c6SummaryKpis['practice_a']['count'], 0, '', '.') }}
+                                                </span>
+                                                <span class="text-xs font-semibold text-[#16a34a]">
+                                                    ({{ number_format($c6SummaryKpis['practice_a']['percent'], 1, ',', '.') }}%)
+                                                </span>
+                                            </div>
+                                            <p class="text-[10px] text-slate-400">≥ 1 consulta no ano (25 pts)</p>
+                                        </div>
+
+                                        <!-- Prática B (25 pts) -->
+                                        <div class="space-y-1 sm:border-l border-slate-200/80 sm:pl-4">
+                                            <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                                <span>Peso e Altura (B)</span>
+                                                <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Registro simultâneo de peso e altura na mesma data nos últimos 12 meses (25 pts)">i</span>
+                                            </div>
+                                            <div class="flex items-baseline gap-1.5">
+                                                <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                    {{ number_format($c6SummaryKpis['practice_b']['count'], 0, '', '.') }}
+                                                </span>
+                                                <span class="text-xs font-semibold text-[#16a34a]">
+                                                    ({{ number_format($c6SummaryKpis['practice_b']['percent'], 1, ',', '.') }}%)
+                                                </span>
+                                            </div>
+                                            <p class="text-[10px] text-slate-400">Antropometria no ano (25 pts)</p>
+                                        </div>
+
+                                        <!-- Prática C (25 pts) -->
+                                        <div class="space-y-1 lg:border-l border-slate-200/80 lg:pl-4">
+                                            <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                                <span>Visitas ACS (C)</span>
+                                                <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Ao menos 2 visitas domiciliares de ACS com intervalo mínimo de 30 dias no ano (25 pts). eAP dispensada.">i</span>
+                                            </div>
+                                            <div class="flex items-baseline gap-1.5">
+                                                <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                    {{ number_format($c6SummaryKpis['practice_c']['count'], 0, '', '.') }}
+                                                </span>
+                                                <span class="text-xs font-semibold text-[#16a34a]">
+                                                    ({{ number_format($c6SummaryKpis['practice_c']['percent'], 1, ',', '.') }}%)
+                                                </span>
+                                            </div>
+                                            <p class="text-[10px] text-slate-400">≥ 2 visitas ACS no ano (25 pts)</p>
+                                        </div>
+
+                                        <!-- Prática D (25 pts) -->
+                                        <div class="space-y-1 sm:border-l border-slate-200/80 sm:pl-4">
+                                            <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                                                <span>Vacina Influenza (D)</span>
+                                                <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Ao menos 1 dose de vacina Influenza registrada nos últimos 12 meses (25 pts)">i</span>
+                                            </div>
+                                            <div class="flex items-baseline gap-1.5">
+                                                <span class="text-2xl font-black text-[#16a34a] tabular-nums">
+                                                    {{ number_format($c6SummaryKpis['practice_d']['count'], 0, '', '.') }}
+                                                </span>
+                                                <span class="text-xs font-semibold text-[#16a34a]">
+                                                    ({{ number_format($c6SummaryKpis['practice_d']['percent'], 1, ',', '.') }}%)
+                                                </span>
+                                            </div>
+                                            <p class="text-[10px] text-slate-400">Dose anual Influenza (25 pts)</p>
+                                        </div>
                                     </div>
-                                    <div class="text-xl font-black text-slate-800 font-mono my-1">
-                                        {{ number_format($c6SummaryKpis['practice_b']['count'], 0, '', '.') }}
-                                        <span class="text-xs text-slate-500 font-normal">
-                                            ({{ number_format($c6SummaryKpis['practice_b']['percent'], 1, ',', '.') }}%)
-                                        </span>
-                                    </div>
-                                    <p class="text-[11px] text-slate-500 leading-snug">
-                                        Registro simultâneo de peso e altura na mesma data no ano
-                                    </p>
                                 </div>
 
-                                <!-- Prática C (25 pts) -->
-                                <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-4">
-                                    <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1">
-                                        <span>Visitas ACS (C)</span>
-                                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-teal-100 text-teal-800 font-bold">25 pts</span>
+                                <!-- Coluna Direita: Denominador -->
+                                <div class="md:col-span-2 text-center md:border-l border-slate-200/80 pl-4 space-y-1">
+                                    <div class="flex items-center justify-center gap-1 text-xs font-medium text-slate-500">
+                                        <span>Denominador</span>
+                                        <span class="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold" title="Total de pessoas com 60 anos ou mais vinculadas às equipes">i</span>
                                     </div>
-                                    <div class="text-xl font-black text-slate-800 font-mono my-1">
-                                        {{ number_format($c6SummaryKpis['practice_c']['count'], 0, '', '.') }}
-                                        <span class="text-xs text-slate-500 font-normal">
-                                            ({{ number_format($c6SummaryKpis['practice_c']['percent'], 1, ',', '.') }}%)
-                                        </span>
-                                    </div>
-                                    <p class="text-[11px] text-slate-500 leading-snug">
-                                        ≥ 2 visitas domiciliares de ACS com intervalo mínimo de 30 dias (isento eAP)
-                                    </p>
-                                </div>
-
-                                <!-- Prática D (25 pts) -->
-                                <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-4">
-                                    <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1">
-                                        <span>Vacina Influenza (D)</span>
-                                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-teal-100 text-teal-800 font-bold">25 pts</span>
-                                    </div>
-                                    <div class="text-xl font-black text-slate-800 font-mono my-1">
-                                        {{ number_format($c6SummaryKpis['practice_d']['count'], 0, '', '.') }}
-                                        <span class="text-xs text-slate-500 font-normal">
-                                            ({{ number_format($c6SummaryKpis['practice_d']['percent'], 1, ',', '.') }}%)
-                                        </span>
-                                    </div>
-                                    <p class="text-[11px] text-slate-500 leading-snug">
-                                        Ao menos 1 dose de vacina Influenza nos últimos 12 meses
-                                    </p>
-                                </div>
-
-                                <!-- Coorte Total -->
-                                <div class="rounded-xl border border-teal-200 bg-teal-50/40 p-4">
-                                    <div class="flex items-center justify-between text-xs font-semibold text-teal-800 mb-1">
-                                        <span>Coorte de Idosos</span>
-                                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-teal-600 text-white font-bold">Base</span>
-                                    </div>
-                                    <div class="text-xl font-black text-teal-900 font-mono my-1">
+                                    <div class="text-3xl sm:text-4xl font-black text-slate-800 tracking-tight tabular-nums">
                                         {{ number_format($c6SummaryKpis['denominator'], 0, '', '.') }}
                                     </div>
-                                    <p class="text-[11px] text-teal-700 leading-snug">
-                                        Idosos com idade ≥ 60 anos vinculados às equipes ativas
-                                    </p>
                                 </div>
                             </div>
                         </div>
