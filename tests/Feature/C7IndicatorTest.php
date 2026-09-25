@@ -185,6 +185,51 @@ class C7IndicatorTest extends TestCase
             ->assertSet('showWomanModal', false);
     }
 
+    public function test_c7_advanced_search_modal_and_filtering_renders_without_error(): void
+    {
+        $this->authenticateUser();
+
+        C7NominalWoman::create([
+            'year' => 2026,
+            'quarter' => 3,
+            'calculation_version' => 'v1.0.0',
+            'cidadao_pec_id' => 99203,
+            'cns' => '700000000000050',
+            'cpf' => '44455566677',
+            'name' => 'BEATRIZ FILTRO AVANCADO',
+            'birth_date' => '1995-02-10',
+            'age_years' => 31,
+            'sex' => 'FEMININO',
+            'gender_identity' => 'MULHER_CIS',
+            'phone' => '82988880005',
+            'race_color' => 'PARDA',
+            'cnes' => '2722623',
+            'facility_name' => 'USF CENTRO',
+            'district' => 'CENTRO',
+            'ine' => '0000171284',
+            'team_name' => 'EQUIPE 01',
+            'team_type' => '70',
+            'microarea' => '02',
+            'eligible_practice_a' => true,
+            'practice_a_met' => true,
+            'practice_a_count' => 1,
+            'score_percent' => 50.0,
+        ]);
+
+        Livewire::test(IndicatorDetail::class, ['indicator' => 'c7', 'year' => 2026, 'quarter' => 3])
+            ->call('switchC7SubTab', 'nominal')
+            ->call('openAdvancedSearch')
+            ->assertSet('showAdvancedModal', true)
+            ->assertSee('CENTRO')
+            ->assertSee('USF CENTRO')
+            ->set('advDistrict', 'CENTRO')
+            ->set('advFacility', '2722623')
+            ->set('advTeam', '0000171284')
+            ->assertSee('BEATRIZ FILTRO AVANCADO')
+            ->call('closeAdvancedSearch')
+            ->assertSet('showAdvancedModal', false);
+    }
+
     public function test_c7_zero_mock_data_when_no_records_exist(): void
     {
         $this->authenticateUser();

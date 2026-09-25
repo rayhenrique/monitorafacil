@@ -287,11 +287,17 @@ class C7ActiveSearchService
             if (! empty($filters['advDistrict']) && (string) $d['district'] !== (string) $filters['advDistrict']) {
                 return false;
             }
-            if (! empty($filters['advFacility']) && (string) $d['cnes'] !== (string) $filters['advFacility']) {
-                return false;
+            if (! empty($filters['advFacility'])) {
+                $fac = (string) $filters['advFacility'];
+                if ((string) $d['cnes'] !== $fac && (string) ($d['facility_name'] ?? '') !== $fac) {
+                    return false;
+                }
             }
-            if (! empty($filters['advTeam']) && (string) $d['ine'] !== (string) $filters['advTeam']) {
-                return false;
+            if (! empty($filters['advTeam'])) {
+                $tm = (string) $filters['advTeam'];
+                if ((string) $d['ine'] !== $tm && (string) ($d['team_name'] ?? '') !== $tm) {
+                    return false;
+                }
             }
             if (! empty($filters['advMicroarea']) && (string) $d['microarea'] !== (string) $filters['advMicroarea']) {
                 return false;

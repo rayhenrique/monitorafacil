@@ -1136,7 +1136,7 @@
                                 >
                                     <option value="">Todas as unidades</option>
                                     @foreach ($c7FilterOptions['facilities'] ?? [] as $f)
-                                        <option value="{{ $f['name'] }}">{{ $f['name'] }}</option>
+                                        <option value="{{ is_array($f) ? ($f['cnes'] ?? $f['name'] ?? '') : $f }}">{{ is_array($f) ? ($f['name'] ?? $f['facility_name'] ?? '') : $f }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -1630,7 +1630,7 @@
                                     >
                                         <option value="">Todas as equipes</option>
                                         @foreach ($c7FilterOptions['teams'] ?? [] as $tm)
-                                            <option value="{{ $tm['name'] }}">{{ $tm['name'] }}</option>
+                                            <option value="{{ is_array($tm) ? ($tm['ine'] ?? $tm['name'] ?? '') : $tm }}">{{ is_array($tm) ? ($tm['name'] ?? $tm['team_name'] ?? '') : $tm }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -1644,7 +1644,7 @@
                                     >
                                         <option value="">Todas as unidades</option>
                                         @foreach ($c7FilterOptions['facilities'] ?? [] as $fc)
-                                            <option value="{{ $fc['name'] }}">{{ $fc['name'] }}</option>
+                                            <option value="{{ is_array($fc) ? ($fc['cnes'] ?? $fc['name'] ?? '') : $fc }}">{{ is_array($fc) ? ($fc['name'] ?? $fc['facility_name'] ?? '') : $fc }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -1658,7 +1658,8 @@
                                     >
                                         <option value="">Todos os bairros</option>
                                         @foreach ($c7FilterOptions['districts'] ?? [] as $dst)
-                                            <option value="{{ $dst['name'] }}">{{ $dst['name'] }}</option>
+                                            @php $dVal = is_array($dst) ? ($dst['name'] ?? $dst['district'] ?? '') : $dst; @endphp
+                                            <option value="{{ $dVal }}">{{ $dVal }}</option>
                                         @endforeach
                                     </select>
                                 </div>

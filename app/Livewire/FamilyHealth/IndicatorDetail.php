@@ -394,6 +394,7 @@ class IndicatorDetail extends Component
         $this->c4Page = 1;
         $this->c5Page = 1;
         $this->c6Page = 1;
+        $this->c7Page = 1;
         $this->showAdvancedModal = false;
     }
 
