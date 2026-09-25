@@ -11,6 +11,8 @@ use App\Models\FamilyHealthIndicatorSnapshot;
 use App\Models\FamilyHealthMonthlySnapshot;
 use App\Models\SyncLog;
 use App\Services\CvatNominalDwService;
+use App\Services\OralHealth\OralHealthNominalSyncService;
+use App\Services\OralHealth\OralHealthSnapshotService;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -109,6 +111,13 @@ class EsusDataProcessingService
                 'rows' => 0,
                 'message' => 'Aguardando processamento...',
             ],
+            'oral_health_dw' => [
+                'name' => 'Saúde Bucal (B1–B6) · DW PEC',
+                'description' => 'Snapshots das 19 eSB, evolução mensal (M5–M12) e Relação Geral Nominal',
+                'status' => 'pending',
+                'rows' => 0,
+                'message' => 'Aguardando processamento...',
+            ],
         ];
 
         $scopeDesc = match ($scope) {
@@ -119,6 +128,7 @@ class EsusDataProcessingService
             'c5' => 'Indicador C5 (Pessoas com Hipertensão)',
             'c6' => 'Indicador C6 (Cuidado da Pessoa Idosa)',
             'c7' => 'Indicador C7 (Prevenção do Câncer / Mulheres)',
+            'oral-health', 'b' => 'Saúde Bucal (Indicadores B1 a B6)',
             default => 'Geral Completo',
         };
         $this->notifyProgress($progressCallback, 10, "Iniciando conexão e validação com o e-SUS PEC [{$scopeDesc}]...", $tablesReport);
@@ -946,8 +956,74 @@ class EsusDataProcessingService
             ];
         }
 
+        // ETAPA 3.11: Indicadores de Saúde Bucal (B1 a B6 - 19 eSB e Lista Nominal Geral)
+        $oralHealthFailureMessage = null;
+        if ($scope === 'all' || $scope === 'oral-health' || $scope === 'b') {
+            $this->notifyProgress($progressCallback, 96, 'Processando Indicadores de Saúde Bucal (B1 a B6 - eSB)...', $tablesReport);
+            try {
+                if (! $isLivePecConnected || ! $connection) {
+                    throw new \RuntimeException('A consolidação de Saúde Bucal exige conexão com o DW do PEC. Nenhum resultado foi gerado.');
+                }
+
+                $connection->statement("SET statement_timeout TO '30s'");
+
+                $oralStats = app(OralHealthSnapshotService::class)->process($connection, $year, $quarter);
+                $nominalStats = app(OralHealthNominalSyncService::class)->sync($connection, $year, $quarter);
+
+                $tablesReport['oral_health_dw'] = [
+                    'name' => 'Saúde Bucal (B1–B6) · DW PEC',
+                    'description' => 'Snapshots das 19 eSB, evolução mensal (M5–M12) e Relação Geral Nominal',
+                    'status' => 'success',
+                    'rows' => $nominalStats['citizens_processed'],
+                    'message' => sprintf(
+                        '%d equipes eSB consolidadas nos 6 indicadores (B1 a B6); %d registros de busca ativa e %d cidadãos na relação geral nominal.',
+                        $oralStats['teams_count'],
+                        $oralStats['nominals_count'],
+                        $nominalStats['citizens_processed']
+                    ),
+                ];
+                $connection->statement("SET statement_timeout TO '10s'");
+            } catch (Throwable $e) {
+                if ($connection) {
+                    try {
+                        $connection->statement("SET statement_timeout TO '10s'");
+                    } catch (Throwable) {
+                    }
+                }
+                $message = 'Saúde Bucal não processada: '.$e->getMessage();
+                $tablesReport['oral_health_dw'] = [
+                    'name' => 'Saúde Bucal (B1–B6) · DW PEC',
+                    'description' => 'Snapshots das 19 eSB e Relação Geral Nominal',
+                    'status' => 'error',
+                    'rows' => 0,
+                    'message' => $message,
+                ];
+                $syncLog->update(['status' => SyncStatus::Failed, 'finished_at' => now(), 'error_message' => $message]);
+                if ($scope === 'oral-health' || $scope === 'b') {
+                    $this->notifyProgress($progressCallback, 100, $message, $tablesReport);
+
+                    return [
+                        'success' => false,
+                        'message' => $message,
+                        'progress' => 100,
+                        'tables' => $tablesReport,
+                        'execution_time_ms' => round((microtime(true) - $startTime) * 1000, 2),
+                    ];
+                }
+                $oralHealthFailureMessage = $message;
+            }
+        } else {
+            $tablesReport['oral_health_dw'] = [
+                'name' => 'Saúde Bucal (B1–B6) · DW PEC',
+                'description' => 'Snapshots das 19 eSB, evolução mensal (M5–M12) e Relação Geral Nominal',
+                'status' => 'info',
+                'rows' => 0,
+                'message' => sprintf('Não processado (Foco selecionado: %s).', $scopeDesc),
+            ];
+        }
+
         // ETAPA 4: tb_fat_cad_individual e tb_fat_cad_domiciliar
-        if (in_array($scope, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7'], true)) {
+        if (in_array($scope, ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'oral-health', 'b'], true)) {
             $tablesReport['tb_fat_cad_individual']['status'] = 'info';
             $tablesReport['tb_fat_cad_individual']['rows'] = 0;
             $tablesReport['tb_fat_cad_individual']['message'] = sprintf('Não processado (Foco selecionado: %s).', $scopeDesc);
@@ -1094,6 +1170,7 @@ class EsusDataProcessingService
             'c5' => 'Indicador C5 (Pessoas com Hipertensão)',
             'c6' => 'Indicador C6 (Cuidado da Pessoa Idosa)',
             'c7' => 'Indicador C7 (Prevenção do Câncer / Mulheres)',
+            'oral-health', 'b' => 'Saúde Bucal (Indicadores B1 a B6)',
             default => 'Geral Completo',
         };
 
@@ -1103,7 +1180,8 @@ class EsusDataProcessingService
             ($c4FailureMessage ? $c4FailureMessage.' ' : '').
             ($c5FailureMessage ? $c5FailureMessage.' ' : '').
             ($c6FailureMessage ? $c6FailureMessage.' ' : '').
-            ($c7FailureMessage ? $c7FailureMessage.' ' : '')
+            ($c7FailureMessage ? $c7FailureMessage.' ' : '').
+            ($oralHealthFailureMessage ? $oralHealthFailureMessage.' ' : '')
         );
 
         $syncLog->update([

@@ -89,7 +89,7 @@
                 <span class="text-[11px] text-slate-500 hidden sm:inline">Clique no card correspondente para iniciar</span>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 gap-3.5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3.5">
                 <!-- Card 1: Vínculo & Território (CVAT) -->
                 <button
                     type="button"
@@ -458,7 +458,53 @@
                     </div>
                 </button>
 
-                <!-- Card 9: Processamento Geral Completo -->
+                <!-- Card 9: Saúde Bucal (B1 a B6) -->
+                <button
+                    type="button"
+                    wire:click="processOralHealth"
+                    x-on:click="startProgress('os indicadores de Saúde Bucal (B1 a B6) e a lista nominal')"
+                    wire:loading.attr="disabled"
+                    class="group relative flex flex-col justify-between p-4 sm:p-4.5 rounded-2xl border transition-all duration-200 text-left cursor-pointer bg-gradient-to-b from-sky-50/80 to-white border-sky-300/80 hover:border-sky-500 hover:shadow-md hover:shadow-sky-950/10 focus:outline-none focus:ring-2 focus:ring-sky-500/40 disabled:opacity-60"
+                >
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="rounded-lg bg-sky-100/90 text-sky-800 p-2 group-hover:scale-105 transition">
+                                <svg class="h-5 w-5 text-sky-700" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 4c-2.5 0-4 2-4 5.5 0 3.5 1.5 6 3 9.5 1 2.3 2 4.5 3 4.5s1-1.5 2-4c.5-1.3 1-2.5 1-2.5s.5 1.2 1 2.5c1 2.5 1 4 2 4s2-2.2 3-4.5c1.5-3.5 3-6 3-9.5C21 6 19.5 4 17 4c-2 0-3.5 1.5-5 1.5S9 4 7 4z" />
+                                </svg>
+                            </span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider rounded-full px-2 py-0.5 bg-sky-100 text-sky-800 border border-sky-200">
+                                B1 a B6
+                            </span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-ink group-hover:text-sky-900 transition leading-snug">
+                                Saúde Bucal
+                            </h3>
+                            <p class="text-[11px] text-slate-500 mt-0.5 leading-normal">
+                                19 eSB · 6 Indicadores
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-sky-100 flex items-center justify-between text-xs font-semibold text-sky-800">
+                        <span wire:loading.remove wire:target="processOralHealth" class="inline-flex items-center gap-1">
+                            <span>Processar</span>
+                            <svg class="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                            </svg>
+                        </span>
+                        <span wire:loading wire:target="processOralHealth" class="inline-flex items-center gap-1.5 text-sky-700 font-bold">
+                            <svg class="animate-spin h-3.5 w-3.5 text-sky-700" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Processando...</span>
+                        </span>
+                    </div>
+                </button>
+
+                <!-- Card 10: Processamento Geral Completo -->
                 <button
                     type="button"
                     wire:click="processAll"
@@ -482,7 +528,7 @@
                                 Processamento Geral
                             </h3>
                             <p class="text-[11px] text-slate-300 mt-0.5 leading-normal">
-                                Indicadores C1 a C7, MICI, MICDT & CVAT
+                                Indicadores C1 a C7, B1 a B6, MICI, MICDT & CVAT
                             </p>
                         </div>
                     </div>
@@ -514,7 +560,7 @@
                 </svg>
             </div>
             <div class="text-teal-950 leading-relaxed">
-                <strong class="font-bold text-teal-900">Rotina Noturna Agendada Automática:</strong> O processamento automatizado no servidor executa diariamente às <strong>03:30 (horário de Brasília)</strong> no escopo <span class="font-mono font-bold bg-teal-100/70 px-1.5 py-0.5 rounded text-[11px]">--scope=all</span> para os Indicadores C1 a C6, MICI e MICDT. A extração nominal CVAT é agendada separadamente pelo card acima e depende do worker da fila.
+                <strong class="font-bold text-teal-900">Rotina Noturna Agendada Automática:</strong> O processamento automatizado no servidor executa diariamente às <strong>03:30 (horário de Brasília)</strong> no escopo <span class="font-mono font-bold bg-teal-100/70 px-1.5 py-0.5 rounded text-[11px]">--scope=all</span> para os Indicadores C1 a C7, Saúde Bucal (B1 a B6), MICI e MICDT. A extração nominal CVAT é agendada separadamente pelo card acima e depende do worker da fila.
             </div>
         </div>
 
@@ -523,7 +569,7 @@
             class="hidden border-t border-line pt-5 space-y-3"
             wire:loading.class.remove="hidden"
             wire:loading.class.add="block"
-            wire:target="processC1,processC2,processC3,processC4,processC5,processC6,processAll,processNow,processCvat"
+            wire:target="processC1,processC2,processC3,processC4,processC5,processC6,processC7,processOralHealth,processAll,processNow,processCvat"
         >
             <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between text-xs" aria-live="polite" aria-atomic="true">
                 <div class="min-w-0 flex items-start gap-2">
@@ -562,7 +608,7 @@
         </div>
 
         @if ($progressPercent > 0 && $processStatus !== null)
-            <div wire:loading.remove wire:target="processC1,processC2,processC3,processAll,processNow,processCvat">
+            <div wire:loading.remove wire:target="processC1,processC2,processC3,processC4,processC5,processC6,processC7,processOralHealth,processAll,processNow,processCvat">
                 <x-processing-progress
                     :percent="$progressPercent"
                     :step="$currentStep ?: 'Preparando o processamento...'"

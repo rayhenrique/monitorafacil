@@ -395,6 +395,13 @@ XML;
             ->assertSet('selectedScope', 'c3')
             ->assertSee('A leitura do C3 exige conexão com o DW do PEC');
 
+        // Processamento Apenas Saúde Bucal (B1 a B6)
+        Livewire::test(DataProcessing::class)
+            ->call('processOralHealth')
+            ->assertSet('progressPercent', 100)
+            ->assertSet('processStatus', 'error')
+            ->assertSet('selectedScope', 'oral-health');
+
         // Processamento Geral Completo
         Livewire::test(DataProcessing::class)
             ->call('processAll')
@@ -416,6 +423,10 @@ XML;
 
         $this->artisan('esus:process-data', ['--scope' => 'c3'])
             ->expectsOutputToContain('[Escopo: C3]')
+            ->assertExitCode(1);
+
+        $this->artisan('esus:process-data', ['--scope' => 'oral-health'])
+            ->expectsOutputToContain('[Escopo: ORAL-HEALTH]')
             ->assertExitCode(1);
 
         $this->artisan('esus:process-data', ['--scope' => 'all'])

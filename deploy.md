@@ -293,6 +293,7 @@ php8.5 -d memory_limit=1024M artisan esus:process-data --scope=c4
 php8.5 -d memory_limit=1024M artisan esus:process-data --scope=c5
 php8.5 -d memory_limit=1024M artisan esus:process-data --scope=c6
 php8.5 -d memory_limit=1024M artisan esus:process-data --scope=c7
+php8.5 -d memory_limit=1024M artisan esus:process-data --scope=oral-health
 php8.5 -d memory_limit=1024M artisan esus:process-oral-health
 php8.5 artisan livewire:publish --assets
 php8.5 artisan optimize:clear

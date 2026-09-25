@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.28.0';
+    public const CURRENT_VERSION = 'v1.29.0';
 
     public const CURRENT_RELEASE_DATE = '25/09/2026';
 
@@ -61,9 +61,23 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.28.0',
+                'version' => 'v1.29.0',
                 'date' => '25/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Integração da Saúde Bucal (B1 a B6) no Módulo "Processar Dados" e Automação CLI',
+                'summary' => 'Inclusão oficial do módulo de Saúde Bucal (Indicadores B1 a B6 - eSB) na central de "Processar Dados" (/configuracoes/processar-dados) e no comando CLI esus:process-data. Agora o gestor e os profissionais podem disparar sob demanda a consolidação de Saúde Bucal com um clique em um card visual estilizado (azul celeste sky-50 com ícone odontológico oficial e badge B1 a B6), acompanhando o progresso em tempo real. O backend processa em lote as 19 eSB, indicadores mensais e a relação geral nominal de 38.509 munícipes. O comando de linha de comando agora suporta --scope=oral-health e o processamento geral (--scope=all) consolida automaticamente a Saúde Bucal junto aos indicadores C1 a C7, MICI e MICDT.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Card dedicado de Saúde Bucal (B1 a B6) na tela "Processar Dados" com feedback visual de progresso estimado e acionamento Livewire sob demanda.'],
+                    ['type' => 'melhoria', 'text' => 'Grid de escopos rebalanceado para 10 cards em 2 linhas simétricas de 5 cards (2xl:grid-cols-5), otimizando a responsividade.'],
+                    ['type' => 'novo', 'text' => 'Suporte ao parâmetro `--scope=oral-health` no comando Artisan `php artisan esus:process-data` para execuções automatizadas e via terminal.'],
+                    ['type' => 'melhoria', 'text' => 'Inclusão da Saúde Bucal na rotina geral completa (`--scope=all`), consolidando B1 a B6, 19 eSB e 38.509 cidadãos nominais na rotina noturna.'],
+                    ['type' => 'melhoria', 'text' => 'Suíte completa de testes automatizados em SettingsTest cobrindo o acionamento Livewire e execução CLI do escopo oral-health.'],
+                ],
+            ],
+            [
+                'version' => 'v1.28.0',
+                'date' => '25/09/2026',
+                'badge' => 'Anterior',
                 'title' => 'Submódulos de Busca Geral Nominal e Dashboard Mensal de Equipes da Saúde Bucal (eSB), e Avaliação Estrita das 19 eSB',
                 'summary' => 'Lançamento de dois novos submódulos analíticos de Saúde Bucal (eSB): a Busca Geral Nominal de Cidadãos (/saude-bucal/busca-nominal) com 38.509 munícipes, acompanhamento individual dos 6 indicadores odontológicos (B1 a B6), situação cadastral e linha do tempo de atendimentos; e o Dashboard Mensal de Equipes (/saude-bucal/mensal) com visão executiva das 19 equipes eSB (001 a 021) por competência mensal (M5 a M12), cards com pontuações, denominadores, barras de progresso proporcionais por nível de desempenho e modal de busca avançada. Adicionalmente, a regra de consolidação de Saúde Bucal foi ajustada para filtrar e avaliar estritamente equipes odontológicas eSB (tipos 87 e 88), eliminando equipes eSF/eAP/USF/PACS dos indicadores B1 a B6.',
                 'highlights' => [
