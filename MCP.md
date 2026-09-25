@@ -1,127 +1,171 @@
-# Servidores MCP (Model Context Protocol) · Monitora Fácil
+# Servidores MCP (Model Context Protocol) & RAG Normativo · Monitora Fácil
 
-Este documento documenta os servidores MCP integrados ao projeto **Monitora Fácil**, explicando suas finalidades, ferramentas disponíveis, quando utilizá-los e como configurá-los em ambientes de desenvolvimento orientados a agentes de IA (como Antigravity IDE e Claude Desktop).
+Este documento documenta os servidores **Model Context Protocol (MCP)** e a arquitetura de **RAG (Retrieval-Augmented Generation)** integrados ao projeto **Monitora Fácil**, explicando suas finalidades, ferramentas disponíveis, exemplos de uso e diretrizes para ambientes de desenvolvimento assistidos por IA (como Antigravity IDE, Claude Desktop e Cursor).
 
 ---
 
 ## 📌 Sumário
 
 1. [O que é o MCP?](#-o-que-é-o-mcp)
-2. [Servidores MCP Disponíveis](#-servidores-mcp-disponíveis)
-   - [1. postgres-esus-readonly](#1-postgres-esus-readonly)
-   - [2. laravel-artisan-runner](#2-laravel-artisan-runner)
-   - [3. esus-file-validator](#3-esus-file-validator)
-   - [4. rag-service](#4-rag-service)
-3. [Quando Utilizar Cada Servidor](#-quando-utilizar-cada-servidor)
-4. [Instruções de Configuração](#-instruções-de-configuração)
-5. [Diretrizes de Segurança e Boas Práticas](#-diretrizes-de-segurança-e-boas-práticas)
+2. [Arquitetura dos Servidores](#-arquitetura-dos-servidores)
+3. [Servidores MCP Disponíveis](#-servidores-mcp-disponíveis)
+   - [1. rag-service (RAG Normativo da APS & Schemas)](#1-rag-service)
+   - [2. laravel-artisan-runner (Artisan CLI Runner)](#2-laravel-artisan-runner)
+   - [3. postgres-esus-readonly (DW e-SUS PEC)](#3-postgres-esus-readonly)
+   - [4. esus-file-validator (Validador XML / CSV)](#4-esus-file-validator)
+4. [Tabela de Decisão: Quando Utilizar Cada Servidor](#-tabela-de-decisão-quando-utilizar-cada-servidor)
+5. [Instruções de Configuração por Ambiente](#-instruções-de-configuração-por-ambiente)
+6. [Pipeline de Ingestão e Reindexação RAG](#-pipeline-de-ingestão-e-reindexação-rag)
+7. [Diretrizes de Segurança e Boas Práticas](#-diretrizes-de-segurança-e-boas-práticas)
 
 ---
 
 ## 🧠 O que é o MCP?
 
-O **Model Context Protocol (MCP)** é um padrão aberto que estabelece uma ponte de comunicação bidirecional e segura entre assistentes de IA e os recursos do sistema (bancos de dados, ferramentas de terminal, parsers de arquivos e APIs internas).
+O **Model Context Protocol (MCP)** é um protocolo aberto que estabelece uma ponte padronizada, segura e bidirecional entre modelos de IA e os recursos do projeto:
+- **Base regulamentar da APS**: Consulta semântica e léxica das regras ministeriais sem alucinação de critérios.
+- **Modelagem de dados**: Consulta de tabelas, colunas, tipos e índices do banco local.
+- **Banco de produção e-SUS PEC**: Inspeção direta do esquema PostgreSQL em modo somente leitura.
+- **Comandos de desenvolvimento**: Execução de rotinas do Laravel Artisan e testes automatizados.
+- **Arquivos de homologação**: Validação de XML ministerial do CNES e planilhas do SIAPS.
 
-No **Monitora Fácil**, os servidores MCP permitem que o assistente de IA inspecione diretamente o esquema do e-SUS PEC, execute testes automatizados, valide arquivos oficiais de homologação e consulte o acervo regulamentar da APS via RAG local sem comprometer a estabilidade do banco de produção ou alucinar regras de negócio.
+---
+
+## 🏛 Arquitetura dos Servidores
+
+```mermaid
+graph LR
+    subgraph "Ambiente da IDE / Agente IA"
+        Agent["Antigravity / Claude Desktop / Cursor"]
+    end
+
+    subgraph "Servidores MCP (Stdio JSON-RPC)"
+        MCP_RAG["rag-service<br/>(Dense 384d + BM25)"]
+        MCP_ART["laravel-artisan-runner<br/>(CLI Artisan Runner)"]
+        MCP_PG["postgres-esus-readonly<br/>(@modelcontextprotocol/server-postgres)"]
+        MCP_VAL["esus-file-validator<br/>(Parser XML CNES & CSV)"]
+    end
+
+    subgraph "Alvos no Sistema"
+        RAG_STORE[("Base Vetorial Local<br/>knowledge_store.json")]
+        APP["Aplicação Laravel 13<br/>(MySQL / Migrations / Tests)"]
+        DW[("PostgreSQL e-SUS PEC<br/>(Somente Leitura)")]
+        FILES["Arquivos Municipais<br/>(XML CNES / CSV SIAPS)"]
+    end
+
+    Agent -- "search_aps_rules / search_db_schema" --> MCP_RAG
+    Agent -- "artisan_run / artisan_test" --> MCP_ART
+    Agent -- "query (SQL)" --> MCP_PG
+    Agent -- "validate / inspect" --> MCP_VAL
+
+    MCP_RAG --> RAG_STORE
+    MCP_ART --> APP
+    MCP_PG --> DW
+    MCP_VAL --> FILES
+```
 
 ---
 
 ## 🛠 Servidores MCP Disponíveis
 
-```mermaid
-graph LR
-    subgraph "Ambiente da IDE / Agente IA"
-        Agent["Antigravity / Claude Desktop"]
-    end
+### 1. `rag-service`
 
-    subgraph "Servidores MCP (Stdio)"
-        MCP1["postgres-esus-readonly<br/>(@modelcontextprotocol/server-postgres)"]
-        MCP2["laravel-artisan-runner<br/>(Artisan CLI Runner)"]
-        MCP3["esus-file-validator<br/>(Validador XML / CSV)"]
-        MCP4["rag-service<br/>(RAG Normativo da APS & Schemas)"]
-    end
-
-    subgraph "Alvos no Sistema"
-        DW[("PostgreSQL e-SUS PEC<br/>(Somente Leitura)")]
-        App["Aplicação Laravel 13<br/>(Testes / Migrações / Schemas)"]
-        Files["Arquivos e-SUS<br/>(XML CNES / CSV SIAPS)"]
-        Docs["Base Vetorial RAG<br/>(PDFs APS & Schemas)"]
-    end
-
-    Agent -- "JSON-RPC (stdio)" --> MCP1
-    Agent -- "JSON-RPC (stdio)" --> MCP2
-    Agent -- "JSON-RPC (stdio)" --> MCP3
-    Agent -- "JSON-RPC (stdio)" --> MCP4
-
-    MCP1 -- "SELECT / EXPLAIN" --> DW
-    MCP2 -- "php artisan [cmd]" --> App
-    MCP3 -- "Inspeção e Validação" --> Files
-    MCP4 -- "Busca Semântica & BM25" --> Docs
-```
-
----
-
-### 1. `postgres-esus-readonly`
-
-Servidor oficial para consultas analíticas somente leitura na base PostgreSQL do e-SUS PEC municipal.
-
-* **Executável**: `npx -y @modelcontextprotocol/server-postgres`
-* **Transporte**: `stdio`
-* **Ferramenta Principal**:
-  * `query`: Executa consultas SQL (`SELECT`, `EXPLAIN`, `SHOW`) diretamente no PostgreSQL do e-SUS.
-* **Características**:
-  * Modo estritamente **read-only** (sem permissão de escrita ou alteração de dados).
-  * Conexão com timeout configurado para evitar travamento em consultas pesadas.
-
----
-
-### 2. `laravel-artisan-runner`
-
-Servidor dedicado para execução segura e controlada de comandos do Laravel Artisan diretamente a partir da raiz da aplicação.
-
-* **Localização**: `.agents/mcp/artisan-runner/index.js`
-* **Executável**: `node .agents/mcp/artisan-runner/index.js`
-* **Transporte**: `stdio` (JSON-RPC)
-* **Ferramentas Disponíveis**:
-  * `artisan_run`: Executa qualquer comando Artisan permitido no projeto (ex: `migrate:status`, `route:list`, `cache:clear`, `view:clear`).
-  * `artisan_test`: Dispara a suíte de testes com suporte opcional a filtro de classes/métodos (ex: `filter: "C4IndicatorTest"`).
-  * `artisan_inspect_schema`: Executa a rotina `php artisan esus:inspect-schema` em transação somente leitura para gerar o contrato de metadados do e-SUS PEC.
-
----
-
-### 3. `esus-file-validator`
-
-Servidor utilitário voltado à inspeção de formato, integridade e nós principais de arquivos e-SUS e relatórios de homologação.
-
-* **Localização**: `.agents/mcp/esus-validator/index.js`
-* **Executável**: `node .agents/mcp/esus-validator/index.js`
-* **Transporte**: `stdio` (JSON-RPC)
-* **Ferramentas Disponíveis**:
-  * `inspect_csv_headers_and_sample`: Lê o cabeçalho e as primeiras linhas de relatórios CSV do SIAPS ou exportações do e-SUS.
-  * `validate_esus_xml_structure`: Inspeciona os nós principais de arquivos XML de homologação ministerial do CNES (`XmlParaESUS31_*.xml`) para validação de tags de equipes e competência.
-
----
-
-### 4. `rag-service`
-
-Servidor de **Retrieval-Augmented Generation (RAG)** local para recuperação semântica e léxica (Dense Embeddings 384d + BM25) das regras ministeriais da APS e esquemas da base de dados.
+Servidor de **Retrieval-Augmented Generation (RAG)** local para recuperação semântica e léxica híbrida (Dense Embeddings 384d + BM25) das regras ministeriais da APS e da modelagem da base de dados.
 
 * **Localização**: `.agents/mcp/rag-service/index.js`
 * **Executável**: `node .agents/mcp/rag-service/index.js`
 * **Transporte**: `stdio` (JSON-RPC)
 * **Base de Conhecimento Indexada**:
-  * Notas Metodológicas C1 a C7 em `importacao/referencia/`
-  * NT 08/2026 (CVAT / Avaliação Quadrimestral / Componente II e III)
-  * NT 30/2025 (Vínculo e Acompanhamento Territorial)
-  * `DATABASE-SCHEMA.md` e migrações em `database/migrations/`
-* **Ferramentas Disponíveis**:
-  * `search_aps_rules(query: string, indicador?: string, tipo_conteudo?: string, limit?: number)`: Recupera trechos normativos oficiais com isolamento estrito por indicador (`C1` a `C7`, `CVAT` ou `GERAL`) e tipo de conteúdo (`criterio_inclusao`, `criterio_exclusao`, `boas_praticas`, `codigos_cid_ciap`, `profissionais_validos`, `periodo_avaliacao`, `metodologia_calculo`), impedindo contaminação de regras entre indicadores distintos.
-  * `search_db_schema(query: string, indicador?: string, limit?: number)`: Recupera definições de tabelas, tipos de dados, índices e relacionamentos internos documentados no `DATABASE-SCHEMA.md` e nas migrations.
-* **Script de Ingestão**: Execute `node .agents/rag/ingest.js` para reindexar a base após adicionar novos documentos ou migrações.
+  - Notas Metodológicas C1 a C7 em `importacao/referencia/`
+  - NT nº 8/2026 (CVAT / Avaliação Quadrimestral / Componente II e III)
+  - NT nº 30/2025 (Vínculo e Acompanhamento Territorial)
+  - `DATABASE-SCHEMA.md` e migrations em `database/migrations/`
+* **Características**:
+  - **Zero Dependência Externa**: Execução 100% local e offline em < 15ms.
+  - **Isolamento Estrito por Indicador**: Previne contaminação de regras entre indicadores distintos (ex: regras de gestante C3 nunca vazam para diabetes C4).
+
+#### Ferramentas Disponíveis:
+
+#### `search_aps_rules`
+Procura trechos normativos oficiais das Notas Metodológicas e Técnicas da APS.
+
+* **Parâmetros**:
+  - `query` (obrigatório, `string`): Pergunta ou termos de busca (ex: `"códigos CIAP CID diabetes ativo"`, `"intervalo mínimo entre visitas ACS"`, `"DUM DPP 42 semanas"`).
+  - `indicador` (opcional, `string`): Filtro estrito: `"C1"`, `"C2"`, `"C3"`, `"C4"`, `"C5"`, `"C6"`, `"C7"`, `"CVAT"` ou `"GERAL"`.
+  - `tipo_conteudo` (opcional, `string`): Filtro de conteúdo:
+    - `"criterio_inclusao"`: Denominador, população elegível, cadastro individual, idade mínima/máxima.
+    - `"criterio_exclusao"`: Condições resolvidas, óbito, saída do território, perda de vínculo.
+    - `"boas_praticas"`: Quadro 01, práticas A a K, pontuações, pesos e intervalos mínimos.
+    - `"codigos_cid_ciap"`: Códigos CIAP-2, CID-10, vacinas e procedimentos SIGTAP válidos.
+    - `"profissionais_validos"`: CBOs de médicos, enfermeiros, odontólogos e ACS.
+    - `"periodo_avaliacao"`: Janelas de oportunidade (6m, 12m, 24m, 36m, 60m).
+    - `"metodologia_calculo"`: Fórmulas, numeradores, notas finais e faixas de qualidade.
+  - `limit` (opcional, `number`, default `5`): Quantidade máxima de trechos.
+
+* **Exemplo de Retorno**:
+```markdown
+### [Resultado 1] Quadro 01. Boas Práticas Clínicas de Diabetes
+- **Indicador:** C4 | **Tema:** diabetes | **Tipo:** boas_praticas
+- **Fonte:** Nota Metodológica C4 - Cuidado da pessoa com diabetes.pdf (Página 5)
+- **Relevância Híbrida:** 88.5% (Vetorial: 77.0% / Léxica: 100.0%)
+
+> (A) Ter realizado pelo menos 01 consulta médica ou de enfermagem nos últimos 6 meses (20 pts).
+> (B) Ter realizado pelo menos 01 aferição de Pressão Arterial nos últimos 6 meses (15 pts).
+> (C) Ter realizado antropometria com peso e altura simultâneos nos últimos 12 meses (15 pts)...
+```
+
+#### `search_db_schema`
+Procura definições de tabelas, colunas, tipos de dados, índices e migrações do Monitora Fácil no `DATABASE-SCHEMA.md` e em `database/migrations/`.
+
+* **Parâmetros**:
+  - `query` (obrigatório, `string`): Nome da tabela ou termos da modelagem (ex: `"c4_nominal_diabetics"`, `"cvat_team_evaluations"`, `"tabelas de coorte"`).
+  - `indicador` (opcional, `string`): Filtrar por indicador associado (`"C1"` a `"C7"`, `"CVAT"`, `"GERAL"`).
+  - `limit` (opcional, `number`, default `5`): Quantidade de resultados.
 
 ---
 
-## 🎯 Quando Utilizar Cada Servidor
+### 2. `laravel-artisan-runner`
+
+Servidor dedicado para execução controlada e segura de comandos do Laravel Artisan diretamente na raiz da aplicação.
+
+* **Localização**: `.agents/mcp/artisan-runner/index.js`
+* **Executável**: `node .agents/mcp/artisan-runner/index.js`
+* **Transporte**: `stdio` (JSON-RPC)
+
+#### Ferramentas Disponíveis:
+- `artisan_run`: Executa comandos permitidos (ex: `migrate:status`, `route:list`, `cache:clear`, `config:clear`, `esus:process-data --scope=c4 --year=2026 --quarter=3`).
+- `artisan_test`: Executa a suíte de testes do PHPUnit com suporte a filtros (ex: `filter: "C4IndicatorTest"`, `filter: "AuthenticationTest"`).
+- `artisan_inspect_schema`: Gera contrato de metadados do PostgreSQL em `storage/app/private/` em modo somente leitura.
+
+---
+
+### 3. `postgres-esus-readonly`
+
+Servidor oficial para consultas analíticas somente leitura na base PostgreSQL do e-SUS PEC municipal.
+
+* **Executável**: `npx -y @modelcontextprotocol/server-postgres <string_conexao>`
+* **Transporte**: `stdio`
+
+#### Ferramenta Principal:
+- `query`: Executa consultas SQL (`SELECT`, `EXPLAIN`) diretamente no PostgreSQL do e-SUS PEC para auditar fatos clínicos reais (`tb_fat_atendimento_individual`, `tb_fat_vacinacao`, `tb_acomp_cidadaos_vinculados`, etc.).
+
+---
+
+### 4. `esus-file-validator`
+
+Servidor utilitário para inspeção e validação de arquivos ministeriais e relatórios de homologação.
+
+* **Localização**: `.agents/mcp/esus-validator/index.js`
+* **Executável**: `node .agents/mcp/esus-validator/index.js`
+* **Transporte**: `stdio` (JSON-RPC)
+
+#### Ferramentas Disponíveis:
+- `inspect_csv_headers_and_sample`: Lê cabeçalho e linhas amostrais de relatórios CSV do SIAPS ou exportações do e-SUS PEC.
+- `validate_esus_xml_structure`: Inspeciona nós principais de arquivos XML ministerial do CNES (`XmlParaESUS31_*.xml`).
+
+---
+
+## 🎯 Tabela de Decisão: Quando Utilizar Cada Servidor
 
 | Cenário de Uso | Servidor Recomendado | Ferramenta Indicada |
 | :--- | :--- | :--- |
@@ -131,19 +175,19 @@ Servidor de **Retrieval-Augmented Generation (RAG)** local para recuperação se
 | **Auditar dados reais no e-SUS PEC** sem rodar o ETL completo | `postgres-esus-readonly` | `query` |
 | **Inspecionar colunas ou índices do DW PEC** para criação de regras normativas (C1–C7) | `postgres-esus-readonly` | `query` |
 | **Rodar suíte de testes automatizados** após alterações de código | `laravel-artisan-runner` | `artisan_test` |
+| **Executar processamento de dados do DW PEC por escopo (C1 a C7)** | `laravel-artisan-runner` | `artisan_run` |
 | **Verificar status de migrações ou limpar cache** de visualização | `laravel-artisan-runner` | `artisan_run` |
 | **Gerar inventário de metadados do DW PEC** em `storage/app/private/` | `laravel-artisan-runner` | `artisan_inspect_schema` |
 | **Checar conformidade do XML ministerial do CNES** antes de importar | `esus-file-validator` | `validate_esus_xml_structure` |
 | **Examinar colunas de planilhas CSV do SIAPS** para carga nominal | `esus-file-validator` | `inspect_csv_headers_and_sample` |
 
-
 ---
 
-## ⚙️ Instruções de Configuração
+## ⚙️ Instruções de Configuração por Ambiente
 
 ### 1. Configuração Global da IDE (`~/.gemini/config/mcp_config.json`)
 
-Para que a IDE carregue os servidores globalmente com o caminho absoluto correto do workspace no Windows:
+Para que a IDE carregue os 4 servidores globalmente com os caminhos corretos no Windows:
 
 ```json
 {
@@ -182,11 +226,11 @@ Para que a IDE carregue os servidores globalmente com o caminho absoluto correto
 ```
 
 > [!IMPORTANT]
-> **Atenção no Windows**: O campo `cwd` deve usar barras normais (`/`) ou barras invertidas escapadas (`\\`), e deve apontar para a raiz real do projeto para evitar erros do tipo `chdir ${workspaceRoot}: The system cannot find the file specified`.
+> **Atenção no Windows**: O campo `cwd` deve usar barras normais (`/`) ou barras invertidas escapadas (`\\`), apontando para a raiz real do projeto para evitar erros do tipo `chdir ${workspaceRoot}: The system cannot find the file specified`.
 
 ### 2. Configuração Portável do Repositório (`.agents/mcp_config.json`)
 
-O repositório já inclui a definição portável dos servidores para integração contínua e compartilhamento entre membros da equipe em `.agents/mcp_config.json` e `.antigravity/mcp_config.json`:
+O repositório inclui a definição portável compartilhada em `.agents/mcp_config.json` e `.antigravity/mcp_config.json`:
 
 ```json
 {
@@ -223,12 +267,31 @@ O repositório já inclui a definição portável dos servidores para integraç�
 
 ---
 
+## 🔄 Pipeline de Ingestão e Reindexação RAG
+
+Sempre que novas Notas Metodológicas forem adicionadas em `importacao/referencia/`, ou quando novas migrações e alterações forem feitas no `DATABASE-SCHEMA.md`, a base de conhecimento RAG deve ser reindexada:
+
+```bash
+node .agents/rag/ingest.js
+```
+
+### O que o script de ingestão executa:
+1. Executa `.agents/rag/extract_pdfs.py` para extrair texto de todos os PDFs regulamentares;
+2. Segmenta o conteúdo em chunks semânticos (500 a 800 tokens) preservando cabeçalhos e metadados;
+3. Indexa as seções e tabelas ativas do `DATABASE-SCHEMA.md`;
+4. Indexa o código DDL das migrações em `database/migrations/`;
+5. Gera vetores densos (384 dimensões) e índice invertido BM25;
+6. Grava a base consolidada em `.agents/rag/storage/knowledge_store.json`.
+
+---
+
 ## 🔒 Diretrizes de Segurança e Boas Práticas
 
-1. **Política Zero Mock (Dados Reais)**:
-   - Toda consulta analítica sobre indicadores ou coortes deve ser validada contra os dados reais extraídos do DW e-SUS PEC municipal.
-   - Nunca utilizar consultas sintéticas ou alterar registros na base de produção.
-2. **PostgreSQL Estritamente Somente Leitura**:
+1. **Consulta Prévia Obrigatória ao RAG (`search_aps_rules`)**:
+   - Conforme a **Regra 5** do [`AGENTS.md`](AGENTS.md), antes de implementar ou refatorar serviços de busca ativa (`C*ActiveSearchService`), cálculo de práticas (`C*PracticeCalculator`) ou snapshots (`C*SnapshotService`), o assistente de IA deve consultar a tool `search_aps_rules`.
+2. **Política Zero Mock (Dados Reais)**:
+   - Toda consulta analítica sobre indicadores ou coortes deve ser validada contra dados reais extraídos do DW e-SUS PEC municipal. Nunca utilizar dados simulados ou fictícios.
+3. **PostgreSQL Estritamente Somente Leitura**:
    - O servidor `postgres-esus-readonly` opera sob o usuário `esus_leitura`, impedindo operações destrutivas (`INSERT`, `UPDATE`, `DELETE`, `DROP`).
-3. **Resolução Dinâmica de Caminhos**:
-   - Os servidores `.agents/mcp/artisan-runner/index.js` e `.agents/mcp/esus-validator/index.js` possuem rotinas automáticas com `fileURLToPath(import.meta.url)` que resolvem os caminhos de arquivos relativos à raiz do projeto, mesmo quando invocados a partir de diretórios de execução externos.
+4. **Resolução Dinâmica de Caminhos**:
+   - Os servidores MCP em Node.js utilizam detecção dinâmica da raiz do projeto (`artisan` presente no diretório corrente ou caminho relativo ao módulo), garantindo portabilidade entre diretórios de trabalho.

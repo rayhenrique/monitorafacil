@@ -8,7 +8,7 @@
 [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://mysql.com)
 [![e--SUS PEC](https://img.shields.io/badge/e--SUS_PEC-PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://sisaps.saude.gov.br/esus/)
-[![Testes](https://img.shields.io/badge/Testes-17%20Aprovados-10B981?style=for-the-badge&logo=pest&logoColor=white)](#testes-automatizados)
+[![Testes](https://img.shields.io/badge/Testes-155%20Aprovados-10B981?style=for-the-badge&logo=pest&logoColor=white)](#testes-automatizados)
 
 ---
 
@@ -18,13 +18,13 @@
 - [Arquitetura e Princípios Técnicos](#-arquitetura-e-princípios-técnicos)
 - [Funcionalidades Principais](#-funcionalidades-principais)
 - [Estrutura do Projeto](#-estrutura-do-projeto)
-- [Requisitos do Sistema](#-requisitos-do-sistema)
+- [Stack Tecnológica & Requisitos](#-stack-tecnológica--requisitos-do-sistema)
 - [Instalação e Configuração](#-instalação-e-configuração)
-- [Comandos Artisan Personalizados](#-comandos-artisan-personalizados)
+- [Comandos Artisan e Processamento DW](#-comandos-artisan-personalizados)
 - [Variáveis de Ambiente (.env)](#-variáveis-de-ambiente-env)
 - [Rotinas de Sincronização e Agendamento](#-rotinas-de-sincronização-e-agendamento)
 - [Testes Automatizados](#-testes-automatizados)
-- [Servidores MCP (Model Context Protocol)](#-servidores-mcp-model-context-protocol)
+- [Servidores MCP e RAG Normativo](#-servidores-mcp-model-context-protocol)
 - [Guia de Deploy (Hostinger + CloudPanel)](deploy.md)
 - [Licença](#-licença)
 
@@ -99,29 +99,23 @@ graph TD
   - **MICDT**: Cadastros Domiciliares e Territoriais / Domicílios (Atualizados vs Desatualizados).
 - Exibição de totais absolutos e percentual de cobertura territorial atualizada.
 
-### 4. 🩺 Componente de Qualidade (Nota Técnica 30/2025)
-- Acompanhamento detalhado dos indicadores clínicos por faixas de desempenho (*Ótimo*, *Bom*, *Suficiente*, *Regular*):
-  - **Saúde da Família (C1 a C7)**: Mais Acesso (C1), Crianças (C2), Gestante e Puérpera (C3), Diabéticos (C4), Hipertensos (C5), Idosos (C6) e Mulheres (C7).
-  - **Saúde Bucal (B1 a B6)**: Primeira Consulta Programada (B1), Tratamento Concluído (B2), Taxa de Exodontias (B3), Escovação Supervisionada (B4), Procedimentos Preventivos (B5) e Restauração Atraumática - ART (B6).
-  - **e-Multi (M1 e M2)**: Atendimentos por pessoa (M1) e Ações interprofissionais (M2).
-- Iconografia executiva contextual dedicada para cada indicador.
-- Ausência de resultado C2 exibida como **sem dados**, sem converter falta de coorte em zero.
+### 4. 🩺 Componente de Qualidade e Busca Ativa (C1 a C7 & CVAT)
 
-#### C1 · Mais Acesso pelo DW PEC
+Acompanhamento detalhado dos indicadores clínicos por faixas de desempenho (*Ótimo*, *Bom*, *Suficiente*, *Regular*) e listas nominais completas para busca ativa em tempo real:
 
-O C1 lê somente snapshots produzidos pela rotina CLI. O numerador usa os tipos `1` e `2`; o denominador usa os tipos `1`, `2`, `4`, `5` e `6`. A população elegível fica restrita às equipes eSF/eAP, aos sete CBOs definidos na nota metodológica e aos atendimentos com CNS do profissional, data de nascimento e CPF ou CNS válido do cidadão.
+- **C1 · Mais Acesso na APS**: Monitora a proporção de atendimentos individuais por demanda programada (numerador: tipos 1 e 2; denominador: tipos 1, 2, 4, 5 e 6) para equipes eSF e eAP, considerando os 7 CBOs definidos na nota metodológica. A média dos 4 meses consolida a estimativa municipal.
+- **C2 · Cuidado no Desenvolvimento Infantil**: Coorte de crianças que completam 2 anos no quadrimestre. Busca ativa nominal avaliando 5 boas práticas (A: 9 consultas médicas/enfermagem, B: antropometria peso e altura, C: vacina VIP, D: vacina Penta, E: vacina Pneumo-10).
+- **C3 · Cuidado na Gestação e Puerpério**: Acompanhamento nominal de gestantes e puérperas com base na DUM/DPP e janela de até 42 semanas / 42 dias puerperais. Rastreia 11 boas práticas clínicas (A a K: captação precoce, 6 consultas, exames de sífilis/HIV/urina, PA, atendimento odontológico, vacina dTpa, puerpério e visitas domiciliares).
+- **C4 · Cuidado da Pessoa com Diabetes**: Coorte e lista nominal de pessoas com diagnóstico ativo de diabetes (códigos CIAP-2 e CID-10). Rastreia as 6 boas práticas do Quadro 01: consulta médica/enfermagem no semestre (20 pts), PA no semestre (15 pts), antropometria anual (15 pts), visitas ACS com intervalo mínimo de 30 dias (20 pts), exame de Hemoglobina Glicada HbA1c (15 pts) e Avaliação dos Pés nos últimos 12 meses (15 pts).
+- **C5 · Cuidado da Pessoa com Hipertensão**: Coorte e lista nominal de hipertensos ativos. Rastreia as 4 boas práticas do Quadro 01: consulta semestral (25 pts), PA semestral (25 pts), antropometria anual (25 pts) e visitas domiciliares ACS anuais com intervalo >= 30 dias (25 pts).
+- **C6 · Cuidado da Pessoa Idosa (60+ Anos)**: Coorte e lista nominal de idosos vinculados. Rastreia as 4 boas práticas do Quadro 01: consulta médica/enfermagem anual (25 pts), antropometria anual (25 pts), visitas ACS anuais (25 pts - com regra normalizada para eAP 76) e vacinação contra Influenza anual (25 pts).
+- **C7 · Cuidado da Saúde da Mulher**: Rastreamento nominal nos 4 estratos populacionais do Quadro 01: Prática A (citopatológico 25-64 anos, peso 20), Prática B (vacina HPV 9-14 anos, peso 30), Prática C (saúde sexual e reprodutiva 14-69 anos, peso 30) e Prática D (mamografia de rastreamento 50-69 anos, peso 20).
+- **CVAT · Avaliação Territorial e Vínculo (Portaria GM/MS & NT nº 8/2026)**:
+  - Avaliação do Componente II (Vínculo e Acompanhamento Territorial): Nota de Cadastro (0 a 3,00), Nota de Acompanhamento (0 a 7,00), Nota Final (0 a 10,00) e classificação oficial (*Ótimo*, *Bom*, *Suficiente*, *Regular*).
+  - Relação nominal completa para saneamento de cadastros (MICI, MICDT, vinculação com equipe) e busca ativa de pessoas em vulnerabilidade prioritária (crianças, idosos, beneficiários do BPC e Bolsa Família/PBF).
+  - Distribuição analítica de equipes por faixas de qualidade e parâmetros populacionais.
+- **Saúde Bucal (B1 a B6) e e-Multi (M1 e M2)**: Monitoramento assistencial dos componentes odontológico e multiprofissional.
 
-Durante o quadrimestre, o painel mostra uma prévia com as competências já monitoradas. Meses futuros ou ausentes aparecem como **sem dados**, sem serem convertidos em zero. Depois das quatro competências, a média simples de M1 a M4 produz a estimativa quadrimestral local. O resultado oficial continua sendo o publicado pelo Siaps.
-
-Uma falha de schema ou leitura interrompe o C1 e preserva o último snapshot válido. Snapshots antigos sem a versão de cálculo atual ficam ocultos. A confirmação do nome do cidadão ainda depende da validação de uma fonte estável no esquema disponível na VPS, pois esse campo não está presente na tabela fato documentada publicamente.
-
-#### C2 · estimativa local do DW PEC
-
-O processamento C2 faz somente consultas de leitura no PostgreSQL do PEC e grava agregados no MySQL local; a tela do indicador consulta apenas esses snapshots. A coorte do quadrimestre inclui todas as crianças vinculadas a eSF/eAP que completam dois anos entre o primeiro e o último dia dos quatro meses. Todas recebem uma prévia calculada com as práticas registradas até a data da extração, inclusive as dos meses futuros M1–M4; a tela informa separadamente quantas já completaram dois anos. Cada prática A–E vale 20 pontos. A média quadrimestral local usa os meses com crianças na coorte, inclusive futuros. Essa antecipação é uma ferramenta de acompanhamento e não é a nota oficial prevista na Nota Técnica nº 8/2026.
-
-O cálculo lê vínculos atuais, atendimentos de puericultura, antropometria, visitas ACS/TACS e vacinação documentados no DW. É **estimativa preliminar**, pois o DW local pode não conter vacinas da RNDS, ações coletivas e o histórico de vínculo usado pelo Siaps. Não use o percentual local como resultado oficial de cofinanciamento. O C2 antigo calculado por simulação fica oculto até uma nova extração bem-sucedida.
-
-Na VPS com acesso ao PEC, após instalar esta versão, execute `php artisan migrate --force` e `php artisan esus:process-data --scope=c2 --year=2026 --quarter=3`; confira a contagem completa da coorte e compare uma amostra de equipes e meses com o Siaps. A aplicação não envia fichas, XML ou Thrift para o PEC.
 
 ### 5. 💲 Simulador de Repasses e Planejamento Financeiro
 - Ferramenta de estimativa do componente de **Vínculo e Acompanhamento Territorial** de eSF (40h).
@@ -313,12 +307,27 @@ php artisan esus:inspect-schema
 
 O comando abre uma transação PostgreSQL explicitamente somente leitura e grava em `storage/app/private/` um JSON com tabelas, colunas, tipos, índices e estimativas do catálogo. Nenhuma linha clínica ou identificação de cidadão é extraída. Um caminho alternativo pode ser informado com `--output=arquivo.json`.
 
-### Sincronização e Consolidação do e-SUS PEC
+### Sincronização e Processamento do DW PEC
 
-Executa a leitura das tabelas do e-SUS PEC, cruza com as equipes ativas do XML homologado e gera o snapshot do quadrimestre:
+Executa a leitura das tabelas do e-SUS PEC, cruza com as equipes ativas do XML homologado e processa indicadores agregados e listas nominais:
 
 ```bash
+# Sincronização básica de consolidados e equipes:
 php artisan esus:sync-snapshot
+
+# Processamento analítico por escopo (C1 a C7, CVAT ou Geral):
+php artisan esus:process-data --scope=all
+php artisan esus:process-data --scope=c2 --year=2026 --quarter=3
+php artisan esus:process-data --scope=c4 --year=2026 --quarter=3
+php artisan esus:process-data --scope=cvat --year=2026 --month=12
+```
+
+### Ingestão da Base de Conhecimento RAG Local
+
+Indexa os documentos regulamentares em `importacao/referencia/`, o `DATABASE-SCHEMA.md` e todas as migrations para consulta pelo servidor MCP `rag-service`:
+
+```bash
+node .agents/rag/ingest.js
 ```
 
 ### Gerenciamento de Senha do Administrador
@@ -337,7 +346,7 @@ php artisan admin:reset-password
 
 ## ⏰ Rotinas de Sincronização e Agendamento
 
-O comando `esus:sync-snapshot` está configurado em `routes/console.php` para rodar automaticamente às **03:00** e `esus:process-data --scope=all` às **03:30**, no fuso horário configurado no município (`America/Maceio`). O escopo geral cobre C1, C2 e C3; a relação nominal CVAT é extraída separadamente.
+O comando `esus:sync-snapshot` está configurado em `routes/console.php` para rodar automaticamente às **03:00** e `esus:process-data --scope=all` às **03:30**, no fuso horário configurado no município (`America/Maceio`). Os escopos específicos cobrem C1 a C7 e a relação nominal CVAT.
 
 ```php
 Schedule::command('esus:sync-snapshot')
@@ -360,7 +369,7 @@ Adicione a seguinte entrada ao `crontab -e`:
 * * * * * cd /caminho/para/o/monitorafacil && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-O botão **CVAT > Agendar extração** em *Configurações > Processar Dados* envia um job para a fila `database`; ele não consulta o PEC durante a requisição web. No servidor, mantenha um worker ativo. Confira o usuário do serviço, o diretório e o caminho do PHP 8.5 no modelo `scripts/monitorafacil-queue.service.example` antes de instalá-lo:
+O botão **CVAT > Agendar extração** em *Configurações > Processar Dados* envia um job para a fila `database`; ele não consulta o PEC durante a requisição web. No servidor, mantenha um worker ativo. Confira o modelo em `scripts/monitorafacil-queue.service.example`:
 
 ```bash
 sudo cp scripts/monitorafacil-queue.service.example /etc/systemd/system/monitorafacil-queue.service
@@ -369,13 +378,11 @@ sudo systemctl enable --now monitorafacil-queue.service
 sudo systemctl status monitorafacil-queue.service
 ```
 
-Use `QUEUE_CONNECTION=database` e `DB_QUEUE_RETRY_AFTER=1200` no `.env`; o prazo de reentrega precisa superar os 900 segundos permitidos ao job. O `scripts/deploy.sh` executa a extração CVAT após as migrações, sinaliza os workers para reinício e avisa se o serviço não estiver ativo. A migração e a extração precisam alcançar o PEC a partir do servidor.
-
 ---
 
 ## 🧪 Testes Automatizados
 
-A suíte de testes cobre fluxos de autenticação, integridade de snapshots, regras de negócio do simulador financeiro e tratamento de falhas em conexões ou arquivos ausentes.
+A suíte de testes cobre fluxos de autenticação, integridade de snapshots, regras de negócio de C1 a C7, avaliação territorial CVAT, responsividade do layout e exportações CSV/PDF.
 
 Para executar todos os testes:
 
@@ -383,28 +390,39 @@ Para executar todos os testes:
 php artisan test
 ```
 
-Saída esperada:
+Saída da suíte de validação:
 ```text
    PASS  Tests\Unit\ExampleTest
    PASS  Tests\Unit\FinancialProjectionServiceTest
    PASS  Tests\Feature\AuthenticationTest
-   PASS  Tests\Feature\EsusSyncSnapshotTest
-   PASS  Tests\Feature\ExampleTest
+   PASS  Tests\Feature\C2IndicatorTest
+   PASS  Tests\Feature\C3IndicatorTest
+   PASS  Tests\Feature\C4IndicatorTest
+   PASS  Tests\Feature\C5IndicatorTest
+   PASS  Tests\Feature\C6IndicatorTest
+   PASS  Tests\Feature\C7IndicatorTest
+   PASS  Tests\Feature\TerritorialBondingTest
+   PASS  Tests\Feature\SettingsTest
+   PASS  Tests\Feature\NominalTeamAndExportTest
+   PASS  Tests\Feature\ResponsiveLayoutTest
+   PASS  Tests\Feature\VersionControlTest
 
-   Tests:    17 passed (59 assertions)
-   Duration: ~1.20s
+   Tests:    155 passed (1044 assertions)
+   Duration: ~4.5 min
 ```
 
 ---
 
-## 🤖 Servidores MCP (Model Context Protocol)
+## 🤖 Servidores MCP e RAG Normativo
 
-O projeto conta com integração ao padrão **Model Context Protocol (MCP)**, permitindo que agentes de IA inspecionem a base do e-SUS PEC, rodem rotinas Artisan, validem arquivos e consultem as regras normativas da APS via RAG local:
+O projeto conta com integração ao padrão **Model Context Protocol (MCP)**, permitindo que agentes de IA e desenvolvedores inspecionem a base do e-SUS PEC, executem rotinas Artisan, validem arquivos e consultem semântica e léxica das regras normativas da APS e modelagens do banco de dados:
 
-* **`postgres-esus-readonly`**: Consultas analíticas estritamente somente leitura no DW PostgreSQL do e-SUS PEC.
-* **`laravel-artisan-runner`**: Execução controlada de comandos Artisan (`test`, `esus:inspect-schema`, `migrate:status`, etc.).
-* **`esus-file-validator`**: Validação de arquivos XML de homologação do CNES e leitura de cabeçalhos de relatórios CSV do SIAPS.
-* **`rag-service`**: Recuperação semântica e léxica híbrida (Embeddings 384d + BM25) para regras normativas da APS (C1–C7, CVAT) e esquemas de tabelas do banco de dados local.
+* **`postgres-esus-readonly`**: Consultas analíticas estritamente somente leitura no DW PostgreSQL do e-SUS PEC (`query`).
+* **`laravel-artisan-runner`**: Execução controlada de comandos Artisan (`artisan_run`, `artisan_test`, `artisan_inspect_schema`).
+* **`esus-file-validator`**: Validação de arquivos XML de homologação do CNES e leitura de cabeçalhos de relatórios CSV do SIAPS (`validate_esus_xml_structure`, `inspect_csv_headers_and_sample`).
+* **`rag-service`**: Recuperação semântica e léxica híbrida (Dense Embeddings 384d + BM25) com isolamento estrito por indicador:
+  * `search_aps_rules`: Busca trechos normativos oficiais das Notas Metodológicas C1 a C7, NT 08/2026 e NT 30/2025.
+  * `search_db_schema`: Busca definições de tabelas, campos, índices e migrations em `database/migrations/` e `DATABASE-SCHEMA.md`.
 
 👉 Para guia detalhado de ferramentas, políticas de segurança e instruções de configuração, consulte o arquivo [**MCP.md**](MCP.md).
 
