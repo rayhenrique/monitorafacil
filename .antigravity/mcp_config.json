@@ -1,0 +1,68 @@
+{
+    "mcpServers": {
+        "postgres-esus-readonly": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-postgres"
+            ],
+            "env": {
+                "PGHOST": "${ESUS_DB_HOST}",
+                "PGPORT": "${ESUS_DB_PORT}",
+                "PGDATABASE": "${ESUS_DB_DATABASE}",
+                "PGUSER": "${ESUS_DB_USERNAME}",
+                "PGPASSWORD": "${ESUS_DB_PASSWORD}",
+                "PGSSLMODE": "${ESUS_DB_SSLMODE}",
+                "PGCONNECT_TIMEOUT": "10"
+            },
+            "permissions": {
+                "mode": "read-only",
+                "allowedQueries": [
+                    "SELECT",
+                    "EXPLAIN",
+                    "SHOW"
+                ]
+            }
+        },
+        "laravel-artisan-runner": {
+            "command": "php",
+            "args": [
+                "artisan"
+            ],
+            "permissions": {
+                "commands": {
+                    "test": {
+                        "policy": "allow",
+                        "description": "Permite executar suítes de testes sem confirmação"
+                    },
+                    "esus:inspect-schema": {
+                        "policy": "allow",
+                        "description": "Inspeção do schema e-SUS interna da aplicação"
+                    },
+                    "migrate:fresh": {
+                        "policy": "ask",
+                        "description": "Comando destrutivo que recria todas as tabelas"
+                    },
+                    "db:seed": {
+                        "policy": "ask",
+                        "description": "Inserção de seeds de banco de dados"
+                    },
+                    "migrate": {
+                        "policy": "ask",
+                        "description": "Execução de migrations pendentes"
+                    }
+                },
+                "defaultPolicy": "ask"
+            }
+        },
+        "esus-file-validator": {
+            "command": "node",
+            "args": [
+                ".agents/mcp/esus-validator/index.js"
+            ],
+            "permissions": {
+                "mode": "read-only"
+            }
+        }
+    }
+}

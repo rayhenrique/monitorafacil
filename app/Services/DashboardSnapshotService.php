@@ -18,6 +18,10 @@ class DashboardSnapshotService
             'c1' => C1DwService::VERSION,
             'c2' => C2DwService::VERSION,
             'c3' => C3DwService::VERSION,
+            'c4' => C4DwService::VERSION,
+            'c5' => C5DwService::VERSION,
+            'c6' => C6DwService::VERSION,
+            'c7' => C7DwService::VERSION,
         ];
         $codes = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7'];
         $distribution = [];
