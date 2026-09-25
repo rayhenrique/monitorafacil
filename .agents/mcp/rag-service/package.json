@@ -1,0 +1,13 @@
+{
+  "name": "rag-service",
+  "version": "1.0.0",
+  "description": "Servidor MCP de RAG Local para regras normativas da APS e esquemas de banco de dados do Monitora Fácil",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.1"
+  }
+}

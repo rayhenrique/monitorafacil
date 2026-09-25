@@ -11,6 +11,7 @@ Este documento documenta os servidores MCP integrados ao projeto **Monitora Fác
    - [1. postgres-esus-readonly](#1-postgres-esus-readonly)
    - [2. laravel-artisan-runner](#2-laravel-artisan-runner)
    - [3. esus-file-validator](#3-esus-file-validator)
+   - [4. rag-service](#4-rag-service)
 3. [Quando Utilizar Cada Servidor](#-quando-utilizar-cada-servidor)
 4. [Instruções de Configuração](#-instruções-de-configuração)
 5. [Diretrizes de Segurança e Boas Práticas](#-diretrizes-de-segurança-e-boas-práticas)
@@ -21,7 +22,7 @@ Este documento documenta os servidores MCP integrados ao projeto **Monitora Fác
 
 O **Model Context Protocol (MCP)** é um padrão aberto que estabelece uma ponte de comunicação bidirecional e segura entre assistentes de IA e os recursos do sistema (bancos de dados, ferramentas de terminal, parsers de arquivos e APIs internas).
 
-No **Monitora Fácil**, os servidores MCP permitem que o assistente de IA inspecione diretamente o esquema do e-SUS PEC, execute testes automatizados e valide arquivos oficiais de homologação (CNES/SIAPS) sem comprometer a estabilidade do banco de produção ou exigir comandos manuais constantes no terminal.
+No **Monitora Fácil**, os servidores MCP permitem que o assistente de IA inspecione diretamente o esquema do e-SUS PEC, execute testes automatizados, valide arquivos oficiais de homologação e consulte o acervo regulamentar da APS via RAG local sem comprometer a estabilidade do banco de produção ou alucinar regras de negócio.
 
 ---
 
@@ -37,21 +38,25 @@ graph LR
         MCP1["postgres-esus-readonly<br/>(@modelcontextprotocol/server-postgres)"]
         MCP2["laravel-artisan-runner<br/>(Artisan CLI Runner)"]
         MCP3["esus-file-validator<br/>(Validador XML / CSV)"]
+        MCP4["rag-service<br/>(RAG Normativo da APS & Schemas)"]
     end
 
     subgraph "Alvos no Sistema"
         DW[("PostgreSQL e-SUS PEC<br/>(Somente Leitura)")]
         App["Aplicação Laravel 13<br/>(Testes / Migrações / Schemas)"]
         Files["Arquivos e-SUS<br/>(XML CNES / CSV SIAPS)"]
+        Docs["Base Vetorial RAG<br/>(PDFs APS & Schemas)"]
     end
 
     Agent -- "JSON-RPC (stdio)" --> MCP1
     Agent -- "JSON-RPC (stdio)" --> MCP2
     Agent -- "JSON-RPC (stdio)" --> MCP3
+    Agent -- "JSON-RPC (stdio)" --> MCP4
 
     MCP1 -- "SELECT / EXPLAIN" --> DW
     MCP2 -- "php artisan [cmd]" --> App
     MCP3 -- "Inspeção e Validação" --> Files
+    MCP4 -- "Busca Semântica & BM25" --> Docs
 ```
 
 ---
@@ -97,10 +102,32 @@ Servidor utilitário voltado à inspeção de formato, integridade e nós princi
 
 ---
 
+### 4. `rag-service`
+
+Servidor de **Retrieval-Augmented Generation (RAG)** local para recuperação semântica e léxica (Dense Embeddings 384d + BM25) das regras ministeriais da APS e esquemas da base de dados.
+
+* **Localização**: `.agents/mcp/rag-service/index.js`
+* **Executável**: `node .agents/mcp/rag-service/index.js`
+* **Transporte**: `stdio` (JSON-RPC)
+* **Base de Conhecimento Indexada**:
+  * Notas Metodológicas C1 a C7 em `importacao/referencia/`
+  * NT 08/2026 (CVAT / Avaliação Quadrimestral / Componente II e III)
+  * NT 30/2025 (Vínculo e Acompanhamento Territorial)
+  * `DATABASE-SCHEMA.md` e migrações em `database/migrations/`
+* **Ferramentas Disponíveis**:
+  * `search_aps_rules(query: string, indicador?: string, tipo_conteudo?: string, limit?: number)`: Recupera trechos normativos oficiais com isolamento estrito por indicador (`C1` a `C7`, `CVAT` ou `GERAL`) e tipo de conteúdo (`criterio_inclusao`, `criterio_exclusao`, `boas_praticas`, `codigos_cid_ciap`, `profissionais_validos`, `periodo_avaliacao`, `metodologia_calculo`), impedindo contaminação de regras entre indicadores distintos.
+  * `search_db_schema(query: string, indicador?: string, limit?: number)`: Recupera definições de tabelas, tipos de dados, índices e relacionamentos internos documentados no `DATABASE-SCHEMA.md` e nas migrations.
+* **Script de Ingestão**: Execute `node .agents/rag/ingest.js` para reindexar a base após adicionar novos documentos ou migrações.
+
+---
+
 ## 🎯 Quando Utilizar Cada Servidor
 
 | Cenário de Uso | Servidor Recomendado | Ferramenta Indicada |
 | :--- | :--- | :--- |
+| **Antes de codificar regras de negócio, busca ativa ou notas de C1–C7** | `rag-service` | `search_aps_rules` |
+| **Consultar critérios de inclusão/exclusão, prazos (DUM/DPP) ou CIDs/CIAPs oficiais** | `rag-service` | `search_aps_rules` |
+| **Verificar colunas, tipos e índices de tabelas locais (C2–C7, CVAT, etc.)** | `rag-service` | `search_db_schema` |
 | **Auditar dados reais no e-SUS PEC** sem rodar o ETL completo | `postgres-esus-readonly` | `query` |
 | **Inspecionar colunas ou índices do DW PEC** para criação de regras normativas (C1–C7) | `postgres-esus-readonly` | `query` |
 | **Rodar suíte de testes automatizados** após alterações de código | `laravel-artisan-runner` | `artisan_test` |
@@ -108,6 +135,7 @@ Servidor utilitário voltado à inspeção de formato, integridade e nós princi
 | **Gerar inventário de metadados do DW PEC** em `storage/app/private/` | `laravel-artisan-runner` | `artisan_inspect_schema` |
 | **Checar conformidade do XML ministerial do CNES** antes de importar | `esus-file-validator` | `validate_esus_xml_structure` |
 | **Examinar colunas de planilhas CSV do SIAPS** para carga nominal | `esus-file-validator` | `inspect_csv_headers_and_sample` |
+
 
 ---
 
@@ -139,6 +167,13 @@ Para que a IDE carregue os servidores globalmente com o caminho absoluto correto
       "command": "node",
       "args": [
         ".agents/mcp/esus-validator/index.js"
+      ],
+      "cwd": "C:/Users/rayhe/Downloads/monitorafacil"
+    },
+    "rag-service": {
+      "command": "node",
+      "args": [
+        ".agents/mcp/rag-service/index.js"
       ],
       "cwd": "C:/Users/rayhe/Downloads/monitorafacil"
     }
@@ -174,6 +209,12 @@ O repositório já inclui a definição portável dos servidores para integraç�
       "command": "node",
       "args": [
         ".agents/mcp/esus-validator/index.js"
+      ]
+    },
+    "rag-service": {
+      "command": "node",
+      "args": [
+        ".agents/mcp/rag-service/index.js"
       ]
     }
   }

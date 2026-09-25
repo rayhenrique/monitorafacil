@@ -399,11 +399,12 @@ Saída esperada:
 
 ## 🤖 Servidores MCP (Model Context Protocol)
 
-O projeto conta com integração ao padrão **Model Context Protocol (MCP)**, permitindo que agentes de IA inspecionem a base do e-SUS PEC, rodem rotinas Artisan e validem arquivos em ambientes de desenvolvimento assistido:
+O projeto conta com integração ao padrão **Model Context Protocol (MCP)**, permitindo que agentes de IA inspecionem a base do e-SUS PEC, rodem rotinas Artisan, validem arquivos e consultem as regras normativas da APS via RAG local:
 
 * **`postgres-esus-readonly`**: Consultas analíticas estritamente somente leitura no DW PostgreSQL do e-SUS PEC.
 * **`laravel-artisan-runner`**: Execução controlada de comandos Artisan (`test`, `esus:inspect-schema`, `migrate:status`, etc.).
 * **`esus-file-validator`**: Validação de arquivos XML de homologação do CNES e leitura de cabeçalhos de relatórios CSV do SIAPS.
+* **`rag-service`**: Recuperação semântica e léxica híbrida (Embeddings 384d + BM25) para regras normativas da APS (C1–C7, CVAT) e esquemas de tabelas do banco de dados local.
 
 👉 Para guia detalhado de ferramentas, políticas de segurança e instruções de configuração, consulte o arquivo [**MCP.md**](MCP.md).
 

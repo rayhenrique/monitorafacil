@@ -26,3 +26,9 @@
 - **Sempre que atualizar algo do banco de dados (criação/alteração de tabelas, migrations, colunas ou índices), atualize obrigatoriamente o arquivo `DATABASE-SCHEMA.md`**.
 - O `DATABASE-SCHEMA.md` deve refletir fielmente tanto as tabelas e colunas ativas (Seção 2) quanto o alinhamento com a arquitetura geral da aplicação.
 
+### 5. Consulta Obrigatória ao RAG Normativo da APS (MCP rag-service)
+- **Sempre que for implementar ou refatorar serviços de busca ativa (`C*ActiveSearchService`), cálculo de práticas (`C*PracticeCalculator`), snapshots (`C*SnapshotService`) ou regras do CVAT (`CvatEvaluationService`), deves primeiro invocar a tool `search_aps_rules` para obter os critérios oficiais de inclusão/exclusão e códigos CID/CIAP válidos**.
+- Para consultar colunas, tipos e relacionamentos de tabelas existentes antes de criar migrations ou queries, utilize a tool `search_db_schema`.
+- O RAG local é gerado pelo script `.agents/rag/ingest.js` e indexa todos os documentos regulamentares em `importacao/referencia/`, o `DATABASE-SCHEMA.md` e as migrations em `database/migrations/`.
+
+

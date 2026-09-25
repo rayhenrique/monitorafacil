@@ -19,6 +19,12 @@
             "args": [
                 ".agents/mcp/esus-validator/index.js"
             ]
+        },
+        "rag-service": {
+            "command": "node",
+            "args": [
+                ".agents/mcp/rag-service/index.js"
+            ]
         }
     }
 }
