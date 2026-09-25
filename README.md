@@ -24,6 +24,7 @@
 - [Variáveis de Ambiente (.env)](#-variáveis-de-ambiente-env)
 - [Rotinas de Sincronização e Agendamento](#-rotinas-de-sincronização-e-agendamento)
 - [Testes Automatizados](#-testes-automatizados)
+- [Servidores MCP (Model Context Protocol)](#-servidores-mcp-model-context-protocol)
 - [Guia de Deploy (Hostinger + CloudPanel)](deploy.md)
 - [Licença](#-licença)
 
@@ -393,6 +394,18 @@ Saída esperada:
    Tests:    17 passed (59 assertions)
    Duration: ~1.20s
 ```
+
+---
+
+## 🤖 Servidores MCP (Model Context Protocol)
+
+O projeto conta com integração ao padrão **Model Context Protocol (MCP)**, permitindo que agentes de IA inspecionem a base do e-SUS PEC, rodem rotinas Artisan e validem arquivos em ambientes de desenvolvimento assistido:
+
+* **`postgres-esus-readonly`**: Consultas analíticas estritamente somente leitura no DW PostgreSQL do e-SUS PEC.
+* **`laravel-artisan-runner`**: Execução controlada de comandos Artisan (`test`, `esus:inspect-schema`, `migrate:status`, etc.).
+* **`esus-file-validator`**: Validação de arquivos XML de homologação do CNES e leitura de cabeçalhos de relatórios CSV do SIAPS.
+
+👉 Para guia detalhado de ferramentas, políticas de segurança e instruções de configuração, consulte o arquivo [**MCP.md**](MCP.md).
 
 ---
 
