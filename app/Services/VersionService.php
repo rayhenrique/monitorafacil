@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.27.0';
+    public const CURRENT_VERSION = 'v1.28.0';
 
     public const CURRENT_RELEASE_DATE = '25/09/2026';
 
@@ -61,9 +61,23 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.27.0',
+                'version' => 'v1.28.0',
                 'date' => '25/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Submódulos de Busca Geral Nominal e Dashboard Mensal de Equipes da Saúde Bucal (eSB), e Avaliação Estrita das 19 eSB',
+                'summary' => 'Lançamento de dois novos submódulos analíticos de Saúde Bucal (eSB): a Busca Geral Nominal de Cidadãos (/saude-bucal/busca-nominal) com 38.509 munícipes, acompanhamento individual dos 6 indicadores odontológicos (B1 a B6), situação cadastral e linha do tempo de atendimentos; e o Dashboard Mensal de Equipes (/saude-bucal/mensal) com visão executiva das 19 equipes eSB (001 a 021) por competência mensal (M5 a M12), cards com pontuações, denominadores, barras de progresso proporcionais por nível de desempenho e modal de busca avançada. Adicionalmente, a regra de consolidação de Saúde Bucal foi ajustada para filtrar e avaliar estritamente equipes odontológicas eSB (tipos 87 e 88), eliminando equipes eSF/eAP/USF/PACS dos indicadores B1 a B6.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Submódulo de Busca Geral Nominal de Saúde Bucal (/saude-bucal/busca-nominal) com 38.509 munícipes, filtros por microárea, equipe e cumprimento de cada indicador (B1 a B6), mascaramento LGPD, exportação CSV e modal de auditoria clínica.'],
+                    ['type' => 'novo', 'text' => 'Submódulo Dashboard Mensal de Equipes (/saude-bucal/mensal) com cards analíticos por eSB, evolução mensal (M5 a M12), pontuação, denominador, barras de progresso coloridas por faixa, busca avançada e exportação CSV.'],
+                    ['type' => 'melhoria', 'text' => 'Filtro e consolidação estrita das 19 equipes de Saúde Bucal (eSB 001 a eSB 021) nos indicadores B1 a B6, excluindo equipes de Saúde da Família (eSF) da avaliação odontológica.'],
+                    ['type' => 'melhoria', 'text' => 'Comando Artisan `php artisan esus:process-oral-health` integrando em execução atômica os snapshots quadrimestrais, evolução mensal e a sincronização nominal de todos os munícipes.'],
+                    ['type' => 'melhoria', 'text' => 'Navegação lateral desktop e mobile atualizada com links dedicados aos novos submódulos e badges oficiais ("PEC" e "Mensal"), com conformidade integral à Política de Rodapé Único.'],
+                ],
+            ],
+            [
+                'version' => 'v1.27.0',
+                'date' => '25/09/2026',
+                'badge' => 'Anterior',
                 'title' => 'Módulo de Saúde Bucal (eSB), Indicadores B1 a B6, Pontuação Municipal (10 pts) e Avaliação Estrita das Equipes eSB',
                 'summary' => 'Implementação integral do novo módulo oficial de Saúde Bucal (eSB) no Monitora Fácil, em total conformidade com as Notas Metodológicas do Ministério da Saúde. O módulo contempla os 6 indicadores odontológicos da Atenção Primária: B1 (Primeira Consulta Odontológica Programática - Peso 2.0x), B2 (Tratamento Odontológico Concluído em até 12 meses - Peso 2.0x), B3 (Taxa de Exodontia de Dentes Permanentes - Polaridade Menor é Melhor - Peso 2.0x), B4 (Ação Coletiva de Escovação Supervisionada em crianças de 6 a 12 anos - Peso 1.0x), B5 (Procedimentos Odontológicos Preventivos Individuais - Faixa Central - Peso 2.0x) e B6 (Tratamento Restaurador Atraumático ART/TRA - Peso 1.0x), somando 10,0 pontos na pontuação municipal. A avaliação contempla estritamente as 19 equipes de Saúde Bucal (eSB 001 a eSB 021) do município, excluindo equipes de Saúde da Família (eSF) da avaliação odontológica. Inclui painel geral municipal (/saude-bucal), telas detalhadas (/saude-bucal/{b1..b6}) com layout padronizado de duas abas (Aba 1: Resumo das Equipes com 4 quadrantes e Aba 2: Busca Ativa Nominal com dados clínicos reais), comando Artisan esus:process-oral-health e suíte completa de testes automatizados.',
                 'highlights' => [
@@ -71,6 +85,8 @@ class VersionService
                     ['type' => 'melhoria', 'text' => 'Avaliação e consolidação estrita das 19 Equipes de Saúde Bucal (eSB 001 a eSB 021) ativas no município, com filtro que elimina equipes eSF/eAP/USF/PACS da avaliação odontológica.'],
                     ['type' => 'novo', 'text' => 'Painel Geral de Saúde Bucal (/saude-bucal) com Hero Card executivo, cálculo da Pontuação Municipal (ISB), status global e cards comparativos dos 6 indicadores com barras de progresso e contagem de equipes por classificação.'],
                     ['type' => 'novo', 'text' => 'Telas Analíticas Detalhadas (/saude-bucal/{b1..b6}) com Aba 1 ("Resumo das Equipes") com os 4 quadrantes oficiais e tabela padrão de 5 colunas, e Aba 2 ("Busca Ativa") com paginação debounced e auditoria clínica.'],
+                    ['type' => 'novo', 'text' => 'Submódulo de Busca Geral Nominal de Saúde Bucal (/saude-bucal/busca-nominal) com 38.509 cidadãos municipais, cards KPI superiores (B1 a B6), alternância de colunas, mascaramento LGPD, modal de Busca Avançada multicritério e visualização detalhada do histórico clínico odontológico.'],
+                    ['type' => 'novo', 'text' => 'Submódulo Dashboard Mensal de Equipes da Saúde Bucal (/saude-bucal/mensal) com visão unificada das 19 equipes eSB por competência mensal (M5 a M12), cards executivos com os 6 indicadores B1 a B6, pontuações, denominadores, barras de progresso coloridas, modal de Busca Avançada e exportação CSV.'],
                     ['type' => 'melhoria', 'text' => 'Motor de extração do DW do e-SUS PEC (B1DwService a B6DwService) de alta performance e comando Artisan `php artisan esus:process-oral-health` com alocação otimizada de memória e transações atômicas.'],
                     ['type' => 'melhoria', 'text' => 'Navegação lateral desktop e mobile atualizada com o novo grupo expansível "Saúde Bucal" e badges metodológicos, preservando 100% a Política de Rodapé Único.'],
                 ],

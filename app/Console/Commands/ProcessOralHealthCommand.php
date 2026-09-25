@@ -14,8 +14,10 @@ use Illuminate\Support\Facades\DB;
 #[Description('Processa e consolida os indicadores de Saúde Bucal (B1 a B6) a partir do DW do e-SUS PEC.')]
 class ProcessOralHealthCommand extends Command
 {
-    public function handle(OralHealthSnapshotService $snapshotService): int
-    {
+    public function handle(
+        OralHealthSnapshotService $snapshotService,
+        \App\Services\OralHealth\OralHealthNominalSyncService $nominalSyncService
+    ): int {
         @ini_set('memory_limit', '1024M');
         @set_time_limit(0);
 
@@ -42,10 +44,19 @@ class ProcessOralHealthCommand extends Command
         $result = $snapshotService->process($pec, $year, $quarter);
 
         $this->info(sprintf(
-            'Processamento concluído com sucesso! Equipes: %d | Indicadores: %d | Registros Nominais: %d',
+            'Snapshots concluídos com sucesso! Equipes: %d | Indicadores: %d | Registros Nominais: %d',
             $result['teams_count'],
             $result['indicators_processed'],
             $result['nominals_count']
+        ));
+
+        $this->info('Consolidando Relação Geral Nominal de Saúde Bucal...');
+        $nominalResult = $nominalSyncService->sync($pec, $year, $quarter);
+
+        $this->info(sprintf(
+            'Busca Geral Nominal concluída! %d cidadãos indexados (%d com procedimentos odontológicos).',
+            $nominalResult['citizens_processed'],
+            $nominalResult['dental_attendances_found']
         ));
 
         return self::SUCCESS;

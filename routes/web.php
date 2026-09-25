@@ -38,6 +38,8 @@ Route::middleware('auth')->group(function (): void {
 
     Route::prefix('saude-bucal')->name('oral-health.')->group(function (): void {
         Route::get('/', \App\Livewire\OralHealth\Overview::class)->name('overview');
+        Route::get('/busca-nominal', \App\Livewire\OralHealth\NominalList::class)->name('nominal');
+        Route::get('/mensal', \App\Livewire\OralHealth\MonthlyDashboard::class)->name('monthly');
         Route::get('/{indicator}', \App\Livewire\OralHealth\IndicatorDetail::class)
             ->whereIn('indicator', ['b1', 'b2', 'b3', 'b4', 'b5', 'b6'])
             ->name('indicator');

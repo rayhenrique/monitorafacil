@@ -210,6 +210,14 @@
                                         </div>
                                         <div x-show="open" class="ml-4 pl-3 border-l border-[#1a3832] space-y-1 mt-1" style="{{ request()->routeIs('oral-health.*') ? '' : 'display: none;' }}">
                                             <a href="{{ route('oral-health.overview') }}" @click="mobileMenuOpen = false" class="block rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('oral-health.overview') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">Painel Geral</a>
+                                            <a href="{{ route('oral-health.nominal') }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('oral-health.nominal') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                                <span>Busca Geral Nominal</span>
+                                                <span class="rounded bg-teal-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-teal-300 font-mono">PEC</span>
+                                            </a>
+                                            <a href="{{ route('oral-health.monthly') }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('oral-health.monthly') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                                <span>Dashboard Mensal</span>
+                                                <span class="rounded bg-sky-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-sky-300 font-mono">Mensal</span>
+                                            </a>
                                             <a href="{{ route('oral-health.indicator', 'b1') }}" @click="mobileMenuOpen = false" class="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition {{ request()->routeIs('oral-health.indicator') && request()->route('indicator') === 'b1' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
                                                 <span>B1 · Primeira Consulta</span>
                                                 <span class="text-[10px] text-teal-400 font-mono">1x/ano</span>
@@ -490,6 +498,14 @@
                             <div x-show="open && !sidebarCollapsed" class="ml-4 pl-3 border-l border-[#1a3832] space-y-1 mt-1" style="{{ request()->routeIs('oral-health.*') ? '' : 'display: none;' }}">
                                 <a href="{{ route('oral-health.overview') }}" class="block rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('oral-health.overview') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
                                     Painel Geral
+                                </a>
+                                <a href="{{ route('oral-health.nominal') }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('oral-health.nominal') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                    <span>Busca Geral Nominal</span>
+                                    <span class="rounded bg-teal-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-teal-300 font-mono">PEC</span>
+                                </a>
+                                <a href="{{ route('oral-health.monthly') }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('oral-health.monthly') ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
+                                    <span>Dashboard Mensal</span>
+                                    <span class="rounded bg-sky-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-sky-300 font-mono">Mensal</span>
                                 </a>
                                 <a href="{{ route('oral-health.indicator', 'b1') }}" class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition {{ request()->routeIs('oral-health.indicator') && request()->route('indicator') === 'b1' ? 'bg-teal-500/20 text-teal-300 font-semibold' : 'text-slate-400 hover:text-white hover:bg-[#132d27]' }}">
                                     <span>B1 · Primeira Consulta</span>

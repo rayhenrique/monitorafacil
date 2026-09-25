@@ -52,13 +52,23 @@
         <!-- Botões e Seletores -->
         <div class="flex items-center gap-2 shrink-0">
             <a
+                href="{{ route('oral-health.nominal') }}"
+                class="inline-flex items-center gap-1.5 rounded-lg border border-[#dce6e2] bg-white px-3 py-2 text-xs font-semibold text-[#16302c] shadow-2xs hover:bg-slate-50 transition"
+            >
+                <svg class="h-4 w-4 text-teal-700" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                </svg>
+                <span>Busca Geral</span>
+            </a>
+
+            <a
                 href="{{ route('oral-health.overview', ['ano' => $year, 'quadrimestre' => $quarter]) }}"
                 class="inline-flex items-center gap-1.5 rounded-lg border border-[#dce6e2] bg-white px-3 py-2 text-xs font-semibold text-[#16302c] shadow-2xs hover:bg-slate-50 transition"
             >
                 <svg class="h-4 w-4 text-[#58716b]" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
                 </svg>
-                <span>Voltar à Visão Geral</span>
+                <span>Voltar ao Painel</span>
             </a>
         </div>
     </div>

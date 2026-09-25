@@ -17,7 +17,7 @@ As tabelas das seções 3 a 6 são o desenho-alvo. As tabelas já existentes est
 
 ## 2. Estado atual
 
-O banco de dados operacional e analítico do Monitora Fácil conta atualmente com **26 tabelas de aplicação** em produção, distribuídas em cinco domínios funcionais (Gestão, Consolidação/APS, Coortes e Busca Ativa C2–C7, Saúde Bucal eSB B1–B6, e Avaliação Territorial/CVAT), além de **8 tabelas técnicas de infraestrutura** gerenciadas pelo Laravel.
+O banco de dados operacional e analítico do Monitora Fácil conta atualmente com **27 tabelas de aplicação** em produção, distribuídas em cinco domínios funcionais (Gestão, Consolidação/APS, Coortes e Busca Ativa C2–C7, Saúde Bucal eSB B1–B6, e Avaliação Territorial/CVAT), além de **8 tabelas técnicas de infraestrutura** gerenciadas pelo Laravel.
 
 ### 2.1. Inventário Geral de Tabelas Ativas
 
@@ -44,7 +44,8 @@ O banco de dados operacional e analítico do Monitora Fácil conta atualmente co
 | | `c7_nominal_women` | `C7NominalWoman` | Lista nominal com busca ativa com identificação de elegibilidade e cumprimento individual das 4 práticas (Quadro 01) e pendências clínicas estruturadas. |
 | **Saúde Bucal (eSB - B1 a B6)** | `oral_health_indicator_snapshots` | `OralHealthIndicatorSnapshot` | Snapshots consolidados quadrimestrais por eSB e município para os 6 indicadores de Saúde Bucal (B1 a B6). |
 | | `oral_health_monthly_snapshots` | `OralHealthMonthlySnapshot` | Evolução mensal de produção e desempenho dos indicadores de Saúde Bucal por equipe e competência. |
-| | `oral_health_nominal_patients` | `OralHealthNominalPatient` | Lista nominal e busca ativa odontológica (1ª consulta, tratamentos concluídos, escovação coletiva, procedimentos preventivos, exodontias e ART). |
+| | `oral_health_nominal_patients` | `OralHealthNominalPatient` | Lista nominal e busca ativa odontológica por indicador (1ª consulta, tratamentos concluídos, escovação coletiva, procedimentos preventivos, exodontias e ART). |
+| | `oral_health_nominal_citizens` | `OralHealthNominalCitizen` | Relação nominal e busca ativa geral odontológica e territorial de cidadãos com atributos dos 6 indicadores (B1 a B6), situação clínica e vínculo. |
 | **Avaliação Territorial (CVAT)** | `cvat_team_evaluations` | `CvatTeamEvaluation` | Avaliação de desempenho das equipes na Portaria GM/MS e NT nº 8/2026: nota de cadastro (0–3), acompanhamento (0–7), nota final (0–10), classificação (ÓTIMO, BOM, SUFICIENTE, REGULAR), parâmetro e razão de vinculados. |
 | | `cvat_dimension_distributions` | `CvatDimensionDistribution` | Distribuição consolidada de equipes por faixa de desempenho para as dimensões de Cadastro e Acompanhamento. |
 | | `cvat_nominal_citizens` | `CvatNominalCitizen` | Cidadãos nominais para saneamento de cadastros e acompanhamento prioritário (MICI/MICDT, vínculo, vulnerabilidades: idoso/criança, benefícios: BPC/PBF, contatos de cuidado e elegibilidade). |
@@ -128,6 +129,10 @@ Os indicadores de Saúde Bucal na APS seguem as Notas Metodológicas Oficiais do
   - Lista nominal de cidadãos e eventos clínicos odontológicos para busca ativa prioritária nas eSB.
   - Colunas: `id`, `year`, `quarter`, `indicator_code` (`b1`, `b2`, `b4`, `b5`, `b6`), `cidadao_pec_id`, `cns`, `cpf`, `name`, `social_name`, `birth_date`, `age_years`, `phone`, `cnes`, `facility_name`, `ine`, `team_name`, `professional_name`, `professional_cbo`, `first_consultation_date`, `treatment_completed_date`, `treatment_status` (`concluido`, `em_andamento`, `nao_iniciado`, `atrasado`), `has_first_consultation`, `has_treatment_completed`, `has_supervised_brushing`, `last_brushing_date`, `preventive_procedures_count`, `restorative_procedures_count`, `art_procedures_count`, `exodontia_procedures_count`, `total_procedures_count`, `score_percent`, `calculation_version`, timestamps.
   - Índices: `PRIMARY(id)`, `INDEX(cidadao_pec_id)`, `INDEX(cns)`, `INDEX(cpf)`, `INDEX(name)`, `INDEX(cnes)`, `INDEX(ine)`, `INDEX(indicator_code)`, `INDEX(year, quarter, indicator_code, ine)`.
+- **`oral_health_nominal_citizens`**:
+  - Relação nominal integral e busca ativa geral odontológica de todos os cidadãos vinculados e cadastrados no território municipal, consolidando contagens dos 6 indicadores de Saúde Bucal (B1 a B6) e situação cadastral.
+  - Colunas: `id`, `year`, `quarter`, `month`, `cidadao_pec_id`, `cns`, `cpf`, `name`, `mother_name`, `birth_date`, `age_years`, `gender`, `race_color`, `cnes`, `facility_name`, `ine`, `team_name`, `microarea`, `district`, `professional_cns`, `professional_name`, `mici_updated`, `micdt_updated`, `is_linked`, `b1_count`, `b2_count`, `b3_count`, `b4_count`, `b4_eligible`, `b5_count`, `b6_count`, `first_consultation_date`, `treatment_completed_date`, `last_brushing_date`, `last_attendance_date`, `last_professional_name`, `last_professional_cbo`, `treatment_status` (`concluido`, `em_andamento`, `nao_iniciado`), `calculation_version`, timestamps.
+  - Índices: `PRIMARY(id)`, `INDEX(cidadao_pec_id)`, `INDEX(cns)`, `INDEX(cpf)`, `INDEX(name)`, `INDEX(cnes)`, `INDEX(ine)`, `INDEX(microarea)`, `INDEX(mici_updated)`, `INDEX(micdt_updated)`, `INDEX(is_linked)`, `INDEX(b1_count)`..`INDEX(b6_count)`, `INDEX(year, quarter, ine)`, `INDEX(year, quarter, cnes)`, `INDEX(year, quarter, cidadao_pec_id)`.
 
 #### 2.2.5. Avaliação Territorial e Vínculo (CVAT - Portaria GM/MS e NT nº 8/2026)
 
