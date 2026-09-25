@@ -4,6 +4,10 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const defaultProjectRoot = path.resolve(__dirname, "../../..");
 
 const server = new Server(
     { name: "esus-validator", version: "1.0.0" },
@@ -42,7 +46,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
-    const projectRoot = process.cwd();
+    const projectRoot = fs.existsSync(path.resolve(process.cwd(), "artisan"))
+        ? process.cwd()
+        : defaultProjectRoot;
 
     if (name === "inspect_csv_headers_and_sample") {
         const fullPath = path.resolve(projectRoot, args.filepath);
