@@ -8,27 +8,27 @@
     />
 
     <!-- Cabeçalho da relação nominal e Toolbar de Ações -->
-    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-[#dce6e2] shadow-xs">
         <div>
             <div class="flex flex-wrap items-center gap-2">
-                <h1 class="text-base sm:text-lg font-bold tracking-tight text-sky-950 flex items-center gap-2">
+                <h1 class="text-base sm:text-lg font-bold tracking-tight text-[#16302c] flex items-center gap-2">
                     <span>Monitoramento de Vínculo e Acompanhamento - Relação Nominal</span>
                 </h1>
                 @if ($activeTeam)
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-100 text-sky-800 border border-sky-200">
-                        <svg class="h-3 w-3 text-sky-600" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/></svg>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-50 text-teal-800 border border-teal-200">
+                        <svg class="h-3 w-3 text-teal-600" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/></svg>
                         <span>Equipe: {{ $metrics?->team_name ?? ($activeTeamModel?->team_name ?? $activeTeam) }}</span>
                         <button type="button" wire:click="clearTeamFilter" class="hover:text-rose-600 font-bold ml-0.5 cursor-pointer" title="Remover filtro de equipe">✕</button>
                     </span>
                 @endif
             </div>
-            <p class="text-xs text-slate-500 mt-1 flex flex-wrap items-center gap-1.5 font-medium">
+            <p class="text-xs text-[#58716b] mt-1 flex flex-wrap items-center gap-1.5 font-medium">
                 <svg class="h-3.5 w-3.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5" />
                 </svg>
                 <span>Último atendimento registrado em {{ $metrics?->last_record_date ? \Carbon\Carbon::parse($metrics->last_record_date)->format('d/m/Y') : ($metrics ? $metrics->reference_date?->format('d/m/Y') : '---') }}</span>
                 <span class="text-slate-300">•</span>
-                <span class="text-sky-700 font-semibold">{{ number_format($totalRecordsCount, 0, ',', '.') }} cidadãos listados</span>
+                <span class="text-teal-800 font-semibold">{{ number_format($totalRecordsCount, 0, ',', '.') }} cidadãos listados</span>
             </p>
         </div>
 
@@ -45,7 +45,7 @@
                 <select
                     id="nominal-team-select"
                     wire:model.live="selectedTeam"
-                    class="w-full rounded-lg border border-slate-300 bg-white pl-8 pr-7 py-2 text-xs font-semibold text-slate-800 shadow-2xs hover:border-slate-400 focus:bg-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition cursor-pointer"
+                    class="w-full rounded-lg border border-[#dce6e2] bg-white pl-8 pr-7 py-2 text-xs font-semibold text-[#16302c] shadow-2xs hover:border-slate-400 focus:bg-white focus:border-teal-600 focus:ring-1 focus:ring-teal-600 transition cursor-pointer"
                 >
                     <option value="">Todas as Equipes (Município)</option>
                     @foreach ($teamsList as $teamItem)
@@ -60,7 +60,7 @@
                 wire:click="exportCsv"
                 wire:loading.attr="disabled"
                 wire:target="exportCsv"
-                class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-semibold shadow-2xs transition cursor-pointer disabled:opacity-50"
+                class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-[#16302c] border border-[#dce6e2] text-xs font-semibold shadow-2xs transition cursor-pointer disabled:opacity-50"
                 title="Exportar dados nominais em planilha CSV (compatível com Excel)"
             >
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -76,7 +76,7 @@
                 wire:click="exportPdf"
                 wire:loading.attr="disabled"
                 wire:target="exportPdf"
-                class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white text-xs font-semibold shadow-2xs transition cursor-pointer disabled:opacity-50"
+                class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-[#16302c] border border-[#dce6e2] text-xs font-semibold shadow-2xs transition cursor-pointer disabled:opacity-50"
                 title="Exportar relatório formatado em PDF (A4 Paisagem)"
             >
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -90,7 +90,7 @@
             <button
                 type="button"
                 wire:click="openAdvancedModal"
-                class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white text-xs font-semibold shadow-2xs transition cursor-pointer"
+                class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white text-xs font-semibold shadow-2xs transition cursor-pointer"
             >
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -521,11 +521,11 @@
     </div>
 
     <!-- TABELA NOMINAL COMPLETA COM ROLAGEM HORIZONTAL PROTEGIDA -->
-    <div class="bg-white rounded-2xl sm:rounded-3xl border border-line shadow-panel overflow-hidden" x-data="{ revealed: {} }">
+    <div class="bg-white rounded-2xl border border-[#dce6e2] shadow-xs overflow-hidden" x-data="{ revealed: {} }">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs whitespace-nowrap min-w-[1300px]">
                 <thead>
-                    <tr class="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider text-[10px] border-b border-line">
+                    <tr class="bg-[#f5f7f6] text-[#58716b] font-semibold uppercase tracking-wider text-xs border-b border-[#dce6e2]">
                         <th class="py-3.5 px-3 text-center w-10">#</th>
                         <th class="py-3.5 px-3">CNS</th>
                         <th class="py-3.5 px-3">CPF</th>
@@ -604,7 +604,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse ($citizens as $c)
-                        <tr class="hover:bg-slate-50/70 transition">
+                        <tr class="hover:bg-teal-50/30 transition-colors border-b border-[#dce6e2]">
                             <!-- ID / PEC ID -->
                             <td class="py-3 px-3 text-center font-mono text-[11px] text-slate-500">
                                 {{ $c->cidadao_pec_id }}
@@ -628,7 +628,7 @@
                                     <button
                                         type="button"
                                         @click="navigator.clipboard.writeText('{{ $c->cns }}')"
-                                        class="text-slate-400 hover:text-blue-600 transition"
+                                        class="text-slate-400 hover:text-teal-700 transition"
                                         title="Copiar CNS"
                                     >
                                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -656,7 +656,7 @@
                                     <button
                                         type="button"
                                         @click="navigator.clipboard.writeText('{{ $c->cpf }}')"
-                                        class="text-slate-400 hover:text-blue-600 transition"
+                                        class="text-slate-400 hover:text-teal-700 transition"
                                         title="Copiar CPF"
                                     >
                                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -732,11 +732,11 @@
                             <!-- MICDT (ATUALIZAÇÃO) -->
                             <td class="py-3 px-3 text-center">
                                 @if ($c->has_micdt && $c->micdt_date)
-                                    <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold {{ $c->micdt_updated ? 'bg-emerald-500' : 'bg-amber-600' }} text-white shadow-2xs" title="{{ $c->micdt_updated ? 'Atualizado' : 'Fora da janela de 24 meses' }}">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border {{ $c->micdt_updated ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-amber-200 bg-amber-50 text-amber-700' }}" title="{{ $c->micdt_updated ? 'Atualizado' : 'Fora da janela de 24 meses' }}">
                                         {{ $c->micdt_date->format('d/m/Y') }}
                                     </span>
                                 @else
-                                    <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-600 text-white shadow-2xs">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border border-rose-200 bg-rose-50 text-rose-700">
                                         SEM MICDT
                                     </span>
                                 @endif
@@ -745,11 +745,11 @@
                             <!-- VULNERABILIDADE (IDADE) -->
                             <td class="py-3 px-3 text-center">
                                 @if ($c->vulnerability_type === 'idoso')
-                                    <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-600 text-white shadow-2xs">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold border border-amber-200 bg-amber-50 text-amber-800">
                                         Idoso
                                     </span>
                                 @elseif ($c->vulnerability_type === 'crianca')
-                                    <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-600 text-white shadow-2xs">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold border border-teal-200 bg-teal-50 text-teal-800">
                                         Criança
                                     </span>
                                 @else
@@ -1038,8 +1038,8 @@
                     </div>
 
                     <!-- Dimensão Acompanhamento -->
-                    <div class="p-4 rounded-2xl border border-blue-200 bg-blue-50/40 space-y-2">
-                        <span class="font-bold text-blue-900 block text-xs uppercase">Auditoria Dimensão Acompanhamento</span>
+                    <div class="p-4 rounded-2xl border border-teal-200 bg-teal-50/40 space-y-2">
+                        <span class="font-bold text-teal-900 block text-xs uppercase">Auditoria Dimensão Acompanhamento</span>
                         <div class="flex items-center justify-between">
                             <span class="text-slate-600">Vulnerabilidade (Idade):</span>
                             <span class="font-bold uppercase text-slate-800">{{ $selectedCitizen->vulnerability_type }}</span>

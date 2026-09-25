@@ -496,25 +496,25 @@
                             <tr>
                                 <td class="py-2.5 px-4 font-mono font-bold text-teal-900">X &ge; 100%</td>
                                 <td class="py-2.5 px-4 text-center font-bold text-emerald-600">3,00 pts</td>
-                                <td class="py-2.5 px-4 text-center"><span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold">Ótimo</span></td>
+                                <td class="py-2.5 px-4 text-center"><span class="px-2.5 py-0.5 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 font-bold text-xs">Ótimo</span></td>
                                 <td class="py-2.5 px-4 text-slate-600">Território plenamente cadastrado e georreferenciado ao domicílio</td>
                             </tr>
                             <tr>
                                 <td class="py-2.5 px-4 font-mono font-bold text-teal-900">75% &le; X &lt; 100%</td>
                                 <td class="py-2.5 px-4 text-center font-bold text-teal-700">2,25 pts</td>
-                                <td class="py-2.5 px-4 text-center"><span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">Bom</span></td>
+                                <td class="py-2.5 px-4 text-center"><span class="px-2.5 py-0.5 rounded-full border border-teal-200 bg-teal-50 text-teal-700 font-bold text-xs">Bom</span></td>
                                 <td class="py-2.5 px-4 text-slate-600">Boa cobertura cadastral com oportunidades de consolidação de domicílios</td>
                             </tr>
                             <tr>
                                 <td class="py-2.5 px-4 font-mono font-bold text-teal-900">50% &le; X &lt; 75%</td>
                                 <td class="py-2.5 px-4 text-center font-bold text-amber-600">1,50 pts</td>
-                                <td class="py-2.5 px-4 text-center"><span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-bold">Suficiente</span></td>
+                                <td class="py-2.5 px-4 text-center"><span class="px-2.5 py-0.5 rounded-full border border-amber-200 bg-amber-50 text-amber-700 font-bold text-xs">Suficiente</span></td>
                                 <td class="py-2.5 px-4 text-slate-600">Volume considerável de cadastros desatualizados (&gt; 24 meses) ou sem MICDT</td>
                             </tr>
                             <tr>
                                 <td class="py-2.5 px-4 font-mono font-bold text-teal-900">X &lt; 50%</td>
                                 <td class="py-2.5 px-4 text-center font-bold text-rose-600">0,75 pts</td>
-                                <td class="py-2.5 px-4 text-center"><span class="px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-bold">Regular</span></td>
+                                <td class="py-2.5 px-4 text-center"><span class="px-2.5 py-0.5 rounded-full border border-rose-200 bg-rose-50 text-rose-700 font-bold text-xs">Regular</span></td>
                                 <td class="py-2.5 px-4 text-slate-600">Necessidade premente de mutirão cadastral e busca ativa pelos ACS</td>
                             </tr>
                         </tbody>
@@ -523,24 +523,24 @@
             </div>
 
             <!-- Dimensão Acompanhamento (Índice Y) -->
-            <div class="p-4 sm:p-6 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-4">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
+            <div class="p-4 sm:p-6 rounded-2xl border border-[#dce6e2] bg-[#f5f7f6] space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#dce6e2] pb-3">
                     <div class="flex items-start sm:items-center gap-2.5">
-                        <div class="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-xl bg-blue-800 text-white font-black text-xs">
+                        <div class="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-xl bg-teal-800 text-white font-black text-xs">
                             3
                         </div>
                         <div>
-                            <h4 class="text-xs sm:text-sm font-bold text-slate-800">3. Dimensão Acompanhamento (Índice Y · Escore de até 7,00 pontos)</h4>
-                            <p class="text-[10px] sm:text-[11px] text-slate-500">Contatos assistenciais contínuos no território nos últimos 12 meses anteriores ao fim do quadrimestre</p>
+                            <h4 class="text-xs sm:text-sm font-bold text-[#16302c]">3. Dimensão Acompanhamento (Índice Y · Escore de até 7,00 pontos)</h4>
+                            <p class="text-[10px] sm:text-[11px] text-[#58716b]">Contatos assistenciais contínuos no território nos últimos 12 meses anteriores ao fim do quadrimestre</p>
                         </div>
                     </div>
-                    <span class="px-3 py-1 rounded-xl bg-blue-100 text-blue-900 text-xs font-black self-start sm:self-auto">Peso 7,0</span>
+                    <span class="px-3 py-1 rounded-xl bg-teal-50 border border-teal-200 text-teal-900 text-xs font-black self-start sm:self-auto">Peso 7,0</span>
                 </div>
 
                 <!-- Definição de Pessoa Acompanhada -->
-                <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-blue-200 space-y-2 text-xs">
-                    <span class="font-bold text-blue-950 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                        <svg class="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-[#dce6e2] space-y-2 text-xs">
+                    <span class="font-bold text-[#16302c] uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                        <svg class="h-4 w-4 text-teal-700" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Definição Oficial de Pessoa Acompanhada (Item 2.6.4 da NT nº 30/2025)
@@ -549,18 +549,18 @@
                         É considerada acompanhada a pessoa cadastrada e vinculada à equipe que tiver <strong>mais de um contato assistencial no período de um ano</strong> (12 meses anteriores à data final do quadrimestre avaliado), sendo <strong>obrigatório que ao menos um contato seja uma Prática de Cuidado</strong>:
                     </p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-[11px]">
-                        <div class="bg-blue-50/60 p-3 rounded-lg border border-blue-100 space-y-1">
-                            <strong class="text-blue-900 block">Práticas de Cuidado Obrigatórias (&ge; 1 contato):</strong>
-                            <ul class="list-disc list-inside text-blue-800 space-y-0.5">
+                        <div class="bg-teal-50/50 p-3 rounded-lg border border-teal-100 space-y-1">
+                            <strong class="text-teal-900 block">Práticas de Cuidado Obrigatórias (&ge; 1 contato):</strong>
+                            <ul class="list-disc list-inside text-teal-800 space-y-0.5">
                                 <li>Atendimento Individual Clínico (Médico / Enfermeiro)</li>
                                 <li>Atendimento Individual Odontológico</li>
                                 <li>Visita Domiciliar do Agente Comunitário de Saúde (ACS)</li>
                                 <li>Atividade Coletiva no território</li>
                             </ul>
                         </div>
-                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1">
-                            <strong class="text-slate-800 block">Demais Contatos Válidos (&ge; 2º contato):</strong>
-                            <ul class="list-disc list-inside text-slate-600 space-y-0.5">
+                        <div class="bg-slate-50 p-3 rounded-lg border border-[#dce6e2] space-y-1">
+                            <strong class="text-[#16302c] block">Demais Contatos Válidos (&ge; 2º contato):</strong>
+                            <ul class="list-disc list-inside text-[#58716b] space-y-0.5">
                                 <li>Outra prática de cuidado médica/odonto/ACS</li>
                                 <li>Registro de Procedimento Ambulatorial ou de Enfermagem</li>
                                 <li>Registro de Vacinação no PEC / SIPNI</li>
@@ -571,20 +571,20 @@
 
                 <!-- Critérios de Vulnerabilidade e Ponderação Y -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 text-xs">
-                    <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 space-y-2">
-                        <span class="font-bold text-slate-800 block uppercase tracking-wider text-[11px]">Ponderadores de Vulnerabilidade (Item 3.10)</span>
-                        <ul class="space-y-1.5 text-slate-600">
+                    <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-[#dce6e2] space-y-2">
+                        <span class="font-bold text-[#16302c] block uppercase tracking-wider text-[11px]">Ponderadores de Vulnerabilidade (Item 3.10)</span>
+                        <ul class="space-y-1.5 text-[#58716b]">
                             <li class="flex items-center justify-between gap-2">
                                 <span class="truncate">Sem critério de vulnerabilidade:</span>
-                                <strong class="font-mono text-blue-800 bg-blue-50 px-2 py-0.5 rounded shrink-0">&times; 1,00</strong>
+                                <strong class="font-mono text-teal-800 bg-teal-50 px-2 py-0.5 rounded shrink-0">&times; 1,00</strong>
                             </li>
                             <li class="flex items-center justify-between gap-2">
                                 <span class="truncate">Idoso (&ge;60a) OU Criança (&lt;5a incompletos):</span>
-                                <strong class="font-mono text-blue-800 bg-blue-50 px-2 py-0.5 rounded shrink-0">&times; 1,20</strong>
+                                <strong class="font-mono text-teal-800 bg-teal-50 px-2 py-0.5 rounded shrink-0">&times; 1,20</strong>
                             </li>
                             <li class="flex items-center justify-between gap-2">
                                 <span class="truncate">Beneficiário BPC OU Bolsa Família (PBF):</span>
-                                <strong class="font-mono text-blue-800 bg-blue-50 px-2 py-0.5 rounded shrink-0">&times; 1,30</strong>
+                                <strong class="font-mono text-teal-800 bg-teal-50 px-2 py-0.5 rounded shrink-0">&times; 1,30</strong>
                             </li>
                             <li class="flex items-center justify-between gap-2">
                                 <span class="truncate">Vulnerabilidade Dupla (Idoso/Criança + BPC/PBF):</span>
@@ -593,20 +593,20 @@
                         </ul>
                     </div>
 
-                    <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 space-y-2">
-                        <span class="font-bold text-slate-800 block uppercase tracking-wider text-[11px]">Fórmula Oficial do Índice Y</span>
-                        <div class="p-3 rounded-xl bg-slate-900 text-sky-300 font-mono text-[11px] sm:text-xs leading-relaxed overflow-x-auto whitespace-nowrap">
+                    <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-[#dce6e2] space-y-2">
+                        <span class="font-bold text-[#16302c] block uppercase tracking-wider text-[11px]">Fórmula Oficial do Índice Y</span>
+                        <div class="p-3 rounded-xl bg-[#0c1f1c] text-teal-300 border border-[#1a3832] font-mono text-[11px] sm:text-xs leading-relaxed overflow-x-auto whitespace-nowrap">
                             Y = [(Acomp_sem &times; 1,0) + (Acomp_idade &times; 1,2) + (Acomp_benef &times; 1,3) + (Acomp_dupla &times; 2,5)] / 47.500 &times; 100
                         </div>
-                        <p class="text-[10px] sm:text-[11px] text-slate-500">A meta ministerial para a pontuação máxima é atingir índice ponderado Y &ge; 50% da população parâmetro.</p>
+                        <p class="text-[10px] sm:text-[11px] text-[#58716b]">A meta ministerial para a pontuação máxima é atingir índice ponderado Y &ge; 50% da população parâmetro.</p>
                     </div>
                 </div>
 
                 <!-- Tabela de Conversão do Escore Y Responsiva -->
-                <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+                <div class="overflow-x-auto rounded-xl border border-[#dce6e2] bg-white">
                     <table class="w-full text-left text-xs min-w-[550px]">
                         <thead>
-                            <tr class="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] border-b border-slate-200">
+                            <tr class="bg-[#f5f7f6] text-[#58716b] font-bold uppercase text-[10px] border-b border-[#dce6e2]">
                                 <th class="py-2.5 px-4">Intervalo do Índice Y</th>
                                 <th class="py-2.5 px-4 text-center">Escore Atribuído (pts)</th>
                                 <th class="py-2.5 px-4 text-center">Classificação</th>
@@ -615,27 +615,27 @@
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             <tr>
-                                <td class="py-2.5 px-4 font-mono font-bold text-blue-900">Y &ge; 50%</td>
+                                <td class="py-2.5 px-4 font-mono font-bold text-teal-900">Y &ge; 50%</td>
                                 <td class="py-2.5 px-4 text-center font-bold text-emerald-600">7,00 pts</td>
-                                <td class="py-2.5 px-4 text-center"><span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold">Ótimo</span></td>
+                                <td class="py-2.5 px-4 text-center"><span class="px-2.5 py-0.5 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 font-bold text-xs">Ótimo</span></td>
                                 <td class="py-2.5 px-4 text-slate-600">Acompanhamento territorial intensivo e equânime com foco prioritário em vulneráveis</td>
                             </tr>
                             <tr>
-                                <td class="py-2.5 px-4 font-mono font-bold text-blue-900">35% &le; Y &lt; 50%</td>
+                                <td class="py-2.5 px-4 font-mono font-bold text-teal-900">35% &le; Y &lt; 50%</td>
                                 <td class="py-2.5 px-4 text-center font-bold text-teal-700">5,25 pts</td>
-                                <td class="py-2.5 px-4 text-center"><span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">Bom</span></td>
+                                <td class="py-2.5 px-4 text-center"><span class="px-2.5 py-0.5 rounded-full border border-teal-200 bg-teal-50 text-teal-700 font-bold text-xs">Bom</span></td>
                                 <td class="py-2.5 px-4 text-slate-600">Bom fluxo de visitas e consultas com margem de expansão nas microáreas</td>
                             </tr>
                             <tr>
-                                <td class="py-2.5 px-4 font-mono font-bold text-blue-900">20% &le; Y &lt; 35%</td>
+                                <td class="py-2.5 px-4 font-mono font-bold text-teal-900">20% &le; Y &lt; 35%</td>
                                 <td class="py-2.5 px-4 text-center font-bold text-amber-600">3,50 pts</td>
-                                <td class="py-2.5 px-4 text-center"><span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-bold">Suficiente</span></td>
+                                <td class="py-2.5 px-4 text-center"><span class="px-2.5 py-0.5 rounded-full border border-amber-200 bg-amber-50 text-amber-700 font-bold text-xs">Suficiente</span></td>
                                 <td class="py-2.5 px-4 text-slate-600">Muitos cidadãos sem o segundo contato assistencial no período de 12 meses</td>
                             </tr>
                             <tr>
-                                <td class="py-2.5 px-4 font-mono font-bold text-blue-900">Y &lt; 20%</td>
+                                <td class="py-2.5 px-4 font-mono font-bold text-teal-900">Y &lt; 20%</td>
                                 <td class="py-2.5 px-4 text-center font-bold text-rose-600">1,75 pts</td>
-                                <td class="py-2.5 px-4 text-center"><span class="px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-bold">Regular</span></td>
+                                <td class="py-2.5 px-4 text-center"><span class="px-2.5 py-0.5 rounded-full border border-rose-200 bg-rose-50 text-rose-700 font-bold text-xs">Regular</span></td>
                                 <td class="py-2.5 px-4 text-slate-600">Descontinuidade do cuidado territorial; risco de perda de incentivo financeiro</td>
                             </tr>
                         </tbody>
@@ -696,29 +696,29 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
-                            <tr class="bg-blue-50/40 font-semibold">
-                                <td class="py-3.5 px-4 font-mono text-blue-950 font-bold text-sm">&gt; 8,50 pts</td>
-                                <td class="py-3.5 px-4 text-center"><span class="px-3 py-1 rounded-full bg-blue-600 text-white font-bold text-xs">ÓTIMO</span></td>
-                                <td class="py-3.5 px-4 text-center font-bold text-blue-900 text-sm">100% Repasse</td>
-                                <td class="py-3.5 px-4 text-blue-900">Transferência fundo a fundo do valor integral do incentivo fixado</td>
-                            </tr>
-                            <tr class="bg-emerald-50/40 font-semibold">
-                                <td class="py-3.5 px-4 font-mono text-emerald-950 font-bold text-sm">7,00 a 8,50 pts</td>
-                                <td class="py-3.5 px-4 text-center"><span class="px-3 py-1 rounded-full bg-emerald-600 text-white font-bold text-xs">BOM</span></td>
+                            <tr class="bg-emerald-50/30 font-semibold">
+                                <td class="py-3.5 px-4 font-mono text-emerald-950 font-bold text-sm">&gt; 8,50 pts</td>
+                                <td class="py-3.5 px-4 text-center"><span class="px-3 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 font-bold text-xs">ÓTIMO</span></td>
                                 <td class="py-3.5 px-4 text-center font-bold text-emerald-900 text-sm">100% Repasse</td>
-                                <td class="py-3.5 px-4 text-emerald-900">Transferência fundo a fundo do valor integral do incentivo fixado</td>
+                                <td class="py-3.5 px-4 text-emerald-950">Transferência fundo a fundo do valor integral do incentivo fixado</td>
                             </tr>
-                            <tr class="bg-amber-50/40 font-semibold">
+                            <tr class="bg-teal-50/30 font-semibold">
+                                <td class="py-3.5 px-4 font-mono text-teal-950 font-bold text-sm">7,00 a 8,50 pts</td>
+                                <td class="py-3.5 px-4 text-center"><span class="px-3 py-1 rounded-full border border-teal-200 bg-teal-50 text-teal-700 font-bold text-xs">BOM</span></td>
+                                <td class="py-3.5 px-4 text-center font-bold text-teal-900 text-sm">100% Repasse</td>
+                                <td class="py-3.5 px-4 text-teal-950">Transferência fundo a fundo do valor integral do incentivo fixado</td>
+                            </tr>
+                            <tr class="bg-amber-50/30 font-semibold">
                                 <td class="py-3.5 px-4 font-mono text-amber-950 font-bold text-sm">5,00 a 6,99 pts</td>
-                                <td class="py-3.5 px-4 text-center"><span class="px-3 py-1 rounded-full bg-amber-500 text-white font-bold text-xs">SUFICIENTE</span></td>
+                                <td class="py-3.5 px-4 text-center"><span class="px-3 py-1 rounded-full border border-amber-200 bg-amber-50 text-amber-700 font-bold text-xs">SUFICIENTE</span></td>
                                 <td class="py-3.5 px-4 text-center font-bold text-amber-900 text-sm">75% Repasse</td>
-                                <td class="py-3.5 px-4 text-amber-900">Retenção de 25% do incentivo federal por desempenho insuficiente</td>
+                                <td class="py-3.5 px-4 text-amber-950">Retenção de 25% do incentivo federal por desempenho insuficiente</td>
                             </tr>
-                            <tr class="bg-rose-50/40 font-semibold">
+                            <tr class="bg-rose-50/30 font-semibold">
                                 <td class="py-3.5 px-4 font-mono text-rose-950 font-bold text-sm">&lt; 5,00 pts</td>
-                                <td class="py-3.5 px-4 text-center"><span class="px-3 py-1 rounded-full bg-rose-600 text-white font-bold text-xs">REGULAR</span></td>
+                                <td class="py-3.5 px-4 text-center"><span class="px-3 py-1 rounded-full border border-rose-200 bg-rose-50 text-rose-700 font-bold text-xs">REGULAR</span></td>
                                 <td class="py-3.5 px-4 text-center font-bold text-rose-900 text-sm">50% Repasse</td>
-                                <td class="py-3.5 px-4 text-rose-900">Retenção de 50% do incentivo federal; equipe sob monitoramento crítico</td>
+                                <td class="py-3.5 px-4 text-rose-950">Retenção de 50% do incentivo federal; equipe sob monitoramento crítico</td>
                             </tr>
                         </tbody>
                     </table>

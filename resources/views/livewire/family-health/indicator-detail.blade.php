@@ -137,7 +137,7 @@
                     <button
                         type="button"
                         wire:click="openAdvancedSearch"
-                        class="inline-flex items-center gap-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                        class="inline-flex items-center gap-2 rounded-lg bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
                     >
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -148,7 +148,7 @@
                     <!-- Botão Voltar -->
                     <a
                         href="{{ route('family-health.overview') }}"
-                        class="inline-flex items-center gap-1.5 rounded-lg bg-[#f97316] hover:bg-[#ea580c] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-white border border-[#dce6e2] text-[#16302c] hover:bg-slate-50 px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
                     >
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -166,25 +166,25 @@
             @endif
 
             <!-- Abas Secundárias de Exibição do C1 -->
-            <div class="flex items-center gap-1 border-b border-[#b8d1e5]/70 pt-2">
+            <div class="flex items-center gap-1 border-b border-[#dce6e2] pt-2">
                 <button
                     type="button"
                     wire:click="setC1SubTab('monthly_summary')"
-                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c1SubTab === 'monthly_summary' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c1SubTab === 'monthly_summary' ? 'bg-teal-50 text-teal-800 border-teal-600 font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
                 >
                     Resumo Mensal das Equipes
                 </button>
                 <button
                     type="button"
                     wire:click="setC1SubTab('teams')"
-                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c1SubTab === 'teams' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c1SubTab === 'teams' ? 'bg-teal-50 text-teal-800 border-teal-600 font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
                 >
                     Resumo por Equipe
                 </button>
                 <button
                     type="button"
                     wire:click="setC1SubTab('unassigned')"
-                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c1SubTab === 'unassigned' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c1SubTab === 'unassigned' ? 'bg-teal-50 text-teal-800 border-teal-600 font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
                 >
                     Sem Equipe
                 </button>
@@ -286,7 +286,7 @@
                             <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
                                 <div class="flex items-center justify-between">
                                     <span class="text-xs font-semibold text-slate-600">Ótimo</span>
-                                    <span class="h-2.5 w-2.5 rounded-full bg-[#0284c7]"></span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-600"></span>
                                 </div>
                                 <div class="text-3xl font-black text-slate-800 mt-2">
                                     {{ $c1Distribution['otimo']['count'] }}
@@ -295,7 +295,7 @@
                                     {{ number_format($c1Distribution['otimo']['percent'], 1, ',', '.') }}% do total
                                 </span>
                                 <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
-                                    <div class="bg-[#0284c7] h-1.5 rounded-full transition-all" style="width: {{ $c1Distribution['otimo']['percent'] }}%"></div>
+                                    <div class="bg-emerald-600 h-1.5 rounded-full transition-all" style="width: {{ $c1Distribution['otimo']['percent'] }}%"></div>
                                 </div>
                             </div>
                         </div>
@@ -382,7 +382,7 @@
                 </div>
             @else
                 <!-- Card de Filtros e Detalhamento por Equipe -->
-                <div class="rounded-b-lg rounded-tr-lg border-2 border-[#b8d1e5] bg-[#f8fafc]/50 p-5 shadow-xs space-y-4">
+                <div class="rounded-b-lg rounded-tr-lg border-2 border-[#dce6e2] bg-[#f8fafc]/50 p-5 shadow-xs space-y-4">
                 <span class="sr-only">Acompanhamento Mensal da Demanda</span>
                 <span class="sr-only">Filtros do Acompanhamento Mensal</span>
 
@@ -507,7 +507,7 @@
             </div>
 
             <!-- Card de Dados com Legenda e Tabela -->
-            <div class="rounded-lg border-2 border-[#b8d1e5] bg-white overflow-hidden shadow-xs mb-4">
+            <div class="rounded-lg border-2 border-[#dce6e2] bg-white overflow-hidden shadow-xs mb-4">
                 <!-- Cabeçalho do Card com Legenda Oficial -->
                 <div class="p-4 sm:p-5 border-b border-slate-200 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white">
                     <h2 class="text-base sm:text-lg font-bold text-slate-700">
@@ -525,7 +525,7 @@
                         <span class="bg-[#198754] text-white text-[11px] font-bold px-3 py-1 rounded shadow-2xs" title="Bom · 0,75 pt no Componente III">
                             Bom (&gt; 30% ou &le; 50%) <span class="sr-only">· Bom · 0,75 pt</span>
                         </span>
-                        <span class="bg-[#0284c7] text-white text-[11px] font-bold px-3 py-1 rounded shadow-2xs" title="Ótimo · 1,00 pt no Componente III">
+                        <span class="bg-emerald-600 text-white text-[11px] font-bold px-3 py-1 rounded shadow-2xs" title="Ótimo · 1,00 pt no Componente III">
                             Ótimo (&gt; 50% ou &le; 70%) <span class="sr-only">· Ótimo · 1,00 pt</span>
                         </span>
                     </div>
@@ -563,7 +563,7 @@
                                 @forelse ($c1TableRows as $index => $row)
                                     @php
                                         $badgeColor = match ($row['performance_level']) {
-                                            'otimo' => 'bg-[#0284c7]',
+                                            'otimo' => 'bg-emerald-600',
                                             'bom' => 'bg-[#198754]',
                                             'suficiente' => 'bg-[#f0ad4e]',
                                             default => 'bg-[#d9534f]',
@@ -614,7 +614,7 @@
                                         <td class="py-3.5 px-4 whitespace-nowrap">
                                             <div class="flex items-center gap-2">
                                                 <div class="w-24 bg-slate-200 rounded-full h-2 overflow-hidden shrink-0">
-                                                    <div class="h-2 rounded-full bg-[#0284c7]" style="width: {{ $barWidth }}%"></div>
+                                                    <div class="h-2 rounded-full bg-emerald-600" style="width: {{ $barWidth }}%"></div>
                                                 </div>
                                                 <span class="font-bold text-slate-700 tabular-nums text-xs">
                                                     {{ number_format($row['score_percent'], 2, ',', '.') }}%
@@ -757,7 +757,7 @@
                     <button
                         type="button"
                         wire:click="openAdvancedSearch"
-                        class="inline-flex items-center gap-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                        class="inline-flex items-center gap-2 rounded-lg bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
                     >
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -768,7 +768,7 @@
                     <!-- Botão Voltar -->
                     <a
                         href="{{ route('family-health.overview') }}"
-                        class="inline-flex items-center gap-1.5 rounded-lg bg-[#f97316] hover:bg-[#ea580c] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-white border border-[#dce6e2] text-[#16302c] hover:bg-slate-50 px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
                     >
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
@@ -1810,7 +1810,7 @@
                     <button
                         type="button"
                         wire:click="openAdvancedSearch"
-                        class="inline-flex items-center gap-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                        class="inline-flex items-center gap-2 rounded-lg bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
                     >
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -1821,7 +1821,7 @@
                     <!-- Botão Voltar -->
                     <a
                         href="{{ route('family-health.overview') }}"
-                        class="inline-flex items-center gap-1.5 rounded-lg bg-[#f97316] hover:bg-[#ea580c] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-white border border-[#dce6e2] text-[#16302c] hover:bg-slate-50 px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
                     >
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -1832,18 +1832,18 @@
             </div>
 
             <!-- Abas Secundárias de Exibição do C2 -->
-            <div class="flex items-center gap-1 border-b border-[#b8d1e5]/70 pt-2">
+            <div class="flex items-center gap-1 border-b border-[#dce6e2] pt-2">
                 <button
                     type="button"
                     wire:click="setC2SubTab('monthly_summary')"
-                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c2SubTab === 'monthly_summary' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c2SubTab === 'monthly_summary' ? 'bg-teal-50 text-teal-800 border-teal-600 font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
                 >
                     Resumo Mensal das Equipes
                 </button>
                 <button
                     type="button"
                     wire:click="setC2SubTab('nominal')"
-                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c2SubTab === 'nominal' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c2SubTab === 'nominal' ? 'bg-teal-50 text-teal-800 border-teal-600 font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
                 >
                     Lista Nominal / Crianças da Coorte
                 </button>
@@ -1952,7 +1952,7 @@
                             <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
                                 <div class="flex items-center justify-between">
                                     <span class="text-xs font-semibold text-slate-600">Ótimo</span>
-                                    <span class="h-2.5 w-2.5 rounded-full bg-[#0284c7]"></span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-600"></span>
                                 </div>
                                 <div class="text-3xl font-black text-slate-800 mt-2">
                                     {{ $c2Distribution['otimo']['count'] }}
@@ -1961,7 +1961,7 @@
                                     {{ number_format($c2Distribution['otimo']['percent'], 1, ',', '.') }}% do total
                                 </span>
                                 <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
-                                    <div class="bg-[#0284c7] h-1.5 rounded-full transition-all" style="width: {{ $c2Distribution['otimo']['percent'] }}%"></div>
+                                    <div class="bg-emerald-600 h-1.5 rounded-full transition-all" style="width: {{ $c2Distribution['otimo']['percent'] }}%"></div>
                                 </div>
                             </div>
                         </div>
@@ -2569,7 +2569,7 @@
                                         <button
                                             type="button"
                                             wire:click="openChildDetail({{ $child['id'] }})"
-                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-[#0284c7] hover:bg-[#0369a1] shadow-2xs transition cursor-pointer"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-emerald-600 hover:bg-teal-800 shadow-2xs transition cursor-pointer"
                                         >
                                             <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
@@ -3538,7 +3538,7 @@
                     <button
                         type="button"
                         wire:click="openAdvancedSearch"
-                        class="inline-flex items-center gap-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                        class="inline-flex items-center gap-2 rounded-lg bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
                     >
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -3549,7 +3549,7 @@
                     <!-- Botão Voltar -->
                     <a
                         href="{{ route('family-health.overview') }}"
-                        class="inline-flex items-center gap-1.5 rounded-lg bg-[#f97316] hover:bg-[#ea580c] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-white border border-[#dce6e2] text-[#16302c] hover:bg-slate-50 px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
                     >
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -3560,18 +3560,18 @@
             </div>
 
             <!-- Abas Secundárias de Exibição do C3 -->
-            <div class="flex items-center gap-1 border-b border-[#b8d1e5]/70 pt-2">
+            <div class="flex items-center gap-1 border-b border-[#dce6e2] pt-2">
                 <button
                     type="button"
                     wire:click="setC3SubTab('monthly_summary')"
-                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c3SubTab === 'monthly_summary' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c3SubTab === 'monthly_summary' ? 'bg-teal-50 text-teal-800 border-teal-600 font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
                 >
                     Resumo Mensal das Equipes
                 </button>
                 <button
                     type="button"
                     wire:click="setC3SubTab('nominal')"
-                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c3SubTab === 'nominal' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c3SubTab === 'nominal' ? 'bg-teal-50 text-teal-800 border-teal-600 font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
                 >
                     Lista Nominal e Coorte de Gestantes e Puérperas
                 </button>
@@ -3680,7 +3680,7 @@
                             <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
                                 <div class="flex items-center justify-between">
                                     <span class="text-xs font-semibold text-slate-600">Ótimo</span>
-                                    <span class="h-2.5 w-2.5 rounded-full bg-[#0284c7]"></span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-600"></span>
                                 </div>
                                 <div class="text-3xl font-black text-slate-800 mt-2">
                                     {{ $c3Distribution['otimo']['count'] }}
@@ -3689,7 +3689,7 @@
                                     {{ number_format($c3Distribution['otimo']['percent'], 1, ',', '.') }}% do total
                                 </span>
                                 <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
-                                    <div class="bg-[#0284c7] h-1.5 rounded-full transition-all" style="width: {{ $c3Distribution['otimo']['percent'] }}%"></div>
+                                    <div class="bg-emerald-600 h-1.5 rounded-full transition-all" style="width: {{ $c3Distribution['otimo']['percent'] }}%"></div>
                                 </div>
                             </div>
                         </div>
@@ -4383,7 +4383,7 @@
                                             <button
                                                 type="button"
                                                 wire:click="openPregnancyDetail({{ $pregnancy['id'] }})"
-                                                class="inline-flex items-center justify-center w-8 h-8 rounded-full text-white bg-[#0284c7] hover:bg-[#0369a1] shadow-2xs transition cursor-pointer"
+                                                class="inline-flex items-center justify-center w-8 h-8 rounded-full text-white bg-emerald-600 hover:bg-teal-800 shadow-2xs transition cursor-pointer"
                                                 title="Ver Ficha da Gestante / Puérpera"
                                             >
                                                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -5333,7 +5333,7 @@
                     <button
                         type="button"
                         wire:click="openAdvancedSearch"
-                        class="inline-flex items-center gap-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                        class="inline-flex items-center gap-2 rounded-lg bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
                     >
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -5344,7 +5344,7 @@
                     <!-- Botão Voltar -->
                     <a
                         href="{{ route('family-health.overview') }}"
-                        class="inline-flex items-center gap-1.5 rounded-lg bg-[#f97316] hover:bg-[#ea580c] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-white border border-[#dce6e2] text-[#16302c] hover:bg-slate-50 px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
                     >
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -5355,18 +5355,18 @@
             </div>
 
             <!-- Abas Secundárias de Exibição do C4 -->
-            <div class="flex items-center gap-1 border-b border-[#b8d1e5]/70 pt-2">
+            <div class="flex items-center gap-1 border-b border-[#dce6e2] pt-2">
                 <button
                     type="button"
                     wire:click="setC4SubTab('monthly_summary')"
-                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c4SubTab === 'monthly_summary' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c4SubTab === 'monthly_summary' ? 'bg-teal-50 text-teal-800 border-teal-600 font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
                 >
                     Resumo Mensal das Equipes
                 </button>
                 <button
                     type="button"
                     wire:click="setC4SubTab('nominal')"
-                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c4SubTab === 'nominal' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c4SubTab === 'nominal' ? 'bg-teal-50 text-teal-800 border-teal-600 font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
                 >
                     Lista Nominal e Coorte de Diabéticos
                 </button>
@@ -5475,7 +5475,7 @@
                             <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
                                 <div class="flex items-center justify-between">
                                     <span class="text-xs font-semibold text-slate-600">Ótimo</span>
-                                    <span class="h-2.5 w-2.5 rounded-full bg-[#0284c7]"></span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-600"></span>
                                 </div>
                                 <div class="text-3xl font-black text-slate-800 mt-2">
                                     {{ $c4Distribution['otimo']['count'] }}
@@ -5484,7 +5484,7 @@
                                     {{ number_format($c4Distribution['otimo']['percent'], 1, ',', '.') }}% do total
                                 </span>
                                 <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
-                                    <div class="bg-[#0284c7] h-1.5 rounded-full transition-all" style="width: {{ $c4Distribution['otimo']['percent'] }}%"></div>
+                                    <div class="bg-emerald-600 h-1.5 rounded-full transition-all" style="width: {{ $c4Distribution['otimo']['percent'] }}%"></div>
                                 </div>
                             </div>
                         </div>
@@ -6006,7 +6006,7 @@
                                                 <button
                                                     type="button"
                                                     wire:click="openDiabeticDetail({{ $diabetic['id'] }})"
-                                                    class="inline-flex items-center justify-center w-8 h-8 rounded-full text-white bg-[#0284c7] hover:bg-[#0369a1] shadow-2xs transition cursor-pointer"
+                                                    class="inline-flex items-center justify-center w-8 h-8 rounded-full text-white bg-emerald-600 hover:bg-teal-800 shadow-2xs transition cursor-pointer"
                                                     title="Ver Ficha Clínica do Diabético"
                                                 >
                                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -6365,7 +6365,7 @@
                                 <button
                                     type="button"
                                     wire:click="applyAdvancedFilters"
-                                    class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-[#0284c7] hover:bg-[#0369a1] shadow-xs transition cursor-pointer"
+                                    class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-teal-800 shadow-xs transition cursor-pointer"
                                 >
                                     Aplicar Filtros
                                 </button>
@@ -6687,7 +6687,7 @@
                     <button
                         type="button"
                         wire:click="openAdvancedSearch"
-                        class="inline-flex items-center gap-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                        class="inline-flex items-center gap-2 rounded-lg bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
                     >
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -6698,7 +6698,7 @@
                     <!-- Botão Voltar -->
                     <a
                         href="{{ route('family-health.overview') }}"
-                        class="inline-flex items-center gap-1.5 rounded-lg bg-[#f97316] hover:bg-[#ea580c] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-white border border-[#dce6e2] text-[#16302c] hover:bg-slate-50 px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
                     >
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -6709,18 +6709,18 @@
             </div>
 
             <!-- Abas Secundárias de Exibição do C5 -->
-            <div class="flex items-center gap-1 border-b border-[#b8d1e5]/70 pt-2">
+            <div class="flex items-center gap-1 border-b border-[#dce6e2] pt-2">
                 <button
                     type="button"
                     wire:click="setC5SubTab('monthly_summary')"
-                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c5SubTab === 'monthly_summary' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c5SubTab === 'monthly_summary' ? 'bg-teal-50 text-teal-800 border-teal-600 font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
                 >
                     Resumo Mensal das Equipes
                 </button>
                 <button
                     type="button"
                     wire:click="setC5SubTab('nominal')"
-                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c5SubTab === 'nominal' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c5SubTab === 'nominal' ? 'bg-teal-50 text-teal-800 border-teal-600 font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
                 >
                     Lista Nominal e Coorte de Hipertensos
                 </button>
@@ -6829,7 +6829,7 @@
                             <div class="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 shadow-2xs">
                                 <div class="flex items-center justify-between">
                                     <span class="text-xs font-semibold text-slate-600">Ótimo</span>
-                                    <span class="h-2.5 w-2.5 rounded-full bg-[#0284c7]"></span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-600"></span>
                                 </div>
                                 <div class="text-3xl font-black text-slate-800 mt-2">
                                     {{ $c5Distribution['otimo']['count'] }}
@@ -6838,7 +6838,7 @@
                                     {{ number_format($c5Distribution['otimo']['percent'], 1, ',', '.') }}% do total
                                 </span>
                                 <div class="w-full bg-slate-200/70 rounded-full h-1.5 mt-3 overflow-hidden">
-                                    <div class="bg-[#0284c7] h-1.5 rounded-full transition-all" style="width: {{ $c5Distribution['otimo']['percent'] }}%"></div>
+                                    <div class="bg-emerald-600 h-1.5 rounded-full transition-all" style="width: {{ $c5Distribution['otimo']['percent'] }}%"></div>
                                 </div>
                             </div>
                         </div>
@@ -7330,7 +7330,7 @@
                                                 <button
                                                     type="button"
                                                     wire:click="openHypertensiveDetail({{ $hypertensive['id'] }})"
-                                                    class="inline-flex items-center justify-center w-8 h-8 rounded-full text-white bg-[#0284c7] hover:bg-[#0369a1] shadow-2xs transition cursor-pointer"
+                                                    class="inline-flex items-center justify-center w-8 h-8 rounded-full text-white bg-emerald-600 hover:bg-teal-800 shadow-2xs transition cursor-pointer"
                                                     title="Ver Ficha Clínica do Hipertenso"
                                                 >
                                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -7701,7 +7701,7 @@
                     <button
                         type="button"
                         wire:click="openAdvancedSearch"
-                        class="inline-flex items-center gap-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                        class="inline-flex items-center gap-2 rounded-lg bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
                     >
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -7712,7 +7712,7 @@
                     <!-- Botão Voltar -->
                     <a
                         href="{{ route('family-health.overview') }}"
-                        class="inline-flex items-center gap-1.5 rounded-lg bg-[#f97316] hover:bg-[#ea580c] text-white px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-white border border-[#dce6e2] text-[#16302c] hover:bg-slate-50 px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-xs transition cursor-pointer"
                     >
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -7723,18 +7723,18 @@
             </div>
 
             <!-- Abas Secundárias de Exibição do C6 -->
-            <div class="flex items-center gap-1 border-b border-[#b8d1e5]/70 pt-2">
+            <div class="flex items-center gap-1 border-b border-[#dce6e2] pt-2">
                 <button
                     type="button"
                     wire:click="setC6SubTab('monthly_summary')"
-                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c6SubTab === 'monthly_summary' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c6SubTab === 'monthly_summary' ? 'bg-teal-50 text-teal-800 border-teal-600 font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
                 >
                     Resumo Mensal das Equipes
                 </button>
                 <button
                     type="button"
                     wire:click="setC6SubTab('nominal')"
-                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c6SubTab === 'nominal' ? 'bg-[#eef5fa] text-[#1c4e80] border-[#b8d1e5] font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
+                    class="px-6 py-3 text-xs sm:text-sm font-semibold rounded-t-lg transition border-t-2 border-l border-r cursor-pointer {{ $c6SubTab === 'nominal' ? 'bg-teal-50 text-teal-800 border-teal-600 font-bold shadow-xs' : 'bg-transparent text-slate-500 hover:text-slate-800 border-transparent' }}"
                 >
                     Lista Nominal e Coorte de Idosos
                 </button>
@@ -7849,7 +7849,7 @@
                                         {{ number_format($c6Distribution['otimo']['percent'], 1, ',', '.') }}% do total
                                     </p>
                                     <div class="w-full bg-sky-200/60 rounded-full h-1.5 mt-2 overflow-hidden">
-                                        <div class="bg-[#0284c7] h-1.5 rounded-full transition-all" style="width: {{ $c6Distribution['otimo']['percent'] }}%"></div>
+                                        <div class="bg-emerald-600 h-1.5 rounded-full transition-all" style="width: {{ $c6Distribution['otimo']['percent'] }}%"></div>
                                     </div>
                                 </div>
                             </div>
