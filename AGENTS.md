@@ -21,3 +21,8 @@
 ### 3. Integridade de Dados
 - Utilizar exclusivamente dados 100% reais extraídos e consolidados a partir do DW / e-SUS PEC municipal.
 - Nunca utilizar dados mockados, fictícios ou simulados.
+
+### 4. Manutenção Contínua da Documentação do Banco de Dados (DATABASE-SCHEMA.md)
+- **Sempre que atualizar algo do banco de dados (criação/alteração de tabelas, migrations, colunas ou índices), atualize obrigatoriamente o arquivo `DATABASE-SCHEMA.md`**.
+- O `DATABASE-SCHEMA.md` deve refletir fielmente tanto as tabelas e colunas ativas (Seção 2) quanto o alinhamento com a arquitetura geral da aplicação.
+

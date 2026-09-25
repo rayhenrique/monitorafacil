@@ -17,18 +17,130 @@ As tabelas das seções 3 a 6 são o desenho-alvo. As tabelas já existentes est
 
 ## 2. Estado atual
 
-| Tabela | Estado | Finalidade |
-|---|---|---|
-| `users` | existente | usuários administradores |
-| `settings` | existente | configurações globais do município |
-| `consolidation_teams` | existente | totais de equipes por quadrimestre e tipo |
-| `consolidation_registrations` | existente | totais MICI e MICDT por quadrimestre |
-| `sync_logs` | existente | início, término, situação e erro das sincronizações |
-| `family_health_indicator_snapshots` | existente | resultado quadrimestral agregado por equipe e indicador |
-| `family_health_monthly_snapshots` | existente | resultado mensal agregado por equipe e indicador |
-| `c2_cohort_snapshots` | existente | coorte C2 agregada por equipe e quadrimestre |
+O banco de dados operacional e analítico do Monitora Fácil conta atualmente com **23 tabelas de aplicação** em produção, distribuídas em quatro domínios funcionais (Gestão, Consolidação/APS, Coortes e Busca Ativa C2–C7, e Avaliação Territorial/CVAT), além de **8 tabelas técnicas de infraestrutura** gerenciadas pelo Laravel.
 
-Os snapshots atuais atendem aos painéis agregados de C1 e C2. Eles não preservam a evidência por cidadão e por boa prática necessária para busca ativa, reprocessamento de C3 a C7, duplicidade e vigilância.
+### 2.1. Inventário Geral de Tabelas Ativas
+
+| Domínio | Tabela | Modelo Eloquent | Finalidade e Conteúdo |
+|---|---|---|---|
+| **Gestão e Configuração** | `users` | `User` | Usuários do sistema, perfis e rastreamento da versão visualizada (`last_seen_version`). |
+| | `settings` | `Setting` | Configurações chave-valor do município (`city_name`, `ibge_code`, `state_uf`, filtros de CNES/equipes). |
+| | `sync_logs` | `SyncLog` | Auditoria detalhada das rotinas de sincronização e ETL (status, tempos de início/fim e mensagens de erro). |
+| **Consolidação e Painel APS** | `consolidation_teams` | `ConsolidationTeam` | Quantitativo de equipes ativas por quadrimestre e tipo (`esf`, `esaude_bucal`, `emulti`). |
+| | `consolidation_registrations` | `ConsolidationRegistration` | Contagens de cadastros individuais (MICI) e domiciliares (MICDT), atualizados e desatualizados por quadrimestre. |
+| | `family_health_indicator_snapshots` | `FamilyHealthIndicatorSnapshot` | Snapshots quadrimestrais consolidados por equipe e indicador (C1 a C7) no Painel Municipal da Saúde da Família. |
+| | `family_health_monthly_snapshots` | `FamilyHealthMonthlySnapshot` | Evolução mensal dos indicadores da Saúde da Família por equipe e mês no quadrimestre (ex: demanda programada vs total em C1). |
+| **Coortes e Busca Ativa (C2–C7)** | `c2_cohort_snapshots` | `C2CohortSnapshot` | Coorte C2 (crianças de 2 anos) agregada por equipe, tipo de equipe e quadrimestre, com contagens mensais. |
+| | `c2_nominal_children` | `C2NominalChild` | Lista nominal com busca ativa de crianças da coorte C2, contato, vínculo e 5 boas práticas (A: 9 consultas, B: antropometria, C: VIP, D: Penta, E: Pneumo-10). |
+| | `c3_cohort_snapshots` | `C3CohortSnapshot` | Coorte C3 (gestantes e puérperas) agregada por equipe e quadrimestre. |
+| | `c3_nominal_pregnancies` | `C3NominalPregnancy` | Lista nominal com busca ativa de gestantes/puérperas do C3 com DUM, DPP, idade gestacional e 11 boas práticas (A a K: consultas, exames, PA, odonto, vacina dTpa, puerpério). |
+| | `c4_cohort_snapshots` | `C4CohortSnapshot` | Coorte C4 (cuidado de pessoas com diabetes) agregada por equipe e quadrimestre, com totais da coorte e avaliados. |
+| | `c4_nominal_diabetics` | `C4NominalDiabetic` | Lista nominal com busca ativa de pessoas com diabetes (CIAP/CID), status da condição e 6 boas práticas (Quadro 01: consulta 6m, PA 6m, antropometria 12m, visitas ACS 12m, HbA1c 12m, exame dos pés 12m). |
+| | `c5_cohort_snapshots` | `C5CohortSnapshot` | Coorte C5 (cuidado de pessoas com hipertensão) agregada por equipe e quadrimestre. |
+| | `c5_nominal_hypertensives` | `C5NominalHypertensive` | Lista nominal com busca ativa de hipertensos (CIAP/CID) e 4 boas práticas (Quadro 01: consulta 6m, PA 6m, antropometria 12m, visitas ACS 12m). |
+| | `c6_cohort_snapshots` | `C6CohortSnapshot` | Coorte C6 (cuidado da pessoa idosa 60+ anos) agregada por equipe e quadrimestre. |
+| | `c6_nominal_elderly` | `C6NominalElderly` | Lista nominal com busca ativa de idosos com 4 boas práticas (Quadro 01: consulta anual, antropometria anual, visitas ACS 12m, vacina Influenza anual). |
+| | `c7_cohort_snapshots` | `C7CohortSnapshot` | Coorte C7 (saúde da mulher) com cumprimento e pontuação dos 4 denominadores/estratos clínicos (colo do útero, HPV, saúde sexual/reprodutiva e mama). |
+| | `c7_nominal_women` | `C7NominalWoman` | Lista nominal com busca ativa com identificação de elegibilidade e cumprimento individual das 4 práticas (Quadro 01) e pendências clínicas estruturadas. |
+| **Avaliação Territorial (CVAT)** | `cvat_team_evaluations` | `CvatTeamEvaluation` | Avaliação de desempenho das equipes na Portaria GM/MS e NT nº 8/2026: nota de cadastro (0–3), acompanhamento (0–7), nota final (0–10), classificação (ÓTIMO, BOM, SUFICIENTE, REGULAR), parâmetro e razão de vinculados. |
+| | `cvat_dimension_distributions` | `CvatDimensionDistribution` | Distribuição consolidada de equipes por faixa de desempenho para as dimensões de Cadastro e Acompanhamento. |
+| | `cvat_nominal_citizens` | `CvatNominalCitizen` | Cidadãos nominais para saneamento de cadastros e acompanhamento prioritário (MICI/MICDT, vínculo, vulnerabilidades: idoso/criança, benefícios: BPC/PBF, contatos de cuidado e elegibilidade). |
+| | `cvat_nominal_metrics` | `CvatNominalMetric` | Métricas consolidadas municipais das dimensões de Cadastro e Acompanhamento, referências temporais, proveniência e importação PBF. |
+| **Infraestrutura Laravel** | `migrations` | — | Controle de versões de migrações executadas. |
+| | `jobs`, `failed_jobs`, `job_batches` | — | Filas de processamento assíncrono e controle de lote de tarefas. |
+| | `cache`, `cache_locks` | — | Cache de aplicação e bloqueios atômicos para execução concorrente. |
+| | `sessions`, `password_reset_tokens` | — | Sessões ativas de usuários autenticados e tokens de recuperação de senha. |
+
+---
+
+### 2.2. Detalhamento Estrutural das Tabelas Ativas
+
+#### 2.2.1. Gestão, Configuração e Auditoria
+
+- **`users`**:
+  - Colunas: `id`, `name`, `email`, `email_verified_at`, `password`, `remember_token`, `last_seen_version`, `created_at`, `updated_at`.
+  - Índices: `PRIMARY(id)`, `UNIQUE(email)`.
+- **`settings`**:
+  - Colunas: `id`, `key`, `value`, `created_at`, `updated_at`.
+  - Índices: `PRIMARY(id)`, `UNIQUE(key)`.
+- **`sync_logs`**:
+  - Colunas: `id`, `status` (`success`, `failed`, `running`), `started_at`, `finished_at`, `error_message`, `created_at`, `updated_at`.
+  - Índices: `PRIMARY(id)`, `INDEX(status, started_at)`.
+
+#### 2.2.2. Consolidações e Snapshots do Painel Municipal da APS
+
+- **`consolidation_teams`**:
+  - Colunas: `id`, `year`, `quarter`, `type` (`esf`, `esaude_bucal`, `emulti`), `total_active`, `created_at`, `updated_at`.
+  - Índices: `PRIMARY(id)`, `UNIQUE(year, quarter, type)`. Constraint de quadrimestre (1 a 3).
+- **`consolidation_registrations`**:
+  - Colunas: `id`, `year`, `quarter`, `mici_updated_count`, `mici_outdated_count`, `micdt_updated_count`, `micdt_outdated_count`, `created_at`, `updated_at`.
+  - Índices: `PRIMARY(id)`, `UNIQUE(year, quarter)`.
+- **`family_health_indicator_snapshots`**:
+  - Colunas: `id`, `year`, `quarter`, `ine`, `team_name`, `team_type` (`70` = eSF, `76` = eAP), `indicator_code` (`c1`..`c7`), `numerator`, `denominator`, `score_percent`, `performance_level` (`otimo`, `bom`, `suficiente`, `regular`), `good_practices_breakdown` (JSON com o cálculo, notas por prática e `calculation_version`), `active_search_count`, `created_at`, `updated_at`.
+  - Índices: `PRIMARY(id)`, `INDEX(ine)`, `INDEX(indicator_code)`, `UNIQUE(year, quarter, ine, indicator_code)`.
+- **`family_health_monthly_snapshots`**:
+  - Colunas: `id`, `year`, `month`, `quarter`, `month_in_quarter` (1 a 4), `ine`, `team_name`, `team_type`, `indicator_code`, `numerator`, `denominator`, `score_percent`, `performance_level`, `created_at`, `updated_at`.
+  - Índices: `PRIMARY(id)`, `INDEX(ine)`, `INDEX(indicator_code)`, `UNIQUE(year, month, ine, indicator_code)`.
+
+#### 2.2.3. Coortes e Listas Nominais com Busca Ativa (C2 a C7)
+
+Todas as tabelas nominais implementam as especificações das Notas Metodológicas do Ministério da Saúde, permitindo busca ativa detalhada por equipe/microárea, além do rastreamento de cada prática clínica individual (contagens e flags de cumprimento `met`):
+
+- **C2 - Saúde da Criança (Até 2 Anos)**:
+  - `c2_cohort_snapshots`: `id`, `year`, `quarter`, `ine`, `team_name`, `team_type`, `cohort_total`, `evaluated_total`, `monthly_counts` (JSON), `as_of`, `calculation_version`, timestamps. `UNIQUE(year, quarter, ine)`.
+  - `c2_nominal_children`: Identificação (`cidadao_pec_id`, `cns`, `cpf`, `name`, `mother_name`, `birth_date`, `age_months`, `race_color`), Unidade/Equipe (`cnes`, `facility_name`, `district`, `ine`, `team_name`, `microarea`, `professional_cns`, `professional_name`), Território (`mici_updated`, `micdt_updated`, `is_accompanied`), Boas Práticas (`practice_a` a `e` e flags `practice_a_met` a `e_met`), `score_percent`, `calculation_version`.
+- **C3 - Saúde da Gestante e Puérpera**:
+  - `c3_cohort_snapshots`: `id`, `year`, `quarter`, `ine`, `team_name`, `team_type`, `cohort_total`, `evaluated_total`, `monthly_counts` (JSON), `as_of`, `calculation_version`, timestamps. `UNIQUE(year, quarter, ine)`.
+  - `c3_nominal_pregnancies`: Identificação e contato (`phone`, `social_name`), dados clínicos gestacionais (`dum`, `dpp`, `outcome_date`, `puerperium_end_date`, `gestational_age_weeks`, `current_status`: gestante/puerpera/encerrada), território (`mici_updated`, `micdt_updated`, `is_accompanied`), 11 Boas Práticas (`practice_a` a `k` e `practice_a_met` a `k_met`), `score_percent`, `calculation_version`.
+- **C4 - Cuidado da Pessoa com Diabetes**:
+  - `c4_cohort_snapshots`: `id`, `year`, `quarter`, `ine`, `team_name`, `team_type`, `cohort_total`, `evaluated_total`, `monthly_counts` (JSON), `as_of`, `calculation_version`, timestamps. `UNIQUE(year, quarter, ine)`.
+  - `c4_nominal_diabetics`: Condição clínica (`ciap_codes`, `cid_codes`, `first_diagnosis_date`, `last_diagnosis_date`, `condition_status`: ativo/latente), território (`mici_updated`, `is_accompanied`), 6 Boas Práticas do Quadro 01 (`practice_a`: consulta 6m [20 pts], `practice_b`: PA 6m [15 pts], `practice_c`: antropometria 12m [15 pts], `practice_d`: visitas ACS 12m [20 pts], `practice_e`: HbA1c 12m [15 pts], `practice_f`: exame dos pés 12m [15 pts]), datas/valores clínicos (`last_consultation_date`, `last_pa_date`, `last_pa_value`, `last_anthropometry_date`, `last_weight`, `last_height`, `last_visit_date`, `last_hba1c_date`, `last_hba1c_type`, `last_foot_exam_date`), `score_percent`, `calculation_version`.
+- **C5 - Cuidado da Pessoa com Hipertensão**:
+  - `c5_cohort_snapshots`: `id`, `year`, `quarter`, `ine`, `team_name`, `team_type`, `cohort_total`, `evaluated_total`, `monthly_counts` (JSON), `as_of`, `calculation_version`, timestamps. `UNIQUE(year, quarter, ine)`.
+  - `c5_nominal_hypertensives`: Condição clínica (`ciap_codes`, `cid_codes`, datas de diagnóstico, `condition_status`: ativo), território (`mici_updated`, `is_accompanied`), 4 Boas Práticas do Quadro 01 (`practice_a`: consulta 6m [25 pts], `practice_b`: PA 6m [25 pts], `practice_c`: antropometria 12m [25 pts], `practice_d`: visitas ACS 12m [25 pts]), datas/valores clínicos (`last_consultation_date`, `last_pa_date`, `last_pa_value`, `last_anthropometry_date`, `last_weight`, `last_height`, `last_visit_date`), `score_percent`, `calculation_version`.
+- **C6 - Cuidado da Pessoa Idosa (60+ Anos)**:
+  - `c6_cohort_snapshots`: `id`, `year`, `quarter`, `ine`, `team_name`, `team_type`, `cohort_total`, `evaluated_total`, `monthly_counts` (JSON), `as_of`, `calculation_version`, timestamps. `UNIQUE(year, quarter, ine)`.
+  - `c6_nominal_elderly`: Identificação e território (`age_years >= 60`, `mici_updated`, `is_accompanied`), 4 Boas Práticas do Quadro 01 (`practice_a`: consulta anual [25 pts], `practice_b`: antropometria anual [25 pts], `practice_c`: visitas ACS [25 pts - regra eAP 76], `practice_d`: vacinação Influenza [25 pts]), datas e detalhes clínicos (`last_consultation_date`, `last_anthropometry_date`, `last_weight`, `last_height`, `last_visit_date`, `last_vaccine_date`, `last_vaccine_name`), `score_percent`, `calculation_version`.
+- **C7 - Cuidado da Saúde da Mulher**:
+  - `c7_cohort_snapshots`: Agregado com detalhamento das 4 práticas/estratos populacionais do Quadro 01 (`practice_a_eligible`, `practice_a_compliant`, `practice_a_score` [20 pts], `practice_b_eligible`, `practice_b_compliant`, `practice_b_score` [30 pts], `practice_c_eligible`, `practice_c_compliant`, `practice_c_score` [30 pts], `practice_d_eligible`, `practice_d_compliant`, `practice_d_score` [20 pts]), `final_score`, `monthly_counts` (JSON), `as_of`, `calculation_version`. `INDEX(year, quarter, ine)`.
+  - `c7_nominal_women`: Elegibilidade e cumprimento individual das 4 práticas:
+    - Prática A (25–64 anos): `eligible_practice_a`, `practice_a_met`, `practice_a_count`, `last_cervical_exam_date`, `last_cervical_exam_code`, `last_cervical_exam_desc` (citopatológico 36m ou DNA-HPV 60m).
+    - Prática B (9–14 anos): `eligible_practice_b`, `practice_b_met`, `practice_b_count`, `last_hpv_vaccine_date`, `last_hpv_vaccine_code`, `last_hpv_vaccine_name` (vacina HPV código 67 ou 93).
+    - Prática C (14–69 anos): `eligible_practice_c`, `practice_c_met`, `practice_c_count`, `last_sexual_health_date`, `last_sexual_health_code`, `last_sexual_health_detail` (consulta saúde sexual/reprodutiva 12m).
+    - Prática D (50–69 anos): `eligible_practice_d`, `practice_d_met`, `practice_d_count`, `last_mammogram_date`, `last_mammogram_code`, `last_mammogram_desc` (mamografia de rastreamento 24m).
+    - `score_percent`, `pending_practices` (JSON com pendências clínicas), `calculation_version`.
+
+#### 2.2.4. Avaliação Territorial e Vínculo (CVAT - Portaria GM/MS e NT nº 8/2026)
+
+- **`cvat_team_evaluations`**:
+  - Avaliação individual das equipes no CVAT: `year`, `quarter`, `quarter_label`, `cnes`, `facility_name`, `ine`, `team_type`, `team_name`, `parameter` (parâmetro populacional da equipe, default 2500), `linked_registrations` (cadastros vinculados), `linked_ratio` (razão cadastros/parâmetro), `registration_score` (nota da dimensão cadastro, 0 a 3,00), `registration_result`, `monitoring_score` (nota da dimensão acompanhamento, 0 a 7,00), `monitoring_result`, `final_score` (nota final da equipe, 0 a 10,00), `final_classification` (`ÓTIMO`, `BOM`, `SUFICIENTE`, `REGULAR`).
+  - Índices: `UNIQUE(year, quarter, ine)`, `INDEX(year, quarter)`, `INDEX(ine)`, `INDEX(final_classification)`.
+- **`cvat_dimension_distributions`**:
+  - Agrupamento das equipes em faixas de desempenho por dimensão: `year`, `quarter`, `quarter_label`, `team_type`, `dimension_code` (`cadastro`, `acompanhamento`), `dimension_name`, `regular_count`, `sufficient_count`, `good_count`, `optimal_count`, `total_teams`.
+  - Índices: `UNIQUE(year, quarter, team_type, dimension_code)`, `INDEX(year, quarter)`.
+- **`cvat_nominal_citizens`**:
+  - Cidadãos nominais para saneamento de cadastro e acompanhamento: `cidadao_pec_id` (chave única PEC), `cns`, `cpf`, `responsible_cns_cpf`, `name`, `birth_date`, `age`, `gender`, `race_color`, `cnes`, `facility_name`, `ine`, `team_name`, `professional_cns`, `professional_name`, `microarea`.
+  - Dimensão Cadastro: `mici_updated`, `mici_date`, `micdt_updated`, `micdt_date`, `has_micdt`, `is_linked`, `registration_eligible`.
+  - Dimensão Acompanhamento: `vulnerability_type` (`sem_criterio`, `idoso`, `crianca`), `social_benefit` (`nenhum`, `bpc`, `pbf`, `bpc_pbf`), `is_accompanied`, `last_visit_date`, `address`, `care_contacts`, `total_contacts`, `source`.
+  - Período: `year`, `month`. Índices em `cidadao_pec_id`, `(year, month)`, `cns`, `cpf`, `name`, `ine`, `cnes`, `microarea`, etc.
+- **`cvat_nominal_metrics`**:
+  - Métricas municipais agregadas: `year`, `month`, `last_record_date`, totais e subtotais MICI/MICDT (atualizados, desatualizados, vinculados), totais e acompanhamento por faixa de vulnerabilidade e benefício, dados de proveniência (`source`, `reference_date`, `benefit_data_available`, `excluded_without_pec_id`, `pbf_import_id`, `pbf_vigencia`, `pbf_confirmed_total`).
+  - Índices: `UNIQUE(year, month)`.
+
+---
+
+### 2.3. Relação com a Arquitetura Alvo
+
+As 23 tabelas ativas do MySQL funcionam atualmente como **Data Marts Analíticos e Operacionais**, construídos e recalculados diretamente a partir da extração do DW PostgreSQL do e-SUS APS PEC pelos serviços da aplicação (`C2SnapshotService` a `C7SnapshotService`, `CvatEvaluationService` e `FamilyHealthSnapshotService`).
+
+Essa estrutura atende aos requisitos operacionais do município:
+1. **Busca ativa nominal em tempo real** nos módulos C2 a C7 e CVAT;
+2. **Dados 100% reais** extraídos do DW PEC municipal (sem simulações);
+3. **Auditoria completa das regras clínicas** (datas dos eventos, contagens, conformidade por prática e versão do cálculo);
+4. **Resguardo de performance** com consultas web restritas ao MySQL local.
+
+As seções 3 a 6 a seguir descrevem o **desenho-alvo canônico de 4 camadas** (`ref_`, canônicas, `_events` e produtos analíticos), servindo como especificação para futuras expansões caso seja adotado armazenamento local integral de eventos brutos de fichas do PEC.
+
 
 ## 3. Princípios do desenho-alvo
 
