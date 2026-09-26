@@ -113,6 +113,12 @@ class NightlyRoutineCommand extends Command
         $status = $isSuccess ? 'success' : 'failed';
         $settings->set('nightly_routine_last_status', $status);
         $settings->set('nightly_routine_finished_at', $endTime);
+        if ($isSuccess) {
+            try {
+                $settings->recordIndicatorsProcessedNow();
+            } catch (Throwable) {
+            }
+        }
 
         $this->newLine();
         $this->info("==============================================================================");

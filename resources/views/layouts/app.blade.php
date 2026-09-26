@@ -14,6 +14,7 @@
         $isTerritorialNominal = request()->routeIs('territorial-bonding.nominal');
         $isTerritorialTeams = request()->routeIs('territorial-bonding.overview') && request()->query('aba', 'teams') === 'teams';
         $isTerritorialGuide = request()->routeIs('territorial-bonding.overview') && request()->query('aba') === 'guide';
+        $lastIndicatorsProcessedAt = $lastIndicatorsProcessedAt ?? app(\App\Services\SettingsService::class)->getLastIndicatorsProcessedAt();
     @endphp
     <div x-data="{
         mobileMenuOpen: false,
@@ -102,6 +103,32 @@
                                 <div class="min-w-0">
                                     <span class="block truncate text-sm font-semibold text-white">{{ trim($settings['municipio_nome'] ?? '') ?: 'Município não configurado' }}</span>
                                     <span class="block text-xs text-teal-300/80">Monitora Fácil · Gestão APS</span>
+                                </div>
+                            </div>
+
+                            <!-- Indicador de Status Mobile -->
+                            <div class="rounded-xl border border-[#1b3a33] bg-[#081714]/80 p-3 shadow-inner">
+                                <div class="flex items-center justify-between gap-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="relative flex h-2 w-2">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                        </span>
+                                        <span class="text-xs font-medium text-emerald-300">Base e-SUS PEC</span>
+                                    </div>
+                                    <span class="rounded bg-[#122e28] px-2 py-0.5 text-[10px] font-semibold text-teal-300">Ativo</span>
+                                </div>
+                                <div class="mt-2.5 space-y-1.5 border-t border-[#132d27] pt-2 text-[11px] text-slate-400">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span>Última Atualização</span>
+                                        <span class="font-mono font-medium text-emerald-300" title="{{ $lastIndicatorsProcessedAt?->format('d/m/Y H:i:s') ?? 'Nenhum processamento registrado' }}">
+                                            {{ $lastIndicatorsProcessedAt ? $lastIndicatorsProcessedAt->format('d/m/Y H:i') : 'Pendente' }}
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span>Fuso</span>
+                                        <span class="font-mono text-slate-300">{{ config('esus.schedule_timezone', 'America/Maceio') }}</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -371,9 +398,28 @@
                         </div>
                         <span class="rounded bg-[#122e28] px-2 py-0.5 text-[10px] font-semibold text-teal-300">Ativo</span>
                     </div>
-                    <div class="mt-2 flex items-center justify-between text-[11px] text-slate-400 border-t border-[#132d27] pt-2">
-                        <span>Fuso</span>
-                        <span class="font-mono text-slate-300">{{ config('esus.schedule_timezone', 'America/Maceio') }}</span>
+                    <div class="mt-2.5 space-y-1.5 border-t border-[#132d27] pt-2 text-[11px] text-slate-400">
+                        <div class="flex items-center justify-between gap-2">
+                            <span>Última Atualização</span>
+                            <span class="font-mono font-medium text-emerald-300" title="{{ $lastIndicatorsProcessedAt?->format('d/m/Y H:i:s') ?? 'Nenhum processamento registrado' }}">
+                                {{ $lastIndicatorsProcessedAt ? $lastIndicatorsProcessedAt->format('d/m/Y H:i') : 'Pendente' }}
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between gap-2">
+                            <span>Fuso</span>
+                            <span class="font-mono text-slate-300">{{ config('esus.schedule_timezone', 'America/Maceio') }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mini status quando recolhido -->
+                <div x-show="sidebarCollapsed" x-transition class="flex justify-center">
+                    <div class="group relative flex h-8 w-8 items-center justify-center rounded-lg border border-[#1b3a33] bg-[#081714] text-emerald-400"
+                         title="Base e-SUS PEC Ativa · Última Atualização: {{ $lastIndicatorsProcessedAt ? $lastIndicatorsProcessedAt->format('d/m/Y H:i') : 'Pendente' }}">
+                        <span class="relative flex h-2.5 w-2.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                        </span>
                     </div>
                 </div>
 

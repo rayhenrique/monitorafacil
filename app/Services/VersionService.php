@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.31.0';
+    public const CURRENT_VERSION = 'v1.32.0';
 
     public const CURRENT_RELEASE_DATE = '25/09/2026';
 
@@ -61,9 +61,23 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.31.0',
+                'version' => 'v1.32.0',
                 'date' => '25/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Exibição da Data e Hora da Última Atualização no Menu Lateral e Rastreamento Analítico de Indicadores',
+                'summary' => 'Inclusão da data e hora da última consolidação/processamento dos indicadores diretamente no card de status da "Base e-SUS PEC" no menu lateral (sidebar desktop e menu gaveta mobile). O rastreamento unificado consulta de forma resiliente as fontes de dados analíticos (Snapshots de Saúde Bucal B1 a B6, Saúde da Família C1 a C7, Coortes individuais C2 a C7, Logs de Sincronização do DW e Rotina Noturna). O sistema mantém cache otimizado de 60 segundos com invalidação imediata sob demanda ao término de qualquer processamento, exibindo a hora exata no fuso municipal com tooltip de precisão em segundos e suporte ao menu recolhido.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Exibição da linha "Última Atualização" no card de status do e-SUS PEC no menu lateral com data e horário no padrão brasileiro (dd/mm/aaaa hh:mm) e fuso municipal.'],
+                    ['type' => 'melhoria', 'text' => 'Rastreamento analítico unificado em SettingsService::getLastIndicatorsProcessedAt() abrangendo Snapshots de Saúde da Família, Saúde Bucal, Coortes C2-C7 e SyncLogs.'],
+                    ['type' => 'melhoria', 'text' => 'Cache de alto desempenho com chave `indicators:last_processed_at` e invalidação automática e em tempo real em todas as esteiras de processamento.'],
+                    ['type' => 'interface', 'text' => 'Disponível tanto no menu lateral desktop quanto na gaveta mobile, com suporte a tooltip detalhado e modo compacto quando a barra lateral é recolhida.'],
+                    ['type' => 'testes', 'text' => 'Cobertura completa de testes automatizados unitários e de interface Blade em SettingsTest.'],
+                ],
+            ],
+            [
+                'version' => 'v1.31.0',
+                'date' => '25/09/2026',
+                'badge' => 'Anterior',
                 'title' => 'Rotina Noturna Automática das 03:00 (20 Etapas), Configuração no Módulo "Processar Dados" e Revisão do Deploy',
                 'summary' => 'Implementação da esteira automatizada para execução noturna diária às 03:00 da manhã, configurável diretamente na interface de "Processar Dados" (/configuracoes/processar-dados). A rotina executa uma sequência oficial de 20 etapas: atualização Git (git pull), instalação de dependências (composer install), compilação de assets (npm run build), migrações (migrate), sincronização nominal CVAT, consolidação de todos os indicadores (C1 a C7, eSB Saúde Bucal B1 a B6 com --scope=oral-health e esus:process-oral-health), publicação de assets Livewire e otimização completa de caches (optimize:clear, config, route, view, queue). Inclui comando Artisan monitora:nightly-routine, script bash otimizado scripts/nightly-sync.sh, agendamento no routes/console.php, visualizador de log em tempo real e atualização dos scripts de deploy (deploy.sh e scripts/deploy.sh).',
                 'highlights' => [

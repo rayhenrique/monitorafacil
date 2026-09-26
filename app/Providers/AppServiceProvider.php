@@ -27,7 +27,13 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-        View::composer(['layouts.app', 'auth.login'], static function (BladeView $view): void {
+        View::composer('layouts.app', static function (BladeView $view): void {
+            $settingsService = app(SettingsService::class);
+            $view->with('settings', $settingsService->all());
+            $view->with('lastIndicatorsProcessedAt', $settingsService->getLastIndicatorsProcessedAt());
+        });
+
+        View::composer('auth.login', static function (BladeView $view): void {
             $view->with('settings', app(SettingsService::class)->all());
         });
     }

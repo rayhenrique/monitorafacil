@@ -59,6 +59,11 @@ class ProcessOralHealthCommand extends Command
             $nominalResult['dental_attendances_found']
         ));
 
+        try {
+            app(\App\Services\SettingsService::class)->recordIndicatorsProcessedNow();
+        } catch (\Throwable) {
+        }
+
         return self::SUCCESS;
     }
 }

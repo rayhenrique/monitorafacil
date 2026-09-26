@@ -1190,6 +1190,13 @@ class EsusDataProcessingService
             'error_message' => $combinedFailureMessage !== '' ? $combinedFailureMessage : null,
         ]);
 
+        if ($combinedFailureMessage === '') {
+            try {
+                app(SettingsService::class)->recordIndicatorsProcessedNow();
+            } catch (Throwable) {
+            }
+        }
+
         $this->notifyProgress($progressCallback, 100,
             $combinedFailureMessage !== '' ? 'Processamento geral concluído com falhas parciais.' : 'Processamento concluído com sucesso!',
             $tablesReport);

@@ -586,5 +586,38 @@ XML;
             ->call('closeNightlyLogModal')
             ->assertSet('showNightlyLogModal', false);
     }
+
+    public function test_settings_service_can_record_and_get_last_indicators_processed_at(): void
+    {
+        $settings = app(SettingsService::class);
+        \Illuminate\Support\Facades\Cache::forget(SettingsService::INDICATORS_CACHE_KEY);
+
+        $this->assertNull($settings->getLastIndicatorsProcessedAt());
+
+        $settings->recordIndicatorsProcessedNow();
+
+        $lastProcessed = $settings->getLastIndicatorsProcessedAt();
+        $this->assertNotNull($lastProcessed);
+        $this->assertSame(now()->setTimezone('America/Maceio')->format('d/m/Y H:i'), $lastProcessed->format('d/m/Y H:i'));
+    }
+
+    public function test_sidebar_displays_last_indicators_processed_at(): void
+    {
+        $admin = User::query()->create([
+            'name' => 'Administrador',
+            'email' => 'admin@monitorafacil.gov.br',
+            'password' => Hash::make('password123'),
+            'role' => User::ROLE_ADMIN,
+        ]);
+
+        $settings = app(SettingsService::class);
+        $settings->recordIndicatorsProcessedNow();
+
+        $response = $this->actingAs($admin)->get(route('dashboard'));
+
+        $response->assertOk();
+        $response->assertSee('Última Atualização');
+        $response->assertSee(now()->setTimezone('America/Maceio')->format('d/m/Y H:i'));
+    }
 }
 
