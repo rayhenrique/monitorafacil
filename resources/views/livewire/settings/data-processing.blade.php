@@ -710,6 +710,238 @@
         </div>
     @endif
 
+    <!-- Rotina Noturna Automática (Madrugada · 03:00) -->
+    <div class="rounded-3xl border border-line bg-white p-6 sm:p-8 shadow-sm space-y-6">
+        <div class="space-y-2 border-b border-line pb-5">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-900 border border-indigo-200">
+                    <span class="h-2 w-2 rounded-full bg-indigo-600 animate-pulse"></span>
+                    Rotina Noturna Automática · 20 Etapas
+                </span>
+                <div class="flex items-center gap-2">
+                    @if ($nightlyLastStatus)
+                        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold border {{ $nightlyLastStatus === 'success' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : ($nightlyLastStatus === 'running' ? 'bg-amber-50 text-amber-800 border-amber-200 animate-pulse' : 'bg-rose-50 text-rose-800 border-rose-200') }}">
+                            <span class="h-1.5 w-1.5 rounded-full {{ $nightlyLastStatus === 'success' ? 'bg-emerald-600' : ($nightlyLastStatus === 'running' ? 'bg-amber-600' : 'bg-rose-600') }}"></span>
+                            Última Execução: {{ ucfirst($nightlyLastStatus === 'running' ? 'Em Execução' : ($nightlyLastStatus === 'success' ? 'Sucesso' : 'Falha')) }}
+                            @if ($nightlyLastRun) ({{ \Carbon\Carbon::parse($nightlyLastRun)->format('d/m/Y H:i') }}) @endif
+                        </span>
+                    @endif
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-xl sm:text-2xl font-extrabold text-ink tracking-tight flex items-center gap-2.5 mt-1">
+                    <svg class="h-6 w-6 text-indigo-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                    </svg>
+                    <span>Rotina Noturna Automática de Sincronização</span>
+                </h2>
+                <p class="text-xs sm:text-sm text-muted mt-1 leading-relaxed max-w-4xl">
+                    Rotina completa executada automaticamente toda madrugada (padrão às <strong>03:00</strong>). Atualiza o repositório (<code class="font-mono text-slate-700 font-bold">git pull</code>), dependências (<code class="font-mono text-slate-700 font-bold">composer</code>), compilação Vite (<code class="font-mono text-slate-700 font-bold">npm run build</code>), migrações (<code class="font-mono text-slate-700 font-bold">migrate</code>), consolidação de todos os indicadores (CVAT, C1 a C7, Saúde Bucal B1 a B6) e otimização total de caches.
+                </p>
+            </div>
+        </div>
+
+        @if ($nightlySuccessMessage)
+            <div class="rounded-2xl p-4 text-xs font-medium border shadow-xs bg-emerald-50 border-emerald-200 text-emerald-900 flex items-center gap-2.5">
+                <svg class="h-4 w-4 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span>{{ $nightlySuccessMessage }}</span>
+            </div>
+        @endif
+
+        @if ($nightlyErrorMessage)
+            <div class="rounded-2xl p-4 text-xs font-medium border shadow-xs bg-rose-50 border-rose-200 text-rose-900 flex items-center gap-2.5">
+                <svg class="h-4 w-4 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                </svg>
+                <span>{{ $nightlyErrorMessage }}</span>
+            </div>
+        @endif
+
+        <!-- Formulário de Configuração -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-5 rounded-2xl bg-slate-50/80 border border-slate-200/80">
+            <!-- Ativação -->
+            <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-ink">Status da Rotina</label>
+                <div class="flex items-center gap-3 pt-1">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" wire:model="nightlyRoutineEnabled" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                        <span class="ml-2.5 text-xs font-semibold text-slate-700">
+                            {{ $nightlyRoutineEnabled ? 'Ativada' : 'Pausada' }}
+                        </span>
+                    </label>
+                </div>
+                <p class="text-[11px] text-muted">Habilita o disparo diário pelo agendador</p>
+            </div>
+
+            <!-- Horário de Execução -->
+            <div class="space-y-1.5">
+                <label for="nightlyRoutineTime" class="block text-xs font-bold text-ink">Horário da Madrugada</label>
+                <input
+                    type="time"
+                    id="nightlyRoutineTime"
+                    wire:model="nightlyRoutineTime"
+                    class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-mono font-bold text-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                >
+                <p class="text-[11px] text-muted">Horário programado (padrão: 03:00)</p>
+            </div>
+
+            <!-- Binário PHP -->
+            <div class="space-y-1.5">
+                <label for="nightlyRoutinePhpBin" class="block text-xs font-bold text-ink">Binário do PHP</label>
+                <input
+                    type="text"
+                    id="nightlyRoutinePhpBin"
+                    wire:model="nightlyRoutinePhpBin"
+                    placeholder="php8.5"
+                    class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-mono text-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                >
+                <p class="text-[11px] text-muted">Binário oficial (CloudPanel: php8.5)</p>
+            </div>
+
+            <!-- Limite de Memória -->
+            <div class="space-y-1.5">
+                <label for="nightlyRoutineMemoryLimit" class="block text-xs font-bold text-ink">Limite de Memória</label>
+                <input
+                    type="text"
+                    id="nightlyRoutineMemoryLimit"
+                    wire:model="nightlyRoutineMemoryLimit"
+                    placeholder="1024M"
+                    class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-mono text-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                >
+                <p class="text-[11px] text-muted">Alocação recomendada: 1024M</p>
+            </div>
+
+            <!-- Diretório do Projeto (Ocupa 4 colunas) -->
+            <div class="space-y-1.5 md:col-span-2 lg:col-span-4 border-t border-slate-200/80 pt-3">
+                <label for="nightlyRoutineProjectPath" class="block text-xs font-bold text-ink">Caminho Raiz no Servidor (Deploy Path)</label>
+                <input
+                    type="text"
+                    id="nightlyRoutineProjectPath"
+                    wire:model="nightlyRoutineProjectPath"
+                    class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-mono text-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                >
+                <p class="text-[11px] text-muted">Diretório oficial no CloudPanel VPS para execução do script e atualização Git</p>
+            </div>
+        </div>
+
+        <!-- Botões de Ação da Rotina -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <div class="flex flex-wrap items-center gap-2.5">
+                <button
+                    type="button"
+                    wire:click="saveNightlySettings"
+                    wire:loading.attr="disabled"
+                    class="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 transition cursor-pointer disabled:opacity-50"
+                >
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                    <span>Salvar Configuração</span>
+                </button>
+
+                <button
+                    type="button"
+                    wire:click="runNightlyRoutineNow"
+                    wire:loading.attr="disabled"
+                    class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-indigo-700 transition cursor-pointer disabled:opacity-50"
+                >
+                    <span wire:loading.remove wire:target="runNightlyRoutineNow" class="flex items-center gap-2">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+                        </svg>
+                        <span>Executar Rotina Noturna Agora (20 Etapas)</span>
+                    </span>
+                    <span wire:loading wire:target="runNightlyRoutineNow" class="flex items-center gap-2">
+                        <svg class="h-4 w-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Executando 20 etapas em segundo plano...</span>
+                    </span>
+                </button>
+
+                <button
+                    type="button"
+                    wire:click="viewNightlyLog"
+                    wire:loading.attr="disabled"
+                    class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                >
+                    <svg class="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                    </svg>
+                    <span>Ver Log da Execução</span>
+                </button>
+            </div>
+
+            <div class="text-[11px] text-slate-500">
+                Arquivo de log: <span class="font-mono font-medium text-slate-700">storage/logs/nightly-sync.log</span>
+            </div>
+        </div>
+
+        <!-- Accordion com os 20 Comandos da Rotina Oficial -->
+        <div x-data="{ expanded: false }" class="rounded-2xl border border-line bg-slate-50/60 p-4 space-y-3">
+            <button
+                type="button"
+                @click="expanded = !expanded"
+                class="w-full flex items-center justify-between text-left text-xs font-bold text-slate-700 hover:text-slate-900 transition cursor-pointer"
+            >
+                <span class="flex items-center gap-2">
+                    <span class="flex h-5 w-5 items-center justify-center rounded-md bg-indigo-100 text-indigo-700 font-mono text-[10px]">20</span>
+                    <span>Comandos Oficiais Executados Sequencialmente na Rotina da Madrugada</span>
+                </span>
+                <span class="text-xs text-indigo-600 font-semibold" x-text="expanded ? 'Recolher ▲' : 'Ver Comandos ▼'"></span>
+            </button>
+
+            <div x-show="expanded" x-collapse class="pt-2 border-t border-slate-200/70 space-y-2">
+                <p class="text-[11px] text-muted">
+                    Esta é a esteira oficial executada pelo script <span class="font-mono text-slate-700">scripts/nightly-sync.sh</span> e agendada pelo sistema:
+                </p>
+                <pre class="p-3.5 rounded-xl bg-[#0c1f1c] text-emerald-400 font-mono text-[11px] leading-relaxed overflow-x-auto selection:bg-teal-700 selection:text-white"><code>cd {{ $nightlyRoutineProjectPath }}
+git pull origin main
+composer install --no-dev --optimize-autoloader
+npm run build
+{{ $nightlyRoutinePhpBin }} artisan migrate --force
+{{ $nightlyRoutinePhpBin }} -d memory_limit={{ $nightlyRoutineMemoryLimit }} artisan cvat:sync-nominal
+{{ $nightlyRoutinePhpBin }} -d memory_limit={{ $nightlyRoutineMemoryLimit }} artisan esus:process-data --scope=c1
+{{ $nightlyRoutinePhpBin }} -d memory_limit={{ $nightlyRoutineMemoryLimit }} artisan esus:process-data --scope=c2
+{{ $nightlyRoutinePhpBin }} -d memory_limit={{ $nightlyRoutineMemoryLimit }} artisan esus:process-data --scope=c3
+{{ $nightlyRoutinePhpBin }} -d memory_limit={{ $nightlyRoutineMemoryLimit }} artisan esus:process-data --scope=c4
+{{ $nightlyRoutinePhpBin }} -d memory_limit={{ $nightlyRoutineMemoryLimit }} artisan esus:process-data --scope=c5
+{{ $nightlyRoutinePhpBin }} -d memory_limit={{ $nightlyRoutineMemoryLimit }} artisan esus:process-data --scope=c6
+{{ $nightlyRoutinePhpBin }} -d memory_limit={{ $nightlyRoutineMemoryLimit }} artisan esus:process-data --scope=c7
+{{ $nightlyRoutinePhpBin }} -d memory_limit={{ $nightlyRoutineMemoryLimit }} artisan esus:process-data --scope=oral-health
+{{ $nightlyRoutinePhpBin }} -d memory_limit={{ $nightlyRoutineMemoryLimit }} artisan esus:process-oral-health
+{{ $nightlyRoutinePhpBin }} artisan livewire:publish --assets
+{{ $nightlyRoutinePhpBin }} artisan optimize:clear
+{{ $nightlyRoutinePhpBin }} artisan config:cache
+{{ $nightlyRoutinePhpBin }} artisan queue:restart || true
+{{ $nightlyRoutinePhpBin }} artisan route:cache
+{{ $nightlyRoutinePhpBin }} artisan view:cache</code></pre>
+
+                <!-- Comandos do Crontab no Servidor -->
+                <div class="mt-3 pt-3 border-t border-slate-200/70 space-y-2">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-600 block">Agendamento no Crontab do Linux (CloudPanel)</span>
+                    <div class="space-y-1.5">
+                        <span class="text-[10px] text-slate-500 font-semibold block">Opção 1: Entrada Crontab direta para o script noturno (Recomendado):</span>
+                        <div class="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-white border border-slate-200 font-mono text-[11px] text-slate-800">
+                            <span class="select-all truncate">{{ $crontabCommand }}</span>
+                        </div>
+                    </div>
+                    <div class="space-y-1.5 pt-1">
+                        <span class="text-[10px] text-slate-500 font-semibold block">Opção 2: Agendador padrão do Laravel (schedule:run a cada minuto):</span>
+                        <div class="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-white border border-slate-200 font-mono text-[11px] text-slate-800">
+                            <span class="select-all truncate">{{ $schedulerCron }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Resumo do Último Snapshot Gravado -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Status Geral do Último Snapshot -->
@@ -794,4 +1026,31 @@
             </p>
         </div>
     </div>
+
+    <!-- Modal de Visualização de Log da Rotina Noturna -->
+    @if ($showNightlyLogModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in" wire:click.self="closeNightlyLogModal">
+            <div class="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
+                <div class="flex items-center justify-between px-6 py-4 bg-slate-900 text-white border-b border-slate-800">
+                    <div class="flex items-center gap-2.5">
+                        <span class="flex h-3 w-3 rounded-full bg-emerald-400"></span>
+                        <h3 class="text-sm font-bold tracking-tight">Log de Execução da Rotina Noturna</h3>
+                        <span class="text-[11px] font-mono text-slate-400">storage/logs/nightly-sync.log</span>
+                    </div>
+                    <button type="button" wire:click="closeNightlyLogModal" class="text-slate-400 hover:text-white transition p-1 cursor-pointer">
+                        ✕
+                    </button>
+                </div>
+                <div class="p-4 bg-[#0c1f1c] text-emerald-300 font-mono text-xs overflow-y-auto flex-1 selection:bg-teal-700 selection:text-white leading-relaxed">
+                    <pre class="whitespace-pre-wrap">{{ $nightlyLogContent }}</pre>
+                </div>
+                <div class="flex items-center justify-between px-6 py-3.5 bg-slate-50 border-t border-slate-200">
+                    <span class="text-xs text-slate-500">Últimas 150 linhas do arquivo de log</span>
+                    <button type="button" wire:click="closeNightlyLogModal" class="rounded-xl bg-slate-800 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-700 transition cursor-pointer">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Services\SettingsService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -10,11 +11,30 @@ Artisan::command('inspire', function () {
 
 Schedule::command('esus:sync-snapshot')
     ->dailyAt('03:00')
-    ->timezone(config('esus.schedule_timezone'))
+    ->timezone(config('esus.schedule_timezone', 'America/Maceio'))
     ->withoutOverlapping();
 
-// Processamento analítico agendado é SEMPRE o completo (scope=all)
+// Rotina Noturna Automática Completa (20 etapas configuráveis pelo módulo Processar Dados)
+try {
+    $settings = app(SettingsService::class);
+    $nightlyEnabled = $settings->get('nightly_routine_enabled', '1') !== '0';
+    $nightlyTime = $settings->get('nightly_routine_time', '03:00') ?: '03:00';
+
+    if ($nightlyEnabled) {
+        Schedule::command('monitora:nightly-routine')
+            ->dailyAt($nightlyTime)
+            ->timezone(config('esus.schedule_timezone', 'America/Maceio'))
+            ->withoutOverlapping();
+    }
+} catch (\Throwable) {
+    Schedule::command('monitora:nightly-routine')
+        ->dailyAt('03:00')
+        ->timezone(config('esus.schedule_timezone', 'America/Maceio'))
+        ->withoutOverlapping();
+}
+
+// Processamento analítico complementar agendado
 Schedule::command('esus:process-data --scope=all')
-    ->dailyAt('03:30')
-    ->timezone(config('esus.schedule_timezone'))
+    ->dailyAt('03:45')
+    ->timezone(config('esus.schedule_timezone', 'America/Maceio'))
     ->withoutOverlapping();

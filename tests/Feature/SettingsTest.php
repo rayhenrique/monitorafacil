@@ -524,4 +524,67 @@ XML;
             ->expectsOutputToContain('[Escopo: ALL]')
             ->assertExitCode(1);
     }
+
+    public function test_data_processing_can_configure_nightly_routine(): void
+    {
+        $admin = User::query()->create([
+            'name' => 'Administrador',
+            'email' => 'admin@monitorafacil.gov.br',
+            'password' => Hash::make('password123'),
+            'role' => User::ROLE_ADMIN,
+        ]);
+
+        $this->actingAs($admin);
+
+        Livewire::test(DataProcessing::class)
+            ->assertSet('nightlyRoutineTime', '03:00')
+            ->assertSet('nightlyRoutineEnabled', true)
+            ->set('nightlyRoutineTime', '04:15')
+            ->set('nightlyRoutineEnabled', false)
+            ->call('saveNightlySettings')
+            ->assertHasNoErrors()
+            ->assertSee('Configurações da rotina noturna salvas com sucesso!')
+            ->assertSee('04:15');
+
+        $settings = app(SettingsService::class);
+        $this->assertSame('04:15', $settings->get('nightly_routine_time'));
+        $this->assertSame('0', $settings->get('nightly_routine_enabled'));
+    }
+
+    public function test_data_processing_validates_nightly_routine_time_format(): void
+    {
+        $admin = User::query()->create([
+            'name' => 'Administrador',
+            'email' => 'admin@monitorafacil.gov.br',
+            'password' => Hash::make('password123'),
+            'role' => User::ROLE_ADMIN,
+        ]);
+
+        $this->actingAs($admin);
+
+        Livewire::test(DataProcessing::class)
+            ->set('nightlyRoutineTime', '99:99')
+            ->call('saveNightlySettings')
+            ->assertSet('nightlyErrorMessage', 'O horário informado deve estar no formato HH:MM (ex: 03:00).');
+    }
+
+    public function test_data_processing_can_view_nightly_log_modal(): void
+    {
+        $admin = User::query()->create([
+            'name' => 'Administrador',
+            'email' => 'admin@monitorafacil.gov.br',
+            'password' => Hash::make('password123'),
+            'role' => User::ROLE_ADMIN,
+        ]);
+
+        $this->actingAs($admin);
+
+        Livewire::test(DataProcessing::class)
+            ->assertSet('showNightlyLogModal', false)
+            ->call('viewNightlyLog')
+            ->assertSet('showNightlyLogModal', true)
+            ->call('closeNightlyLogModal')
+            ->assertSet('showNightlyLogModal', false);
+    }
 }
+

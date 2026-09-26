@@ -274,7 +274,7 @@ cd /home/kltecnologia-monitorafacil/htdocs/monitorafacil.kltecnologia.com
 ```
 
 > **Opções úteis do deploy:**
-> - `./deploy.sh`: Executa todas as 19 etapas completas (incluindo migrações, compilação Vite e sincronização de dados de C1 a C7, Saúde Bucal B1 a B6 e CVAT).
+> - `./deploy.sh`: Executa todas as 20 etapas completas (incluindo migrações, compilação Vite e sincronização de dados de C1 a C7, Saúde Bucal B1 a B6 via `--scope=oral-health` e `esus:process-oral-health`, além do CVAT).
 > - `./deploy.sh --quick`: Executa o deploy rápido (atualiza código, dependências, Vite, migrações e limpa caches, pulando a sincronização demorada do PEC).
 
 *(Ou executar manualmente os comandos equivalentes contidos no script):*
@@ -302,6 +302,32 @@ php8.5 artisan queue:restart || true
 php8.5 artisan route:cache
 php8.5 artisan view:cache
 ```
+
+---
+
+## 🌙 Rotina Noturna Automática da Madrugada (03:00)
+
+O Monitora Fácil conta com rotina automatizada para execução às **03:00 da madrugada** (configurável pela interface em **Configurações > Processar Dados**).
+
+Para ativar o agendamento no Crontab do CloudPanel / Linux para o usuário `kltecnologia-monitorafacil`:
+
+```bash
+crontab -e
+```
+
+Adicione a linha da rotina oficial:
+
+```bash
+0 3 * * * /bin/bash /home/kltecnologia-monitorafacil/htdocs/monitorafacil.kltecnologia.com/scripts/nightly-sync.sh >> /home/kltecnologia-monitorafacil/htdocs/monitorafacil.kltecnologia.com/storage/logs/nightly-sync.log 2>&1
+```
+
+Ou, caso utilize o agendador padrão do Laravel:
+
+```bash
+* * * * * cd /home/kltecnologia-monitorafacil/htdocs/monitorafacil.kltecnologia.com && php8.5 artisan schedule:run >> /dev/null 2>&1
+```
+
+O log completo de cada execução fica gravado em `storage/logs/nightly-sync.log` e pode ser consultado diretamente na interface web em "Processar Dados".
 
 ---
 

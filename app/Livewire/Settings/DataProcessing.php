@@ -8,6 +8,8 @@ use App\Models\ConsolidationRegistration;
 use App\Models\ConsolidationTeam;
 use App\Models\SyncLog;
 use App\Services\EsusDataProcessingService;
+use App\Services\SettingsService;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -32,6 +34,45 @@ class DataProcessing extends Component
     public string $selectedScope = 'all'; // 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'cvat' ou 'all' (Geral Completo)
 
     public ?float $executionTimeMs = null;
+
+    // Configurações da Rotina Noturna Automática (03:00 da manhã)
+    public bool $nightlyRoutineEnabled = true;
+
+    public string $nightlyRoutineTime = '03:00';
+
+    public string $nightlyRoutineProjectPath = '/home/kltecnologia-monitorafacil/htdocs/monitorafacil.kltecnologia.com';
+
+    public string $nightlyRoutinePhpBin = 'php8.5';
+
+    public string $nightlyRoutineMemoryLimit = '1024M';
+
+    public ?string $nightlySuccessMessage = null;
+
+    public ?string $nightlyErrorMessage = null;
+
+    public ?string $nightlyLastRun = null;
+
+    public ?string $nightlyLastStatus = null;
+
+    public ?string $nightlyFinishedAt = null;
+
+    public bool $showNightlyLogModal = false;
+
+    public string $nightlyLogContent = '';
+
+    public bool $isExecutingNightlyNow = false;
+
+    public function mount(SettingsService $settings): void
+    {
+        $this->nightlyRoutineEnabled = $settings->get('nightly_routine_enabled', '1') !== '0';
+        $this->nightlyRoutineTime = $settings->get('nightly_routine_time', '03:00') ?: '03:00';
+        $this->nightlyRoutineProjectPath = $settings->get('nightly_routine_project_path') ?: '/home/kltecnologia-monitorafacil/htdocs/monitorafacil.kltecnologia.com';
+        $this->nightlyRoutinePhpBin = $settings->get('nightly_routine_php_bin', 'php8.5') ?: 'php8.5';
+        $this->nightlyRoutineMemoryLimit = $settings->get('nightly_routine_memory_limit', '1024M') ?: '1024M';
+        $this->nightlyLastRun = $settings->get('nightly_routine_last_run');
+        $this->nightlyLastStatus = $settings->get('nightly_routine_last_status');
+        $this->nightlyFinishedAt = $settings->get('nightly_routine_finished_at');
+    }
 
     public function setScope(string $scope): void
     {
@@ -178,6 +219,70 @@ class DataProcessing extends Component
         }
     }
 
+    public function saveNightlySettings(SettingsService $settings): void
+    {
+        $this->nightlySuccessMessage = null;
+        $this->nightlyErrorMessage = null;
+
+        $time = trim($this->nightlyRoutineTime);
+        if (! preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $time)) {
+            $this->nightlyErrorMessage = 'O horário informado deve estar no formato HH:MM (ex: 03:00).';
+
+            return;
+        }
+
+        $settings->set('nightly_routine_enabled', $this->nightlyRoutineEnabled ? '1' : '0');
+        $settings->set('nightly_routine_time', $time);
+        $settings->set('nightly_routine_project_path', trim($this->nightlyRoutineProjectPath));
+        $settings->set('nightly_routine_php_bin', trim($this->nightlyRoutinePhpBin));
+        $settings->set('nightly_routine_memory_limit', trim($this->nightlyRoutineMemoryLimit));
+
+        $this->nightlySuccessMessage = "Configurações da rotina noturna salvas com sucesso! Horário agendado: {$time}.";
+    }
+
+    public function runNightlyRoutineNow(SettingsService $settings): void
+    {
+        $this->nightlySuccessMessage = null;
+        $this->nightlyErrorMessage = null;
+        $this->isExecutingNightlyNow = true;
+
+        try {
+            $exitCode = Artisan::call('monitora:nightly-routine', ['--force' => true]);
+            $this->nightlyLastRun = $settings->get('nightly_routine_last_run');
+            $this->nightlyLastStatus = $settings->get('nightly_routine_last_status');
+            $this->nightlyFinishedAt = $settings->get('nightly_routine_finished_at');
+
+            if ($exitCode === 0) {
+                $this->nightlySuccessMessage = 'Rotina noturna completa executada com sucesso!';
+            } else {
+                $this->nightlyErrorMessage = 'A rotina noturna foi concluída com pendências ou avisos. Verifique o log de execução.';
+            }
+        } catch (Throwable $e) {
+            $this->nightlyErrorMessage = 'Erro ao disparar rotina noturna: '.$e->getMessage();
+        } finally {
+            $this->isExecutingNightlyNow = false;
+        }
+    }
+
+    public function viewNightlyLog(): void
+    {
+        $logPath = storage_path('logs/nightly-sync.log');
+        if (file_exists($logPath)) {
+            $lines = @file($logPath);
+            $lastLines = array_slice($lines ?: [], -150);
+            $this->nightlyLogContent = implode('', $lastLines);
+        } else {
+            $this->nightlyLogContent = "Nenhum registro de log encontrado em storage/logs/nightly-sync.log ainda.\nExecute a rotina noturna manualmente ou aguarde o próximo agendamento.";
+        }
+
+        $this->showNightlyLogModal = true;
+    }
+
+    public function closeNightlyLogModal(): void
+    {
+        $this->showNightlyLogModal = false;
+    }
+
     private function updateProgress(int $percent, string $step): void
     {
         $this->progressPercent = max(0, min(100, $percent));
@@ -208,10 +313,19 @@ class DataProcessing extends Component
             ];
         }
 
+        $timeParts = explode(':', $this->nightlyRoutineTime ?: '03:00');
+        $cronMinute = (int) ($timeParts[1] ?? 0);
+        $cronHour = (int) ($timeParts[0] ?? 3);
+        $projectPath = rtrim($this->nightlyRoutineProjectPath ?: '/home/kltecnologia-monitorafacil/htdocs/monitorafacil.kltecnologia.com', '/');
+        $crontabCommand = "{$cronMinute} {$cronHour} * * * /bin/bash {$projectPath}/scripts/nightly-sync.sh >> {$projectPath}/storage/logs/nightly-sync.log 2>&1";
+        $schedulerCron = "* * * * * cd {$projectPath} && {$this->nightlyRoutinePhpBin} artisan schedule:run >> /dev/null 2>&1";
+
         return view('livewire.settings.data-processing', [
             'lastLog' => $lastLog,
             'latestRegistration' => $latestRegistration,
             'teams' => $teams,
+            'crontabCommand' => $crontabCommand,
+            'schedulerCron' => $schedulerCron,
         ]);
     }
 }

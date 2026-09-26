@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.30.0';
+    public const CURRENT_VERSION = 'v1.31.0';
 
     public const CURRENT_RELEASE_DATE = '25/09/2026';
 
@@ -61,9 +61,23 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.30.0',
+                'version' => 'v1.31.0',
                 'date' => '25/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Rotina Noturna Automática das 03:00 (20 Etapas), Configuração no Módulo "Processar Dados" e Revisão do Deploy',
+                'summary' => 'Implementação da esteira automatizada para execução noturna diária às 03:00 da manhã, configurável diretamente na interface de "Processar Dados" (/configuracoes/processar-dados). A rotina executa uma sequência oficial de 20 etapas: atualização Git (git pull), instalação de dependências (composer install), compilação de assets (npm run build), migrações (migrate), sincronização nominal CVAT, consolidação de todos os indicadores (C1 a C7, eSB Saúde Bucal B1 a B6 com --scope=oral-health e esus:process-oral-health), publicação de assets Livewire e otimização completa de caches (optimize:clear, config, route, view, queue). Inclui comando Artisan monitora:nightly-routine, script bash otimizado scripts/nightly-sync.sh, agendamento no routes/console.php, visualizador de log em tempo real e atualização dos scripts de deploy (deploy.sh e scripts/deploy.sh).',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Painel de configuração da Rotina Noturna no módulo "Processar Dados" com alternância de status, seletor de horário (padrão 03:00), limites de memória, disparador sob demanda e visualizador de log (nightly-sync.log).'],
+                    ['type' => 'novo', 'text' => 'Comando Artisan `php artisan monitora:nightly-routine` e script bash dedicado `scripts/nightly-sync.sh` com 20 etapas atômicas e registro de status/duração no banco de dados.'],
+                    ['type' => 'melhoria', 'text' => 'Atualização dos scripts `deploy.sh` e `scripts/deploy.sh` para 20 etapas oficiais, integrando tanto o escopo `oral-health` no `esus:process-data` quanto o `esus:process-oral-health`.'],
+                    ['type' => 'novo', 'text' => 'Integração com o Agendador do Laravel em `routes/console.php` disparando às 03:00 com respeito dinâmico às preferências do gestor.'],
+                    ['type' => 'melhoria', 'text' => 'Documentação completa de agendamento Crontab no `deploy.md` e suíte de testes automatizados em `SettingsTest.php`.'],
+                ],
+            ],
+            [
+                'version' => 'v1.30.0',
+                'date' => '25/09/2026',
+                'badge' => 'Anterior',
                 'title' => 'Controle de Acesso por Perfis (Administrador e Operador UBS/CNES) e Escopo de Dados por Unidade de Saúde',
                 'summary' => 'Implementação completa do sistema de perfis de usuário com controle de acesso granular e restrição de escopo de visualização por UBS/CNES. Dois níveis de acesso passam a operar no sistema: Administrador (acesso municipal irrestrito a todas as UBS, equipes e telas de configuração) e Operador (vinculado obrigatoriamente a uma Unidade Básica de Saúde / CNES, com visualização restrita a todas as equipes e munícipes daquela UBS). Operadores contam com aplicação automática do filtro de CNES no Painel Geral, Vínculo e Acompanhamento Territorial, Indicadores de Saúde da Família (C1 a C7) e Saúde Bucal (B1 a B6), impedindo a visualização de unidades e munícipes de outras unidades. Além disso, as rotas de configurações do sistema (/configuracoes/*) e links de navegação ficam restritos exclusivamente a Administradores via middleware EnsureUserIsAdmin.',
                 'highlights' => [
