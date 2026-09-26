@@ -81,4 +81,30 @@ class DashboardRealDataTest extends TestCase
             ->assertOk()
             ->assertSee('Sem consolidação disponível neste período');
     }
+
+    public function test_quality_overview_displays_oral_health_real_indicators_when_available(): void
+    {
+        \App\Models\OralHealth\OralHealthIndicatorSnapshot::create([
+            'year' => 2026,
+            'quarter' => 3,
+            'ine' => '0001746014',
+            'team_name' => 'ESB 013',
+            'cnes' => '2722607',
+            'facility_name' => 'Usf 13 Jose Belarmino Soares',
+            'team_type' => '88',
+            'indicator_code' => 'b1',
+            'numerator' => 59,
+            'denominator' => 1749,
+            'score_percent' => 3.37,
+            'performance_level' => 'regular',
+            'good_practices_breakdown' => ['points' => 0.5, 'weight' => 2],
+            'active_search_count' => 0,
+        ]);
+
+        Livewire::test(QualityOverview::class, ['year' => 2026, 'quarter' => 3])
+            ->assertOk()
+            ->assertSee('Primeira Consulta Programada')
+            ->assertSee('1 equipe eSB avaliada com consolidação válida')
+            ->assertSeeHtml('<p class="text-lg font-semibold tabular-nums text-rose-700">1</p>');
+    }
 }

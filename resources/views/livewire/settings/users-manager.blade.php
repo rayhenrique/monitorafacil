@@ -1,7 +1,7 @@
 <div class="app-page">
     <x-settings-tabs
         title="Usuários do Sistema"
-        subtitle="Gerencie os operadores com permissão de acesso ao Monitora Fácil"
+        subtitle="Gerencie os operadores e administradores com permissão de acesso ao Monitora Fácil"
         activeTab="users"
     />
 
@@ -37,7 +37,7 @@
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="search"
-                    placeholder="Buscar por nome ou e-mail..."
+                    placeholder="Buscar por nome, e-mail ou UBS..."
                     class="block w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-3 text-xs text-ink placeholder-slate-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
                 >
             </div>
@@ -56,11 +56,12 @@
 
         <!-- Tabela de Usuários -->
         <div class="overflow-x-auto">
-            <table class="min-w-[42rem] divide-y divide-line text-left text-xs text-ink">
+            <table class="min-w-[50rem] divide-y divide-line text-left text-xs text-ink">
                 <thead class="bg-slate-50 text-[11px] font-semibold uppercase tracking-wider text-muted">
                     <tr>
                         <th scope="col" class="px-6 py-3.5">Usuário</th>
                         <th scope="col" class="px-6 py-3.5">E-mail</th>
+                        <th scope="col" class="px-6 py-3.5">Perfil & Acesso</th>
                         <th scope="col" class="px-6 py-3.5">Data de Criação</th>
                         <th scope="col" class="px-6 py-3.5 text-right">Ações</th>
                     </tr>
@@ -85,6 +86,28 @@
                             </td>
                             <td class="whitespace-nowrap px-6 py-4 text-muted font-mono">
                                 {{ $user->email }}
+                            </td>
+                            <td class="px-6 py-4">
+                                @if ($user->isAdmin())
+                                    <div class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 text-[11px] font-semibold text-emerald-800">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                                        <span>Administrador</span>
+                                        <span class="text-[10px] text-emerald-600 font-normal">· Acesso Municipal</span>
+                                    </div>
+                                @else
+                                    <div class="space-y-0.5">
+                                        <div class="inline-flex items-center gap-1.5 rounded-full bg-teal-50 border border-teal-200/80 px-2.5 py-0.5 text-[11px] font-semibold text-teal-800">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-teal-600"></span>
+                                            <span>Operador</span>
+                                            @if ($user->cnes)
+                                                <span class="font-mono text-[10px] text-teal-600">CNES {{ $user->cnes }}</span>
+                                            @endif
+                                        </div>
+                                        <div class="text-[11px] font-medium text-slate-700 max-w-xs truncate" title="{{ $user->facility_name ?: 'UBS não informada' }}">
+                                            {{ $user->facility_name ?: 'UBS vinculada' }}
+                                        </div>
+                                    </div>
+                                @endif
                             </td>
                             <td class="whitespace-nowrap px-6 py-4 text-muted tabular-nums">
                                 {{ $user->created_at ? $user->created_at->format('d/m/Y H:i') : '-' }}
@@ -121,7 +144,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-6 py-12 text-center text-muted">
+                            <td colspan="5" class="px-6 py-12 text-center text-muted">
                                 <div class="flex flex-col items-center justify-center gap-2">
                                     <svg class="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
@@ -183,6 +206,63 @@
                         >
                         @error('email') <span class="text-[11px] text-rose-600 mt-1 block font-medium">{{ $message }}</span> @enderror
                     </div>
+
+                    <!-- Perfil de Acesso -->
+                    <div>
+                        <label class="block text-xs font-semibold text-ink mb-1.5">Perfil de Acesso</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <label class="flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition {{ $role === 'operator' ? 'border-teal-600 bg-teal-50/50 ring-1 ring-teal-500/20' : 'border-slate-200 bg-white hover:bg-slate-50' }}">
+                                <input type="radio" wire:model.live="role" value="operator" class="mt-0.5 text-teal-600 focus:ring-teal-500">
+                                <div>
+                                    <div class="text-xs font-semibold text-ink">Operador de UBS</div>
+                                    <div class="text-[11px] text-muted">Acesso restrito a uma UBS e suas equipes</div>
+                                </div>
+                            </label>
+                            <label class="flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition {{ $role === 'admin' ? 'border-teal-600 bg-teal-50/50 ring-1 ring-teal-500/20' : 'border-slate-200 bg-white hover:bg-slate-50' }}">
+                                <input type="radio" wire:model.live="role" value="admin" class="mt-0.5 text-teal-600 focus:ring-teal-500">
+                                <div>
+                                    <div class="text-xs font-semibold text-ink">Administrador</div>
+                                    <div class="text-[11px] text-muted">Acesso municipal irrestrito</div>
+                                </div>
+                            </label>
+                        </div>
+                        @error('role') <span class="text-[11px] text-rose-600 mt-1 block font-medium">{{ $message }}</span> @enderror
+                    </div>
+
+                    <!-- Vinculação à UBS (Obrigatório se Operador) -->
+                    @if ($role === 'operator')
+                        <div class="rounded-2xl border border-teal-200/90 bg-teal-50/50 p-4 space-y-2">
+                            <label for="userCnes" class="block text-xs font-semibold text-teal-950">
+                                Unidade Básica de Saúde vinculada (UBS / CNES) <span class="text-rose-600">*</span>
+                            </label>
+                            <select
+                                id="userCnes"
+                                wire:model.live="cnes"
+                                class="w-full rounded-xl border border-teal-300 bg-white px-3.5 py-2.5 text-xs text-ink focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                            >
+                                <option value="">Selecione o estabelecimento de saúde...</option>
+                                @foreach ($facilities as $facility)
+                                    <option value="{{ $facility->cnes }}">
+                                        {{ $facility->facility_name }} (CNES: {{ $facility->cnes }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="flex items-center gap-1.5 text-[11px] text-teal-800">
+                                <svg class="h-3.5 w-3.5 text-teal-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                                </svg>
+                                <span>O operador enxerga todas as equipes e cadastros desta UBS.</span>
+                            </div>
+                            @error('cnes') <span class="text-[11px] text-rose-600 mt-1 block font-medium">{{ $message }}</span> @enderror
+                        </div>
+                    @else
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 text-xs text-slate-600 flex items-start gap-2.5">
+                            <svg class="h-4 w-4 text-emerald-700 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Administradores possuem acesso total a todas as unidades, equipes, coortes e configurações de todo o município (não necessita vinculação).</span>
+                        </div>
+                    @endif
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
@@ -249,7 +329,7 @@
                     </div>
                 </div>
 
-                <div class="mt-6 flex flex-col-reverse gap-3 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-end">
+                <div class="mt-6 flex flex-col-reverse gap-3 border-t border-line pt-4 sm:flex-row sm:items-center sm:justify-end">
                     <button
                         type="button"
                         wire:click="closeDeleteModal"
@@ -262,7 +342,7 @@
                         wire:click="delete"
                         class="w-full rounded-xl bg-rose-600 px-5 py-2 text-xs font-semibold text-white hover:bg-rose-700 shadow-sm transition sm:w-auto"
                     >
-                        Sim, Excluir
+                        Excluir Usuário
                     </button>
                 </div>
             </div>

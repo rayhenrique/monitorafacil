@@ -141,8 +141,20 @@ class NominalList extends Component
         $this->resetPage();
     }
 
+    public function mount(): void
+    {
+        if (auth()->user()?->isOperator() && auth()->user()->cnes) {
+            $this->filterCnes = auth()->user()->cnes;
+            $this->advCnes = auth()->user()->cnes;
+        }
+    }
+
     public function updatedFilterCnes(): void
     {
+        if (auth()->user()?->isOperator() && auth()->user()->cnes) {
+            $this->filterCnes = auth()->user()->cnes;
+            $this->advCnes = auth()->user()->cnes;
+        }
         $this->resetPage();
     }
 
@@ -353,7 +365,9 @@ class NominalList extends Component
             $query->where('name', 'like', "%{$term}%");
         }
 
-        if (filled($this->filterCnes)) {
+        if (auth()->user()?->isOperator() && auth()->user()->cnes) {
+            $query->where('cnes', auth()->user()->cnes);
+        } elseif (filled($this->filterCnes)) {
             $query->where('cnes', trim($this->filterCnes));
         }
 
@@ -484,21 +498,32 @@ class NominalList extends Component
     {
         $records = $this->buildQuery()->paginate($this->perPage);
         $kpis = $this->getKpiSummary();
+        $operatorCnes = (auth()->user()?->isOperator() && auth()->user()->cnes) ? auth()->user()->cnes : null;
 
         // Carrega lista de equipes odontológicas e estabelecimentos para os seletores
-        $teams = OralHealthNominalCitizen::select('ine', 'team_name')
+        $teamsQuery = OralHealthNominalCitizen::select('ine', 'team_name')
             ->where('year', $this->selectedYear)
             ->where('quarter', $this->selectedQuarter)
-            ->whereNotNull('ine')
-            ->distinct()
+            ->whereNotNull('ine');
+
+        if ($operatorCnes) {
+            $teamsQuery->where('cnes', $operatorCnes);
+        }
+
+        $teams = $teamsQuery->distinct()
             ->orderBy('team_name')
             ->get();
 
-        $units = OralHealthNominalCitizen::select('cnes', 'facility_name')
+        $unitsQuery = OralHealthNominalCitizen::select('cnes', 'facility_name')
             ->where('year', $this->selectedYear)
             ->where('quarter', $this->selectedQuarter)
-            ->whereNotNull('cnes')
-            ->distinct()
+            ->whereNotNull('cnes');
+
+        if ($operatorCnes) {
+            $unitsQuery->where('cnes', $operatorCnes);
+        }
+
+        $units = $unitsQuery->distinct()
             ->orderBy('facility_name')
             ->get();
 

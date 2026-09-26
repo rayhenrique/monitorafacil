@@ -24,9 +24,17 @@
 
     <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-            <p class="eyebrow">Novo Financiamento APS</p>
+            <div class="flex items-center gap-2 flex-wrap">
+                <p class="eyebrow">Novo Financiamento APS</p>
+                @if (!empty($operatorFacility))
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-teal-100/90 border border-teal-300 px-2.5 py-0.5 text-xs font-bold text-teal-900 shadow-2xs">
+                        <span class="h-1.5 w-1.5 rounded-full bg-teal-600"></span>
+                        Unidade: {{ $operatorFacility }}
+                    </span>
+                @endif
+            </div>
             <h2 id="quality-title" class="mt-2 text-2xl font-semibold tracking-tight text-ink">Componente de Qualidade</h2>
-            <p class="mt-1 text-sm text-muted">Acompanhamento dos indicadores clínicos no {{ $quarter }}º quadrimestre de {{ $year }}.</p>
+            <p class="mt-1 text-sm text-muted">Acompanhamento dos indicadores clínicos no {{ $quarter }}º quadrimestre de {{ $year }}{{ !empty($operatorFacility) ? ' para as equipes vinculadas a esta UBS.' : '.' }}</p>
         </div>
         <span class="rounded-full bg-teal-50 px-3.5 py-1 text-xs font-semibold text-teal-900 border border-teal-200/60">
             Metodologia Nota Técnica 30/2025
@@ -99,9 +107,17 @@
 
     <!-- Sub-seção: SAÚDE BUCAL (B1 a B6) -->
     <div class="mt-10">
-        <div class="mb-4 flex items-center gap-2.5">
-            <span class="h-2 w-2 rounded-full bg-teal-600"></span>
-            <h3 class="text-xs font-bold uppercase tracking-wider text-teal-900">Saúde Bucal · Indicadores B1 a B6</h3>
+        <div class="mb-4 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <span class="h-2 w-2 rounded-full bg-teal-600"></span>
+                <h3 class="text-xs font-bold uppercase tracking-wider text-teal-900">Saúde Bucal · Indicadores B1 a B6</h3>
+            </div>
+            <a href="{{ route('oral-health.overview') }}" class="text-xs font-semibold text-teal-800 hover:text-teal-950 transition flex items-center gap-1">
+                <span>Painel de Saúde Bucal</span>
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+            </a>
         </div>
 
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -117,7 +133,9 @@
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-center gap-2">
                                     <span class="rounded-md bg-teal-100/70 px-2 py-0.5 text-xs font-bold text-teal-900">{{ $indicator['code'] }}</span>
-                                    <h4 class="text-sm font-semibold text-ink sm:text-base leading-snug">{{ $indicator['name'] }}</h4>
+                                    <a href="{{ route('oral-health.indicator', ['indicator' => strtolower($indicator['code'])]) }}" class="text-sm font-semibold text-ink sm:text-base leading-snug hover:text-teal-800 transition">
+                                        {{ $indicator['name'] }}
+                                    </a>
                                 </div>
                                 <p class="mt-1.5 text-xs leading-relaxed text-muted">{{ $indicator['description'] }}</p>
                             </div>
@@ -143,6 +161,9 @@
                                 <p class="text-[10px] font-medium text-muted uppercase">Regular</p>
                             </div>
                         </div>
+                        <p class="mt-2 text-[10px] font-medium text-muted">
+                            {{ $indicator['evaluated_teams'] }} {{ $indicator['evaluated_teams'] === 1 ? 'equipe eSB avaliada' : 'equipes eSB avaliadas' }} com consolidação válida
+                        </p>
                     @else
                         <div class="mt-6 rounded-xl border border-dashed border-line bg-canvas/50 px-3 py-4 text-center">
                             <p class="text-xs font-semibold text-ink">Sem consolidação disponível neste período</p>

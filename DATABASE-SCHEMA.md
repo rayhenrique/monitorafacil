@@ -62,8 +62,8 @@ O banco de dados operacional e analítico do Monitora Fácil conta atualmente co
 #### 2.2.1. Gestão, Configuração e Auditoria
 
 - **`users`**:
-  - Colunas: `id`, `name`, `email`, `email_verified_at`, `password`, `remember_token`, `last_seen_version`, `created_at`, `updated_at`.
-  - Índices: `PRIMARY(id)`, `UNIQUE(email)`.
+  - Colunas: `id`, `name`, `email`, `email_verified_at`, `password`, `remember_token`, `last_seen_version`, `role` (`admin`, `operator`), `cnes` (CNES de vinculação para operadores), `facility_name` (nome da UBS), `created_at`, `updated_at`.
+  - Índices: `PRIMARY(id)`, `UNIQUE(email)`, `INDEX(cnes)`.
 - **`settings`**:
   - Colunas: `id`, `key`, `value`, `created_at`, `updated_at`.
   - Índices: `PRIMARY(id)`, `UNIQUE(key)`.

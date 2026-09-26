@@ -76,7 +76,8 @@ class Overview extends Component
 
     public function render(OralHealthService $service, DashboardSnapshotService $snapshots): View
     {
-        $overview = $service->getMunicipalOverview($this->year, $this->quarter);
+        $operatorCnes = (auth()->user()?->isOperator() && auth()->user()->cnes) ? auth()->user()->cnes : null;
+        $overview = $service->getMunicipalOverview($this->year, $this->quarter, $operatorCnes);
 
         $periods = collect($snapshots->periods())
             ->filter(fn ($p) => $p['year'] <= (int) now()->year)

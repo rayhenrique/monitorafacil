@@ -32,6 +32,12 @@ class UsersManager extends Component
 
     public string $password_confirmation = '';
 
+    public string $role = User::ROLE_OPERATOR;
+
+    public string $cnes = '';
+
+    public string $facility_name = '';
+
     public bool $showDeleteModal = false;
 
     public ?int $userToDeleteId = null;
@@ -55,6 +61,14 @@ class UsersManager extends Component
             'password' => $this->isEditing
                 ? ['nullable', 'string', 'min:8', 'confirmed']
                 : ['required', 'string', 'min:8', 'confirmed'],
+            'role' => ['required', 'string', Rule::in([User::ROLE_ADMIN, User::ROLE_OPERATOR])],
+            'cnes' => [
+                Rule::requiredIf(fn () => $this->role === User::ROLE_OPERATOR),
+                'nullable',
+                'string',
+                'max:20',
+            ],
+            'facility_name' => ['nullable', 'string', 'max:255'],
         ];
     }
 
@@ -72,6 +86,8 @@ class UsersManager extends Component
             'password.required' => 'A senha é obrigatória.',
             'password.min' => 'A senha deve conter no mínimo 8 caracteres.',
             'password.confirmed' => 'A confirmação da senha não confere.',
+            'role.required' => 'Selecione o perfil de acesso.',
+            'cnes.required' => 'Para operadores, é obrigatório selecionar a Unidade Básica de Saúde (UBS).',
         ];
     }
 
@@ -80,9 +96,38 @@ class UsersManager extends Component
         $this->resetPage();
     }
 
+    public function updatedRole(): void
+    {
+        if ($this->role === User::ROLE_ADMIN) {
+            $this->cnes = '';
+            $this->facility_name = '';
+        }
+    }
+
+    public function updatedCnes(): void
+    {
+        if (filled($this->cnes)) {
+            $facilities = User::availableFacilities();
+            $facility = $facilities->firstWhere('cnes', $this->cnes);
+            $this->facility_name = $facility->facility_name ?? '';
+        } else {
+            $this->facility_name = '';
+        }
+    }
+
     public function openCreateModal(): void
     {
-        $this->reset(['userId', 'name', 'email', 'password', 'password_confirmation']);
+        $this->reset([
+            'userId',
+            'name',
+            'email',
+            'password',
+            'password_confirmation',
+            'role',
+            'cnes',
+            'facility_name',
+        ]);
+        $this->role = User::ROLE_OPERATOR;
         $this->resetValidation();
         $this->isEditing = false;
         $this->showModal = true;
@@ -95,6 +140,9 @@ class UsersManager extends Component
         $this->userId = $user->id;
         $this->name = $user->name;
         $this->email = $user->email;
+        $this->role = $user->role ?: User::ROLE_OPERATOR;
+        $this->cnes = $user->cnes ?: '';
+        $this->facility_name = $user->facility_name ?: '';
         $this->password = '';
         $this->password_confirmation = '';
         $this->isEditing = true;
@@ -105,11 +153,23 @@ class UsersManager extends Component
     {
         $this->validate();
 
+        $cnesVal = $this->role === User::ROLE_ADMIN ? null : trim($this->cnes);
+        $facilityNameVal = null;
+
+        if ($this->role === User::ROLE_OPERATOR && filled($cnesVal)) {
+            $facilities = User::availableFacilities();
+            $facility = $facilities->firstWhere('cnes', $cnesVal);
+            $facilityNameVal = $facility->facility_name ?? $this->facility_name ?: null;
+        }
+
         if ($this->isEditing && $this->userId !== null) {
             $user = User::findOrFail($this->userId);
             $data = [
                 'name' => $this->name,
                 'email' => $this->email,
+                'role' => $this->role,
+                'cnes' => $cnesVal,
+                'facility_name' => $facilityNameVal,
             ];
 
             if (filled($this->password)) {
@@ -123,12 +183,24 @@ class UsersManager extends Component
                 'name' => $this->name,
                 'email' => $this->email,
                 'password' => Hash::make($this->password),
+                'role' => $this->role,
+                'cnes' => $cnesVal,
+                'facility_name' => $facilityNameVal,
             ]);
             session()->flash('success', 'Novo usuário cadastrado com sucesso!');
         }
 
         $this->showModal = false;
-        $this->reset(['userId', 'name', 'email', 'password', 'password_confirmation']);
+        $this->reset([
+            'userId',
+            'name',
+            'email',
+            'password',
+            'password_confirmation',
+            'role',
+            'cnes',
+            'facility_name',
+        ]);
     }
 
     public function confirmDelete(int $id): void
@@ -181,7 +253,16 @@ class UsersManager extends Component
     public function closeModal(): void
     {
         $this->showModal = false;
-        $this->reset(['userId', 'name', 'email', 'password', 'password_confirmation']);
+        $this->reset([
+            'userId',
+            'name',
+            'email',
+            'password',
+            'password_confirmation',
+            'role',
+            'cnes',
+            'facility_name',
+        ]);
         $this->resetValidation();
     }
 
@@ -197,7 +278,9 @@ class UsersManager extends Component
             ->when(filled($this->search), function ($query): void {
                 $query->where(function ($q): void {
                     $q->where('name', 'like', '%'.$this->search.'%')
-                        ->orWhere('email', 'like', '%'.$this->search.'%');
+                        ->orWhere('email', 'like', '%'.$this->search.'%')
+                        ->orWhere('facility_name', 'like', '%'.$this->search.'%')
+                        ->orWhere('cnes', 'like', '%'.$this->search.'%');
                 });
             })
             ->orderBy('id', 'desc')
@@ -205,6 +288,7 @@ class UsersManager extends Component
 
         return view('livewire.settings.users-manager', [
             'users' => $users,
+            'facilities' => User::availableFacilities(),
         ]);
     }
 }

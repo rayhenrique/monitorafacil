@@ -46,6 +46,9 @@ class SettingsTest extends TestCase
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('role', 20)->default(User::ROLE_OPERATOR);
+            $table->string('cnes', 20)->nullable()->index();
+            $table->string('facility_name', 150)->nullable();
             $table->string('last_seen_version')->nullable();
             $table->rememberToken();
             $table->timestamps();
@@ -139,15 +142,16 @@ class SettingsTest extends TestCase
         $this->get('/configuracoes/importar-cnes-xml')->assertRedirect('/login');
     }
 
-    public function test_authenticated_user_can_access_settings_pages(): void
+    public function test_admin_user_can_access_settings_pages(): void
     {
-        $user = User::query()->create([
+        $admin = User::query()->create([
             'name' => 'Gestor APS',
             'email' => 'gestor@monitorafacil.gov.br',
             'password' => Hash::make('password123'),
+            'role' => User::ROLE_ADMIN,
         ]);
 
-        $this->actingAs($user);
+        $this->actingAs($admin);
 
         $this->get('/configuracoes/usuarios')->assertOk()->assertSee('Usuários do Sistema');
         $this->get('/configuracoes/municipio')->assertOk()->assertSee('Dados do Município');
@@ -157,12 +161,34 @@ class SettingsTest extends TestCase
         $this->get('/configuracoes/importar-cnes-xml')->assertOk()->assertSee('Importar CNES / XML');
     }
 
-    public function test_users_manager_can_create_user(): void
+    public function test_operator_user_is_forbidden_from_settings_pages(): void
+    {
+        $operator = User::query()->create([
+            'name' => 'Operador UBS',
+            'email' => 'operador@monitorafacil.gov.br',
+            'password' => Hash::make('password123'),
+            'role' => User::ROLE_OPERATOR,
+            'cnes' => '2719738',
+            'facility_name' => 'UBS CENTRO',
+        ]);
+
+        $this->actingAs($operator);
+
+        $this->get('/configuracoes/usuarios')->assertForbidden();
+        $this->get('/configuracoes/municipio')->assertForbidden();
+        $this->get('/configuracoes/logs-auditoria')->assertForbidden();
+        $this->get('/configuracoes/conexao-esus')->assertForbidden();
+        $this->get('/configuracoes/processar-dados')->assertForbidden();
+        $this->get('/configuracoes/importar-cnes-xml')->assertForbidden();
+    }
+
+    public function test_users_manager_can_create_operator_with_cnes(): void
     {
         $admin = User::query()->create([
             'name' => 'Administrador',
             'email' => 'admin@monitorafacil.gov.br',
             'password' => Hash::make('password123'),
+            'role' => User::ROLE_ADMIN,
         ]);
 
         $this->actingAs($admin);
@@ -173,12 +199,72 @@ class SettingsTest extends TestCase
             ->set('email', 'operador@monitorafacil.gov.br')
             ->set('password', 'senhaSegura123')
             ->set('password_confirmation', 'senhaSegura123')
+            ->set('role', User::ROLE_OPERATOR)
+            ->set('cnes', '2719738')
             ->call('save')
             ->assertHasNoErrors();
 
         $this->assertDatabaseHas('users', [
             'email' => 'operador@monitorafacil.gov.br',
             'name' => 'Novo Operador',
+            'role' => User::ROLE_OPERATOR,
+            'cnes' => '2719738',
+        ]);
+    }
+
+    public function test_users_manager_can_create_admin_without_cnes(): void
+    {
+        $admin = User::query()->create([
+            'name' => 'Administrador',
+            'email' => 'admin@monitorafacil.gov.br',
+            'password' => Hash::make('password123'),
+            'role' => User::ROLE_ADMIN,
+        ]);
+
+        $this->actingAs($admin);
+
+        Livewire::test(UsersManager::class)
+            ->call('create')
+            ->set('name', 'Novo Administrador')
+            ->set('email', 'novoadmin@monitorafacil.gov.br')
+            ->set('password', 'senhaSegura123')
+            ->set('password_confirmation', 'senhaSegura123')
+            ->set('role', User::ROLE_ADMIN)
+            ->set('cnes', '')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'novoadmin@monitorafacil.gov.br',
+            'role' => User::ROLE_ADMIN,
+            'cnes' => null,
+        ]);
+    }
+
+    public function test_users_manager_requires_cnes_for_operator(): void
+    {
+        $admin = User::query()->create([
+            'name' => 'Administrador',
+            'email' => 'admin@monitorafacil.gov.br',
+            'password' => Hash::make('password123'),
+            'role' => User::ROLE_ADMIN,
+        ]);
+
+        $this->actingAs($admin);
+
+        Livewire::test(UsersManager::class)
+            ->call('create')
+            ->set('name', 'Operador Sem UBS')
+            ->set('email', 'semubs@monitorafacil.gov.br')
+            ->set('password', 'senhaSegura123')
+            ->set('password_confirmation', 'senhaSegura123')
+            ->set('role', User::ROLE_OPERATOR)
+            ->set('cnes', '')
+            ->call('save')
+            ->assertHasErrors(['cnes']);
+
+        $this->assertDatabaseMissing('users', [
+            'email' => 'semubs@monitorafacil.gov.br',
         ]);
     }
 
@@ -194,6 +280,9 @@ class SettingsTest extends TestCase
             'name' => 'Operador Antigo',
             'email' => 'antigo@monitorafacil.gov.br',
             'password' => Hash::make('password123'),
+            'role' => User::ROLE_OPERATOR,
+            'cnes' => '2719738',
+            'facility_name' => 'CENTRO DE SAUDE',
         ]);
 
         $this->actingAs($admin);
@@ -348,6 +437,7 @@ XML;
             'name' => 'Administrador',
             'email' => 'admin@monitorafacil.gov.br',
             'password' => Hash::make('password123'),
+            'role' => User::ROLE_ADMIN,
         ]);
 
         $this->actingAs($admin);
@@ -368,6 +458,7 @@ XML;
             'name' => 'Administrador',
             'email' => 'admin@monitorafacil.gov.br',
             'password' => Hash::make('password123'),
+            'role' => User::ROLE_ADMIN,
         ]);
 
         $this->actingAs($admin);

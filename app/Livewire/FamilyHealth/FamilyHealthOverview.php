@@ -94,6 +94,12 @@ class FamilyHealthOverview extends Component
         }
 
         $teams = $overview['available_teams'] ?? [];
+
+        if (auth()->user()?->isOperator() && auth()->user()->cnes) {
+            $cnesInes = array_flip(\App\Models\CvatTeamEvaluation::where('cnes', auth()->user()->cnes)->pluck('ine')->all());
+            $teams = array_values(array_filter($teams, fn ($team) => isset($cnesInes[$team['ine'] ?? ''])));
+        }
+
         if (! empty(trim($this->searchTeamQuery))) {
             $term = mb_strtolower(trim($this->searchTeamQuery));
             $teams = array_values(array_filter($teams, function ($team) use ($term) {

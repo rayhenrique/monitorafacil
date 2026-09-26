@@ -82,6 +82,10 @@ class TerritorialBondingOverview extends Component
                 $this->selectedQuarter = $latestPeriod['quarter'];
             }
         }
+
+        if (auth()->user()?->isOperator() && auth()->user()->cnes) {
+            $this->filterCnes = auth()->user()->cnes;
+        }
     }
 
     public function selectPeriod(int $year, int $quarter): void

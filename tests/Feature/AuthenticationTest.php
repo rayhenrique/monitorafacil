@@ -33,6 +33,9 @@ class AuthenticationTest extends TestCase
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('role', 20)->default(User::ROLE_ADMIN);
+            $table->string('cnes', 20)->nullable()->index();
+            $table->string('facility_name', 150)->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

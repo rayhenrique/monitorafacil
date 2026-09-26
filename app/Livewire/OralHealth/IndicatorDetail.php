@@ -138,6 +138,12 @@ class IndicatorDetail extends Component
             ->where('team_name', 'not like', 'ESF%')
             ->where('team_name', 'not like', 'USF%');
 
+        $operatorCnes = (auth()->user()?->isOperator() && auth()->user()->cnes) ? auth()->user()->cnes : null;
+
+        if ($operatorCnes) {
+            $teamsQuery->where('cnes', $operatorCnes);
+        }
+
         if ($this->selectedIne) {
             $teamsQuery->where('ine', $this->selectedIne);
         }
@@ -155,6 +161,7 @@ class IndicatorDetail extends Component
             'quarter' => $this->quarter,
             'search' => $this->search,
             'ine' => $this->selectedIne,
+            'cnes' => $operatorCnes,
             'status' => $this->statusFilter,
             'per_page' => $this->perPage,
         ]);
@@ -164,7 +171,13 @@ class IndicatorDetail extends Component
             'year' => $this->year,
             'quarter' => $this->quarter,
             'ine' => $this->selectedIne,
+            'cnes' => $operatorCnes,
         ]);
+
+        $allTeams = $data['all_teams'];
+        if ($operatorCnes) {
+            $allTeams = array_values(array_filter($allTeams, fn ($t) => ($t['cnes'] ?? null) === $operatorCnes));
+        }
 
         return view('livewire.oral-health.indicator-detail', [
             'meta' => $meta,
@@ -174,7 +187,7 @@ class IndicatorDetail extends Component
             'monthlyEvolution' => $data['monthly_evolution'],
             'nominalRecords' => $nominalRecords,
             'nominalMetrics' => $nominalMetrics,
-            'allTeams' => $data['all_teams'],
+            'allTeams' => $allTeams,
         ]);
     }
 }

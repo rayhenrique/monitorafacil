@@ -65,8 +65,20 @@ class MonthlyDashboard extends Component
         $this->resetPage();
     }
 
+    public function mount(): void
+    {
+        if (auth()->user()?->isOperator() && auth()->user()->cnes) {
+            $this->filterCnes = auth()->user()->cnes;
+            $this->advCnes = auth()->user()->cnes;
+        }
+    }
+
     public function updatedFilterCnes(): void
     {
+        if (auth()->user()?->isOperator() && auth()->user()->cnes) {
+            $this->filterCnes = auth()->user()->cnes;
+            $this->advCnes = auth()->user()->cnes;
+        }
         $this->resetPage();
     }
 
@@ -101,6 +113,10 @@ class MonthlyDashboard extends Component
     public function clearFilters(): void
     {
         $this->reset(['filterTeam', 'filterCnes', 'advCnes', 'advIne']);
+        if (auth()->user()?->isOperator() && auth()->user()->cnes) {
+            $this->filterCnes = auth()->user()->cnes;
+            $this->advCnes = auth()->user()->cnes;
+        }
         $this->resetPage();
     }
 
@@ -109,11 +125,12 @@ class MonthlyDashboard extends Component
         $year = $this->selectedYear;
         $month = $this->selectedMonth;
         $fileName = sprintf('dashboard_mensal_saude_bucal_%s_M%02d_%s.csv', $year, $month, now()->format('Ymd_His'));
+        $operatorCnes = (auth()->user()?->isOperator() && auth()->user()->cnes) ? auth()->user()->cnes : null;
 
         $snapshots = OralHealthMonthlySnapshot::where('year', $year)
             ->where('month', $month)
             ->when(filled($this->filterTeam), fn ($q) => $q->where('ine', $this->filterTeam)->orWhere('team_name', 'like', "%{$this->filterTeam}%"))
-            ->when(filled($this->filterCnes), fn ($q) => $q->where('cnes', $this->filterCnes))
+            ->when(filled($operatorCnes ?: $this->filterCnes), fn ($q) => $q->where('cnes', $operatorCnes ?: $this->filterCnes))
             ->orderBy('team_name')
             ->orderBy('indicator_code')
             ->get();
@@ -178,6 +195,9 @@ class MonthlyDashboard extends Component
             $availableMonths = [5, 6, 7, 8, 9, 10, 11, 12];
         }
 
+        $operatorCnes = (auth()->user()?->isOperator() && auth()->user()->cnes) ? auth()->user()->cnes : null;
+        $activeCnes = $operatorCnes ?: trim($this->filterCnes);
+
         // Busca equipes odontológicas ativas com snapshots nesta competência
         $allSnapshots = OralHealthMonthlySnapshot::where('year', $this->selectedYear)
             ->where('month', $this->selectedMonth)
@@ -187,7 +207,7 @@ class MonthlyDashboard extends Component
                     $sub->where('ine', $term)->orWhere('team_name', 'like', "%{$term}%");
                 });
             })
-            ->when(filled($this->filterCnes), fn ($q) => $q->where('cnes', trim($this->filterCnes)))
+            ->when(filled($activeCnes), fn ($q) => $q->where('cnes', $activeCnes))
             ->orderBy('team_name')
             ->get();
 
@@ -294,15 +314,25 @@ class MonthlyDashboard extends Component
         );
 
         // Listas para os filtros
-        $teamOptions = OralHealthMonthlySnapshot::select('ine', 'team_name')
-            ->where('year', $this->selectedYear)
-            ->distinct()
+        $teamOptionsQuery = OralHealthMonthlySnapshot::select('ine', 'team_name')
+            ->where('year', $this->selectedYear);
+
+        if ($activeCnes) {
+            $teamOptionsQuery->where('cnes', $activeCnes);
+        }
+
+        $teamOptions = $teamOptionsQuery->distinct()
             ->orderBy('team_name')
             ->get();
 
-        $unitOptions = OralHealthMonthlySnapshot::select('cnes', 'facility_name')
-            ->where('year', $this->selectedYear)
-            ->distinct()
+        $unitOptionsQuery = OralHealthMonthlySnapshot::select('cnes', 'facility_name')
+            ->where('year', $this->selectedYear);
+
+        if ($activeCnes) {
+            $unitOptionsQuery->where('cnes', $activeCnes);
+        }
+
+        $unitOptions = $unitOptionsQuery->distinct()
             ->orderBy('facility_name')
             ->get();
 

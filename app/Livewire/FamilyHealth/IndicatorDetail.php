@@ -266,6 +266,11 @@ class IndicatorDetail extends Component
         if ($this->indicator === 'c1' && $this->selectedMonth === null) {
             $this->selectedMonth = ($this->quarter - 1) * 4 + 1;
         }
+
+        if (auth()->user()?->isOperator() && auth()->user()->cnes) {
+            $this->selectedCnes = auth()->user()->cnes;
+            $this->searchCnes = auth()->user()->cnes;
+        }
     }
 
     public function updatedSearchCns(): void
@@ -785,6 +790,10 @@ class IndicatorDetail extends Component
 
     public function updatedSelectedCnes(): void
     {
+        if (auth()->user()?->isOperator() && auth()->user()->cnes) {
+            $this->selectedCnes = auth()->user()->cnes;
+            $this->searchCnes = auth()->user()->cnes;
+        }
         $this->selectedIne = null;
     }
 
@@ -801,7 +810,13 @@ class IndicatorDetail extends Component
     public function resetC1Filters(): void
     {
         $this->selectedDistrict = null;
-        $this->selectedCnes = null;
+        if (auth()->user()?->isOperator() && auth()->user()->cnes) {
+            $this->selectedCnes = auth()->user()->cnes;
+            $this->searchCnes = auth()->user()->cnes;
+        } else {
+            $this->selectedCnes = null;
+            $this->searchCnes = '';
+        }
         $this->selectedIne = null;
         $this->selectedClassification = null;
         if ($this->indicator === 'c1') {
@@ -1073,6 +1088,12 @@ class IndicatorDetail extends Component
                 'cnes' => $item->cnes,
                 'name' => $item->facility_name,
             ]) : collect();
+
+        if (auth()->user()?->isOperator() && auth()->user()->cnes) {
+            $this->selectedCnes = auth()->user()->cnes;
+            $this->searchCnes = auth()->user()->cnes;
+            $availableUnits = $availableUnits->where('cnes', auth()->user()->cnes)->values();
+        }
 
         $teamsQuery = $hasCvat ? CvatTeamEvaluation::select('ine', 'team_name', 'cnes')
             ->distinct()

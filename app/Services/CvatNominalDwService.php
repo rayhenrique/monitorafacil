@@ -17,7 +17,7 @@ class CvatNominalDwService
 {
     public const SOURCE = 'pec_nt30_2025_v2';
 
-    public function getMetrics(?int $year = null, ?int $month = null, ?string $team = null, ?int $quarter = null): ?object
+    public function getMetrics(?int $year = null, ?int $month = null, ?string $team = null, ?int $quarter = null, ?string $cnes = null): ?object
     {
         if (! Schema::hasTable('cvat_nominal_metrics')) {
             return null;
@@ -36,20 +36,28 @@ class CvatNominalDwService
         }
         $metric = $baseMetric->orderByDesc('year')->orderByDesc('month')->first();
 
-        if (blank($team) || ! $metric) {
+        if ((blank($team) && blank($cnes)) || ! $metric) {
             return $metric;
         }
 
         $teamVal = trim((string) $team);
+        $cnesVal = trim((string) $cnes);
         $teamQuery = DB::table('cvat_nominal_citizens')
             ->where('source', self::SOURCE)
             ->where('registration_eligible', true)
             ->where('year', $metric->year)
-            ->where('month', $metric->month)
-            ->where(function ($q) use ($teamVal) {
+            ->where('month', $metric->month);
+
+        if (filled($team)) {
+            $teamQuery->where(function ($q) use ($teamVal) {
                 $q->where('ine', $teamVal)
                   ->orWhere('team_name', 'like', '%'.$teamVal.'%');
             });
+        }
+
+        if (filled($cnes)) {
+            $teamQuery->where('cnes', $cnesVal);
+        }
 
         $counts = $teamQuery->selectRaw('
             COUNT(*) as mici_total,

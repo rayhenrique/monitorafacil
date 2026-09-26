@@ -45,7 +45,7 @@ Route::middleware('auth')->group(function (): void {
             ->name('indicator');
     });
 
-    Route::prefix('configuracoes')->name('settings.')->group(function (): void {
+    Route::prefix('configuracoes')->name('settings.')->middleware('admin')->group(function (): void {
         Route::get('/usuarios', UsersManager::class)->name('users');
         Route::get('/municipio', MunicipalitySettings::class)->name('municipality');
         Route::get('/logs-auditoria', AuditLogs::class)->name('audit-logs');

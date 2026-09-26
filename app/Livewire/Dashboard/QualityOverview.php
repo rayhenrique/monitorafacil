@@ -213,7 +213,9 @@ class QualityOverview extends Component
 
     public function render(DashboardSnapshotService $snapshots): View
     {
-        $performance = $snapshots->familyHealthPerformance($this->year, $this->quarter);
+        $operatorCnes = (auth()->user()?->isOperator() && auth()->user()->cnes) ? auth()->user()->cnes : null;
+
+        $performance = $snapshots->familyHealthPerformance($this->year, $this->quarter, $operatorCnes);
         $familyHealth = array_map(function (array $indicator) use ($performance): array {
             $code = strtolower($indicator['code']);
 
@@ -222,10 +224,20 @@ class QualityOverview extends Component
                 : $indicator;
         }, $this->getFamilyHealthIndicators());
 
+        $oralPerformance = $snapshots->oralHealthPerformance($this->year, $this->quarter, $operatorCnes);
+        $oralHealth = array_map(function (array $indicator) use ($oralPerformance): array {
+            $code = strtolower($indicator['code']);
+
+            return isset($oralPerformance[$code])
+                ? array_replace($indicator, $oralPerformance[$code])
+                : $indicator;
+        }, $this->getOralHealthIndicators());
+
         return view('livewire.dashboard.quality-overview', [
             'familyHealth' => $familyHealth,
-            'oralHealth' => $this->getOralHealthIndicators(),
+            'oralHealth' => $oralHealth,
             'eMulti' => $this->getEMultiIndicators(),
+            'operatorFacility' => auth()->user()?->isOperator() ? (auth()->user()->facility_name ?: ('CNES ' . auth()->user()->cnes)) : null,
         ]);
     }
 }

@@ -255,7 +255,7 @@ class OralHealthService
      *
      * @return array<string, mixed>
      */
-    public function getMunicipalOverview(int $year, int $quarter): array
+    public function getMunicipalOverview(int $year, int $quarter, ?string $cnes = null): array
     {
         $indicatorsMeta = self::getIndicatorsMetadata();
 
@@ -266,7 +266,7 @@ class OralHealthService
             ->get()
             ->keyBy(fn ($item) => strtolower($item->indicator_code));
 
-        $teamSnapshots = OralHealthIndicatorSnapshot::query()
+        $teamSnapshotsQuery = OralHealthIndicatorSnapshot::query()
             ->where('year', $year)
             ->where('quarter', $quarter)
             ->whereNotNull('ine') // Snapshots individuais por equipe eSB
@@ -277,8 +277,13 @@ class OralHealthService
                     ->orWhere('team_type', '88');
             })
             ->where('team_name', 'not like', 'ESF%')
-            ->where('team_name', 'not like', 'USF%')
-            ->get()
+            ->where('team_name', 'not like', 'USF%');
+
+        if ($cnes !== null && $cnes !== '') {
+            $teamSnapshotsQuery->where('cnes', $cnes);
+        }
+
+        $teamSnapshots = $teamSnapshotsQuery->get()
             ->groupBy(fn ($item) => strtolower($item->indicator_code));
 
         $cards = [];

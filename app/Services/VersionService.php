@@ -6,7 +6,7 @@ use App\Models\User;
 
 class VersionService
 {
-    public const CURRENT_VERSION = 'v1.29.0';
+    public const CURRENT_VERSION = 'v1.30.0';
 
     public const CURRENT_RELEASE_DATE = '25/09/2026';
 
@@ -61,9 +61,23 @@ class VersionService
     {
         return [
             [
-                'version' => 'v1.29.0',
+                'version' => 'v1.30.0',
                 'date' => '25/09/2026',
                 'badge' => 'Versão Atual',
+                'title' => 'Controle de Acesso por Perfis (Administrador e Operador UBS/CNES) e Escopo de Dados por Unidade de Saúde',
+                'summary' => 'Implementação completa do sistema de perfis de usuário com controle de acesso granular e restrição de escopo de visualização por UBS/CNES. Dois níveis de acesso passam a operar no sistema: Administrador (acesso municipal irrestrito a todas as UBS, equipes e telas de configuração) e Operador (vinculado obrigatoriamente a uma Unidade Básica de Saúde / CNES, com visualização restrita a todas as equipes e munícipes daquela UBS). Operadores contam com aplicação automática do filtro de CNES no Painel Geral, Vínculo e Acompanhamento Territorial, Indicadores de Saúde da Família (C1 a C7) e Saúde Bucal (B1 a B6), impedindo a visualização de unidades e munícipes de outras unidades. Além disso, as rotas de configurações do sistema (/configuracoes/*) e links de navegação ficam restritos exclusivamente a Administradores via middleware EnsureUserIsAdmin.',
+                'highlights' => [
+                    ['type' => 'novo', 'text' => 'Perfis de Usuário (RBAC): Administrador (gestão municipal completa e configurações) e Operador (vinculado a uma UBS / CNES específica).'],
+                    ['type' => 'segurança', 'text' => 'Middleware EnsureUserIsAdmin e proteção em /configuracoes/* com resposta HTTP 403 Forbidden para acessos não autorizados e ocultação condicional nos menus.'],
+                    ['type' => 'novo', 'text' => 'Cadastro e Gestão de Usuários com seletor interativo de perfil e vinculação mandatória da UBS/CNES para operadores com busca das unidades reais do município.'],
+                    ['type' => 'melhoria', 'text' => 'Escopo de dados restrito e automático para Operadores no Painel Geral, Vínculo Territorial, Saúde da Família (C1 a C7) e Saúde Bucal (B1 a B6), com badge indicativo da unidade no topo e rodapé.'],
+                    ['type' => 'melhoria', 'text' => 'Atualização metodológica do menu lateral para "Vínculo e Acomp." e suíte completa de testes automatizados de controle de acesso e escopo de dados.'],
+                ],
+            ],
+            [
+                'version' => 'v1.29.0',
+                'date' => '25/09/2026',
+                'badge' => 'Anterior',
                 'title' => 'Integração da Saúde Bucal (B1 a B6) no Módulo "Processar Dados" e Automação CLI',
                 'summary' => 'Inclusão oficial do módulo de Saúde Bucal (Indicadores B1 a B6 - eSB) na central de "Processar Dados" (/configuracoes/processar-dados) e no comando CLI esus:process-data. Agora o gestor e os profissionais podem disparar sob demanda a consolidação de Saúde Bucal com um clique em um card visual estilizado (azul celeste sky-50 com ícone odontológico oficial e badge B1 a B6), acompanhando o progresso em tempo real. O backend processa em lote as 19 eSB, indicadores mensais e a relação geral nominal de 38.509 munícipes. O comando de linha de comando agora suporta --scope=oral-health e o processamento geral (--scope=all) consolida automaticamente a Saúde Bucal junto aos indicadores C1 a C7, MICI e MICDT.',
                 'highlights' => [

@@ -142,8 +142,18 @@ class NominalList extends Component
         $this->resetPage();
     }
 
+    public function mount(): void
+    {
+        if (auth()->user()?->isOperator() && auth()->user()->cnes) {
+            $this->filterCnes = auth()->user()->cnes;
+        }
+    }
+
     public function updatedFilterCnes(): void
     {
+        if (auth()->user()?->isOperator() && auth()->user()->cnes) {
+            $this->filterCnes = auth()->user()->cnes;
+        }
         $this->resetPage();
     }
 
@@ -241,6 +251,7 @@ class NominalList extends Component
     public function getFilters(): array
     {
         $activeTeam = $this->selectedTeam ?: $this->advTeam;
+        $operatorCnes = (auth()->user()?->isOperator() && auth()->user()->cnes) ? auth()->user()->cnes : null;
 
         return [
             'cns' => $this->filterCns,
@@ -248,7 +259,7 @@ class NominalList extends Component
             'name' => $this->filterName,
             'professional_cns' => $this->filterProfCns,
             'professional_name' => $this->filterProfName,
-            'cnes' => $this->filterCnes,
+            'cnes' => $operatorCnes ?: $this->filterCnes,
             'ine' => $this->filterIne,
             'race_color' => $this->filterRaceColor,
             'microarea' => $this->advMicroarea,
@@ -416,19 +427,28 @@ class NominalList extends Component
     public function render(CvatNominalDwService $service): View
     {
         $activeTeam = $this->selectedTeam ?: $this->advTeam;
+        $operatorCnes = (auth()->user()?->isOperator() && auth()->user()->cnes) ? auth()->user()->cnes : null;
 
-        $metrics = $service->getMetrics(team: $activeTeam ?: null);
+        $metrics = $service->getMetrics(
+            team: $activeTeam ?: null,
+            cnes: $operatorCnes ?: ($this->filterCnes ?: null)
+        );
 
         $filters = $this->getFilters();
 
         $citizens = $service->queryCitizens($filters);
 
-        $teamsList = CvatNominalCitizen::query()
+        $teamsQuery = CvatNominalCitizen::query()
             ->where('source', CvatNominalDwService::SOURCE)
             ->where('registration_eligible', true)
             ->whereNotNull('ine')
-            ->where('ine', '!=', '')
-            ->select(['ine', 'team_name'])
+            ->where('ine', '!=', '');
+
+        if ($operatorCnes) {
+            $teamsQuery->where('cnes', $operatorCnes);
+        }
+
+        $teamsList = $teamsQuery->select(['ine', 'team_name'])
             ->distinct()
             ->orderBy('team_name')
             ->get();

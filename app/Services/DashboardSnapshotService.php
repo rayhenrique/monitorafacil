@@ -6,13 +6,15 @@ use App\Enums\TeamType;
 use App\Models\ConsolidationRegistration;
 use App\Models\ConsolidationTeam;
 use App\Models\FamilyHealthIndicatorSnapshot;
+use App\Models\OralHealth\OralHealthIndicatorSnapshot;
+use Illuminate\Support\Facades\Schema;
 
 class DashboardSnapshotService
 {
     /**
      * @return array<string, array{optimal:int,good:int,sufficient:int,regular:int,evaluated_teams:int,has_data:bool}>
      */
-    public function familyHealthPerformance(int $year, int $quarter): array
+    public function familyHealthPerformance(int $year, int $quarter, ?string $cnes = null): array
     {
         $versions = [
             'c1' => C1DwService::VERSION,
@@ -37,7 +39,7 @@ class DashboardSnapshotService
             ];
         }
 
-        $snapshots = FamilyHealthIndicatorSnapshot::query()
+        $snapshotsQuery = FamilyHealthIndicatorSnapshot::query()
             ->where('year', $year)
             ->where('quarter', $quarter)
             ->whereIn('indicator_code', $codes)
@@ -45,8 +47,14 @@ class DashboardSnapshotService
             ->where(function ($query): void {
                 $query->whereIn('team_type', ['70', '76'])
                     ->orWhereNull('team_type');
-            })
-            ->get(['indicator_code', 'performance_level', 'good_practices_breakdown']);
+            });
+
+        if (filled($cnes) && Schema::hasTable('cvat_team_evaluations')) {
+            $teamInes = \App\Models\CvatTeamEvaluation::where('cnes', $cnes)->whereNotNull('ine')->pluck('ine')->all();
+            $snapshotsQuery->whereIn('ine', $teamInes);
+        }
+
+        $snapshots = $snapshotsQuery->get(['indicator_code', 'performance_level', 'good_practices_breakdown']);
 
         foreach ($snapshots as $snapshot) {
             $code = strtolower((string) $snapshot->indicator_code);
@@ -66,6 +74,63 @@ class DashboardSnapshotService
                 'otimo' => 'optimal',
                 'bom' => 'good',
                 'suficiente' => 'sufficient',
+                default => 'regular',
+            };
+
+            $distribution[$code][$classification]++;
+            $distribution[$code]['evaluated_teams']++;
+            $distribution[$code]['has_data'] = true;
+        }
+
+        return $distribution;
+    }
+
+    /**
+     * @return array<string, array{optimal:int,good:int,sufficient:int,regular:int,evaluated_teams:int,has_data:bool}>
+     */
+    public function oralHealthPerformance(int $year, int $quarter, ?string $cnes = null): array
+    {
+        $codes = ['b1', 'b2', 'b3', 'b4', 'b5', 'b6'];
+        $distribution = [];
+
+        foreach ($codes as $code) {
+            $distribution[$code] = [
+                'optimal' => 0,
+                'good' => 0,
+                'sufficient' => 0,
+                'regular' => 0,
+                'evaluated_teams' => 0,
+                'has_data' => false,
+            ];
+        }
+
+        if (! Schema::hasTable('oral_health_indicator_snapshots')) {
+            return $distribution;
+        }
+
+        $snapshotsQuery = OralHealthIndicatorSnapshot::query()
+            ->where('year', $year)
+            ->where('quarter', $quarter)
+            ->whereIn('indicator_code', $codes)
+            ->whereNotNull('ine');
+
+        if (filled($cnes)) {
+            $snapshotsQuery->where('cnes', $cnes);
+        }
+
+        $snapshots = $snapshotsQuery->get(['indicator_code', 'performance_level']);
+
+        foreach ($snapshots as $snapshot) {
+            $code = strtolower((string) $snapshot->indicator_code);
+
+            if (! isset($distribution[$code]) || empty($snapshot->performance_level)) {
+                continue;
+            }
+
+            $classification = match (strtolower((string) $snapshot->performance_level)) {
+                'otimo', 'optimal' => 'optimal',
+                'bom', 'good' => 'good',
+                'suficiente', 'sufficient' => 'sufficient',
                 default => 'regular',
             };
 
@@ -107,10 +172,13 @@ class DashboardSnapshotService
         $teams = ConsolidationTeam::query()->select('year', 'quarter')->distinct()->get();
         $registrations = ConsolidationRegistration::query()->select('year', 'quarter')->distinct()->get();
         $snapshots = FamilyHealthIndicatorSnapshot::query()->select('year', 'quarter')->distinct()->get();
-        $evaluations = \Illuminate\Support\Facades\Schema::hasTable('cvat_team_evaluations')
+        $oralSnapshots = Schema::hasTable('oral_health_indicator_snapshots')
+            ? OralHealthIndicatorSnapshot::query()->select('year', 'quarter')->distinct()->get()
+            : collect();
+        $evaluations = Schema::hasTable('cvat_team_evaluations')
             ? \App\Models\CvatTeamEvaluation::query()->select('year', 'quarter')->distinct()->get()
             : collect();
-        $distributions = \Illuminate\Support\Facades\Schema::hasTable('cvat_dimension_distributions')
+        $distributions = Schema::hasTable('cvat_dimension_distributions')
             ? \App\Models\CvatDimensionDistribution::query()->select('year', 'quarter')->distinct()->get()
             : collect();
 
@@ -118,6 +186,7 @@ class DashboardSnapshotService
             ->concat($evaluations)
             ->concat($distributions)
             ->concat($snapshots)
+            ->concat($oralSnapshots)
             ->map(static fn ($row): array => [
                 'year' => (int) $row->year,
                 'quarter' => (int) $row->quarter,
